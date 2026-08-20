@@ -1,0 +1,33 @@
+name: Auto-close pull requests
+
+on:
+  pull_request_target:
+    types: [opened]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  close-pr:
+    # Only act on PRs from forks. PRs opened from a branch within this
+    # same repo (i.e. the owner's own work, since no outside collaborator
+    # has write access here) are left alone for normal review/merge.
+    if: github.event.pull_request.head.repo.full_name != github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Comment and close
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: "Thanks for the interest, but this repository is a read-only source mirror and does not accept external contributions. Please see https://osclass-classifieds.com for support, downloads, and documentation."
+            });
+            await github.rest.pulls.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              state: "closed"
+            });
