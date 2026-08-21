@@ -129,6 +129,15 @@ oc-content/uploads/custom-images/*
 !oc-content/uploads/custom-images/index.php
 
 # ============================================================
+# Admin themes
+# Only omega is versioned
+# ============================================================
+
+oc-admin/themes/*
+
+!oc-admin/themes/omega/
+
+# ============================================================
 # Other
 # ============================================================
 
