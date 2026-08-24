@@ -1,0 +1,81 @@
+body, html {direction:rtl;}
+
+body.item-post #error_list {margin-left: 0%;float: left;}
+.form-container-box {direction: ltr;}
+.form-container-box input[type="text"], .form-container-box input[type="password"], .form-container-box input[type="email"], .form-container-box select {direction: rtl;}
+#error_list li, .error_list li, #comment_error_list li {direction: rtl;float: right;clear: both;}
+.comment-leave-rating {float: right;}
+.comment-rating-selected {float: right;margin: 15px 5px 0 0;line-height: 16px;}
+
+
+.item-post .form-horizontal .controls.checkbox {margin-left:0;margin-right:30%;}
+.item.item-post form > fieldset> div {direction: ltr;}
+.listing-grid .listing-card, body.home #main, #home-cats a, #home-regs, #home-regs .wrap > div, #home-regs a i, footer .box > a, footer .copy, footer .language, header #logo,
+header .nav a, header .nav a.my-account, #home-cats, .counter-search, .doublebutton a, body.search #sidebar, body.user #sidebar, ul.breadcrumb li, input[type=checkbox] + label, input[type="checkbox"], 
+.admin-options a, .listing-card .listing-thumb, #related-searches a, .see_by label, .see_by span, .see_by ul a, body.item #main, body.user-public-profile #main,
+.item-photos .main-photo, .contact_button a, .form-horizontal .controls, .form-horizontal label, .btn, input[type=text], input[type=url], input[type=password], input[type=email], 
+input[type=phone], input[type=number], select, textarea, .item-header strong, #contact > p > span, .form-container-box .control-group.act a:first-child,
+.title-has-actions h1, .title-has-actions h2, .title-has-actions h3 {float:right;}
+
+footer .language, header .nav, #sidebar, body.search .list-header .actions, .btn.see_by, .doublebutton, body.search #main, body.user #main, .item-photos .thumbs,
+.form-container-box .control-group.act a:last-child, .title-has-actions a {float:left;}
+
+.item-post .meta[data-type="CHECKBOX"] {padding-left:0;padding-right:30%;}
+.item.item-post form > fieldset {direction:ltr;}
+.item.item-post form > fieldset * {direction:rtl;}
+.counter-search {direction: ltr!important; unicode-bidi: embed;}
+.main-search > .cell {padding-left:20px;padding-right:0;float:right;}
+.main-search > .cell.c3 {padding-left:0;}
+#home-cats a {margin:0 0 11px 10px;}
+#home-regs a i {margin:0 0 0 4px;}
+footer .box > a {margin-right:0;margin-left:25px;}
+footer .language a {margin-left:0;margin-right:6px;}
+header .nav a {margin-left:0;margin-right:3px;}
+header .nav a.my-account {margin-left:3px;margin-right:6px;padding-right:41px;padding-left:10px;}
+header .nav .my-account > img {right:0;left:auto;}
+header .nav a.logout2 {margin-left:0;margin-right:5px;text-indent:-2px;}
+header .nav a.logout2 i {transform:scaleX(-1);}
+#home-cats {padding-left:13px;padding-right:25px;}
+.counter-search, input[type="checkbox"] {margin-left:5px;margin-right:0;}
+.doublebutton {margin-left:10px;margin-right:0;}
+.doublebutton a {margin-right:5px;margin-left:0;}
+#sidebar ul.category ul {padding-left:0;padding-right:15px;}
+.admin-options a {margin:0 0 0 10px;}
+.listing-list .listing-card .listing-detail {margin-right:105px;margin-left:0;}
+#related-searches a {margin-left:6px;margin-right:0;}
+.see_by span {margin-left:3px;margin-right:0px;}
+.see_by label i {margin-right:3px;margin-left:0;}
+.contact_button a {margin-left:12px;margin-right:0;}
+.form-horizontal label {padding-left:15px;padding-right:0;text-align:left;}
+.form-horizontal .actions, .item.item-post h1, .item.item-post h2, .item-post .pblbt, .form-horizontal .controls.recpt, .item-post .form-horizontal .control-group.img, body.user .form-horizontal .control-group.bts {padding-left:0;padding-right:30%;}
+.flashmessage .ico-close {left:5px;right:auto;}
+#useful_info ul {padding:0 20px 0 0;}
+.item-header strong {margin-left:4px;}
+.item #comments .comments_list {float:unset;}
+#contact > p > span {margin-left:3px;}
+.form-container-box label, .form-container-box .header h1, .form-container-box .controls.checkbox label, .form-container-box .controls.checkbox {text-align:right;}
+.control-group.control-group-price select {margin-right:-2px;margin-left:0;}
+.title-has-actions a {margin-right:10px;margin-left:0;}
+.user-card {padding-left:0;padding-right:120px;}
+.user-card img {right:0;left:auto;}
+.menu-icon {left:0;right:auto;}
+.item-post .meta input[type="radio"], .item-post .meta input[type="checkbox"] {margin-left:5px;margin-right:0;}
+.meta_list .meta ul {float:right;}
+
+
+@media screen and (max-width: 980px) {
+  body.user #sidebar {margin-left: 2%;margin-right:0;}
+}
+
+@media screen and (max-width: 767px) {
+  .item-post .form-horizontal .control-group.img, .item.item-post h1, .item.item-post h2, .item-post .pblbt, .form-horizontal .controls.recpt {padding-right:0;text-align:right;}
+  footer .box > a {float: none; margin: 0 5px 8px 5px;}
+  .item-post .form-horizontal .controls.checkbox {margin-right:0;text-align:right;}
+  .item.item-post .form-horizontal label:not(.osp-chk) {text-align:right;}
+  .item-post .meta[data-type="CHECKBOX"] {padding-left:0;padding-right:0;}
+}
+
+@media screen and (max-width: 490px) {
+  .form-horizontal .actions, .item.item-post h1, .item.item-post h2, .item-post .pblbt, .form-horizontal .controls.recpt, .item-post .form-horizontal .control-group.img, body.user .form-horizontal .control-group.bts {padding-right:0;}
+  .item.item-post .form-horizontal label, .form-horizontal label {text-align:right;}
+}

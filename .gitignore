@@ -1,0 +1,159 @@
+# ============================================================
+# OS / IDE / AI tools
+# ============================================================
+
+.DS_Store
+
+.idea/
+*.iml
+.vscode/
+.cursor/
+.claude/
+.windsurf/
+.copilot/
+.aider/
+
+nbproject/
+.sass-cache
+
+# Sublime
+sftp-config*
+
+# ============================================================
+# Git
+# ============================================================
+
+*.diff
+*.patch
+
+# ============================================================
+# Osclass configuration / installation-generated files
+# ============================================================
+
+config.php
+_config.php
+.maintenance
+
+oc-includes/osclass/t/config.php
+oc-includes/simpletest/test/osclass/custom_config.php
+
+.htaccess
+robots.txt
+
+# ============================================================
+# oc-content logs
+# ============================================================
+
+oc-content/*.log
+oc-content/debug*.log
+oc-content/queries.log
+oc-content/explain_queries.log
+
+# ============================================================
+# Languages
+# Only en_US is versioned
+# ============================================================
+
+oc-content/languages/*
+
+!oc-content/languages/en_US/
+
+# ============================================================
+# Themes
+# Only sigma is versioned
+# ============================================================
+
+oc-content/themes/*
+
+!oc-content/themes/sigma/
+
+# ============================================================
+# Plugins
+# Only index.php is versioned
+# ============================================================
+
+oc-content/plugins/*
+
+!oc-content/plugins/index.php
+
+# ============================================================
+# Downloads
+# Only index.php is versioned
+# ============================================================
+
+oc-content/downloads/*
+
+!oc-content/downloads/index.php
+
+# ============================================================
+# Uploads
+# Only index.php and sigma_logo.png at root level
+# ============================================================
+
+oc-content/uploads/*
+
+!oc-content/uploads/index.php
+!oc-content/uploads/sigma_logo.png
+
+# ============================================================
+# Prepared upload directories
+# Keep directory + index.php only
+# ============================================================
+
+oc-content/uploads/widget-images/*
+!oc-content/uploads/widget-images/
+!oc-content/uploads/widget-images/index.php
+
+oc-content/uploads/user-images/*
+!oc-content/uploads/user-images/
+!oc-content/uploads/user-images/index.php
+
+oc-content/uploads/temp/*
+!oc-content/uploads/temp/
+!oc-content/uploads/temp/index.php
+
+oc-content/uploads/page-images/*
+!oc-content/uploads/page-images/
+!oc-content/uploads/page-images/index.php
+
+oc-content/uploads/minify/*
+!oc-content/uploads/minify/
+!oc-content/uploads/minify/index.php
+
+oc-content/uploads/item-images/*
+!oc-content/uploads/item-images/
+!oc-content/uploads/item-images/index.php
+
+oc-content/uploads/custom-images/*
+!oc-content/uploads/custom-images/
+!oc-content/uploads/custom-images/index.php
+
+# ============================================================
+# Admin themes
+# Only omega is versioned
+# ============================================================
+
+oc-admin/themes/*
+
+!oc-admin/themes/omega/
+
+# ============================================================
+# Vendor documentation
+# ============================================================
+
+oc-includes/vendor/**/*.md
+
+# ============================================================
+# Root backup folders (name contains bkp, bckp, or backup)
+# ============================================================
+
+/*[Bb][Kk][Pp]*/
+/*[Bb][Cc][Kk][Pp]*/
+/*[Bb][Aa][Cc][Kk][Uu][Pp]*/
+
+# ============================================================
+# Other
+# ============================================================
+
+dist/
+node_modules/
