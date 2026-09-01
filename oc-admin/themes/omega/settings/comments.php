@@ -1,0 +1,239 @@
+<?php
+if(!defined('ABS_PATH')) exit('ABS_PATH is not loaded. Direct access is not allowed.');
+/*
+ * Copyright 2014 Osclass
+ * Copyright 2026 Osclass by OsclassPoint.com
+ *
+ * Osclass maintained & developed by OsclassPoint.com
+ * You may not use this file except in compliance with the License.
+ * You may download copy of Osclass at
+ *
+ *     https://osclass-classifieds.com/download
+ *
+ * Do not edit or add to this file if you wish to upgrade Osclass to newer
+ * versions in the future. Software is distributed on an "AS IS" basis, without
+ * warranties or conditions of any kind, either express or implied. Do not remove
+ * this NOTICE section as it contains license information and copyrights.
+ */
+
+
+osc_enqueue_script('jquery-validate');
+
+//customize Head
+function customHead() { 
+  ?>
+  <script type="text/javascript">
+  $(document).ready(function(){
+    // Code for form validation
+    $("form[name=comments_form]").validate({
+      rules: {
+        num_moderate_comments: {
+          required: true,
+          digits: true
+        },
+        comments_per_page: {
+          required: true,
+          digits: true
+        }
+      },
+      messages: {
+        num_moderate_comments: {
+          required: '<?php echo osc_esc_js(__("Moderated comments: this field is required")); ?>.',
+          digits: '<?php echo osc_esc_js(__("Moderated comments: this field must only contain numeric characters")); ?>.'
+        },
+        comments_per_page: {
+          required: '<?php echo osc_esc_js(__("Comments per page: this field is required")); ?>.',
+          digits: '<?php echo osc_esc_js(__("Comments per page: this field must only contain numeric characters")); ?>.'
+        }
+      },
+      wrapper: "li",
+      errorLabelContainer: "#error_list",
+      invalidHandler: function(form, validator) {
+        $('html,body').animate({ scrollTop: $('h1').offset().top }, { duration: 250, easing: 'swing'});
+      },
+      submitHandler: function(form){
+        $('button[type=submit], input[type=submit]').attr('disabled', 'disabled');
+        form.submit();
+      }
+    });
+
+    if(!$('input[name="moderate_comments"]').is(':checked')) {
+      $('.comments_approved').css('display', 'none');
+    }
+
+    $('input[name="moderate_comments"]').bind('change', function() {
+      if($(this).is(':checked')) {
+        $('.comments_approved').css('display', '');
+      } else {
+        $('.comments_approved').css('display', 'none');
+      }
+    });
+  });
+  </script>
+  <?php
+}
+osc_add_hook('admin_header','customHead', 10);
+
+function render_offset(){
+  return 'row-offset';
+}
+
+function addHelp() {
+  echo '<p>' . __("Modify the options that allow your users to publish comments on your site's listings.") . '</p>';
+}
+
+osc_add_hook('help_box','addHelp');
+
+
+function customPageHeader(){ 
+  ?>
+  <h1><?php _e('Settings'); ?>
+    <a href="#" class="btn ico ico-32 ico-help float-right"></a>
+  </h1>
+  <?php
+}
+
+osc_add_hook('admin_page_header','customPageHeader');
+
+
+function customPageTitle($string) {
+  return sprintf(__('Comment Settings - %s'), $string);
+}
+
+osc_add_filter('admin_title', 'customPageTitle');
+
+osc_current_admin_theme_path('parts/header.php'); 
+?>
+
+<div id="general-settings">
+  <ul id="error_list"></ul>
+  <form name="comments_form" action="<?php echo osc_admin_base_url(true); ?>" method="post">
+    <input type="hidden" name="page" value="settings" />
+    <input type="hidden" name="action" value="comments_post" />
+    <fieldset>
+      <div class="form-horizontal">
+        <h2 class="render-title"><?php _e('Comment Settings'); ?></h2>
+
+        <div class="form-row">
+          <div class="form-label"><?php _e('Default comment settings'); ?></div>
+          <div class="form-controls">
+            <div class="form-label-checkbox">
+              <label>
+                <input type="checkbox" <?php echo (osc_comments_enabled() ? 'checked="checked"' : ''); ?> name="enabled_comments" value="1" /> <?php _e('Allow people to post comments on listings'); ?>
+              </label>
+            </div>
+            
+            <div class="form-label-checkbox">
+              <label>
+                <input type="checkbox" <?php echo (osc_reg_user_post_comments() ? 'checked="checked"' : ''); ?> name="reg_user_post_comments" value="1" /> <?php _e('Users must be registered and logged in to comment'); ?>
+              </label>
+            </div>
+            
+            <div class="form-label-checkbox">
+              <label>
+                <input type="checkbox" <?php echo (osc_enable_comment_rating() ? 'checked="checked"' : ''); ?> name="enable_comment_rating" value="1" /> <?php _e('Enable rating on comments'); ?>
+              </label>
+            </div>
+
+            <div class="form-label-checkbox-offset">
+              <?php printf(__('User can rate each listing maximum %s time(s)'), '<input type="text" class="input-small" name="comment_rating_limit" value="' . ((osc_comment_rating_limit() == -1) ? '0' : osc_esc_html(osc_comment_rating_limit())) . '" />'); ?>
+              <div class="help-box"><?php _e('If the value is zero, there will be no limit on ratings per item and user'); ?></div>
+            </div>
+            
+            <div class="form-label-checkbox">
+              <label>
+                <input type="checkbox" <?php echo ((osc_moderate_comments() == -1) ? '' : 'checked="checked"'); ?> name="moderate_comments" value="1" /> <?php _e('A comment is being held for moderation'); ?>
+              </label>
+            </div>
+            
+            <div class="form-label-checkbox-offset">
+              <?php printf(__('Before a comment appears, comment author must have at least %s previously approved comments'), '<input type="text" class="input-small" name="num_moderate_comments" value="' . ((osc_moderate_comments() == -1) ? '0' : osc_esc_html(osc_moderate_comments())) . '" />'); ?>
+              <div class="help-box"><?php _e('If the value is zero, an administrator must always approve comments'); ?></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-label"><?php _e('Pagination settings'); ?></div>
+          <div class="form-controls">
+            <?php printf(__('Break comments into pages with %s comments per page'), '<input type="text" class="input-small" name="comments_per_page" value="' . osc_esc_html(osc_comments_per_page()) . '" />'); ?>
+            <div class="help-box"><?php _e('If the value is zero all comments are shown'); ?></div>
+          </div>
+        </div>
+        
+        <h2 class="render-title"><?php _e('Comment reply'); ?></h2>
+
+        <div class="form-row">
+          <div class="form-label"><?php _e('Reply settings'); ?></div>
+          <div class="form-controls">
+            <div class="form-label-checkbox">
+              <label>
+                <input type="checkbox" <?php echo (osc_enable_comment_reply() ? 'checked="checked"' : ''); ?> name="enable_comment_reply" value="1" /> <?php _e('Enable reply on comments'); ?>
+              </label>
+            </div>
+            
+            <div class="form-label-checkbox">
+              <label>
+                <input type="checkbox" <?php echo (osc_enable_comment_reply_rating() ? 'checked="checked"' : ''); ?> name="enable_comment_reply_rating" value="1" /> <?php _e('Enable rating on comment reply'); ?>
+              </label>
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-label"><?php _e('Reply restrictions'); ?></div>
+          <div class="form-controls">
+            <select name="comment_reply_user_type">
+              <option value="" <?php if(osc_comment_reply_user_type() == '') { ?>selected="selected"<?php } ?>><?php echo __('Anyone can reply on comment'); ?></option>
+              <option value="LOGGED" <?php if(osc_comment_reply_user_type() == 'LOGGED') { ?>selected="selected"<?php } ?>><?php echo __('Only logged-in users can reply on comments'); ?></option>
+              <option value="OWNER" <?php if(osc_comment_reply_user_type() == 'OWNER') { ?>selected="selected"<?php } ?>><?php echo __('Only owner of listing can reply on comments'); ?></option>
+              <option value="ADMIN" <?php if(osc_comment_reply_user_type() == 'ADMIN') { ?>selected="selected"<?php } ?>><?php echo __('Only logged-in admin can reply on comments'); ?></option>
+            </select>
+          </div>
+        </div>
+        
+
+
+        <h2 class="render-title"><?php _e('Notifications'); ?></h2>
+
+        <div class="form-row">
+          <div class="form-label"><?php _e('E-mail admin whenever') ?></div>
+          <div class="form-controls">
+            <div class="form-label-checkbox">
+              <label>
+                <input type="checkbox" <?php echo (osc_notify_new_comment() ? 'checked="checked"' : ''); ?> name="notify_new_comment" value="1" /> <?php _e("A new comment is posted"); ?>
+              </label>
+            </div>
+            
+            <div class="form-label-checkbox">
+              <label>
+                <input type="checkbox" <?php echo (osc_notify_new_comment_reply() ? 'checked="checked"' : ''); ?> name="notify_new_comment_reply" value="1" /> <?php _e("A new comment reply is posted"); ?>
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-label"><?php _e('E-mail user whenever') ?></div>
+          <div class="form-controls">
+            <div class="form-label-checkbox">
+              <label>
+                <input type="checkbox" <?php echo (osc_notify_new_comment_user() ? 'checked="checked"' : ''); ?> name="notify_new_comment_user" value="1" /> <?php _e("There's a new comment on his listing"); ?>
+              </label>
+            </div>
+            
+            <div class="form-label-checkbox">
+              <label>
+                <input type="checkbox" <?php echo (osc_notify_new_comment_reply_user() ? 'checked="checked"' : ''); ?> name="notify_new_comment_reply_user" value="1" /> <?php _e("There's a new comment reply on his listing"); ?>
+              </label>
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-actions">
+          <input type="submit" id="save_changes" value="<?php echo osc_esc_html(__('Save changes')); ?>" class="btn btn-submit" />
+        </div>
+      </div>
+    </fieldset>
+  </form>
+</div>
+<?php osc_current_admin_theme_path('parts/footer.php'); ?>
