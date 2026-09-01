@@ -30,8 +30,8 @@ sftp-config*
 # Osclass configuration / installation-generated files
 # ============================================================
 
-config.php
-_config.php
+/config.php
+/_config.php
 .maintenance
 
 oc-includes/osclass/t/config.php
