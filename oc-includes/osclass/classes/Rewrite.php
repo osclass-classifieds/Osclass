@@ -160,31 +160,38 @@ class Rewrite {
           // Find langauge code in URL
           // If not matching to current user locale, set it!
           preg_match('#^' . $lang_regex . '#', $request_uri, $lreg);
+          $lang = '';
 
           if(count($lreg) > 0) {
             // echo 'MATCHED Request URI: '.$request_uri." # Match : ".$route['regexp']." # URI to go : ".$route['url']." <br />";
 
-            $lang = str_replace('/', '', end($lreg));
-            $locale = osc_current_user_locale();
+            $lang = trim(str_replace('/', '', (string)$lreg[0]));
+            $locale = (string)osc_current_user_locale();
+            $lang_match = array();
 
-            //if($lang != '' && (preg_match('/.{2}_.{2}/', $lang) && $locale != $lang || preg_match('/.{2}/', $lang) && substr($locale, 0, 2) != $lang)) {
-            if($lang != '' && ((preg_match('/[a-z]{2}_[a-zA-Z]{2}/', $lang, $lang_match) || preg_match('/[a-z]{2}-[a-zA-Z]{2}/', $lang, $lang_match)) && $locale != $lang || preg_match('/[a-z]{2}/', $lang, $lang_match) && substr($locale, 0, 2) != $lang)) {
-              //if(preg_match('/.{2}_.{2}/', $lang)) {
-              if(preg_match('/[a-z]{2}_[a-zA-Z]{2}/', $lang, $lang_match) || preg_match('/[a-z]{2}-[a-zA-Z]{2}/', $lang, $lang_match)) {
-                $lang = strtolower(substr($lang, 0, 2)) . '_' . strtoupper(substr($lang, 3, 2));
-                Session::newInstance()->_set('userLocale', $lang);
+            if($lang != '' && preg_match('/^[a-z]{2}-[a-zA-Z]{2}$/', $lang, $lang_match) === 1) {
+              $lang_code = strtolower(substr($lang, 0, 2)) . '_' . strtoupper(substr($lang, 3, 2));
+              if(strcasecmp($locale, $lang_code) != 0) {
+                Session::newInstance()->_set('userLocale', $lang_code);
                 Translation::init();
-                osc_run_hook('user_locale_changed', $lang);
+                osc_run_hook('user_locale_changed', $lang_code);
+              }
 
-              //} else if(preg_match('/.{2}/', $lang)) {
-              } else if(preg_match('/[a-z]{2}/', $lang, $lang_match)) {
-                $find_lang = OSCLocale::newInstance()->findByShortCode($lang);
+            } else if($lang != '' && preg_match('/^[a-z]{2}_[a-zA-Z]{2}$/', $lang, $lang_match) === 1) {
+              $lang_code = strtolower(substr($lang, 0, 2)) . '_' . strtoupper(substr($lang, 3, 2));
+              if(strcasecmp($locale, $lang_code) != 0) {
+                Session::newInstance()->_set('userLocale', $lang_code);
+                Translation::init();
+                osc_run_hook('user_locale_changed', $lang_code);
+              }
 
-                if($find_lang !== false && isset($find_lang['pk_c_code']) && $find_lang['pk_c_code'] != '') {
-                  Session::newInstance()->_set('userLocale', $find_lang['pk_c_code']);
-                  Translation::init();
-                  osc_run_hook('user_locale_changed', $find_lang['pk_c_code']);
-                }
+            } else if($lang != '' && preg_match('/^[a-z]{2}$/', $lang, $lang_match) === 1 && strtolower(substr($locale, 0, 2)) != strtolower($lang)) {
+              $find_lang = OSCLocale::newInstance()->findByShortCode($lang);
+
+              if($find_lang !== false && isset($find_lang['pk_c_code']) && $find_lang['pk_c_code'] != '') {
+                Session::newInstance()->_set('userLocale', $find_lang['pk_c_code']);
+                Translation::init();
+                osc_run_hook('user_locale_changed', $find_lang['pk_c_code']);
               }
             }
           }
@@ -193,7 +200,7 @@ class Rewrite {
           // $lang_match contains matched language code
           // $route_match contains matched route params
           if($lang_regex != '' && count($route_match) > count($args[1])) {
-            $lang_check_code = isset($lang_match[0]) ? $lang_match[0] : '';
+            $lang_check_code = $lang;
             $pos = strpos($request_uri, $lang_check_code . '/');
 
             if($lang_check_code != '' && $pos === 0) {

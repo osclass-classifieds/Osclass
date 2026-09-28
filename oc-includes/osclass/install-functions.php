@@ -333,7 +333,7 @@ function oc_install() {
 
     if($error_num > 0) {
       if(reportToOsclass()) {
-        LogOsclassInstaller::instance()->error(sprintf(__('Cannot connect to the database. <br/>[%s: %s]'), $error_num, $error_desc), __FILE__ . "::" . __LINE__);
+        LogOsclassInstaller::instance()->error(sprintf(__('Cannot connect to the database. [%s] %s'), $error_num, $error_desc), __FILE__ . "::" . __LINE__);
       }
 
       switch($error_num) {
@@ -347,10 +347,10 @@ function oc_install() {
           return array('error' => sprintf(__('Cannot connect to the database. Check if the username and password are correct. <br/>[%s: %s]'), $error_num, $error_desc));
           break;
         case 2005:
-          return array('error' => sprintf(__("Can't resolve MySQL host. Check if the host is correct. <br/>[%s: %s]"), $error_num, $error_desc));
+          return array('error' => sprintf(__("Cannot resolve the MySQL host. Check if the host is correct. [%s] %s"), $error_num, $error_desc));
           break;
         default:
-          return array('error' => sprintf(__('Cannot connect to the database. <br/>[%s: %s]'), $error_num, $error_desc));
+          return array('error' => sprintf(__('Cannot connect to the database. [%s] %s'), $error_num, $error_desc));
           break;
 
       }
@@ -365,14 +365,14 @@ function oc_install() {
 
     if($error_num > 0) {
       if(reportToOsclass()) {
-        LogOsclassInstaller::instance()->error(sprintf(__("Can't create the database. <br/>[%s: %s]"), $error_num, $error_desc), __FILE__ . "::" . __LINE__);
+        LogOsclassInstaller::instance()->error(sprintf(__("Cannot create the database. [%s] %s"), $error_num, $error_desc), __FILE__ . "::" . __LINE__);
       }
 
       if(in_array($error_num, array(1006, 1044, 1045))) {
-        return array('error' => sprintf(__("Can't create the database. Check if the admin username and password are correct. <br/>[%s: %s]"), $error_num, $error_desc));
+        return array('error' => sprintf(__("Cannot create the database. Check if the admin username and password are correct. [%s] %s"), $error_num, $error_desc));
       }
 
-      return array('error' => sprintf(__("Can't create the database. Error number: <br/>[%s: %s]"), $error_num, $error_desc));
+      return array('error' => sprintf(__("Cannot create the database. [%s] %s"), $error_num, $error_desc));
     }
 
     unset($conn);
@@ -391,7 +391,7 @@ function oc_install() {
 
   if($error_num > 0) {
     if(reportToOsclass()) {
-      LogOsclassInstaller::instance()->error(sprintf(__('Cannot connect to the database. ERROR: [%s] %s'), $error_num, $error_desc), __FILE__ . "::" . __LINE__);
+      LogOsclassInstaller::instance()->error(sprintf(__('Cannot connect to the database. [%s] %s'), $error_num, $error_desc), __FILE__ . "::" . __LINE__);
     }
 
     switch($error_num) {
@@ -405,10 +405,10 @@ function oc_install() {
         return array('error' => sprintf(__('Cannot connect to the database. Check if the username and password are correct. <br/>[%s: %s]'), $error_num, $error_desc));
         break;
       case 2005:
-        return array('error' => sprintf(__("Can't resolve MySQL host. Check if the host is correct. <br/>[%s: %s]"), $error_num, $error_desc));
+        return array('error' => sprintf(__("Cannot resolve the MySQL host. Check if the host is correct. [%s] %s"), $error_num, $error_desc));
         break;
       default:
-        return array('error' => sprintf(__('Cannot connect to the database. <br/>[%s]: %s'), $error_num, $error_desc));
+        return array('error' => sprintf(__('Cannot connect to the database. [%s] %s'), $error_num, $error_desc));
         break;
     }
   }
@@ -416,10 +416,10 @@ function oc_install() {
   if(file_exists(ABS_PATH . 'config.php')) {
     if(!is_writable(ABS_PATH . 'config.php')) {
       if(reportToOsclass()) {
-        LogOsclassInstaller::instance()->error(__("Can't write in config.php file. Check if the file is writable."), __FILE__ . "::" . __LINE__);
+        LogOsclassInstaller::instance()->error(__("Cannot write config.php. Check if the file is writable."), __FILE__ . "::" . __LINE__);
       }
 
-      return array('error' => __("Can't write in config.php file. Check if the file is writable."));
+      return array('error' => __("Cannot write config.php. Check if the file is writable."));
     }
 
     create_config_file($dbname, $username, $password, $dbhost, $tableprefix);
@@ -435,10 +435,10 @@ function oc_install() {
 
     if(!is_writable(ABS_PATH)) {
       if(reportToOsclass()) {
-        LogOsclassInstaller::instance()->error(__('Can\'t copy config-sample.php. Check if the root directory is writable.'), __FILE__ . "::" . __LINE__);
+        LogOsclassInstaller::instance()->error(__('Cannot copy config-sample.php. Check if the root directory is writable.'), __FILE__ . "::" . __LINE__);
       }
 
-      return array('error' => __('Can\'t copy config-sample.php. Check if the root directory is writable.'));
+      return array('error' => __('Cannot copy config-sample.php. Check if the root directory is writable.'));
     }
 
     copy_config_file($dbname, $username, $password, $dbhost, $tableprefix);
@@ -457,7 +457,7 @@ function oc_install() {
 
   if($error_num > 0) {
     if(reportToOsclass()) {
-      LogOsclassInstaller::instance()->error(sprintf(__('Cannot create tables - database structure (struct.sql). ERROR: [%s] %s'), $error_num, $error_desc), __FILE__ . "::" . __LINE__);
+      LogOsclassInstaller::instance()->error(sprintf(__('Cannot create tables (struct.sql). [%s] %s'), $error_num, $error_desc), __FILE__ . "::" . __LINE__);
     }
 
     switch($error_num) {
@@ -465,7 +465,7 @@ function oc_install() {
         return array('error' => __('There are tables with the same name in the database. Change the table prefix or the database and try again.'));
         break;
       default:
-        return array('error' => sprintf(__('Cannot create tables - database structure (struct.sql). <br/>[%s] %s'), $error_num, $error_desc));
+        return array('error' => sprintf(__('Cannot create tables (struct.sql). [%s] %s'), $error_num, $error_desc));
         break;
     }
   }
@@ -519,15 +519,15 @@ function oc_install() {
 
   if($error_num > 0) {
     if(reportToOsclass()) {
-      LogOsclassInstaller::instance()->error(sprintf(__("Can't insert basic configuration. Error number: %s"), $error_num), __FILE__ . "::" . __LINE__);
+      LogOsclassInstaller::instance()->error(sprintf(__("Cannot insert basic configuration. Error number: %s"), $error_num), __FILE__ . "::" . __LINE__);
     }
 
     switch($error_num) {
       case 1471:
-        return array('error' => __("Can't insert basic configuration. This user has no privileges to 'INSERT' into the database."));
+        return array('error' => __("Cannot insert basic configuration. This user has no INSERT privilege."));
         break;
       default:
-        return array('error' => sprintf(__("Can't insert basic configuration. Error number: %s"), $error_num));
+        return array('error' => sprintf(__("Cannot insert basic configuration. Error number: %s"), $error_num));
         break;
     }
   }
@@ -954,9 +954,9 @@ function display_target() {
             <td></td>
           </tr>
           <tr>
-            <th><label for="email"><?php _e('Contact e-mail'); ?></label></th>
+            <th><label for="email"><?php _e('Contact email'); ?></label></th>
             <td><input type="text" id="email" name="email" size="25" required/></td>
-            <td><span id="email-error" class="error" style="display:none;"><?php _e('Put your e-mail here'); ?></span></td>
+            <td><span id="email-error" class="error" style="display:none;"><?php _e('Put your email here'); ?></span></td>
           </tr>
           </tbody>
         </table>
@@ -1041,6 +1041,47 @@ function ping_search_engines($bool) {
 }
 
 
+// Ping osclass-classifieds install stats via osc_doRequest (max 5s)
+function osc_ping_install_stats($email) {
+  try {
+    if(!function_exists('osc_doRequest') || !function_exists('osc_osclass_installed_url')) {
+      return false;
+    }
+
+    $site_url = get_absolute_url();
+    $host = parse_url($site_url, PHP_URL_HOST);
+    if($host == '' || $host === false) {
+      return false;
+    }
+
+    $version = '';
+    if(defined('OSCLASS_VERSION')) {
+      $version = OSCLASS_VERSION;
+    }
+
+    $ip = '';
+    if(function_exists('osc_get_ip')) {
+      $ip = (string)osc_get_ip();
+    }
+
+    $payload = array(
+      'domain' => substr((string)$host, 0, 253),
+      'url' => substr((string)$site_url, 0, 512),
+      'email' => substr((string)$email, 0, 128),
+      'ip' => substr($ip, 0, 45),
+      'version' => substr((string)$version, 0, 32)
+    );
+
+    $sent = osc_doRequest(osc_osclass_installed_url(), $payload, 5);
+    return ($sent !== false && (int)$sent > 0);
+  } catch(Exception $e) {
+    return false;
+  } catch(Throwable $e) {
+    return false;
+  }
+}
+
+
 function display_finish($password) {
   $data = finish_installation($password);
   ?>
@@ -1050,11 +1091,11 @@ function display_finish($password) {
         $('.error-location').fadeOut('slow');
       }, 5000);
     </script>
-    <div class="flash error imp"><?php _e('The selected location could not been installed'); ?></div>
+    <div class="flash error imp"><?php _e('The selected location could not be installed'); ?></div>
   <?php } ?>
 
   <h2><?php _e('Congratulations!'); ?></h2>
-  <div class="row"><?php _e("Osclass has been installed. Were you expecting more steps? Sorry to disappoint you!"); ?><br/><?php echo sprintf(__('An e-mail with the password for oc-admin has been sent to: %s'), $data['s_email']); ?></div>
+  <div class="row"><?php _e("Osclass has been installed. Were you expecting more steps? Sorry to disappoint you!"); ?><br/><?php echo sprintf(__('An email with the oc-admin password has been sent to %s'), $data['s_email']); ?></div>
   <div style="clear:both;"></div>
   <div class="form-table finish">
     <table>
@@ -1088,4 +1129,5 @@ function display_finish($password) {
     <a target="_blank" href="<?php echo get_absolute_url() ?>" class="btn btn-secondary"><?php _e('Explore frontoffice'); ?></a>
   </p>
   <?php
+  osc_ping_install_stats($data['s_email']);
 }

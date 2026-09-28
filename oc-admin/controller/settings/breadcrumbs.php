@@ -80,9 +80,9 @@ class CAdminSettingsBreadcrumbs extends AdminSecBaseModel
         $iUpdated += osc_set_preference('breadcrumbs_hide_custom', $hideCustom);
 
         if($iUpdated > 0) {
-          osc_add_flash_ok_message( _m("Breadcrumbs settings have been updated"), 'admin');
+          osc_add_flash_ok_message( _m("Settings have been updated"), 'admin');
         } else {
-          osc_add_flash_ok_message( _m("No changes has been done"), 'admin');
+          osc_add_flash_ok_message( _m("No changes were made"), 'admin');
         }
 
         $this->redirectTo(osc_admin_base_url(true) . '?page=settings&action=breadcrumbs');

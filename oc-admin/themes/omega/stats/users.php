@@ -56,7 +56,7 @@ function customPageHeader(){ ?>
 }
 
 function customPageTitle($string) {
-  return sprintf(__('User statistics - %s'), $string);
+  return sprintf(__('%s - %s'), __('User statistics'), $string);
 }
 osc_add_filter('admin_title', 'customPageTitle');
 
@@ -189,12 +189,12 @@ foreach((array)$latest_users as $u) {
 }
 ?>
 <div class="grid-system" id="stats-page">
-  <div class="grid-row grid-50">
+  <div class="grid-row grid-30">
     <div class="row-wrapper">
       <h2 class="render-title"><?php _e('User statistics'); ?></h2>
     </div>
   </div>
-  <div class="grid-row grid-50">
+  <div class="grid-row grid-70">
     <div class="row-wrapper">
       <?php echo osc_admin_stats_period_links('users'); ?>
     </div>

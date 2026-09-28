@@ -629,7 +629,7 @@ HTACCESS;
 
           osc_set_preference('seo_url_search_prefix', rtrim(Params::getParam('seo_url_search_prefix'), '/'));
 
-          $msg_error = '<br/>'._m('All fields are required.')." ".sprintf(_mn('One field was not updated', '%s fields were not updated', $errors), $errors);
+          $msg_error = '<br/>'._m('All fields are required')." ".sprintf(_mn('One field was not updated', '%s fields were not updated', $errors), $errors);
 
           switch($status) {
             case 1:
@@ -643,9 +643,9 @@ HTACCESS;
               break;
 
             case 2:
-              $msg = _m("Permalinks structure updated.");
+              $msg = _m("Permalinks structure updated");
               $msg .= " ";
-              $msg .= _m("However, we can't check if Apache module <b>mod_rewrite</b> is loaded. If you experience some problems with the URLs, you should deactivate <em>Friendly URLs</em>");
+              $msg .= _m("However, we cannot check if Apache module <b>mod_rewrite</b> is loaded. If you experience some problems with the URLs, you should deactivate <em>Friendly URLs</em>");
               if($errors>0) {
                 $msg .= $msg_error;
               }
@@ -655,7 +655,7 @@ HTACCESS;
             case 3:
               $msg = _m("File <b>.htaccess</b> couldn't be filled out with the right content.");
               $msg .= " ";
-              $msg .= _m("Here's the content you have to add to the <b>.htaccess</b> file. If you can't create the file, please deactivate the <em>Friendly URLs</em> option.");
+              $msg .= _m("Here's the content you have to add to the <b>.htaccess</b> file. If you cannot create the file, please deactivate the <em>Friendly URLs</em> option.");
               $msg .= "</p><pre>" . htmlentities($htaccess, ENT_COMPAT, "UTF-8") . '</pre><p>';
               if($errors>0) {
                 $msg .= $msg_error;
@@ -666,7 +666,7 @@ HTACCESS;
             case 4:
               $msg = _m("File <b>.htaccess</b> couldn't be filled out with the right content.");
               $msg .= " ";
-              $msg .= _m("Here's the content you have to add to the <b>.htaccess</b> file. If you can't create the file or experience some problems with the URLs, please deactivate the <em>Friendly URLs</em> option.");
+              $msg .= _m("Here's the content you have to add to the <b>.htaccess</b> file. If you cannot create the file or experience some problems with the URLs, please deactivate the <em>Friendly URLs</em> option.");
               $msg .= "</p><pre>" . htmlentities($htaccess, ENT_COMPAT, "UTF-8") . '</pre><p>';
               if($errors>0) {
                 $msg .= $msg_error;
@@ -681,7 +681,7 @@ HTACCESS;
                 if($htaccess_content!=$htaccess) {
                   $msg = _m("File <b>.htaccess</b> already exists and was not modified.");
                   $msg .= " ";
-                  $msg .= _m("Here's the content you have to add to the <b>.htaccess</b> file. If you can't modify the file or experience some problems with the URLs, please deactivate the <em>Friendly URLs</em> option.");
+                  $msg .= _m("Here's the content you have to add to the <b>.htaccess</b> file. If you cannot modify the file or experience some problems with the URLs, please deactivate the <em>Friendly URLs</em> option.");
                   $msg .= "</p><pre>" . htmlentities($htaccess, ENT_COMPAT, "UTF-8") . '</pre><p>';
                   $warning = true;
                 } else {
@@ -719,7 +719,7 @@ HTACCESS;
           }
 
           if($deleted) {
-            osc_add_flash_ok_message(_m('Friendly URLs successfully deactivated'), 'admin');
+            osc_add_flash_ok_message(_m('Friendly URLs have been deactivated'), 'admin');
           } else {
             if($same_content) {
               osc_add_flash_warning_message(_m('Friendly URLs deactivated, but .htaccess file could not be deleted. Please, remove it manually'), 'admin');

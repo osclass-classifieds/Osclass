@@ -136,15 +136,6 @@ function osc_item_stats_cleanup_months() {
 }
 
 /**
- * Legacy alias for older code paths
- *
- * @return boolean
- */
-function osc_item_stats_auto_cleanup() {
-  return osc_item_stats_auto_cleanup_enabled();
-}
-
-/**
  * True when alerts feature is enabled
  *
  * @return boolean
@@ -430,11 +421,6 @@ function osc_item_stats_user_chart_type() {
   return $raw;
 }
 
-// User summary KPI measures follow the chart measures
-function osc_item_stats_user_chart_kpis() {
-  return osc_item_stats_user_chart_measures();
-}
-
 // User summary chart hook names (comma-separated)
 function osc_item_stats_user_chart_hooks() {
   $raw = trim((string)getPreference('item_stats_user_chart_hooks'));
@@ -632,11 +618,16 @@ function osc_item_send_friend_form_disabled() {
 
 
 /**
- * Legacy "Mark as" is retired. Always disabled so old themes hide those links.
+ * Legacy "Mark as" gate used by old themes (e.g. sigma 8.3.1).
+ * When reports are enabled, return false so Mark as UI stays visible and posts to action=mark,
+ * which redirects to the report form with the matching reason preselected.
  *
  * @return boolean
  */
 function osc_item_mark_disable() {
+  if(function_exists('osc_reports_enabled')) {
+    return !osc_reports_enabled();
+  }
   return true;
 }
 
@@ -2130,6 +2121,192 @@ function osc_num_category_levels() {
   return (int)(getPreference('num_category_levels'));
 }
 
+/**
+ * Catalog of category bulk expiration presets (keys + days + unit)
+ * Month = 30 days; whole years (12/24/36/48 months) = 365 days per year
+ * Filter: osc_category_bulk_expiration_option_defs
+ *
+ * @return array
+ */
+function osc_category_bulk_expiration_option_defs() {
+  $defs = array(
+    '3d' => array('days' => 3, 'unit' => 'day', 'n' => 3),
+    '7d' => array('days' => 7, 'unit' => 'day', 'n' => 7),
+    '14d' => array('days' => 14, 'unit' => 'day', 'n' => 14),
+    '21d' => array('days' => 21, 'unit' => 'day', 'n' => 21),
+    '1m' => array('days' => 30, 'unit' => 'month', 'n' => 1),
+    '2m' => array('days' => 60, 'unit' => 'month', 'n' => 2),
+    '3m' => array('days' => 90, 'unit' => 'month', 'n' => 3),
+    '6m' => array('days' => 180, 'unit' => 'month', 'n' => 6),
+    '9m' => array('days' => 270, 'unit' => 'month', 'n' => 9),
+    '12m' => array('days' => 365, 'unit' => 'month', 'n' => 12),
+    '18m' => array('days' => 540, 'unit' => 'month', 'n' => 18),
+    '24m' => array('days' => 730, 'unit' => 'month', 'n' => 24),
+    '36m' => array('days' => 1095, 'unit' => 'month', 'n' => 36),
+    '48m' => array('days' => 1460, 'unit' => 'month', 'n' => 48),
+  );
+
+  $defs = osc_apply_filter('osc_category_bulk_expiration_option_defs', $defs);
+  if(!is_array($defs)) {
+    return array();
+  }
+  return $defs;
+}
+
+/**
+ * Default selected keys for category bulk expiration options
+ * Filter: osc_category_bulk_expiration_options_default
+ *
+ * @return array
+ */
+function osc_category_bulk_expiration_options_default() {
+  $keys = array('14d', '1m', '3m');
+  $keys = osc_apply_filter('osc_category_bulk_expiration_options_default', $keys);
+  if(!is_array($keys)) {
+    return array('14d', '1m', '3m');
+  }
+
+  $defs = osc_category_bulk_expiration_option_defs();
+  $out = array();
+  foreach($keys as $key) {
+    $key = trim((string)$key);
+    if($key !== '' && isset($defs[$key]) && !in_array($key, $out, true)) {
+      $out[] = $key;
+    }
+  }
+  if(count($out) === 0) {
+    return array('14d', '1m', '3m');
+  }
+  return $out;
+}
+
+/**
+ * Raw preference string for category bulk expiration options
+ * Filter: osc_category_bulk_expiration_options
+ *
+ * @return string
+ */
+function osc_category_bulk_expiration_options() {
+  return (string)osc_apply_filter('osc_category_bulk_expiration_options', (string)getPreference('category_bulk_expiration_options'));
+}
+
+/**
+ * Selected category bulk expiration option keys (validated)
+ * Filter: osc_category_bulk_expiration_options_array
+ *
+ * @return array
+ */
+function osc_category_bulk_expiration_options_array() {
+  $defs = osc_category_bulk_expiration_option_defs();
+  $raw = trim(osc_category_bulk_expiration_options());
+  if($raw === '') {
+    $keys = osc_category_bulk_expiration_options_default();
+  } else {
+    $keys = array();
+    foreach(explode(',', $raw) as $part) {
+      $key = trim((string)$part);
+      if($key !== '' && isset($defs[$key]) && !in_array($key, $keys, true)) {
+        $keys[] = $key;
+      }
+    }
+    if(count($keys) === 0) {
+      $keys = osc_category_bulk_expiration_options_default();
+    }
+  }
+
+  $keys = osc_apply_filter('osc_category_bulk_expiration_options_array', $keys);
+  if(!is_array($keys)) {
+    return osc_category_bulk_expiration_options_default();
+  }
+
+  $out = array();
+  foreach($keys as $key) {
+    $key = trim((string)$key);
+    if($key !== '' && isset($defs[$key]) && !in_array($key, $out, true)) {
+      $out[] = $key;
+    }
+  }
+  if(count($out) === 0) {
+    return osc_category_bulk_expiration_options_default();
+  }
+  return $out;
+}
+
+/**
+ * Human label for a category bulk expiration option key
+ * Filter: osc_category_bulk_expiration_option_label
+ *
+ * @param string $key
+ * @return string
+ */
+function osc_category_bulk_expiration_option_label($key) {
+  $defs = osc_category_bulk_expiration_option_defs();
+  if(!isset($defs[$key])) {
+    return (string)osc_apply_filter('osc_category_bulk_expiration_option_label', '', $key);
+  }
+
+  $n = (int)$defs[$key]['n'];
+  if(isset($defs[$key]['unit']) && $defs[$key]['unit'] === 'month') {
+    $label = sprintf(_n('%d month', '%d months', $n), $n);
+  } else {
+    $label = sprintf(_n('%d day', '%d days', $n), $n);
+  }
+
+  return (string)osc_apply_filter('osc_category_bulk_expiration_option_label', $label, $key);
+}
+
+/**
+ * Day values for currently selected category bulk expiration options
+ * Filter: osc_category_bulk_expiration_selected_days
+ *
+ * @return array
+ */
+function osc_category_bulk_expiration_selected_days() {
+  $defs = osc_category_bulk_expiration_option_defs();
+  $days = array();
+  foreach(osc_category_bulk_expiration_options_array() as $key) {
+    if(isset($defs[$key]['days'])) {
+      $day = (int)$defs[$key]['days'];
+      if($day > 0 && !in_array($day, $days, true)) {
+        $days[] = $day;
+      }
+    }
+  }
+
+  $days = osc_apply_filter('osc_category_bulk_expiration_selected_days', $days);
+  if(!is_array($days)) {
+    return array();
+  }
+
+  $out = array();
+  foreach($days as $day) {
+    $day = (int)$day;
+    if($day > 0 && !in_array($day, $out, true)) {
+      $out[] = $day;
+    }
+  }
+  return $out;
+}
+
+/**
+ * Label for an expiration length in days (from catalog when possible)
+ * Filter: osc_category_bulk_expiration_days_label
+ *
+ * @param int $days
+ * @return string
+ */
+function osc_category_bulk_expiration_days_label($days) {
+  $days = (int)$days;
+  $label = sprintf(_n('%d day', '%d days', $days), $days);
+  foreach(osc_category_bulk_expiration_option_defs() as $key => $def) {
+    if(isset($def['days']) && (int)$def['days'] === $days) {
+      $label = osc_category_bulk_expiration_option_label($key);
+      break;
+    }
+  }
+  return (string)osc_apply_filter('osc_category_bulk_expiration_days_label', $label, $days);
+}
+
 
 /**
  * Gets default currency
@@ -2243,6 +2420,11 @@ function osc_osclass_url($action = '') {
   }
 
   return $url;
+}
+
+
+function osc_osclass_installed_url() {
+  return 'https://osclass-classifieds.com/api/installed.php';
 }
 
 

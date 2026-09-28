@@ -457,6 +457,29 @@ class Item extends DAO {
   }
 
   /**
+   * Legacy Mark as counter. Stats columns were removed with Reports; always returns 0.
+   * Kept so old plugins/themes calling Item::countByMarkas() do not fatal.
+   *
+   * @param string $type spam, repeated, bad_classified, offensive, expired
+   * @return int
+   */
+  public function countByMarkas($type) {
+    return 0;
+  }
+
+  /**
+   * Legacy clear of Mark as stats. Columns were removed with Reports.
+   * Kept so old plugins/admin code calling clearStat() do not fatal.
+   *
+   * @param int $id
+   * @param string $stat spam, duplicated, bad, offensive, expired, all
+   * @return bool
+   */
+  public function clearStat($id, $stat) {
+    return true;
+  }
+
+  /**
    * Find enabled items belong to an user given its id
    *
    * @access public

@@ -28,6 +28,7 @@ sftp-config*
 
 # ============================================================
 # Osclass configuration / installation-generated files
+# Only site-root files created by install or the running site.
 # ============================================================
 
 /config.php
@@ -37,8 +38,14 @@ sftp-config*
 oc-includes/osclass/t/config.php
 oc-includes/simpletest/test/osclass/custom_config.php
 
-.htaccess
-robots.txt
+# Copied or written at the site root. Do not ignore installer sources.
+/.htaccess
+/robots.txt
+
+# Required to install Osclass. Keep these in the repository.
+!config-sample.php
+!oc-includes/osclass/installer/
+!oc-includes/osclass/installer/**
 
 # ============================================================
 # oc-content logs
@@ -56,6 +63,7 @@ oc-content/explain_queries.log
 
 oc-content/languages/*
 
+!oc-content/languages/index.php
 !oc-content/languages/en_US/
 
 # ============================================================
@@ -65,6 +73,7 @@ oc-content/languages/*
 
 oc-content/themes/*
 
+!oc-content/themes/index.php
 !oc-content/themes/sigma/
 
 # ============================================================
@@ -135,6 +144,7 @@ oc-content/uploads/custom-images/*
 
 oc-admin/themes/*
 
+!oc-admin/themes/index.php
 !oc-admin/themes/omega/
 
 # ============================================================

@@ -40,7 +40,7 @@ osc_add_hook('admin_page_header','customPageHeader');
 
 
 function customPageTitle($string) {
-  return sprintf(__('Tools - %s'), $string);
+  return sprintf(__('%s - %s'), __('Tools'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');
@@ -218,11 +218,11 @@ if(Params::getParam('details') == 1) {
       <div class="widget-box-title"><h3><i class="fa fa-info-circle"></i> <?php _e('Permissions information'); ?></h3></div>
       <div class="widget-box-content">
         <?php if($details) { ?>
-          <p><?php _e('In case folder is not readable or writtable, it may be issue when updating or upgrading osclass, themes or plugins.'); ?></p>
+          <p><?php _e('In case folder is not readable or writable, it may be issue when updating or upgrading osclass, themes or plugins.'); ?></p>
 
           <?php $chmod = osc_dir_chmod(osc_base_path()); ?>
           <p>
-            <strong><?php _e('Folders those are not readable'); ?>:</strong><br/>
+            <strong><?php _e('Folders that are not readable'); ?>:</strong><br/>
             <span>
               <?php if(empty($chmod['not_readable'])) { ?>
                 <i class="fa fa-check-circle-o"></i> <?php _e('All folders are readable'); ?>
@@ -233,10 +233,10 @@ if(Params::getParam('details') == 1) {
           </p>
 
           <p>
-            <strong><?php _e('Folders those are not writtable'); ?>:</strong><br/>
+            <strong><?php _e('Folders that are not writable'); ?>:</strong><br/>
             <span>
               <?php if(empty($chmod['not_writtable'])) { ?>
-                <i class="fa fa-check-circle-o"></i> <?php _e('All folders are writtable'); ?>
+                <i class="fa fa-check-circle-o"></i> <?php _e('All folders are writable'); ?>
               <?php } else { ?>
                 <?php echo implode('<br/>', $chmod['not_writtable']); ?>
               <?php } ?>

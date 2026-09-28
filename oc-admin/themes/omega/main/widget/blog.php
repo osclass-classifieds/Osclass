@@ -37,7 +37,7 @@ if(is_array($articles)) {
 ?>
 
 <?php if(!is_array($articles) || count($articles) <= 0) { ?>
-  <div class="empty"><?php _e('No articles has been found'); ?></div>
+  <div class="empty"><?php _e('No articles have been found'); ?></div>
 <?php } else { ?>
   <?php foreach($articles as $a) { ?>
     <div class="row">

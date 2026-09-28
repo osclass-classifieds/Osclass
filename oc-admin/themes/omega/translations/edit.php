@@ -223,7 +223,7 @@ if(is_array($translations)) {
                       ?><div class="line"><?php echo $cvalue; ?></div><?php
                     }
                   } else {
-                    ?><div class="line none"><?php _e('No comments found'); ?></div><?php
+                    ?><div class="line none"><?php _e('No comments have been found'); ?></div><?php
                   }
                 ?>
               </div>
@@ -243,7 +243,7 @@ if(is_array($translations)) {
                 if(!$exists) {
                   _e('File does not exists');
                 } else {
-                  _e('No translations has been found');
+                  _e('No translations have been found');
                 }
               ?>
               </div>
@@ -382,7 +382,7 @@ if(is_array($translations)) {
                 if($missing > 0) {
                   echo sprintf(__('%d missing'), $missing);
                 } else {
-                  echo __('No missing tranlsations');
+                  echo __('No missing translations');
                 }
               ?>
             </div>

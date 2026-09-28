@@ -154,7 +154,7 @@ class CAdminLogin extends AdminBaseModel
 
       case('recover_post'):
         if(defined('DEMO') ) {
-          osc_add_flash_warning_message( _m("This action can't be done because it's a demo site"), 'admin');
+          osc_add_flash_warning_message( _m("This action cannot be done because it is a demo site"), 'admin');
           $this->redirectTo( osc_admin_base_url() );
         }
         osc_csrf_check();
@@ -186,7 +186,7 @@ class CAdminLogin extends AdminBaseModel
           osc_run_hook('hook_email_user_forgot_password', $admin, $password_url);
         }
 
-        osc_add_flash_ok_message( _m('A new password has been sent to your e-mail'), 'admin');
+        osc_add_flash_ok_message( _m('A new password has been sent to your email'), 'admin');
         $this->redirectTo(osc_admin_base_url(true) . '?page=login');
         break;
 
@@ -218,7 +218,7 @@ class CAdminLogin extends AdminBaseModel
           $this->redirectTo(osc_admin_base_url(true) . '?page=login');
 
         } else {
-          osc_add_flash_error_message( _m("Error, the passwords don't match"), 'admin');
+          osc_add_flash_error_message( _m("The passwords do not match"), 'admin');
           $this->redirectTo(osc_forgot_admin_password_confirm_url(Params::getParam('adminId'), Params::getParam('code')));
         }
         break;

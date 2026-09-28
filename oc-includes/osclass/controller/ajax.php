@@ -141,7 +141,7 @@ class CWebAjax extends BaseModel {
         echo json_encode(
           array(
             'success' => $success ,
-            'msg' => _m($success ? 'The selected photo has been successfully rotated' : "The selected photo couldn't be rotated")
+            'msg' => _m($success ? 'The selected photo has been rotated' : "The selected photo couldn't be rotated")
           )
         );
 
@@ -184,7 +184,7 @@ class CWebAjax extends BaseModel {
 
           echo json_encode(array(
             'success' => $success,
-            'msg' => _m($success ? 'The selected photo has been successfully deleted' : "The selected photo couldn't be deleted")
+            'msg' => _m($success ? 'The selected photo has been deleted' : "The selected photo couldn't be deleted")
           ));
 
           return false;
@@ -255,7 +255,7 @@ class CWebAjax extends BaseModel {
 
             ItemResource::newInstance()->delete(array('pk_i_id' => $id, 'fk_i_item_id' => $item, 's_name' => $code));
 
-            $json['msg'] =  _m('The selected photo has been successfully deleted');
+            $json['msg'] =  _m('The selected photo has been deleted');
             $json['success'] = 'true';
           } else {
             $json['msg'] = _m('The selected photo does not belong to you');

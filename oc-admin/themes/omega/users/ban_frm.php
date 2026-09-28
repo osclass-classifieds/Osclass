@@ -94,7 +94,7 @@ osc_current_admin_theme_path('parts/header.php');
           </div>
 
           <div class="form-row">
-            <div class="form-label"><?php _e('E-mail rule'); ?></div>
+            <div class="form-label"><?php _e('Email rule'); ?></div>
             <div class="form-controls">
               <?php BanRuleForm::email_text($rule); ?>
               <span class="help-box"><?php _e('Example: *@badsite.com, *@subdomain.badsite.com, *@*badsite.com, *badsite.*, *badsite*, *.com'); ?></span>

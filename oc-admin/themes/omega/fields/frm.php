@@ -36,9 +36,9 @@ osc_add_hook('admin_page_header','customPageHeader');
 function customPageTitle($string) {
   global $is_add;
   if($is_add) {
-    return sprintf(__('Add custom field - %s'), $string);
+    return sprintf(__('%s - %s'), __('Add custom field'), $string);
   }
-  return sprintf(__('Edit custom field - %s'), $string);
+  return sprintf(__('%s - %s'), __('Edit custom field'), $string);
 }
 osc_add_filter('admin_title', 'customPageTitle');
 
@@ -160,7 +160,7 @@ osc_current_admin_theme_path('parts/header.php');
         </div>
         <div class="form-row">
           <div class="form-label"><?php _e('Required'); ?></div>
-          <div class="form-controls cf-checkbox"><label><?php FieldForm::required_checkbox($field); ?> <span><?php _e('Required field on publish item page'); ?></span></label></div>
+          <div class="form-controls cf-checkbox"><label><?php FieldForm::required_checkbox($field); ?> <span><?php _e('Required field on the publish listing page'); ?></span></label></div>
         </div>
         <div class="form-row">
           <div class="form-label"><?php _e('Searchable'); ?></div>

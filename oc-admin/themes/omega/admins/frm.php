@@ -88,7 +88,7 @@ osc_current_admin_theme_path('parts/header.php');
         </div>
 
         <div class="form-row">
-          <div class="form-label"><?php _e('E-mail'); ?> *</div>
+          <div class="form-label"><?php _e('Email'); ?> *</div>
           <div class="form-controls"><?php AdminForm::email_text($admin); ?></div>
         </div>
 

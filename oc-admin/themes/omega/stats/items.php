@@ -52,7 +52,7 @@ function customPageHeader() {
 osc_add_hook('admin_page_header', 'customPageHeader');
 
 function customPageTitle($string) {
-  return sprintf(__('Listing statistics - %s'), $string);
+  return sprintf(__('%s - %s'), __('Listing statistics'), $string);
 }
 osc_add_filter('admin_title', 'customPageTitle');
 
@@ -83,7 +83,7 @@ function customHead() {
   );
   $chart_color = omg_current_color_scheme_chart();
   echo osc_admin_stats_chart_js(array(
-    array('id' => 'placeholder', 'type' => 'area', 'labels' => array(__('Date'), __('Items')), 'rows' => $items, 'colors' => array($chart_color)),
+    array('id' => 'placeholder', 'type' => 'area', 'labels' => array(__('Date'), __('Listings')), 'rows' => $items, 'colors' => array($chart_color)),
     array('id' => 'placeholder_total', 'type' => 'scatter', 'labels' => array(__('Date'), __('Views')), 'rows' => $views, 'colors' => array($chart_color))
   ), array(
     'page' => 'items',
@@ -137,10 +137,10 @@ $sum_alerts = array_sum((array)$alerts);
 $sum_subscribers = array_sum((array)$subscribers);
 ?>
 <div class="grid-system" id="stats-page">
-  <div class="grid-row grid-50">
+  <div class="grid-row grid-30">
     <div class="row-wrapper"><h2 class="render-title"><?php _e('Listing statistics'); ?></h2></div>
   </div>
-  <div class="grid-row grid-50">
+  <div class="grid-row grid-70">
     <div class="row-wrapper"><?php echo osc_admin_stats_period_links('items'); ?></div>
   </div>
   <div class="grid-row grid-100">

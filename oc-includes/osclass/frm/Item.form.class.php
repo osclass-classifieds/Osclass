@@ -1182,11 +1182,11 @@ class ItemForm extends Form {
 
         messages: {
           "title[<?php echo osc_current_user_locale(); ?>]": {
-              required: '<?php echo osc_esc_js(__('Title: this field is required')); ?>',
+              required: '<?php echo osc_esc_js(sprintf(__('%s is required'), __('Title'))); ?>',
               minlength: '<?php echo osc_esc_js(__('Title: enter at least 5 characters')); ?>'
           },
           "description[<?php echo osc_current_user_locale(); ?>]": {
-              required: '<?php echo osc_esc_js(__('Description: this field is required')); ?>',
+              required: '<?php echo osc_esc_js(sprintf(__('%s is required'), __('Description'))); ?>',
               minlength: '<?php echo osc_esc_js(__('Description: enter at least 10 characters')); ?>'
           },
           catId: "<?php echo osc_esc_js(__('Choose one category')); ?>.",
@@ -1208,8 +1208,8 @@ class ItemForm extends Form {
             maxlength: "<?php echo osc_esc_js(__('Name: no more than 35 characters')); ?>."
           },
           contactEmail: {
-            required: "<?php echo osc_esc_js(__('Email: this field is required')); ?>.",
-            email: "<?php echo osc_esc_js(__('Invalid email address')); ?>."
+            required: "<?php echo osc_esc_js(sprintf(__('%s is required'), __('Email'))); ?>.",
+            email: "<?php echo osc_esc_js(__('The email is not valid')); ?>."
           },
           address: {
             minlength: "<?php echo osc_esc_js(__('Address: enter at least 3 characters')); ?>.",
@@ -1258,7 +1258,7 @@ class ItemForm extends Form {
 
     function delete_image(id, item_id,name, secret) {
       //alert(id + " - "+ item_id + " - "+name+" - "+secret);
-      var result = confirm('<?php echo osc_esc_js(__("This action can't be undone. Are you sure you want to continue?")); ?>');
+      var result = confirm('<?php echo osc_esc_js(__("This action cannot be undone. Are you sure you want to continue?")); ?>');
       if(result) {
         $.ajax({
           type: "POST",
@@ -1505,11 +1505,11 @@ class ItemForm extends Form {
 
         messages: {
           "title[<?php echo osc_current_user_locale(); ?>]": {
-              required: '<?php echo osc_esc_js(__('Title: this field is required')); ?>',
+              required: '<?php echo osc_esc_js(sprintf(__('%s is required'), __('Title'))); ?>',
               minlength: '<?php echo osc_esc_js(__('Title: enter at least 5 characters')); ?>'
           },
           "description[<?php echo osc_current_user_locale(); ?>]": {
-              required: '<?php echo osc_esc_js(__('Description: this field is required')); ?>',
+              required: '<?php echo osc_esc_js(sprintf(__('%s is required'), __('Description'))); ?>',
               minlength: '<?php echo osc_esc_js(__('Description: enter at least 10 characters')); ?>'
           },
           catId: "<?php echo osc_esc_js(__('Choose one category')); ?>.",
@@ -1531,8 +1531,8 @@ class ItemForm extends Form {
             maxlength: "<?php echo osc_esc_js(__('Name: no more than 35 characters')); ?>."
           },
           contactEmail: {
-            required: "<?php echo osc_esc_js(__('Email: this field is required')); ?>.",
-            email: "<?php echo osc_esc_js(__('Invalid email address')); ?>."
+            required: "<?php echo osc_esc_js(sprintf(__('%s is required'), __('Email'))); ?>.",
+            email: "<?php echo osc_esc_js(__('The email is not valid')); ?>."
           },
           regionId: "<?php echo osc_esc_js(__('Select a region')); ?>.",
           cityId: "<?php echo osc_esc_js(__('Select a city')); ?>.",
@@ -1587,7 +1587,7 @@ class ItemForm extends Form {
 
     function delete_image(id, item_id,name, secret) {
       //alert(id + " - "+ item_id + " - "+name+" - "+secret);
-      var result = confirm('<?php echo osc_esc_js(__("This action can't be undone. Are you sure you want to continue?")); ?>');
+      var result = confirm('<?php echo osc_esc_js(__("This action cannot be undone. Are you sure you want to continue?")); ?>');
       if(result) {
         $.ajax({
           type: "POST",
@@ -1902,7 +1902,7 @@ class ItemForm extends Form {
               return true;
             } else {
               <?php if($is_debug) { ?>console.log('[onBeforeFileAdded] Image limit reached: ' + maxItems);<?php } ?>
-              uppy.info('<?php echo osc_esc_js(__('Some images were not added. Image limit reached:')); ?>' + ' ' + maxItems, 'error', 5000);
+              uppy.info('<?php echo osc_esc_js(__('You cannot upload more images. Image limit reached:')); ?>' + ' ' + maxItems, 'error', 5000);
               return false;
             }
           },
@@ -1915,7 +1915,7 @@ class ItemForm extends Form {
               return true;
             } else {
               <?php if($is_debug) { ?>console.log('[onBeforeUpload] Image limit reached: ' + maxItems);<?php } ?>
-              uppy.info('<?php echo osc_esc_js(__('Some images were not uploaded. Image limit reached:')); ?>' + ' ' + maxItems, 'error', 5000);
+              uppy.info('<?php echo osc_esc_js(__('You cannot upload more images. Image limit reached:')); ?>' + ' ' + maxItems, 'error', 5000);
               return false;
             }
           }
@@ -2005,7 +2005,7 @@ class ItemForm extends Form {
         $('body').on('click', '.qq-upload-delete', function(e) {
           e.preventDefault();
           var parent = $(this).parent()
-          var result = confirm('<?php echo osc_esc_js(__("This action can't be undone. Are you sure you want to continue?")); ?>');
+          var result = confirm('<?php echo osc_esc_js(__("This action cannot be undone. Are you sure you want to continue?")); ?>');
           var urlrequest = '';
 
           if($(this).attr('ajaxfile') != undefined) {
@@ -2063,7 +2063,7 @@ class ItemForm extends Form {
             (uppy.getPlugin('Dashboard')).setOptions({disabled: true});
 
             if(type == 'MODALOPEN') {
-              uppy.info('<?php echo osc_esc_js(__('You cannot upload more images. Image limit reached!')); ?>', 'warning', 5000);
+              uppy.info('<?php echo osc_esc_js(__('You cannot upload more images. Image limit reached.')); ?>', 'warning', 5000);
             }
           } else {
             (uppy.getPlugin('Dashboard')).setOptions({disabled: false});
@@ -2223,7 +2223,7 @@ class ItemForm extends Form {
           $('.qq-upload-delete').on('click', function(evt) {
             evt.preventDefault();
             var parent = $(this).parent()
-            var result = confirm('<?php echo osc_esc_js(__("This action can't be undone. Are you sure you want to continue?")); ?>');
+            var result = confirm('<?php echo osc_esc_js(__("This action cannot be undone. Are you sure you want to continue?")); ?>');
             var urlrequest = '';
 
             if($(this).attr('ajaxfile')!=undefined) {

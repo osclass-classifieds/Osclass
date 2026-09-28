@@ -226,9 +226,9 @@ class CAdminItems extends AdminSecBaseModel {
             if($success && $success > 0) {
               osc_add_flash_ok_message(_m('The listing has been activated'), 'admin');
             } elseif(!$success){
-              osc_add_flash_error_message(_m('An error has occurred'), 'admin');
+              osc_add_flash_error_message(_m('An error occurred'), 'admin');
             } else {
-              osc_add_flash_error_message(_m("The listing can't be activated because it's blocked"), 'admin');
+              osc_add_flash_error_message(_m("The listing cannot be activated because it is blocked"), 'admin');
             }
 
             break;
@@ -238,7 +238,7 @@ class CAdminItems extends AdminSecBaseModel {
             if($success && $success > 0) {
               osc_add_flash_ok_message(_m('The listing has been deactivated'), 'admin');
             } else {
-              osc_add_flash_error_message(_m('An error has occurred'), 'admin');
+              osc_add_flash_error_message(_m('An error occurred'), 'admin');
             }
 
             break;
@@ -248,7 +248,7 @@ class CAdminItems extends AdminSecBaseModel {
             if($success && $success > 0) {
               osc_add_flash_ok_message(_m('The listing has been enabled'), 'admin');
             } else {
-              osc_add_flash_error_message(_m('An error has occurred'), 'admin');
+              osc_add_flash_error_message(_m('An error occurred'), 'admin');
             }
 
             break;
@@ -258,7 +258,7 @@ class CAdminItems extends AdminSecBaseModel {
             if($success && $success > 0) {
               osc_add_flash_ok_message(_m('The listing has been disabled'), 'admin');
             } else {
-              osc_add_flash_error_message(_m('An error has occurred'), 'admin');
+              osc_add_flash_error_message(_m('An error occurred'), 'admin');
             }
 
             break;
@@ -286,9 +286,9 @@ class CAdminItems extends AdminSecBaseModel {
         $mItems = new ItemActions(true);
 
         if($mItems->premium($id, $value==1?true:false)) {
-          osc_add_flash_ok_message(_m('Changes have been applied'), 'admin');
+          osc_add_flash_ok_message(_m('Changes have been saved'), 'admin');
         } else {
-          osc_add_flash_error_message(_m('An error has occurred'), 'admin');
+          osc_add_flash_error_message(_m('An error occurred'), 'admin');
         }
 
         $this->redirectTo(Params::getServerParam('HTTP_REFERER', false, false));
@@ -313,9 +313,9 @@ class CAdminItems extends AdminSecBaseModel {
         $mItems = new ItemActions(true);
 
         if($mItems->spam($id, $value==1?true:false)){
-          osc_add_flash_ok_message(_m('Changes have been applied'), 'admin');
+          osc_add_flash_ok_message(_m('Changes have been saved'), 'admin');
         } else {
-          osc_add_flash_error_message(_m('An error has occurred'), 'admin');
+          osc_add_flash_error_message(_m('An error occurred'), 'admin');
         }
 
         $this->redirectTo(Params::getServerParam('HTTP_REFERER', false, false));
@@ -345,7 +345,7 @@ class CAdminItems extends AdminSecBaseModel {
         if($do == 1){
           osc_add_flash_ok_message(_m('The listing has been renewed'), 'admin');
         } else {
-          osc_add_flash_error_message(_m('The listing can\'t be renewed' . ' (' . $do . ')'), 'admin');
+          osc_add_flash_error_message(sprintf(_m('The listing cannot be renewed (%s)'), $do), 'admin');
         }
 
         $this->redirectTo(Params::getServerParam('HTTP_REFERER', false, false));
@@ -429,7 +429,7 @@ class CAdminItems extends AdminSecBaseModel {
         $success = $mItems->edit();
 
         if($success==1){
-          osc_add_flash_ok_message(_m('Changes saved correctly'), 'admin');
+          osc_add_flash_ok_message(_m('Changes have been saved'), 'admin');
           $url = osc_admin_base_url(true) . "?page=items";
 
           // if Referer is saved that means referer is ManageListings or ReportListings
@@ -466,9 +466,9 @@ class CAdminItems extends AdminSecBaseModel {
 
         $result = ItemResource::newInstance()->delete(array('pk_i_id' => $id, 'fk_i_item_id' => $fkid, 's_name' => $name));
         if($result === false) {
-          osc_add_flash_error_message(_m('An error has occurred'), 'admin');
+          osc_add_flash_error_message(_m('An error occurred'), 'admin');
         } else {
-          osc_add_flash_ok_message(_m('Resource deleted'), 'admin');
+          osc_add_flash_ok_message(_m('The media file has been deleted'), 'admin');
         }
         $this->redirectTo(osc_admin_base_url(true) . "?page=items");
         break;
@@ -674,7 +674,7 @@ class CAdminItems extends AdminSecBaseModel {
 
 
         if($iUpdated > 0) {
-          osc_add_flash_ok_message(_m("Listings' settings have been updated"), 'admin');
+          osc_add_flash_ok_message(_m("Settings have been updated"), 'admin');
         }
         $this->redirectTo(osc_admin_base_url(true) . '?page=items&action=settings');
         break;

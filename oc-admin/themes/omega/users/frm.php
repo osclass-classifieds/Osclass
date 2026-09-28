@@ -265,7 +265,7 @@ osc_current_admin_theme_path('parts/header.php');
       },
       messages: {
         s_username: {
-          required: '<?php echo osc_esc_js(__("Username: this field is required", "modern")); ?>.'
+          required: '<?php echo osc_esc_js(sprintf(__('%s is required', 'modern'), __('Username', 'modern'))); ?>.'
         }
       },
       errorLabelContainer: "#error_list",
@@ -429,7 +429,7 @@ osc_current_admin_theme_path('parts/header.php');
       </div>
 
       <div class="form-row">
-        <div class="form-label"><?php _e('E-mail'); ?> <em><?php _e('(required)'); ?></em></div>
+        <div class="form-label"><?php _e('Email'); ?> <em><?php _e('(required)'); ?></em></div>
         <div class="form-controls">
           <?php UserForm::email_text($user); ?>
         </div>

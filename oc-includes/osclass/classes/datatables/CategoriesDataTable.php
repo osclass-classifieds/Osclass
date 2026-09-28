@@ -125,7 +125,7 @@ class CategoriesDataTable extends DataTable {
     $this->addColumn('bulkactions', '<input id="check_all" type="checkbox" />', 3);
     $this->addColumn('name', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('name', $sort, $direction)) . '">' . __('Name') . '</a>', 4);
     $this->addColumn('children', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('children', $sort, $direction)) . '">' . __('Subcategories') . '</a>', 5);
-    $this->addColumn('items', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('items', $sort, $direction)) . '">' . __('Items') . '</a>', 6);
+    $this->addColumn('items', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('items', $sort, $direction)) . '">' . __('Listings') . '</a>', 6);
     $this->addColumn('expiration', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('expiration', $sort, $direction)) . '">' . __('Expiration') . '</a>', 7);
     $this->addColumn('price', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('price', $sort, $direction)) . '">' . __('Price field') . '</a>', 8);
     $this->addColumn('icon', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('icon', $sort, $direction)) . '">' . __('Icon') . '</a>', 9);

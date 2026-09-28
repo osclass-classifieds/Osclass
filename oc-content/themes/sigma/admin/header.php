@@ -74,7 +74,7 @@ if(!defined('ABS_PATH')) exit('ABS_PATH is not loaded. Direct access is not allo
         <p>
             <?php
                 $msg  = sprintf(__('The images folder <strong>%s</strong> is not writable on your server', 'sigma'), WebThemes::newInstance()->getCurrentThemePath() ."images/" ) .", ";
-                $msg .= __("Osclass can't upload the logo image from the administration panel.", 'sigma') . ' ';
+                $msg .= __("Osclass cannot upload the logo image from the administration panel.", 'sigma') . ' ';
                 $msg .= __('Please make the aforementioned image folder writable.', 'sigma') . ' ';
                 echo $msg;
             ?>

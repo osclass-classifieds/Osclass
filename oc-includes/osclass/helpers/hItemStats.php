@@ -830,16 +830,6 @@ function osc_item_stats_totals($item_ids, $measures) {
 }
 
 
-// Top listings for one measure
-function osc_item_stats_top($measure, $from_date, $limit = 10, $filters = array()) {
-  $column = osc_item_stats_column($measure);
-  if($column == '') {
-    return array();
-  }
-  return ItemStats::newInstance()->getTopByMeasure($column, $from_date, $limit, $filters);
-}
-
-
 // KPI cards for a seller
 function osc_item_stats_kpis($user_id, $period, $cur_rows = null) {
   $user_id = (int)$user_id;
@@ -1085,7 +1075,7 @@ function osc_stats_period_keys($scope = 'admin') {
   if($scope == 'item') {
     return osc_item_stats_parse_period_csv(osc_item_stats_item_chart_periods());
   }
-  return array('30d', '3m', '12m', 'all');
+  return array('7d', '14d', '30d', '3m', '6m', '12m', 'all');
 }
 
 
@@ -1165,14 +1155,14 @@ function osc_stats_period_current($scope = 'admin') {
 function osc_stats_period_label($key) {
   $key = osc_stats_period_normalize($key);
   $labels = array(
-    '7d' => __('Last 7 days'),
-    '14d' => __('Last 14 days'),
-    '30d' => __('Last 30 days'),
-    '90d' => __('Last 90 days'),
-    '3m' => __('Last 3 months'),
-    '6m' => __('Last 6 months'),
-    '12m' => __('Last 12 months'),
-    '24m' => __('Last 24 months'),
+    '7d' => __('7 days'),
+    '14d' => __('14 days'),
+    '30d' => __('30 days'),
+    '90d' => __('90 days'),
+    '3m' => __('3 months'),
+    '6m' => __('6 months'),
+    '12m' => __('12 months'),
+    '24m' => __('24 months'),
     'all' => __('All time')
   );
   return (isset($labels[$key]) ? $labels[$key] : $labels['30d']);
@@ -1229,7 +1219,7 @@ function osc_admin_stats_chart_total($label, $total, $period = '', $more = array
 }
 
 
-// Shared admin period toolbar (smallest to largest: 30d, 3m, 12m, all)
+// Shared admin period toolbar (smallest to largest: 7d, 14d, 30d, 3m, 6m, 12m, all)
 function osc_admin_stats_period_links($action) {
   $current = osc_stats_period_current('admin');
   $html = '<div class="btn-group float-right">';
@@ -1325,33 +1315,6 @@ function osc_item_stats_capture_period() {
 }
 
 
-// Compact inline counters for one listing
-function osc_item_stats_inline($item_id, $measures = null) {
-  $item_id = (int)$item_id;
-  if($item_id <= 0) {
-    return '';
-  }
-  if($measures === null) {
-    $measures = array_values(array_intersect(array('views', 'premium_views', 'contactforms', 'favorites'), osc_item_stats_enabled_keys()));
-  }
-  $parts = array();
-  $titles = array();
-  foreach((array)$measures as $measure) {
-    $def = osc_item_stats_measure($measure);
-    if(!is_array($def) || !osc_item_stats_enabled($measure)) {
-      continue;
-    }
-    $n = osc_item_stat($measure, $item_id);
-    $parts[] = sprintf('%s %s', osc_item_stats_format($n), osc_esc_html($def['label']));
-    $titles[] = $n . ' ' . $def['label'];
-  }
-  if(empty($parts)) {
-    return '';
-  }
-  return '<span class="osc-stats-inline" title="' . osc_esc_html(implode(' · ', $titles)) . '">' . implode(' · ', $parts) . '</span>';
-}
-
-
 // User summary / listing chart types (HTML/SVG, same shapes as Google Charts bar, line, area, stacked)
 function osc_item_stats_chart_types() {
   return array(
@@ -1415,7 +1378,8 @@ function osc_item_stats_chart($item_id = null, $category_id = null, $user_id = n
     }
   }
 
-  $html = '<div class="osc-stats">';
+  $html = osc_item_stats_assets_html();
+  $html .= '<div class="osc-stats">';
   if($show_kpis && (int)$user_id > 0) {
     $html .= osc_item_stats_kpis_html($user_id, $period, $rows);
   }
@@ -1432,6 +1396,19 @@ function osc_item_stats_chart($item_id = null, $category_id = null, $user_id = n
   $html .= '</div>';
 
   return osc_apply_filter('osc_item_stats_chart_html', $html, $item_id, $category_id, $user_id, $options);
+}
+
+
+// CSS/JS for user charts (printed once per request, even with multiple charts)
+function osc_item_stats_assets_html() {
+  static $printed = false;
+  if($printed) {
+    return '';
+  }
+  $printed = true;
+  $html = '<link rel="stylesheet" type="text/css" href="' . osc_esc_html(osc_assets_url('css/user-stats.css')) . '" />';
+  $html .= '<script type="text/javascript" src="' . osc_esc_html(osc_assets_url('js/user-stats.js')) . '"></script>';
+  return $html;
 }
 
 
@@ -1517,7 +1494,7 @@ function osc_item_stats_svg($rows, $measures, $type, $height, $title) {
   $plot_h = $vb_h - $pad_t - $pad_b;
   $series_n = count($measures);
   $base_y = $pad_t + $plot_h;
-  $svg = '<svg class="osc-stats-svg" role="img" aria-label="' . osc_esc_html($title) . '" viewBox="0 0 ' . $vb_w . ' ' . $vb_h . '" preserveAspectRatio="xMidYMid meet" style="height:' . (int)$height . 'px">';
+  $svg = '<svg class="osc-stats-svg" role="img" aria-label="' . osc_esc_html($title) . '" viewBox="0 0 ' . $vb_w . ' ' . $vb_h . '" preserveAspectRatio="xMidYMid meet" width="100%">';
   $svg .= '<title>' . osc_esc_html($title) . '</title>';
   for($g = 0; $g <= $steps; $g++) {
     $gy = $pad_t + ($plot_h * $g / $steps);
@@ -1535,6 +1512,7 @@ function osc_item_stats_svg($rows, $measures, $type, $height, $title) {
       $label = (is_array($def) ? $def['label'] : $measure);
       $top = array();
       $bot = array();
+      $tips = array();
       $i = 0;
       foreach($rows as $row) {
         $v = (int)(isset($row[$measure]) ? $row[$measure] : 0);
@@ -1545,9 +1523,11 @@ function osc_item_stats_svg($rows, $measures, $type, $height, $title) {
           $y1 = $base_y - (($cum[$i] / $max) * $plot_h);
           $bot[] = round($x, 2) . ',' . round($y0, 2);
           $top[] = round($x, 2) . ',' . round($y1, 2);
+          $tips[] = array('x' => $x, 'y' => $y1, 'v' => $v, 'd' => $row['d_date']);
         } else {
           $y = $base_y - (($v / $max) * $plot_h);
           $top[] = round($x, 2) . ',' . round($y, 2);
+          $tips[] = array('x' => $x, 'y' => $y, 'v' => $v, 'd' => $row['d_date']);
         }
         $i++;
       }
@@ -1566,7 +1546,16 @@ function osc_item_stats_svg($rows, $measures, $type, $height, $title) {
         $op = ($stacked ? '0.75' : '0.28');
         $svg .= '<polygon fill="' . osc_esc_html($color) . '" fill-opacity="' . $op . '" stroke="none" points="' . implode(' ', $poly) . '" />';
       }
-      $svg .= '<polyline fill="none" stroke="' . osc_esc_html($color) . '" stroke-width="2" points="' . implode(' ', $top) . '"><title>' . osc_esc_html($label) . '</title></polyline>';
+      $svg .= '<polyline fill="none" stroke="' . osc_esc_html($color) . '" stroke-width="2" points="' . implode(' ', $top) . '"></polyline>';
+      foreach($tips as $tip) {
+        $tip_text = $tip['d'] . ': ' . $tip['v'] . ' ' . $label;
+        $cx = round($tip['x'], 2);
+        $cy = round($tip['y'], 2);
+        $svg .= '<g class="osc-stats-tip" tabindex="0" role="button" data-tip="' . osc_esc_html($tip_text) . '">';
+        $svg .= '<circle class="osc-stats-hit" cx="' . $cx . '" cy="' . $cy . '" r="14" fill="transparent"></circle>';
+        $svg .= '<circle class="osc-stats-point" cx="' . $cx . '" cy="' . $cy . '" r="5" fill="' . osc_esc_html($color) . '"></circle>';
+        $svg .= '</g>';
+      }
     }
   } else {
     $slot = $plot_w / $n;
@@ -1584,7 +1573,8 @@ function osc_item_stats_svg($rows, $measures, $type, $height, $title) {
           $x = $pad_l + ($i * $slot) + $x0;
           $y = $base_y - ((($acc + $v) / $max) * $plot_h);
           $acc += $v;
-          $svg .= '<rect x="' . round($x, 2) . '" y="' . round($y, 2) . '" width="' . round($bar_w, 2) . '" height="' . round($h, 2) . '" fill="' . osc_esc_html($color) . '"><title>' . osc_esc_html($row['d_date'] . ': ' . $v . ' ' . $label) . '</title></rect>';
+          $tip_text = $row['d_date'] . ': ' . $v . ' ' . $label;
+          $svg .= '<rect class="osc-stats-tip osc-stats-bar" tabindex="0" role="button" data-tip="' . osc_esc_html($tip_text) . '" x="' . round($x, 2) . '" y="' . round($y, 2) . '" width="' . round($bar_w, 2) . '" height="' . round(max(0.5, $h), 2) . '" fill="' . osc_esc_html($color) . '"></rect>';
         }
       }
     } else {
@@ -1600,7 +1590,8 @@ function osc_item_stats_svg($rows, $measures, $type, $height, $title) {
           $x = $pad_l + ($i * $slot) + $x0 + ($si * $bar_w);
           $y = $base_y - $h;
           $label = (is_array($def) ? $def['label'] : $measure);
-          $svg .= '<rect x="' . round($x, 2) . '" y="' . round($y, 2) . '" width="' . round($bar_w, 2) . '" height="' . round($h, 2) . '" fill="' . osc_esc_html($color) . '"><title>' . osc_esc_html($row['d_date'] . ': ' . $v . ' ' . $label) . '</title></rect>';
+          $tip_text = $row['d_date'] . ': ' . $v . ' ' . $label;
+          $svg .= '<rect class="osc-stats-tip osc-stats-bar" tabindex="0" role="button" data-tip="' . osc_esc_html($tip_text) . '" x="' . round($x, 2) . '" y="' . round($y, 2) . '" width="' . round($bar_w, 2) . '" height="' . round(max(0.5, $h), 2) . '" fill="' . osc_esc_html($color) . '"></rect>';
         }
       }
     }
@@ -1628,7 +1619,7 @@ function osc_item_stats_svg($rows, $measures, $type, $height, $title) {
   }
   $legend .= '</div>';
 
-  return '<div class="osc-stats-chart">' . $svg . $legend . '</div>';
+  return '<div class="osc-stats-chart"><div class="osc-stats-chart-wrap">' . $svg . '<div class="osc-stats-tooltip" role="status" aria-live="polite"></div></div>' . $legend . '</div>';
 }
 
 
@@ -1671,7 +1662,6 @@ function osc_user_items_stats_block() {
   if($user_id <= 0 || Item::newInstance()->countByUserID($user_id) <= 0) {
     return;
   }
-  osc_item_stats_enqueue_assets();
   $item_id = (int)Params::getParam('stats_item');
   if($item_id > 0) {
     $item = osc_get_item_row($item_id);
@@ -1704,7 +1694,6 @@ function osc_item_page_stats_block() {
   if(!$owner && !$admin) {
     return;
   }
-  osc_item_stats_enqueue_assets();
   echo osc_item_stats_chart($item_id, null, null, array(
     'type' => osc_item_stats_item_chart_type(),
     'period' => osc_stats_period_current('item'),
@@ -1782,9 +1771,6 @@ function osc_user_item_stats_inline($item_id = null) {
 
 // Enqueue item-page JS/CSS
 function osc_item_stats_enqueue() {
-  if(osc_is_ad_page() || osc_is_list_items() || osc_is_user_dashboard()) {
-    osc_item_stats_enqueue_assets();
-  }
   if(!osc_is_ad_page()) {
     return;
   }
@@ -1825,22 +1811,6 @@ function osc_item_stats_print_vars() {
     'otherSelectors' => osc_item_stats_contactother_selectors()
   );
   echo '<script type="text/javascript">window.oscItemStats = ' . json_encode($vars) . ';</script>';
-}
-
-
-// Shared CSS for seller block and item page
-function osc_item_stats_enqueue_assets() {
-  static $done = false;
-  if($done) {
-    return;
-  }
-  $done = true;
-  $css = osc_assets_url('css/item-stats.css');
-  $css_file = osc_lib_path() . 'osclass/assets/css/item-stats.css';
-  if(file_exists($css_file)) {
-    $css .= '?v=' . filemtime($css_file);
-  }
-  osc_enqueue_style('osc-item-stats', $css);
 }
 
 
@@ -2582,6 +2552,18 @@ function osc_admin_stats_extra_chart_js($charts) {
       $labels = (isset($chart['labels']) ? (array)$chart['labels'] : array(__('Category')));
       $col1 = (isset($labels[0]) ? $labels[0] : __('Category'));
       if(empty($series) || empty($srows)) {
+        $js .= 'var ep'.$i.'=document.getElementById("'.$sid.'");if(ep'.$i.'){oscAdminStatsEmpty(ep'.$i.');}';
+        continue;
+      }
+      $sum_all = 0;
+      foreach($srows as $srow) {
+        $vals = (isset($srow['values']) && is_array($srow['values']) ? $srow['values'] : array());
+        foreach($series as $sname) {
+          $sum_all += (int)(isset($vals[$sname]) ? $vals[$sname] : 0);
+        }
+      }
+      if($sum_all <= 0) {
+        $js .= 'var ep'.$i.'=document.getElementById("'.$sid.'");if(ep'.$i.'){oscAdminStatsEmpty(ep'.$i.');}';
         continue;
       }
       $palette = osc_item_stats_palette();
@@ -2617,7 +2599,7 @@ function osc_admin_stats_extra_chart_js($charts) {
         $js .= 'eopts'.$i.'.colors=[' . implode(',', $safe) . '];';
       }
       $js .= 'if(!window.oscAdminStatsCharts["'.$sid.'"]){window.oscAdminStatsCharts["'.$sid.'"]=new google.visualization.BarChart(ep'.$i.');}';
-      $js .= 'window.oscAdminStatsCharts["'.$sid.'"].draw(ed'.$i.',eopts'.$i.');}}}';
+      $js .= 'try{window.oscAdminStatsCharts["'.$sid.'"].draw(ed'.$i.',eopts'.$i.');}catch(exs'.$i.'){oscAdminStatsEmpty(ep'.$i.',true);}}}else{oscAdminStatsEmpty(ep'.$i.');}}';
       continue;
     }
     $pairs = array();
@@ -2644,6 +2626,14 @@ function osc_admin_stats_extra_chart_js($charts) {
       }
     }
     $n_pairs = count($pairs);
+    $pair_sum = 0;
+    foreach($pairs as $pair) {
+      $pair_sum += (int)$pair[1];
+    }
+    if($pair_sum <= 0) {
+      $js .= 'var ep'.$i.'=document.getElementById("'.$sid.'");if(ep'.$i.'){oscAdminStatsEmpty(ep'.$i.');}';
+      continue;
+    }
     $labels = (isset($chart['labels']) ? (array)$chart['labels'] : array(__('Label'), __('Value')));
     $col1 = (isset($labels[0]) ? $labels[0] : __('Label'));
     $col2 = (isset($labels[1]) ? $labels[1] : __('Value'));
@@ -2700,7 +2690,7 @@ function osc_admin_stats_extra_chart_js($charts) {
       $js .= 'eopts'.$i.'.colors=[' . implode(',', $safe) . '];';
     }
     $js .= 'if(!window.oscAdminStatsCharts["'.$sid.'"]){window.oscAdminStatsCharts["'.$sid.'"]=new google.visualization.'.$gtype.'(ep'.$i.');}';
-    $js .= 'window.oscAdminStatsCharts["'.$sid.'"].draw(ed'.$i.',eopts'.$i.');}}}';
+    $js .= 'try{window.oscAdminStatsCharts["'.$sid.'"].draw(ed'.$i.',eopts'.$i.');}catch(exe'.$i.'){oscAdminStatsEmpty(ep'.$i.',true);}}}else{oscAdminStatsEmpty(ep'.$i.');}}';
   }
   return $js;
 }
@@ -2740,12 +2730,13 @@ function osc_admin_stats_chart_js($charts, $options = array()) {
   if($lang == '') {
     $lang = 'en';
   }
-  $js = '<link rel="stylesheet" href="' . osc_esc_html(osc_assets_url('css/item-stats.css')) . '" />' . "\n";
+  $js = '<link rel="stylesheet" href="' . osc_esc_html(osc_assets_url('css/user-stats.css')) . '" />' . "\n";
   $js .= ($loader ? osc_admin_stats_google_loader() . "\n" : '');
   $js .= '<script type="text/javascript">';
   $js .= 'if(!window.oscAdminStatsCharts){window.oscAdminStatsCharts={};}';
   $js .= 'if(!window.oscAdminStatsExtraFns){window.oscAdminStatsExtraFns=[];}';
-  $js .= 'window.oscAdminStatsFit=function(el,opts){var o={},k;if(opts){for(k in opts){if(Object.prototype.hasOwnProperty.call(opts,k)){o[k]=opts[k];}}}if(!el){return null;}var w=el.clientWidth||el.offsetWidth||0;var h=el.clientHeight||el.offsetHeight||0;if(h<80){h=parseInt((window.getComputedStyle(el).height||"0"),10)||240;el.style.height=h+"px";}if(w<40){return null;}o.width=w;o.height=h;return o;};';
+  $js .= 'window.oscAdminStatsFit=function(el,opts){var o={},k;if(opts){for(k in opts){if(Object.prototype.hasOwnProperty.call(opts,k)){o[k]=opts[k];}}}if(!el){return null;}var w=el.clientWidth||el.offsetWidth||0;var h=el.clientHeight||el.offsetHeight||0;if(h<80){h=parseInt((window.getComputedStyle(el).height||"0"),10)||240;el.style.height=h+"px";}w=parseFloat(w)||0;h=parseFloat(h)||0;if(w<40||h<40||!isFinite(w)||!isFinite(h)){return null;}o.width=w;o.height=h;return o;};';
+  $js .= 'window.oscAdminStatsEmpty=function(el,force){if(!el){return;}if(!force&&String(el.textContent||"").replace(/\\s+/g,"")!==""){return;}el.textContent="'.osc_esc_js(__("There're no statistics yet")).'";};';
   $js .= 'window.oscAdminStatsTint=function(hex,t){hex=String(hex||"#4E79A7").replace("#","");if(hex.length===3){hex=hex.charAt(0)+hex.charAt(0)+hex.charAt(1)+hex.charAt(1)+hex.charAt(2)+hex.charAt(2);}var r=parseInt(hex.substr(0,2),16),g=parseInt(hex.substr(2,2),16),b=parseInt(hex.substr(4,2),16);if(isNaN(r)||isNaN(g)||isNaN(b)){r=78;g=121;b=167;}t=Math.max(0.28,Math.min(1,t));r=Math.round(255-(255-r)*t);g=Math.round(255-(255-g)*t);b=Math.round(255-(255-b)*t);return"rgb("+r+","+g+","+b+")";};';
   $js .= 'function oscDrawAdminStats(){if(typeof google==="undefined"||!google.visualization){return;}';
   foreach($charts as $i => $chart) {
@@ -2758,6 +2749,22 @@ function osc_admin_stats_chart_js($charts, $options = array()) {
     $ncol = count($labels);
     $colors = (isset($chart['colors']) ? (array)$chart['colors'] : array());
     $rows = (isset($chart['rows']) ? $chart['rows'] : array());
+    $has_values = false;
+    foreach((array)$rows as $vals) {
+      if(!is_array($vals)) {
+        $vals = array($vals);
+      }
+      foreach($vals as $v) {
+        if((int)$v > 0) {
+          $has_values = true;
+          break 2;
+        }
+      }
+    }
+    if(!$has_values) {
+      $js .= 'var e'.$i.'=document.getElementById("'.$sid.'");if(e'.$i.'){oscAdminStatsEmpty(e'.$i.');}';
+      continue;
+    }
     $ctype = (isset($chart['type']) ? $chart['type'] : 'line');
     $stacked = !empty($chart['stacked']);
     $is_percent = false;
@@ -2883,23 +2890,23 @@ function osc_admin_stats_chart_js($charts, $options = array()) {
       $show_every = ($n_rows > 10 ? (int)ceil($n_rows / 10) : 1);
       $haxis_js = 'hAxis:{showTextEvery:'.$show_every.',maxAlternation:1,maxTextLines:1,slantedText:false,textStyle:{color:"#8C8C8C",fontSize:11}}';
     }
-    $explore_js = '';
-    if($use_date) {
-      $explore_js = 'explorer:{actions:["dragToZoom","rightClickToReset"],axis:"horizontal",keepInBounds:true,maxZoomIn:0.15},crosshair:{trigger:"both",orientation:"vertical"},focusTarget:"category",';
-    }
     if($is_percent) {
       $vaxis_js = 'vAxis:{minValue:0,viewWindow:{min:0},textStyle:{color:"#8C8C8C",fontSize:12},gridlines:{color:"#ddd",count:4}}';
     } else {
       $vaxis_js = 'vAxis:{minValue:0,viewWindow:{min:0},format:"0",textStyle:{color:"#8C8C8C",fontSize:12},gridlines:{color:"#ddd",count:4}}';
     }
     $js .= 'var e'.$i.'=document.getElementById("'.$sid.'");';
-    $js .= 'if(e'.$i.'&&d'.$i.'.getNumberOfRows()>0){';
-    $js .= 'var o'.$i.'=oscAdminStatsFit(e'.$i.',{'.$color_js.$area_js.$stack_js.$combo_js.$explore_js.$legend_js.',lineWidth:'.$line_w.',pointSize:'.$pt.','.$ca_js.','.$haxis_js.','.$vaxis_js.',animation:{duration:(window.oscAdminStatsCharts["'.$sid.'"]&&window.oscAdminStatsCharts["'.$sid.'"].oscDrawn?0:400),easing:"out",startup:!(window.oscAdminStatsCharts["'.$sid.'"]&&window.oscAdminStatsCharts["'.$sid.'"].oscDrawn)}});';
+    $js .= 'if(e'.$i.'){';
+    $js .= 'var mx'.$i.'=0;for(var r=0;r<d'.$i.'.getNumberOfRows();r++){for(var c=1;c<d'.$i.'.getNumberOfColumns();c++){var vv=d'.$i.'.getValue(r,c);if(typeof vv==="number"&&isFinite(vv)&&vv>mx'.$i.')mx'.$i.'=vv;}}';
+    $js .= 'if(d'.$i.'.getNumberOfRows()>0&&mx'.$i.'>0&&e'.$i.'.offsetWidth>0&&e'.$i.'.offsetHeight>0){';
+    $js .= 'var o'.$i.'=oscAdminStatsFit(e'.$i.',{'.$color_js.$area_js.$stack_js.$combo_js.$legend_js.',lineWidth:'.$line_w.',pointSize:'.$pt.','.$ca_js.','.$haxis_js.','.$vaxis_js.',animation:{duration:(window.oscAdminStatsCharts["'.$sid.'"]&&window.oscAdminStatsCharts["'.$sid.'"].oscDrawn?0:400),easing:"out",startup:!(window.oscAdminStatsCharts["'.$sid.'"]&&window.oscAdminStatsCharts["'.$sid.'"].oscDrawn)}});';
     $js .= 'if(o'.$i.'){';
+    if($use_date) {
+      $js .= 'if(mx'.$i.'>0&&d'.$i.'.getNumberOfRows()>1){o'.$i.'.explorer={actions:["dragToZoom","rightClickToReset"],axis:"horizontal",keepInBounds:true,maxZoomIn:0.15};o'.$i.'.crosshair={trigger:"both",orientation:"vertical"};o'.$i.'.focusTarget="category";}';
+    }
     $js .= 'if(!window.oscAdminStatsCharts["'.$sid.'"]){window.oscAdminStatsCharts["'.$sid.'"]=new google.visualization.'.$gtype.'(e'.$i.');}';
-    $js .= 'var mx'.$i.'=0;for(var r=0;r<d'.$i.'.getNumberOfRows();r++){for(var c=1;c<d'.$i.'.getNumberOfColumns();c++){var vv=d'.$i.'.getValue(r,c);if(vv>mx'.$i.')mx'.$i.'=vv;}}';
     $js .= 'if(mx'.$i.'<4&&o'.$i.'.isStacked!=="percent"){o'.$i.'.vAxis=o'.$i.'.vAxis||{};o'.$i.'.vAxis.viewWindowMode="explicit";o'.$i.'.vAxis.viewWindow={min:0,max:4};}';
-    $js .= 'window.oscAdminStatsCharts["'.$sid.'"].draw(d'.$i.',o'.$i.');window.oscAdminStatsCharts["'.$sid.'"].oscDrawn=true;}}';
+    $js .= 'try{window.oscAdminStatsCharts["'.$sid.'"].draw(d'.$i.',o'.$i.');window.oscAdminStatsCharts["'.$sid.'"].oscDrawn=true;}catch(ex'.$i.'){oscAdminStatsEmpty(e'.$i.',true);}}}else if(mx'.$i.'<=0){oscAdminStatsEmpty(e'.$i.');}}';
   }
   $js .= osc_admin_stats_extra_chart_js($extra);
   $js .= 'if(!window.oscAdminStatsExtraFns){window.oscAdminStatsExtraFns=[];}';

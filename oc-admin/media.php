@@ -48,7 +48,7 @@ class CAdminMedia extends AdminSecBaseModel {
               Log::newInstance()->insertLog('media', 'delete bulk', $log_ids, $log_ids, 'admin', osc_logged_admin_id());
               $this->resourcesManager->deleteResourcesIds($ids);
             }
-            osc_add_flash_ok_message( _m('Resource deleted'), 'admin');
+            osc_add_flash_ok_message( _m('The media file has been deleted'), 'admin');
             break;
 
           default:
@@ -74,7 +74,7 @@ class CAdminMedia extends AdminSecBaseModel {
           $this->resourcesManager->deleteResourcesIds($ids);
         }
 
-        osc_add_flash_ok_message( _m('Resource deleted'), 'admin' );
+        osc_add_flash_ok_message( _m('The media file has been deleted'), 'admin' );
         $this->redirectTo( osc_admin_base_url(true) . '?page=media' );
         break;
 

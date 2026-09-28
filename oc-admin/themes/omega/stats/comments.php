@@ -55,7 +55,7 @@ function customPageHeader(){
 }
 
 function customPageTitle($string) {
-  return sprintf(__('Comment statistics - %s'), $string);
+  return sprintf(__('%s - %s'), __('Comment statistics'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');
@@ -136,12 +136,12 @@ foreach((array)$latest_comments as $c) {
 ?>
 
 <div class="grid-system" id="stats-page">
-  <div class="grid-row grid-50">
+  <div class="grid-row grid-30">
     <div class="row-wrapper">
       <h2 class="render-title"><?php _e('Comment statistics'); ?></h2>
     </div>
   </div>
-  <div class="grid-row grid-50">
+  <div class="grid-row grid-70">
     <div class="row-wrapper">
       <?php echo osc_admin_stats_period_links('comments'); ?>
     </div>
@@ -177,7 +177,7 @@ foreach((array)$latest_comments as $c) {
         <div class="widget-box-content">
           <?php echo osc_admin_stats_chart_total(__('Comments'), $sum_comments, $period); ?>
           <div id="placeholder" class="graph-placeholder">
-            <?php if(count($comments) == 0 ) {
+            <?php if(array_sum((array)$comments) == 0) {
               _e("There're no statistics yet");
             } ?>
           </div>

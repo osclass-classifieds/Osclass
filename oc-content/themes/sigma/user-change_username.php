@@ -44,7 +44,7 @@ $(document).ready(function() {
         },
         messages: {
             s_username: {
-                required: '<?php echo osc_esc_js(__("Username: this field is required", "sigma")); ?>.'
+                required: '<?php echo osc_esc_js(sprintf(__('%s is required', 'sigma'), __('Username', 'sigma'))); ?>.'
             }
         },
         errorLabelContainer: "#error_list",

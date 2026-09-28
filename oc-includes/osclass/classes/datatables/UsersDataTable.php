@@ -96,11 +96,11 @@ class UsersDataTable extends DataTable {
     $this->addColumn('status', __('Status'));
     $this->addColumn('bulkactions', '<input id="check_all" type="checkbox" />');
     $this->addColumn('name', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('name', $sort, $direction)) . '">' . __('Name') . '</a>');
-    $this->addColumn('email', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('email', $sort, $direction)) . '">' . __('E-mail') . '</a>');
+    $this->addColumn('email', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('email', $sort, $direction)) . '">' . __('Email') . '</a>');
     $this->addColumn('phone', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('phone', $sort, $direction)) . '">' . __('Phone') . '</a>');
     $this->addColumn('username', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('username', $sort, $direction)) . '">' . __('Username') . '</a>');
     $this->addColumn('location', __('Location'));
-    $this->addColumn('items', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('items', $sort, $direction)) . '">' . __('Items') . '</a>');
+    $this->addColumn('items', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('items', $sort, $direction)) . '">' . __('Listings') . '</a>');
     $this->addColumn('update_date', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('update_date', $sort, $direction)) . '">' . __('Last update') . '</a>');
     $this->addColumn('access_date', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('access_date', $sort, $direction)) . '">' . __('Last access date') . '</a>');
 
@@ -132,23 +132,23 @@ class UsersDataTable extends DataTable {
         }
         if($aRow['b_enabled'] == 1) {
           $options_more[] = '<a href="' . osc_admin_base_url(true) . '?page=users&action=disable&amp;id[]=' . $aRow['pk_i_id'] . '&amp;' . $csrf_token_url . '">' . __('Block') . '</a>';
-          $options_more[] = '<a href="' . osc_admin_base_url(true) . '?page=users&action=disable_items&amp;id[]=' . $aRow['pk_i_id'] . '&amp;' . $csrf_token_url . '">' . __('Block all items') . '</a>';
+          $options_more[] = '<a href="' . osc_admin_base_url(true) . '?page=users&action=disable_items&amp;id[]=' . $aRow['pk_i_id'] . '&amp;' . $csrf_token_url . '">' . __('Block all listings') . '</a>';
         } else {
           $options_more[] = '<a href="' . osc_admin_base_url(true) . '?page=users&action=enable&amp;id[]=' . $aRow['pk_i_id'] . '&amp;' . $csrf_token_url . '">' . __('Unblock') . '</a>';
-          $options_more[] = '<a href="' . osc_admin_base_url(true) . '?page=users&action=enable_items&amp;id[]=' . $aRow['pk_i_id'] . '&amp;' . $csrf_token_url . '">' . __('Unblock all items') . '</a>';
+          $options_more[] = '<a href="' . osc_admin_base_url(true) . '?page=users&action=enable_items&amp;id[]=' . $aRow['pk_i_id'] . '&amp;' . $csrf_token_url . '">' . __('Unblock all listings') . '</a>';
         }
         if(osc_user_validation_enabled() && ($aRow['b_active'] == 0)) {
           $options_more[] = '<a href="' . osc_admin_base_url(true) . '?page=users&action=resend_activation&amp;id[]=' . $aRow['pk_i_id'] . '&amp;' . $csrf_token_url . '">' . __('Re-send activation email') . '</a>';
         }
 
-        $options_more[] = '<a href="' . osc_admin_base_url(true) . '?page=items&userId=' . (int)$aRow['pk_i_id'] . '&user=' . rawurlencode($aRow['s_name']) . '">' . __('View items') . '</a>';
+        $options_more[] = '<a href="' . osc_admin_base_url(true) . '?page=items&userId=' . (int)$aRow['pk_i_id'] . '&user=' . rawurlencode($aRow['s_name']) . '">' . __('View listings') . '</a>';
         $options_more[] = '<a href="' . osc_admin_base_url(true) . '?page=users&action=edit&amp;id=' . $aRow['pk_i_id'] . '&amp;open_message=1">' . __('Send message') . '</a>';
         if(osc_alerts_enabled()) {
           $options_more[] = '<a href="' . osc_admin_base_url(true) . '?page=users&action=alerts&amp;alertUserId=' . (int)$aRow['pk_i_id'] . '">' . __('View alerts') . '</a>';
         }
 
         $options_force_more = array();
-        $options_force_more[] = '<a href="' . osc_admin_base_url(true) . '?page=items&userId=' . (int)$aRow['pk_i_id'] . '&user=' . rawurlencode($aRow['s_name']) . '">' . __('View items') . '</a>';
+        $options_force_more[] = '<a href="' . osc_admin_base_url(true) . '?page=items&userId=' . (int)$aRow['pk_i_id'] . '&user=' . rawurlencode($aRow['s_name']) . '">' . __('View listings') . '</a>';
         $options_force_more[] = '<a href="' . osc_admin_base_url(true) . '?page=users&action=edit&amp;id=' . $aRow['pk_i_id'] . '&amp;open_message=1">' . __('Send message') . '</a>';
         if(osc_alerts_enabled()) {
           $options_force_more[] = '<a href="' . osc_admin_base_url(true) . '?page=users&action=alerts&amp;alertUserId=' . (int)$aRow['pk_i_id'] . '">' . __('View alerts') . '</a>';
@@ -163,7 +163,7 @@ class UsersDataTable extends DataTable {
         $row['id'] = $aRow['pk_i_id'];
         $row['status-border'] = '';
         $row['status'] = $status['text'];
-        $row['bulkactions'] = '<input type="checkbox" name="id[]" value="' . $aRow['pk_i_id'] . '" /></div>';
+        $row['bulkactions'] = '<input type="checkbox" name="id[]" value="' . $aRow['pk_i_id'] . '" />';
         $userName = $aRow['s_name'];
         $profileUrl = trim((string)osc_user_public_profile_url($aRow['pk_i_id'], $aRow));
         if($aRow['b_active'] == 1 && $aRow['b_enabled'] == 1 && $profileUrl != '' && $profileUrl != '#') {

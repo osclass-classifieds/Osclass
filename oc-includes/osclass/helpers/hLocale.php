@@ -64,8 +64,9 @@ function osc_base_url_locale_regex() {
  * @return string
  */
 function osc_base_url_locale_slug($locale = '') {
+  $locale = (string)$locale;
   if($locale == '') {
-    $locale = osc_current_user_locale();
+    $locale = (string)osc_current_user_locale();
   }
 
   if(osc_locale_to_base_url_type() == '') {
@@ -77,6 +78,34 @@ function osc_base_url_locale_slug($locale = '') {
   }
 }
 
+// Resolve locale slug or code (en, en-US, en_US) to t_locale pk_c_code
+function osc_locale_code_from_param($locale) {
+  $locale = trim((string)$locale);
+  if($locale == '') {
+    return osc_current_user_locale();
+  }
+
+  $locales = osc_get_locales();
+  if(!is_array($locales)) {
+    return $locale;
+  }
+
+  foreach($locales as $row) {
+    if(!isset($row['pk_c_code'])) {
+      continue;
+    }
+    $code = $row['pk_c_code'];
+    if($code == $locale || strtolower($code) == strtolower($locale)) {
+      return $code;
+    }
+    if(osc_base_url_locale_slug($code) == strtolower($locale) || strtolower(str_replace('_', '-', $code)) == strtolower($locale)) {
+      return $code;
+    }
+  }
+
+  return $locale;
+}
+
 /**
  * Gets locale slug based on subdomain settings
  * Supports "en" or "en-US" formats
@@ -85,6 +114,7 @@ function osc_base_url_locale_slug($locale = '') {
  * @return string
  */
 function osc_subdomain_locale_slug($locale) {
+  $locale = (string)$locale;
   if(osc_subdomain_language_slug_type() == '') {
     return substr($locale, 0, 2);
 

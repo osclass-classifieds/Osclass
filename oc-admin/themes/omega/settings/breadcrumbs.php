@@ -87,7 +87,7 @@ osc_add_hook('admin_page_header','customPageHeader');
 
 
 function customPageTitle($string) {
-  return sprintf(__('Breadcrumbs settings - %s'), $string);
+  return sprintf(__('%s - %s'), __('Breadcrumbs settings'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');
@@ -166,7 +166,7 @@ osc_current_admin_theme_path( 'parts/header.php' );
 
                 <div class="form-label-checkbox">
                   <input type="checkbox" <?php echo ( osc_breadcrumbs_hide('item', 'item_add') ? 'checked="checked"' : ''); ?> name="bchide-item-item_add" />
-                  <span><?php _e('Item publish'); ?> <?php _e('page'); ?></span>
+                  <span><?php _e('Listing publish'); ?> <?php _e('page'); ?></span>
                 </div>
 
                 <div class="form-label-checkbox">
@@ -176,7 +176,7 @@ osc_current_admin_theme_path( 'parts/header.php' );
 
                 <div class="form-label-checkbox">
                   <input type="checkbox" <?php echo ( osc_breadcrumbs_hide('user', 'items') ? 'checked="checked"' : ''); ?> name="bchide-user-items" />
-                  <span><?php _e('User items'); ?> <?php _e('page'); ?></span>
+                  <span><?php _e('User listings'); ?> <?php _e('page'); ?></span>
                 </div>
 
                 <div class="form-label-checkbox">

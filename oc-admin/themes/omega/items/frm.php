@@ -383,12 +383,12 @@ osc_current_admin_theme_path( 'parts/header.php' );
                   <?php ItemForm::contact_name_text(); ?>
                 </div>
                 <div class="input-has-placeholder input-separate-top">
-                  <label><?php _e('E-mail'); ?></label>
+                  <label><?php _e('Email'); ?></label>
                   <?php ItemForm::contact_email_text(); ?>
                 </div>
 
                 <div class="input-separate-top">
-                  <label><?php ItemForm::show_email_checkbox(); ?><span><?php _e('Show e-mail'); ?></span></label>
+                  <label><?php ItemForm::show_email_checkbox(); ?><span><?php _e('Show email'); ?></span></label>
                 </div>
 
                 <div class="input-has-placeholder input-separate-top">
@@ -423,7 +423,7 @@ osc_current_admin_theme_path( 'parts/header.php' );
             </div>
 
             <div class="well ui-rounded-corners input-separate-top">
-              <h3 class="label"><?php _e('Item location'); ?></h3>
+              <h3 class="label"><?php _e('Listing location'); ?></h3>
               <div class="input-has-placeholder input-separate-top">
                 <label><?php _e('Country'); ?></label>
                 <?php ItemForm::country_select(); ?>

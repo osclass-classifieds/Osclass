@@ -481,59 +481,133 @@ function is_serialized($data) {
 
 
 /**
- * VERY BASIC
- * Perform a POST request, so we could launch fake-cron calls and other core-system calls without annoying the user
+ * Perform a POST request (curl first, then fsockopen).
+ * Used for install pings, fake-cron, search-engine pings and similar core calls.
  *
- * @param $url   string
- * @param $_data array
+ * @param string $url
+ * @param array  $_data
+ * @param int    $timeout Max seconds for connect + transfer (1-5, default 5)
+ * @param bool   $follow_redirects Follow HTTP redirects (disable for auto-cron so page=cron is not lost)
  *
- * @return bool false on error or number of bytes sent.
+ * @return bool|int false on error or number of bytes sent (at least 1 on success)
  */
-function osc_doRequest($url, $_data) {
-  if(ini_get('allow_url_fopen') === false) {
-    error_log('enable allow_url_fopen in php.ini' . PHP_EOL);
+function osc_doRequest($url, $_data, $timeout = 5, $follow_redirects = true) {
+  try {
+    if(!is_array($_data)) {
+      $_data = array();
+    }
+
+    $timeout = (int)$timeout;
+    if($timeout < 1) {
+      $timeout = 1;
+    }
+    if($timeout > 5) {
+      $timeout = 5;
+    }
+
+    $data = http_build_query($_data);
+    $version = '';
+    if(function_exists('osc_version')) {
+      $version = (string)osc_version();
+    } else if(defined('OSCLASS_VERSION')) {
+      $version = (string)OSCLASS_VERSION;
+    }
+    $referer = 'Osclass' . ($version != '' ? ' ' . $version : '');
+
+    // Prefer curl for reliable HTTPS on shared hosting
+    if(function_exists('curl_init') && function_exists('curl_exec')) {
+      $ch = curl_init();
+      if($ch !== false) {
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
+        curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
+        curl_setopt($ch, CURLOPT_USERAGENT, 'Osclass' . ($version != '' ? ' (v.' . $version . ')' : ''));
+        curl_setopt($ch, CURLOPT_REFERER, $referer);
+        @curl_setopt($ch, CURLOPT_FOLLOWLOCATION, (bool)$follow_redirects);
+
+        if(stripos($url, 'https') !== false) {
+          curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+          curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+        }
+
+        $response = curl_exec($ch);
+        $http_code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if($response !== false && $http_code >= 200 && $http_code < 300) {
+          return (strlen($data) > 0 ? strlen($data) : 1);
+        }
+      }
+    }
+
+    $parsed = parse_url($url);
+    if(!isset($parsed['host'], $parsed['path']) || $parsed === false) {
+      return false;
+    }
+
+    $host = $parsed['host'];
+    $path = $parsed['path'];
+    if(isset($parsed['query']) && $parsed['query'] != '') {
+      $path .= '?' . $parsed['query'];
+    }
+    $port = 80;
+
+    if(isset($parsed['port'])) {
+      $port = $parsed['port'];
+    }
+
+    if(isset($parsed['scheme']) && $parsed['scheme'] === 'https' && !filter_var($host, FILTER_VALIDATE_IP)) {
+      $host = 'ssl://' . $host;
+      $port = 443;
+    }
+
+    $errno = 0;
+    $errstr = '';
+    $fp = @fsockopen($host, $port, $errno, $errstr, $timeout);
+    if($fp === false) {
+      return false;
+    }
+
+    stream_set_timeout($fp, $timeout);
+
+    $out = 'POST ' . $path . ' HTTP/1.1' . PHP_EOL;
+    $out .= 'Host: ' . $parsed['host'] . PHP_EOL;
+    $out .= 'Referer: ' . $referer . PHP_EOL;
+    $out .= 'Content-type: application/x-www-form-urlencoded' . PHP_EOL;
+    $out .= 'Content-Length: ' . strlen($data) . PHP_EOL;
+    $out .= 'Connection: close' . PHP_EOL . PHP_EOL;
+    $out .= $data;
+
+    $number_bytes_sent = @fwrite($fp, $out);
+    @fclose($fp);
+
+    if($number_bytes_sent === false || (int)$number_bytes_sent <= 0) {
+      return false;
+    }
+
+    return $number_bytes_sent;
+  } catch(Exception $e) {
+    return false;
+  } catch(Throwable $e) {
     return false;
   }
+}
 
-  // parse the given URL
-  $url = parse_url($url);
-  if(!isset($url['host'], $url['path']) || $url === false) {
-    return false;
-  }
 
-  // extract host, path, port:
-  $host = $url['host'];
-  $path = $url['path'];
-  $port = 80;
-
-  if(isset($url['port'])) {
-    $port = $url['port'];
-  }
-
-  if(isset($url['scheme']) && $url['scheme'] === 'https' && !filter_var($host, FILTER_VALIDATE_IP)) {
-    $host = 'ssl://' . $host;
-    $port = 443;
-  }
-
-  $fp = @fsockopen($host, $port);
-
-  if($fp === false) {
-    return false;
-  }
-
-  $data = http_build_query($_data);
-  $out = 'POST ' . $path . ' HTTP/1.1' . PHP_EOL;
-  $out .= 'Host: ' . $url['host'] . PHP_EOL;
-  $out .= 'Referer: Osclass ' . osc_version() . PHP_EOL;
-  $out .= 'Content-type: application/x-www-form-urlencoded' . PHP_EOL;
-  $out .= 'Content-Length: ' . strlen($data) . PHP_EOL;
-  $out .= 'Connection: close' . PHP_EOL . PHP_EOL;
-  $out .= $data;
-
-  $number_bytes_sent = fwrite($fp, $out);
-  fclose($fp);
-
-  return $number_bytes_sent; // or false on fwrite() error
+/**
+ * Fire-and-forget POST with short connection timeout.
+ *
+ * @param string $url
+ * @param array  $_data
+ * @param int    $timeout seconds (1-5)
+ *
+ * @return bool|int false on error or number of bytes sent
+ */
+function osc_doRequestQuick($url, $_data, $timeout = 2) {
+  return osc_doRequest($url, $_data, $timeout);
 }
 
 
@@ -2500,7 +2574,7 @@ function osc_translate_categories($locale) {
           break;
         }
 
-        $slug = $slug_tmp . '_' . $slug_unique;
+        $slug = $slug_tmp . '-' . $slug_unique;
         $slug_unique++;
       }
       $fieldsDescription['s_slug'] = $slug;
@@ -3072,21 +3146,21 @@ function osc_do_auto_upgrade() {
       $body .= '<p>' . __('Let us inform you, that your osclass website {WEB_TITLE} on {WEB_URL} has been auto-upgraded. List of upgraded items is bellow.') . '</p>';
 
       if($core_updated > 0) {
-        $body .= '<p>' . __('Osclass core has been updated') . '</p>';
+        $body .= '<p>' . __('Osclass has been updated') . '</p>';
         $body .= '<p>' . __('Old version') . ': <strong>{OLD_VERSION}</strong></p>';
         $body .= '<p>' . __('Current version') . ': <strong>{NEW_VERSION}</strong></p>';
       }
 
       if($plugins_updated > 0) {
-        $body .= '<p>' . sprintf(__('%s plugin(s) has been updated'), '<strong>' . $plugins_updated . '</strong>') . '</p>';
+        $body .= '<p>' . sprintf(__('%s plugin(s) have been updated'), '<strong>' . $plugins_updated . '</strong>') . '</p>';
       }
 
       if($themes_updated > 0) {
-        $body .= '<p>' . sprintf(__('%s theme(s) has been updated'), '<strong>' . $themes_updated . '</strong>') . '</p>';
+        $body .= '<p>' . sprintf(__('%s theme(s) have been updated'), '<strong>' . $themes_updated . '</strong>') . '</p>';
       }
 
       if($languages_updated > 0) {
-        $body .= '<p>' . sprintf(__('%s plugin(s) has been updated'), '<strong>' . $languages_updated . '</strong>') . '</p>';
+        $body .= '<p>' . sprintf(__('%s plugin(s) have been updated'), '<strong>' . $languages_updated . '</strong>') . '</p>';
       }
 
       $body .= '<p><br/></p>';

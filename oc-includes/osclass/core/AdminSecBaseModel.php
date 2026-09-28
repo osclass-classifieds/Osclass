@@ -24,6 +24,8 @@ class AdminSecBaseModel extends SecBaseModel
   {
     parent::__construct();
 
+    $this->trimGetParams();
+
     $admin = Admin::newInstance()->findByPrimaryKey(osc_logged_admin_id());
 
     $moderator_access = array();
@@ -133,6 +135,37 @@ class AdminSecBaseModel extends SecBaseModel
     osc_current_admin_theme_path($file);
     Session::newInstance()->_clearVariables();
     osc_run_hook( 'after_admin_html' );
+  }
+
+  // Trim leading and trailing whitespace on GET params used by admin filters and ajax.
+  private function trimGetParams()
+  {
+    if(!is_array($_GET) || empty($_GET)) {
+      return;
+    }
+
+    foreach($_GET as $key => $value) {
+      $trimmed = $this->trimGetValue($value);
+      $_GET[$key] = $trimmed;
+      if(!isset($_POST[$key])) {
+        Params::setParam($key, $trimmed);
+      }
+    }
+  }
+
+  // Recursively trim string values, including nested GET arrays.
+  private function trimGetValue($value)
+  {
+    if(is_array($value)) {
+      foreach($value as $k => $v) {
+        $value[$k] = $this->trimGetValue($v);
+      }
+      return $value;
+    }
+    if(is_string($value)) {
+      return trim($value);
+    }
+    return $value;
   }
 }
 

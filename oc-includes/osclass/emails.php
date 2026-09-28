@@ -70,6 +70,83 @@ function fn_email_alert_validation($alert, $email, $secret) {
 osc_add_hook('hook_email_alert_validation', 'fn_email_alert_validation');
 
 
+// Build placeholder replacements for alert notification emails
+function osc_alert_email_words($user, $ads, $alert, $totalItems) {
+  $email = $user['s_email'] ?? '';
+  $name = $user['s_name'] ?? $email;
+  $alert_id = (int)($alert['pk_i_id'] ?? 0);
+  $alert_secret = $alert['s_secret'] ?? '';
+  $alert_name = trim((string)($alert['s_name'] ?? ''));
+  if($alert_name == '') {
+    $alert_name = sprintf(__('Alert #%d'), $alert_id);
+  }
+  $alert_type = strtoupper(trim((string)($alert['e_type'] ?? '')));
+  $totalItems = (int)$totalItems;
+
+  switch($alert_type) {
+    case 'HOURLY':
+      $intro = __('New listings have been published in the last hour. Take a look at them:');
+      break;
+    case 'DAILY':
+      $intro = __('New listings have been published in the last day. Take a look at them:');
+      break;
+    case 'WEEKLY':
+      $intro = __('New listings have been published in the last week. Take a look at them:');
+      break;
+    case 'INSTANT':
+      if($totalItems == 1) {
+        $intro = __('A new listing has been published, check it out!');
+      } else {
+        $intro = sprintf(__('%d new listings have been published. Take a look at them:'), $totalItems);
+      }
+      break;
+    default:
+      $intro = __('New listings have been published in the last day. Take a look at them:');
+      break;
+  }
+
+  $unsub_link = '<a href="' . osc_user_unsubscribe_alert_url($alert_id, $email, $alert_secret) . '">' . __('unsubscribe alert') . '</a>';
+  $search_link = '<a href="' . osc_search_alert_url($alert_id, $alert_secret) . '">' . __('open alert in search') . '</a>';
+  $alerts_link = '<a href="' . osc_user_alerts_url() . '">' . __('My Account > Alerts') . '</a>';
+
+  $words = array();
+  $words[] = array(
+    '{USER_NAME}',
+    '{USER_EMAIL}',
+    '{ADS}',
+    '{UNSUB_LINK}',
+    '{SEARCH_LINK}',
+    '{ITEMS_COUNT}',
+    '{USER_ALERTS_LINK}',
+    '{ALERT_INTRO}',
+    '{ALERT_ID}',
+    '{ALERT_NAME}',
+    '{ALERT_FREQUENCY}',
+    '{ALERT_DATE}',
+    '{ALERT_EXPIRE_DATE}',
+    '{ALERT_TRIGGERS}'
+  );
+  $words[] = array(
+    $name,
+    $email,
+    $ads,
+    $unsub_link,
+    $search_link,
+    $totalItems,
+    $alerts_link,
+    $intro,
+    $alert_id,
+    $alert_name,
+    osc_alert_type_label($alert_type),
+    osc_format_date_only($alert['dt_date'] ?? ''),
+    osc_format_date_only($alert['dt_expire_date'] ?? ''),
+    (int)($alert['i_num_trigger'] ?? 0)
+  );
+
+  return $words;
+}
+
+
 /**
  * @param $user
  * @param $ads
@@ -91,30 +168,7 @@ function fn_alert_email_hourly($user, $ads, $s_search, $items, $totalItems) {
   $_title = osc_apply_filter('email_title',osc_apply_filter('alert_email_hourly_title', $page_description[$prefLocale]['s_title'], $user, $ads, $s_search, $items, $totalItems));
   $_body = osc_apply_filter('email_description', osc_apply_filter('alert_email_hourly_description', $page_description[$prefLocale]['s_text'], $user, $ads, $s_search, $items, $totalItems));
 
-  $unsub_link = osc_user_unsubscribe_alert_url($s_search['pk_i_id'], $user['s_email'], $s_search['s_secret']);
-  $unsub_link = '<a href="' . $unsub_link . '">' . __('unsubscribe alert') . '</a>';
-
-  $search_link = osc_search_alert_url($s_search['pk_i_id'], $s_search['s_secret']);
-  $search_link = '<a href="' . $search_link . '">' . __('open alert in search') . '</a>';
-
-  $words = array();
-  $words[] = array(
-    '{USER_NAME}',
-    '{USER_EMAIL}',
-    '{ADS}',
-    '{UNSUB_LINK}',
-    '{SEARCH_LINK}',
-    '{ITEMS_COUNT}'
-  );
-
-  $words[] = array(
-    $name,
-    $email,
-    $ads,
-    $unsub_link,
-    $search_link,
-    $totalItems
-  );
+  $words = osc_alert_email_words($user, $ads, $s_search, $totalItems);
 
   $title = osc_apply_filter('alert_email_hourly_title_after', osc_mailBeauty($_title, $words), $user, $ads, $s_search, $items, $totalItems);
   $body = osc_apply_filter('alert_email_hourly_description_after', osc_mailBeauty($_body, $words), $user, $ads, $s_search, $items, $totalItems);
@@ -155,30 +209,7 @@ function fn_alert_email_daily($user, $ads, $s_search, $items, $totalItems) {
   $_title = osc_apply_filter('email_title', osc_apply_filter('alert_email_daily_title', $page_description[$prefLocale]['s_title'], $user, $ads, $s_search, $items, $totalItems));
   $_body = osc_apply_filter('email_description', osc_apply_filter('alert_email_daily_description', $page_description[$prefLocale]['s_text'], $user, $ads, $s_search, $items, $totalItems));
 
-  $unsub_link = osc_user_unsubscribe_alert_url($s_search['pk_i_id'], $user['s_email'], $s_search['s_secret']);
-  $unsub_link = '<a href="' . $unsub_link . '">' . __('unsubscribe alert') . '</a>';
-
-  $search_link = osc_search_alert_url($s_search['pk_i_id'], $s_search['s_secret']);
-  $search_link = '<a href="' . $search_link . '">' . __('open alert in search') . '</a>';
-
-  $words = array();
-  $words[] = array(
-    '{USER_NAME}',
-    '{USER_EMAIL}',
-    '{ADS}',
-    '{UNSUB_LINK}',
-    '{SEARCH_LINK}',
-    '{ITEMS_COUNT}'
-  );
-
-  $words[] = array(
-    $name,
-    $email,
-    $ads,
-    $unsub_link,
-    $search_link,
-    $totalItems
-  );
+  $words = osc_alert_email_words($user, $ads, $s_search, $totalItems);
 
   $title = osc_apply_filter('alert_email_daily_title_after', osc_mailBeauty($_title, $words), $user, $ads, $s_search, $items, $totalItems);
   $body = osc_apply_filter('alert_email_daily_description_after', osc_mailBeauty($_body, $words), $user, $ads, $s_search, $items, $totalItems);
@@ -219,30 +250,7 @@ function fn_alert_email_weekly($user, $ads, $s_search, $items, $totalItems) {
   $_title = osc_apply_filter('email_title', osc_apply_filter('alert_email_weekly_title', $page_description[$prefLocale]['s_title'], $user, $ads, $s_search, $items, $totalItems));
   $_body = osc_apply_filter('email_description', osc_apply_filter('alert_email_weekly_description', $page_description[$prefLocale]['s_text'], $user, $ads, $s_search, $items, $totalItems));
 
-  $unsub_link = osc_user_unsubscribe_alert_url($s_search['pk_i_id'], $user['s_email'], $s_search['s_secret']);
-  $unsub_link = '<a href="' . $unsub_link . '">' . __('unsubscribe alert') . '</a>';
-
-  $search_link = osc_search_alert_url($s_search['pk_i_id'], $s_search['s_secret']);
-  $search_link = '<a href="' . $search_link . '">' . __('open alert in search') . '</a>';
-
-  $words = array();
-  $words[] = array(
-    '{USER_NAME}',
-    '{USER_EMAIL}',
-    '{ADS}',
-    '{UNSUB_LINK}',
-    '{SEARCH_LINK}',
-    '{ITEMS_COUNT}'
-  );
-
-  $words[] = array(
-    $name,
-    $email,
-    $ads,
-    $unsub_link,
-    $search_link,
-    $totalItems
-  );
+  $words = osc_alert_email_words($user, $ads, $s_search, $totalItems);
 
   $title = osc_apply_filter('alert_email_weekly_title_after', osc_mailBeauty($_title, $words), $user, $ads, $s_search, $items, $totalItems);
   $body = osc_apply_filter('alert_email_weekly_description_after', osc_mailBeauty($_body, $words), $user, $ads, $s_search, $items, $totalItems);
@@ -283,31 +291,7 @@ function fn_alert_email_instant($user, $ads, $s_search, $items, $totalItems) {
   $_title = osc_apply_filter('email_title', osc_apply_filter('alert_email_instant_title', $page_description[$prefLocale]['s_title'], $user, $ads, $s_search, $items, $totalItems, $items, $totalItems));
   $_body = osc_apply_filter('email_description', osc_apply_filter('alert_email_instant_description', $page_description[$prefLocale]['s_text'], $user, $ads, $s_search, $items, $totalItems, $items, $totalItems));
 
-
-  $unsub_link = osc_user_unsubscribe_alert_url($s_search['pk_i_id'], $user['s_email'], $s_search['s_secret']);
-  $unsub_link = '<a href="' . $unsub_link . '">' . __('unsubscribe alert') . '</a>';
-
-  $search_link = osc_search_alert_url($s_search['pk_i_id'], $s_search['s_secret']);
-  $search_link = '<a href="' . $search_link . '">' . __('open alert in search') . '</a>';
-
-  $words = array();
-  $words[] = array(
-    '{USER_NAME}',
-    '{USER_EMAIL}',
-    '{ADS}',
-    '{UNSUB_LINK}',
-    '{SEARCH_LINK}',
-    '{ITEMS_COUNT}'
-  );
-
-  $words[] = array(
-    $name,
-    $email,
-    $ads,
-    $unsub_link,
-    $search_link,
-    $totalItems
-  );
+  $words = osc_alert_email_words($user, $ads, $s_search, $totalItems);
 
   $title = osc_apply_filter('alert_email_instant_title_after', osc_mailBeauty($_title, $words), $user, $ads, $s_search, $items, $totalItems);
   $body = osc_apply_filter('alert_email_instant_description_after', osc_mailBeauty($_body, $words), $user, $ads, $s_search, $items, $totalItems);
@@ -596,10 +580,10 @@ function fn_email_new_email($new_email, $validation_url) {
 
     osc_sendMail($emailParams, 'new_email');
 
-    osc_add_flash_ok_message(_m("We've sent you an e-mail. Follow its instructions to validate the changes"));
+    osc_add_flash_ok_message(_m("We have sent you an email. Follow its instructions to validate the changes"));
 
   } else {
-    osc_add_flash_error_message(_m('We tried to sent you an e-mail, but it failed. Please, contact an administrator'));
+    osc_add_flash_error_message(_m('We could not send the email. Please contact an administrator.'));
   }
 }
 
@@ -834,7 +818,7 @@ function fn_email_item_inquiry($aItem) {
         osc_add_flash_warning_message(_m('Attachment had incorrect extension or mime type and has not been attached to message'));
 
       } else if(!is_writable(osc_uploads_path())) {
-        osc_add_flash_warning_message(_m('Uploads folder is not writtable, attachment has not been attached to message'));
+        osc_add_flash_warning_message(_m('Uploads folder is not writable, attachment has not been attached to message'));
 
       } else if(!move_uploaded_file($tmpName, $path)) {
         unset($path);

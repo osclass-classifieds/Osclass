@@ -68,7 +68,7 @@
     <?php if(osc_is_web_user_logged_in() && osc_logged_user_id()==osc_item_user_id()) { ?>
       <p id="edit_item_view">
         <strong>
-          <a href="<?php echo osc_item_edit_url(); ?>" rel="nofollow"><?php _e('Edit item', 'sigma'); ?></a>
+          <a href="<?php echo osc_item_edit_url(); ?>" rel="nofollow"><?php _e('Edit listing', 'sigma'); ?></a>
         </strong>
       </p>
     <?php } ?>
@@ -268,7 +268,7 @@
                   </div>
                 </div>
                 <div class="control-group">
-                  <label class="control-label" for="authorEmail"><?php _e('Your e-mail', 'sigma'); ?></label>
+                  <label class="control-label" for="authorEmail"><?php _e('Your email', 'sigma'); ?></label>
                   <div class="controls">
                     <?php CommentForm::email_input_text(); ?>
                   </div>

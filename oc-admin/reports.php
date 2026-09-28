@@ -410,7 +410,7 @@ class CAdminReports extends AdminSecBaseModel {
 
         osc_run_hook('reports_settings_post');
 
-        osc_add_flash_ok_message(_m('Reports settings have been updated'), 'admin');
+        osc_add_flash_ok_message(_m('Settings have been updated'), 'admin');
         $this->redirectTo(osc_admin_base_url(true) . "?page=reports&action=settings");
         break;
 

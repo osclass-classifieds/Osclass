@@ -38,7 +38,7 @@ osc_add_hook('admin_page_header','customPageHeader');
 
 
 function customPageTitle($string) {
-  return sprintf(__('Cleanup - %s'), $string);
+  return sprintf(__('%s - %s'), __('Cleanup'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');
@@ -97,7 +97,7 @@ $old_item_stats_count = osc_get_count_query_data(sprintf('SELECT count(*) FROM %
     <fieldset>
       <div class="form-horizontal">
         <div class="form-row">
-          <p><?php echo sprintf(__('Remove listings those has not been validated in last %d days. These data are usually spam/unwanted and are redundant for your installation.'), $limit_days); ?></p>
+          <p><?php echo sprintf(__('Remove listings that have not been validated in the last %d days. These are usually spam or unwanted.'), $limit_days); ?></p>
           <p><?php echo sprintf(__('Total number of listings matching criteria: %s'), '<strong>' . $items_inactive_count . '</strong>'); ?></p>
         </div>
 
@@ -118,7 +118,7 @@ $old_item_stats_count = osc_get_count_query_data(sprintf('SELECT count(*) FROM %
     <fieldset>
       <div class="form-horizontal">
         <div class="form-row">
-          <p><?php echo __('Remove listings those has been marked as spam, or has been disabled by you or your moderators.'); ?></p>
+          <p><?php echo __('Remove listings that have been marked as spam, or have been disabled by you or your moderators.'); ?></p>
           <p><?php echo sprintf(__('Total number of listings matching criteria: %s'), '<strong>' . $items_blocked_spam_count . '</strong>'); ?></p>
         </div>
 
@@ -139,7 +139,7 @@ $old_item_stats_count = osc_get_count_query_data(sprintf('SELECT count(*) FROM %
     <fieldset>
       <div class="form-horizontal">
         <div class="form-row">
-          <p><?php echo sprintf(__('Remove listings those has expired more than %d days ago and were not removed or reactivated. These listings are not visible on your site.'), $limit_days); ?></p>
+          <p><?php echo sprintf(__('Remove listings that expired more than %d days ago and were not removed or reactivated. These listings are not visible on your site.'), $limit_days); ?></p>
           <p><?php echo sprintf(__('Total number of listings matching criteria: %s'), '<strong>' . $items_expired_count . '</strong>'); ?></p>
         </div>
 
@@ -160,7 +160,7 @@ $old_item_stats_count = osc_get_count_query_data(sprintf('SELECT count(*) FROM %
     <fieldset>
       <div class="form-horizontal">
         <div class="form-row">
-          <p><?php echo sprintf(__('Remove users those has registered more than %d days ago did not activated their account.'), $limit_days); ?></p>
+          <p><?php echo sprintf(__('Remove users that have registered more than %d days ago and did not activate their account.'), $limit_days); ?></p>
           <p><?php echo sprintf(__('Total number of users matching criteria: %s'), '<strong>' . $users_inactive_count . '</strong>'); ?></p>
         </div>
 
@@ -181,7 +181,7 @@ $old_item_stats_count = osc_get_count_query_data(sprintf('SELECT count(*) FROM %
     <fieldset>
       <div class="form-horizontal">
         <div class="form-row">
-          <p><?php echo sprintf(__('Remove users those has been blocked more than %d days (based on last access date). This will remove also all listings published by this user.'), $limit_days); ?></p>
+          <p><?php echo sprintf(__('Remove users that have been blocked more than %d days (based on last access date). This will also remove all listings published by this user.'), $limit_days); ?></p>
           <p><?php echo sprintf(__('Total number of users matching criteria: %s'), '<strong>' . $users_blocked_count . '</strong>'); ?></p>
         </div>
 
@@ -202,7 +202,7 @@ $old_item_stats_count = osc_get_count_query_data(sprintf('SELECT count(*) FROM %
     <fieldset>
       <div class="form-horizontal">
         <div class="form-row">
-          <p><?php echo sprintf(__('Remove comments those has not been activated for more than %d days.'), $limit_days); ?></p>
+          <p><?php echo sprintf(__('Remove comments that have not been activated for more than %d days.'), $limit_days); ?></p>
           <p><?php echo sprintf(__('Total number of comments matching criteria: %s'), '<strong>' . $comments_inactive_count . '</strong>'); ?></p>
         </div>
 
@@ -223,7 +223,7 @@ $old_item_stats_count = osc_get_count_query_data(sprintf('SELECT count(*) FROM %
     <fieldset>
       <div class="form-horizontal">
         <div class="form-row">
-          <p><?php echo __('Remove comments those has been blocked by your or your moderators.'); ?></p>
+          <p><?php echo __('Remove comments that have been blocked by you or your moderators.'); ?></p>
           <p><?php echo sprintf(__('Total number of comments matching criteria: %s'), '<strong>' . $comments_blocked_count . '</strong>'); ?></p>
         </div>
 
@@ -244,7 +244,7 @@ $old_item_stats_count = osc_get_count_query_data(sprintf('SELECT count(*) FROM %
     <fieldset>
       <div class="form-horizontal">
         <div class="form-row">
-          <p><?php echo sprintf(__('Remove inactive alerts those has been unsubscribed for more than %d days.'), $limit_days); ?></p>
+          <p><?php echo sprintf(__('Remove inactive alerts that have been unsubscribed for more than %d days.'), $limit_days); ?></p>
           <p><?php echo sprintf(__('Total number of alerts matching criteria: %s'), '<strong>' . $alerts_unsubscribed_count . '</strong>'); ?></p>
         </div>
 
@@ -322,7 +322,7 @@ $old_item_stats_count = osc_get_count_query_data(sprintf('SELECT count(*) FROM %
 </div>
 
 <div id="cleanup-settings">
-  <h2 class="render-title"><?php _e('Item statistics'); ?></h2>
+  <h2 class="render-title"><?php _e('Listing statistics'); ?></h2>
   <form id="cleanup_form" name="cleanup_form" action="<?php echo osc_admin_base_url(true); ?>" enctype="multipart/form-data" method="post">
     <input type="hidden" name="page" value="tools" />
     <input type="hidden" name="action" value="cleanup_post" />

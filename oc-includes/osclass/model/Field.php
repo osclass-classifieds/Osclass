@@ -658,7 +658,7 @@ class Field extends DAO
   public function saveAdminConfiguration($fieldId) {
     $fieldId = (int)$fieldId;
     if($fieldId <= 0) {
-      return array('ok' => false, 'error' => 1, 'message' => __('An error occurred while updating.'));
+      return array('ok' => false, 'error' => 1, 'message' => __('An error occurred while updating'));
     }
 
     $name = Params::getParam('s_name');
@@ -691,7 +691,7 @@ class Field extends DAO
     );
 
     if(is_bool($res) && !$res) {
-      return array('ok' => false, 'error' => 1, 'message' => __('An error occurred while updating.'));
+      return array('ok' => false, 'error' => 1, 'message' => __('An error occurred while updating'));
     }
 
     $this->cleanCategoriesFromField($fieldId);
@@ -699,7 +699,7 @@ class Field extends DAO
     if(is_array($aCategories) && count($aCategories) > 0) {
       $res = $this->insertCategories($fieldId, $aCategories);
       if(!$res) {
-        return array('ok' => false, 'error' => 1, 'message' => __('An error occurred while updating.'));
+        return array('ok' => false, 'error' => 1, 'message' => __('An error occurred while updating'));
       }
     }
 

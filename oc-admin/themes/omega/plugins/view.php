@@ -26,7 +26,7 @@ function customPageHeader() {
 
 
 function customPageTitle($string) {
-  return sprintf(__('Plugins - %s'), $string);
+  return sprintf(__('%s - %s'), __('Plugins'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');

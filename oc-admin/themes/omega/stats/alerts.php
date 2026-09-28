@@ -58,7 +58,7 @@ function customPageHeader() {
 osc_add_hook('admin_page_header', 'customPageHeader');
 
 function customPageTitle($string) {
-  return sprintf(__('Alert statistics - %s'), $string);
+  return sprintf(__('%s - %s'), __('Alert statistics'), $string);
 }
 osc_add_filter('admin_title', 'customPageTitle');
 
@@ -187,10 +187,10 @@ foreach((array)$latest_alerts as $a) {
 }
 ?>
 <div class="grid-system" id="stats-page">
-  <div class="grid-row grid-50">
+  <div class="grid-row grid-30">
     <div class="row-wrapper"><h2 class="render-title"><?php _e('Alert statistics'); ?></h2></div>
   </div>
-  <div class="grid-row grid-50">
+  <div class="grid-row grid-70">
     <div class="row-wrapper"><?php echo osc_admin_stats_period_links('alerts'); ?></div>
   </div>
   <div class="grid-row grid-100">

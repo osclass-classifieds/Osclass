@@ -37,7 +37,7 @@ osc_add_hook('admin_page_header','customPageHeader');
 
 
 function customPageTitle($string) {
-  return sprintf(__('Manage listings - %s'), $string);
+  return sprintf(__('%s - %s'), __('Manage listings'), $string);
 }
 osc_add_filter('admin_title', 'customPageTitle');
 
@@ -350,7 +350,7 @@ osc_current_admin_theme_path( 'parts/header.php' );
           <option value="oLocation" <?php if($opt == 'oLocation'){ echo 'selected="selected"'; } ?>><?php _e('Location'); ?></option>
           <option value="oPublishDate" <?php if($opt == 'oPublishDate'){ echo 'selected="selected"'; } ?>><?php _e('Publish date'); ?></option>
           <option value="oExpirationDate" <?php if($opt == 'oExpirationDate'){ echo 'selected="selected"'; } ?>><?php _e('Expiration date'); ?></option>
-          <option value="oItemId" <?php if($opt == 'oItemId'){ echo 'selected="selected"'; } ?>><?php _e('Item ID'); ?></option>
+          <option value="oItemId" <?php if($opt == 'oItemId'){ echo 'selected="selected"'; } ?>><?php _e('Listing ID'); ?></option>
         </select><input
           id="fPattern" type="text" name="sSearch"
           value="<?php echo osc_esc_html(Params::getParam('sSearch')); ?>"
@@ -369,7 +369,7 @@ osc_current_admin_theme_path( 'parts/header.php' );
           id="fItemId" type="text" name="itemId"
           value="<?php echo osc_esc_html(Params::getParam('itemId')); ?>"
           class="input-text input-actions input-has-select <?php echo $classItemId; ?>"
-          placeholder="<?php echo osc_esc_html(__('Search by item ID')); ?>"/>
+          placeholder="<?php echo osc_esc_html(__('Search by listing ID')); ?>"/>
 
         <input type="submit" class="btn submit-right" value="<?php echo osc_esc_html( __('Find') ); ?>">
       </form>

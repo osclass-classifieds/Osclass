@@ -28,7 +28,7 @@ class CWebUserNonSecure extends BaseModel {
     parent::__construct();
     
     if(!osc_users_enabled() && ($this->action != 'activate_alert' && $this->action != 'unsub_alert')) {
-      osc_add_flash_error_message(_m('Users not enabled'));
+      osc_add_flash_error_message(_m('Users are not enabled'));
       $this->redirectTo(osc_base_url());
     }
     
@@ -78,7 +78,7 @@ class CWebUserNonSecure extends BaseModel {
             
             osc_run_hook('change_email_confirm', Params::getParam('userId'), $userOldEmail, $userEmailTmp['s_new_email']);
             
-            osc_add_flash_ok_message(_m('Your email has been changed successfully'));
+            osc_add_flash_ok_message(_m('Your email has been changed'));
             $this->redirectTo(osc_user_profile_url());
             
           } else {
@@ -114,7 +114,7 @@ class CWebUserNonSecure extends BaseModel {
         if($result == 1) {
           osc_add_flash_ok_message(_m('Alert activated'));
         }else{
-          osc_add_flash_error_message(_m('Oops!There was a problem trying to activate your alert. Please contact an administrator'));
+          osc_add_flash_error_message(_m('Oops! There was a problem trying to activate your alert. Please contact an administrator'));
         }
 
         $this->redirectTo(osc_base_url());
@@ -127,15 +127,27 @@ class CWebUserNonSecure extends BaseModel {
 
         $alert = Alerts::newInstance()->findByPrimaryKey($id);
         $result = 0;
-        
-        if (!empty($alert) && $email == $alert['s_email'] && $secret == $alert['s_secret']) {
-          $result = Alerts::newInstance()->unsub($id);
+        $already = false;
+        $valid = (!empty($alert) && $email == $alert['s_email'] && $secret == $alert['s_secret']);
+
+        if($valid) {
+          if(trim((string)($alert['dt_unsub_date'] ?? '')) != '') {
+            $already = true;
+          } else {
+            $result = Alerts::newInstance()->unsub($id);
+          }
+
+          if(osc_is_web_user_logged_in() && strcasecmp((string)osc_logged_user_email(), (string)$alert['s_email']) !== 0) {
+            osc_add_flash_warning_message(sprintf(_m('This alert was tied to account %s.'), $alert['s_email']));
+          }
         }
 
-        if($result == 1) {
-          osc_add_flash_ok_message(_m('Unsubscribed correctly'));
+        if($already) {
+          osc_add_flash_info_message(_m('You have successfully unsubscribed from this alert.'));
+        } else if($result == 1) {
+          osc_add_flash_ok_message(_m('You have been unsubscribed from this alert'));
         }else{
-          osc_add_flash_error_message(_m('Oops!There was a problem trying to unsubscribe you. Please contact an administrator'));
+          osc_add_flash_error_message(_m('Oops! There was a problem trying to unsubscribe you. Please contact an administrator'));
         }
 
         $this->redirectTo(osc_base_url());
@@ -440,7 +452,7 @@ class CWebUserNonSecure extends BaseModel {
         }
 
         osc_run_hook('hook_email_contact_user', Params::getParam('id'), Params::getParam('yourEmail'), Params::getParam('yourName'), Params::getParam('phoneNumber'), Params::getParam('message'));
-        osc_add_flash_ok_message(_m('Your email has been sent properly.'));
+        osc_add_flash_ok_message(_m('Your email has been sent'));
         
         $this->redirectTo(osc_user_public_profile_url());
         break;

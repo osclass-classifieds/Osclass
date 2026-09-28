@@ -112,7 +112,7 @@ class Category extends DAO
         break;
     }
 
-    $key = md5(osc_base_url().'Category::listWhere'.(string)$this->_language.(string)$sql);
+    $key = md5(osc_base_url().'Category::listWhere'.(string)$this->_language.(string)$sql.'slug-');
     $found = null;
     $cache = osc_cache_get($key, $found);
 
@@ -226,10 +226,23 @@ class Category extends DAO
         $aux = $finalArray;
       }
 
+      foreach($aux as $k => $row) {
+        if(isset($aux[$k]['s_slug'])) {
+          $aux[$k]['s_slug'] = $this->urlCategorySlug($aux[$k]['s_slug']);
+        }
+      }
+
       osc_cache_set($key, $aux, OSC_CACHE_TTL);
       return $aux;
 
     } else {
+      if(is_array($cache)) {
+        foreach($cache as $k => $row) {
+          if(isset($cache[$k]['s_slug'])) {
+            $cache[$k]['s_slug'] = $this->urlCategorySlug($cache[$k]['s_slug']);
+          }
+        }
+      }
       return $cache;
     }
   }
@@ -274,7 +287,7 @@ class Category extends DAO
    * @return array
    */
   public function toTree($empty = true) {
-    $key = md5(osc_base_url().'Category::categoryToTree'.(string)$this->_language.(string)$empty);
+    $key = md5(osc_base_url().'Category::categoryToTree'.(string)$this->_language.(string)$empty.'slug-');
     $found = null;
     $cache = osc_cache_get($key, $found);
 
@@ -472,13 +485,17 @@ class Category extends DAO
    * @param integer$category
    * @return array
    */
-  public function toRootTree($cat = null) {
+  public function toRootTree($cat = null, $locale = '') {
     $tree = array();
+
+    if($locale == '') {
+      $locale = $this->_language;
+    }
 
     if($cat!=null) {
       $tree_b = array();
       if(is_numeric($cat)) {
-        $cat = $this->findByPrimaryKey($cat, $this->_language);
+        $cat = $this->findByPrimaryKey($cat, $locale);
       } else {
         $cat = $this->findBySlug($cat);
       }
@@ -486,7 +503,7 @@ class Category extends DAO
       $tree[0] = $cat;
 
       while(isset($cat['fk_i_parent_id']) && $cat['fk_i_parent_id']!=null && $cat['fk_i_parent_id'] > 0) {
-        $cat = $this->findByPrimaryKey($cat['fk_i_parent_id'], $this->_language);
+        $cat = $this->findByPrimaryKey($cat['fk_i_parent_id'], $locale);
         array_unshift($tree, '');//$cat);
         $tree[0] = $cat;
       }
@@ -540,6 +557,21 @@ class Category extends DAO
 
       $results = $this->listWhere('b.s_slug = %s', $slug);
 
+      if(!is_array($results) || count($results) == 0) {
+        $raw_slug = urldecode($slug);
+        $alt_slug = '';
+        if(preg_match('/^(.+)_([0-9]{1,3})$/', $raw_slug, $m)) {
+          $alt_slug = $m[1] . '-' . $m[2];
+        } else if(preg_match('/^(.+)-([0-9]{1,3})$/', $raw_slug, $m)) {
+          $alt_slug = $m[1] . '_' . $m[2];
+        }
+        if($alt_slug != '' && $alt_slug != $raw_slug) {
+          $alt_slug = $this->dao->connId->real_escape_string($alt_slug);
+          $alt_slug = urlencode(urldecode($alt_slug));
+          $results = $this->listWhere('b.s_slug = %s', $alt_slug);
+        }
+      }
+
       if(is_array($results) && count($results) > 0) {
         $this->_slugs[$slug] = $results[0]['pk_i_id'];
         return $results[0];
@@ -557,8 +589,8 @@ class Category extends DAO
    * @param integer$category_id
    * @return array
    */
-  public function hierarchy($category_id) {
-    return array_reverse($this->toRootTree($category_id));
+  public function hierarchy($category_id, $locale = '') {
+    return array_reverse($this->toRootTree($category_id, $locale));
   }
 
   /**
@@ -621,7 +653,12 @@ class Category extends DAO
    * @param int $categoryID primary key
    * @return array
    */
-  // Apply localized name/description on a category row
+  // Rewrite uniqueness suffix _N to -N for URL slugs
+  private function urlCategorySlug($slug) {
+    return preg_replace('/_([0-9]{1,3})$/', '-$1', (string)$slug);
+  }
+
+  // Apply localized name, description and slug on a category row
   private function applyCategoryLocale(&$category, $locale) {
     if($locale == '' || $locale == 'all' || !is_array($category)) {
       return;
@@ -630,15 +667,22 @@ class Category extends DAO
     if(isset($category['locale'][$locale]['s_name'])) {
       $category['s_name'] = $category['locale'][$locale]['s_name'];
       $category['s_description'] = (isset($category['locale'][$locale]['s_description']) ? $category['locale'][$locale]['s_description'] : '');
-      return;
-    }
-
-    if(isset($category['locale']) && is_array($category['locale']) && count($category['locale']) > 0) {
+      if(isset($category['locale'][$locale]['s_slug'])) {
+        $category['s_slug'] = $category['locale'][$locale]['s_slug'];
+      }
+    } else if(isset($category['locale']) && is_array($category['locale']) && count($category['locale']) > 0) {
       $first = current($category['locale']);
       if(is_array($first) && isset($first['s_name'])) {
         $category['s_name'] = $first['s_name'];
         $category['s_description'] = (isset($first['s_description']) ? $first['s_description'] : '');
+        if(isset($first['s_slug'])) {
+          $category['s_slug'] = $first['s_slug'];
+        }
       }
+    }
+
+    if(isset($category['s_slug'])) {
+      $category['s_slug'] = $this->urlCategorySlug($category['s_slug']);
     }
   }
 
@@ -655,7 +699,7 @@ class Category extends DAO
       $locale = $this->_language;
     }
 
-    $key = md5(osc_base_url().'Category::findByPrimaryKey'.$categoryID.$locale);
+    $key = md5(osc_base_url().'Category::findByPrimaryKey'.$categoryID.$locale.'slug-');
     $found = null;
     $cache = osc_cache_get($key, $found);
 
@@ -715,10 +759,14 @@ class Category extends DAO
       }
       $category['locale'] = $row;
 
-      // if it exists in the $categories array, we copy the row data
       if(array_key_exists($categoryID, $this->_categories)) {
-        $this->_categories[$categoryID] = $category;
+        $store = $category;
+        if(!$loadAllLocales) {
+          $this->applyCategoryLocale($store, $this->_language);
+        }
+        $this->_categories[$categoryID] = $store;
       }
+
       if(!$loadAllLocales) {
         $this->applyCategoryLocale($category, $applyLocale);
       }
@@ -871,9 +919,7 @@ class Category extends DAO
           if(!isset($cat_slug['pk_i_id']) || $cat_slug['pk_i_id']==$pk) {
             break;
           } else {
-            // update 812 - non-unique slug ie car_1 will be now car1
-            //$slug = $slug_tmp . "_" . $slug_unique;
-            $slug = $slug_tmp . $slug_unique;
+            $slug = $slug_tmp . '-' . $slug_unique;
             $slug_unique++;
           }
         }
@@ -937,7 +983,7 @@ class Category extends DAO
         if(!$this->findBySlug($slug)) {
           break;
         } else {
-          $slug = $slug_tmp . "_" . $slug_unique;
+          $slug = $slug_tmp . '-' . $slug_unique;
           $slug_unique++;
         }
       }
@@ -995,8 +1041,9 @@ class Category extends DAO
     $result = $this->dao->get();
     if($result == false) {
       $items = array();
+    } else {
+      $items = $result->result();
     }
-    $items = $result->result();
     foreach($items as $item) {
       $itemManager->updateExpirationDate($item['pk_i_id'], $expiration);
     }

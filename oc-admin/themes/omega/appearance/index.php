@@ -63,7 +63,7 @@ function customPageHeader() {
 }
 
 function customPageTitle($string) {
-  return sprintf(__('Appearance - %s'), $string);
+  return sprintf(__('%s - %s'), __('Appearance'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');
@@ -292,7 +292,7 @@ if(is_array($aThemesToUpdate) && count($aThemesToUpdate) > 0) {
   <input type="hidden" name="webtheme" value="" />
   <div class="form-horizontal">
     <div class="form-row">
-      <?php _e('This action can not be undone. Are you sure you want to delete the theme?'); ?>
+      <?php _e('This action cannot be undone. Are you sure you want to delete the theme?'); ?>
     </div>
     <div class="form-actions">
       <div class="wrapper">
@@ -324,7 +324,7 @@ if(is_array($aThemesToUpdate) && count($aThemesToUpdate) > 0) {
 
         if(data.error == 0) { // no errors
           content += oscEscapeHTML(data.message);
-          content += '<h3><?php echo osc_esc_js(__('Theme has been downloaded correctly.')); ?></h3>';
+          content += '<h3><?php echo osc_esc_js(__('The package has been downloaded')); ?></h3>';
           content += "<p>";
           content += '<a class="btn btn-mini btn-green" href="<?php echo osc_admin_base_url(true); ?>?page=appearance&marketError='+data.error+'&message='+oscEscapeHTML(data.message)+'&slug='+oscEscapeHTML(data.data['download'])+'"><?php echo osc_esc_js(__('Ok')); ?></a>';
           content += '<a class="btn btn-mini" href="javascript:location.reload(true)"><?php echo osc_esc_js(__('Close')); ?></a>';

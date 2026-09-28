@@ -123,7 +123,7 @@ class CAdminPages extends AdminSecBaseModel {
             $this->redirectTo(osc_admin_base_url(true)."?page=pages&action=edit&id=" . $id);
           }
 
-          osc_add_flash_error_message(_m("You can't repeat internal name"), 'admin');
+          osc_add_flash_error_message(_m("You cannot reuse this internal name"), 'admin');
         } else {
           osc_add_flash_error_message(_m("The page couldn't be updated, at least one title should not be empty"), 'admin');
         }
@@ -211,7 +211,7 @@ class CAdminPages extends AdminSecBaseModel {
             osc_add_flash_error_message(_m("The page couldn't be added, at least one title should not be empty"), 'admin');
           }
         } else {
-          osc_add_flash_error_message(_m("Oops! That internal name is already in use. We can't make the changes"), 'admin');
+          osc_add_flash_error_message(_m('Oops! That internal name is already in use. We cannot make the changes'), 'admin');
         }
 
         $this->redirectTo(osc_admin_base_url(true)."?page=pages&action=add");
@@ -253,7 +253,7 @@ class CAdminPages extends AdminSecBaseModel {
 
         if($page_indelible > 0) {
           if($page_indelible == 1) {
-            osc_add_flash_error_message( _m("One page can't be deleted because it is indelible"), 'admin');
+            osc_add_flash_error_message( _m("This page cannot be deleted because it is indelible"), 'admin');
           } else {
             osc_add_flash_error_message(sprintf(_m("%s pages couldn't be deleted because they are indelible"), $page_indelible), 'admin');
           }
@@ -269,9 +269,9 @@ class CAdminPages extends AdminSecBaseModel {
 
         if($page_deleted_correcty > 0) {
           if($page_deleted_correcty == 1) {
-            osc_add_flash_ok_message(_m('One page has been deleted correctly'), 'admin');
+            osc_add_flash_ok_message(_m('One page has been deleted'), 'admin');
           } else {
-            osc_add_flash_ok_message(sprintf(_m('%s pages have been deleted correctly'), $page_deleted_correcty), 'admin');
+            osc_add_flash_ok_message(sprintf(_m('%s pages have been deleted'), $page_deleted_correcty), 'admin');
           }
         }
 

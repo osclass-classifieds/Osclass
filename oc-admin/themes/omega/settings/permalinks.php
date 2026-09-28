@@ -246,224 +246,224 @@ $(document).ready(function(){
     },
     messages: {
       rewrite_item_url: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Listings url"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Listings url"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Listings url"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Listings url"))); ?>.'
       },
       rewrite_page_url: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Static page url"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Static page url"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Static page URL"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Static page URL"))); ?>.'
       },
       rewrite_cat_url: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Categories url"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Categories url"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Categories url"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Categories url"))); ?>.'
       },
       rewrite_search_url: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Search url"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Search url"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Search URL"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Search URL"))); ?>.'
       },
       rewrite_search_country: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Search country"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Search country"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Search country"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Search country"))); ?>.'
       },
       rewrite_search_region: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Search region"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Search region"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Search region"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Search region"))); ?>.'
       },
       rewrite_search_city: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Search city"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Search city"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Search city"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Search city"))); ?>.'
       },
       rewrite_search_city_area: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Search city area"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Search city area"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Search city area"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Search city area"))); ?>.'
       },
       rewrite_search_category: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Search category"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Search category"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Search category"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Search category"))); ?>.'
       },
       rewrite_search_user: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Search user"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Search user"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Search user"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Search user"))); ?>.'
       },
       rewrite_search_pattern: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Search pattern"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Search pattern"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Search pattern"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Search pattern"))); ?>.'
       },
       rewrite_search_order: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Search order"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Search order"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Search order"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Search order"))); ?>.'
       },
       rewrite_search_order_type: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Search order type"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Search order type"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Search order type"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Search order type"))); ?>.'
       },
       rewrite_search_order_by_price: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Search order by price"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Search order by price"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Search order by price"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Search order by price"))); ?>.'
       },
       rewrite_search_order_by_pub_date: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Search order by publish date"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Search order by publish date"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Search order by publish date"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Search order by publish date"))); ?>.'
       },
       rewrite_search_order_by_relevance: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Search order by relevance"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Search order by relevance"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Search order by relevance"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Search order by relevance"))); ?>.'
       },
       rewrite_search_order_by_expiration: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Search order by expiration date"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Search order by expiration date"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Search order by expiration date"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Search order by expiration date"))); ?>.'
       },
       rewrite_search_order_by_rating: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Search order by rating"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Search order by rating"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Search order by rating"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Search order by rating"))); ?>.'
       },
       rewrite_search_price_min: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Search price minimum"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Search price minimum"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Search minimum price"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Search minimum price"))); ?>.'
       },
       rewrite_search_price_max: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Search price maximum"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Search price maximum"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Search maximum price"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Search maximum price"))); ?>.'
       },
       rewrite_search_with_picture: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Search with picture"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Search with picture"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Search with picture"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Search with picture"))); ?>.'
       },
       rewrite_search_premium_only: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Search premium only"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Search premium only"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Search premium only"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Search premium only"))); ?>.'
       },
       rewrite_search_with_phone: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Search with phone"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Search with phone"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Search with phone"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Search with phone"))); ?>.'
       },
       rewrite_search_show_as: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Search show as"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Search show as"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Search show as"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Search show as"))); ?>.'
       },
       rewrite_search_page_number: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Search page number"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Search page number"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Search page number"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Search page number"))); ?>.'
       },
       rewrite_contact: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Contact url"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Contact url"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Contact url"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Contact url"))); ?>.'
       },
       rewrite_feed: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Feed url"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Feed url"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Feed url"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Feed url"))); ?>.'
       },
       rewrite_language: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Language url"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Language url"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Language url"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Language url"))); ?>.'
       },
       rewrite_item_send_friend: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Listing send friend url"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Listing send friend url"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Listing send friend url"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Listing send friend url"))); ?>.'
       },
       rewrite_item_contact: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Listing contact url"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Listing contact url"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Listing contact url"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Listing contact url"))); ?>.'
       },
       rewrite_report_item: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Report listing url"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Report listing url"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Report listing url"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Report listing url"))); ?>.'
       },
       rewrite_report_user: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Report user url"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Report user url"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Report user url"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Report user url"))); ?>.'
       },
       rewrite_report_view: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Report view url"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Report view url"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Report view url"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Report view url"))); ?>.'
       },
       rewrite_item_new: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("New listing url"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("New listing url"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("New listing url"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("New listing url"))); ?>.'
       },
       rewrite_item_activate: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Activate listing url"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Activate listing url"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Activate listing url"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Activate listing url"))); ?>.'
       },
       rewrite_item_deactivate: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Deactivate listing url"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Deactivate listing url"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Deactivate listing url"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Deactivate listing url"))); ?>.'
       },
       rewrite_item_renew: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Listing renewal url"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Listing renewal url"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Listing renewal url"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Listing renewal url"))); ?>.'
       },
       rewrite_item_edit: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Edit listing url"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Edit listing url"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Edit listing url"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Edit listing url"))); ?>.'
       },
       rewrite_item_delete: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Delete listing url"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Delete listing url"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Delete listing url"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Delete listing url"))); ?>.'
       },
       rewrite_item_resource_delete: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Delete listing resource url"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Delete listing resource url"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Delete listing resource url"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Delete listing resource url"))); ?>.'
       },
       rewrite_user_login: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Login url"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Login url"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Login url"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Login url"))); ?>.'
       },
       rewrite_user_dashboard: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("User dashboard url"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("User dashboard url"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("User dashboard url"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("User dashboard url"))); ?>.'
       },
       rewrite_user_logout: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Logout url"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Logout url"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Logout url"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Logout url"))); ?>.'
       },
       rewrite_user_register: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("User register url"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("User register url"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("User register url"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("User register url"))); ?>.'
       },
       rewrite_user_activate: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Activate user url"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Activate user url"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Activate user url"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Activate user url"))); ?>.'
       },
       rewrite_user_activate_alert: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Activate alert url"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Activate alert url"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Activate alert url"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Activate alert url"))); ?>.'
       },
       rewrite_user_profile: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("User profile url"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("User profile url"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("User profile url"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("User profile url"))); ?>.'
       },
       rewrite_user_items: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("User listings url"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("User listings url"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("User listings url"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("User listings url"))); ?>.'
       },
       rewrite_user_alerts: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("User alerts url"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("User alerts url"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("User alerts url"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("User alerts url"))); ?>.'
       },
       rewrite_user_recover: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Recover user url"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Recover user url"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Recover user url"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Recover user url"))); ?>.'
       },
       rewrite_user_forgot: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("User forgot url"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("User forgot url"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("User forgot url"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("User forgot url"))); ?>.'
       },
       rewrite_user_change_password: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Change password url"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Change password url"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Change password url"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Change password url"))); ?>.'
       },
       rewrite_user_change_email: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Change email url"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Change email url"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Change email url"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Change email url"))); ?>.'
       },
       rewrite_user_change_username: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Change username url"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Change username url"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Change username url"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Change username url"))); ?>.'
       },
       rewrite_user_change_email_confirm: {
-        required: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Change email confirm url"))); ?>.',
-        minlength: '<?php echo osc_esc_js(sprintf(__("%s: this field is required"), __("Change email confirm url"))); ?>.'
+        required: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Change email confirm url"))); ?>.',
+        minlength: '<?php echo osc_esc_js(sprintf(__("%s is required"), __("Change email confirm url"))); ?>.'
       }
     },
     wrapper: "li",
@@ -514,7 +514,7 @@ function customPageHeader(){
 }
 
 function customPageTitle($string) {
-  return sprintf(__('Permalinks - %s'), $string);
+  return sprintf(__('%s - %s'), __('Permalinks'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');
@@ -562,7 +562,7 @@ osc_current_admin_theme_path('parts/header.php');
           <h2 class="render-title separate-top"><?php _e('Core pages structure'); ?></h2>
 
           <div class="form-row">
-            <div class="form-label"><?php _e('Listing URL:'); ?></div>
+            <div class="form-label"><?php _e('Listing URL'); ?></div>
             <div class="form-controls">
               <input type="text" class="input-large" size="60" name="rewrite_item_url" value="<?php echo osc_esc_html(osc_get_preference('rewrite_item_url')); ?>" />
               <div class="help-box">
@@ -574,11 +574,11 @@ osc_current_admin_theme_path('parts/header.php');
           </div>
 
           <div class="form-row">
-            <div class="form-label"><?php _e('Static page URL:'); ?></div>
+            <div class="form-label"><?php _e('Static page URL'); ?></div>
             <div class="form-controls">
               <input type="text" class="input-large" size="40" name="rewrite_page_url" value="<?php echo osc_esc_html(osc_get_preference('rewrite_page_url')); ?>" />
               <div class="help-box">
-                <?php echo sprintf(__('Accepted keywords: %s.'), '{PAGE_ID}, {PAGE_SLUG}'); ?>
+                <?php echo sprintf(__('Accepted keywords: %s'), '{PAGE_ID}, {PAGE_SLUG}'); ?>
                 <?php echo sprintf(__('When not using %s, add prefix before page slug to keep static page URLs unique, example: %s.'), '{PAGE_ID}', 'help/{PAGE_SLUG}'); ?>
               </div>
             </div>
@@ -608,7 +608,7 @@ osc_current_admin_theme_path('parts/header.php');
           </div>
 
           <div class="form-row">
-            <div class="form-label"><?php _e('Search URL:'); ?></div>
+            <div class="form-label"><?php _e('Search URL'); ?></div>
             <div class="form-controls">
               <input type="text" class="input-medium" size="20" name="rewrite_search_url" value="<?php echo osc_esc_html(osc_get_preference('rewrite_search_url')); ?>" />
             </div>
@@ -1062,7 +1062,7 @@ osc_current_admin_theme_path('parts/header.php');
 
         <?php if(file_exists(osc_base_path() . '.htaccess')) { ?>
           <div class="form-row">
-            <h3 class="separate-top"><strong class="htaccess-label"><?php _e('Your .htaccess file:') ?></strong></h3>
+            <h3 class="separate-top"><strong class="htaccess-label"><?php _e('Your .htaccess file') ?></strong></h3>
             <pre><?php
               $htaccess_content =  file_get_contents(osc_base_path() . '.htaccess');
               echo htmlentities($htaccess_content);

@@ -58,16 +58,16 @@ class AjaxUploader {
     }
 
     if(!$this->_file) {
-      return array('error' => __('No files were uploaded.'));
+      return array('error' => __('No files were uploaded'));
     }
 
     $size = $this->_file->getSize();
     if($size == 0) {
-      return array('error' => __('File is empty.'));
+      return array('error' => __('File is empty'));
     }
 
     if($size > $this->_sizeLimit) {
-      return array('error' => __('File is too large.') . ' ' . round($size/1000) . '/' . round($this->_sizeLimit/1000) . 'kb');
+      return array('error' => __('File is too large') . ' ' . round($size/1000) . '/' . round($this->_sizeLimit/1000) . 'kb');
     }
 
     $pathinfo = pathinfo($this->_file->getOriginalName());

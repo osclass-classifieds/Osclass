@@ -126,24 +126,24 @@ class AdminForm extends Form {
         },
         messages: {
           s_name: {
-            required:  "<?php _e('Name: this field is required'); ?>.",
+            required:  "<?php echo sprintf(__('%s is required'), __('Name')); ?>.",
             minlength: "<?php _e('Name: enter at least 3 characters'); ?>.",
             maxlength: "<?php _e('Name: no more than 50 characters'); ?>."
           },
           s_username: {
-            required:  "<?php _e('Username: this field is required'); ?>.",
+            required:  "<?php echo sprintf(__('%s is required'), __('Username')); ?>.",
             minlength: "<?php _e('Username: enter at least 3 characters'); ?>.",
             maxlength: "<?php _e('Username: no more than 50 characters'); ?>."
           },
           s_email: {
-            required: "<?php _e('Email: this field is required'); ?>.",
-            email: "<?php _e('Invalid email address'); ?>."
+            required: "<?php echo sprintf(__('%s is required'), __('Email')); ?>.",
+            email: "<?php _e('The email is not valid'); ?>."
           },
           s_password: {
             minlength: "<?php _e('Password: enter at least 5 characters'); ?>."
           },
           s_password2: {
-            equalTo: "<?php _e("Passwords don't match"); ?>."
+            equalTo: "<?php _e('The passwords do not match'); ?>."
           }
         },
         errorLabelContainer: "#error_list",

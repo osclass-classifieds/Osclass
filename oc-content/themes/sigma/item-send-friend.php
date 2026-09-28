@@ -63,7 +63,7 @@ osc_current_web_theme_path('header.php');
           </div>
         </div>
         <div class="control-group">
-          <label for="friendEmail"><?php _e("Your friend's e-mail address", 'sigma'); ?></label> </label>
+          <label for="friendEmail"><?php _e("Your friend's email address", 'sigma'); ?></label> </label>
           <div class="controls">
             <?php SendFriendForm::friend_email(); ?>
           </div>

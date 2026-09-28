@@ -35,7 +35,7 @@ osc_add_hook('admin_page_header','customPageHeader');
 
 
 function customPageTitle($string) {
-  return sprintf(__('Manage pages - %s'), $string);
+  return sprintf(__('%s - %s'), __('Manage pages'), $string);
 }
 osc_add_filter('admin_title', 'customPageTitle');
 

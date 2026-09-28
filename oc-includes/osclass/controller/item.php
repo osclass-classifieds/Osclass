@@ -292,7 +292,7 @@ class CWebItem extends BaseModel {
             }
 
             Session::newInstance()->_clearVariables();
-            osc_add_flash_ok_message(_m("Great! We've just updated your listing"));
+            osc_add_flash_ok_message(_m("The listing has been updated"));
             View::newInstance()->_exportVariableToView("item", Item::newInstance()->findByPrimaryKey($id));
             $this->redirectTo(osc_item_url());
 
@@ -324,7 +324,7 @@ class CWebItem extends BaseModel {
           if($success) {
             osc_add_flash_ok_message(_m('The listing has been validated'));
           }else{
-            osc_add_flash_error_message(_m("The listing can't be validated"));
+            osc_add_flash_error_message(_m("The listing cannot be validated"));
           }
         } else {
           osc_add_flash_warning_message(_m('The listing has already been validated'));
@@ -354,7 +354,7 @@ class CWebItem extends BaseModel {
           if($success) {
             osc_add_flash_ok_message(_m('The listing has been deactivated'));
           }else{
-            osc_add_flash_error_message(_m("The listing can't be deactivated"));
+            osc_add_flash_error_message(_m("The listing cannot be deactivated"));
           }
         } else {
           osc_add_flash_warning_message(_m('The listing has already been deactivated'));
@@ -389,10 +389,10 @@ class CWebItem extends BaseModel {
           if($success == 1) {
             osc_add_flash_ok_message(_m('The listing has been renewed'));
           }else{  // error code 2, 3, 4, -1, yet problem will not be described
-            osc_add_flash_error_message(_m('The listing can\'t be renewed'));
+            osc_add_flash_error_message(_m('The listing cannot be renewed'));
           }
         } else {
-          osc_add_flash_warning_message(_m('The listing can\'t be renewed'));
+          osc_add_flash_warning_message(_m('The listing cannot be renewed'));
         }
 
         $this->redirectTo(osc_item_url());
@@ -468,7 +468,7 @@ class CWebItem extends BaseModel {
             osc_deleteResource($id, false);
             Log::newInstance()->insertLog('item', 'deleteResource', $id, $id, 'user', osc_logged_user_id());
             ItemResource::newInstance()->delete(array('pk_i_id' => $id, 'fk_i_item_id' => $item, 's_name' => $code));
-            osc_add_flash_ok_message(_m('The selected photo has been successfully deleted'));
+            osc_add_flash_ok_message(_m('The selected photo has been deleted'));
           } else {
             osc_add_flash_error_message(_m("The selected photo does not belong to you"));
           }
@@ -507,7 +507,7 @@ class CWebItem extends BaseModel {
 
       case 'send_friend_post':
         if(osc_item_send_friend_form_disabled()) {
-          osc_add_flash_warning_message(_m('Sorry, send to friend form is disabled.'));
+          osc_add_flash_warning_message(_m('Sorry, the send to a friend form is disabled'));
           $this->redirectTo(osc_base_url());
         }
 
@@ -549,7 +549,7 @@ class CWebItem extends BaseModel {
 
       case 'contact':
         if(osc_item_contact_form_disabled()) {
-          osc_add_flash_warning_message(_m('Sorry, contact form is disabled.'));
+          osc_add_flash_warning_message(_m('Sorry, the contact form is disabled'));
           $this->redirectTo(osc_base_url());
         }
 
@@ -563,14 +563,14 @@ class CWebItem extends BaseModel {
           $this->_exportVariableToView('item', $item);
 
           if(osc_item_is_expired ()) {
-            osc_add_flash_error_message(_m("We're sorry, but the listing has expired. You can't contact the seller"));
+            osc_add_flash_error_message(_m("This listing has expired. You cannot contact the seller."));
             $this->redirectTo(osc_item_url());
           }
 
           if(osc_reg_user_can_contact() && osc_is_web_user_logged_in() || !osc_reg_user_can_contact()){
             $this->doView('item-contact.php');
           } else {
-            osc_add_flash_warning_message(_m("You can't contact the seller, only registered users can").'. <br />'.sprintf(_m("<a href=\"%s\">Click here to sign-in</a>"), osc_user_login_url()));
+            osc_add_flash_warning_message(_m("You cannot contact the seller. Only registered users can.") . ' <br />' . sprintf(_m("<a href=\"%s\">Click here to sign-in</a>"), osc_user_login_url()));
             $this->redirectTo(osc_item_url());
           }
         }
@@ -578,14 +578,14 @@ class CWebItem extends BaseModel {
 
       case 'contact_post':
         if(osc_item_contact_form_disabled()) {
-          osc_add_flash_warning_message(_m('Sorry, contact form is disabled.'));
+          osc_add_flash_warning_message(_m('Sorry, the contact form is disabled'));
           $this->redirectTo(osc_base_url());
         }
 
         osc_csrf_check();
 
         if(osc_reg_user_can_contact() && !osc_is_web_user_logged_in()){
-          osc_add_flash_warning_message(_m("You can't contact the seller, only registered users can"));
+          osc_add_flash_warning_message(_m("You cannot contact the seller. Only registered users can."));
           $this->redirectTo(osc_base_url(true));
         }
 
@@ -615,7 +615,7 @@ class CWebItem extends BaseModel {
         }
 
         if(osc_isExpired($item['dt_expiration'])) {
-          osc_add_flash_error_message(_m("We're sorry, but the listing has expired. You can't contact the seller"));
+          osc_add_flash_error_message(_m("This listing has expired. You cannot contact the seller."));
           $this->redirectTo(osc_item_url());
         }
 
@@ -630,7 +630,7 @@ class CWebItem extends BaseModel {
           osc_add_flash_error_message($result);
         } else {
           osc_increase_item_stat('contactforms', $item['pk_i_id']);
-          osc_add_flash_ok_message(_m("We've just sent an e-mail to the seller"));
+          osc_add_flash_ok_message(_m("We have sent an email to the seller"));
         }
 
         $this->redirectTo(osc_item_url());
@@ -664,7 +664,7 @@ class CWebItem extends BaseModel {
             break;
 
           case 3:
-            $msg = _m('Please fill the required field (email)');
+            $msg = _m('The email is not valid');
             osc_add_flash_warning_message($msg);
             break;
 
@@ -714,12 +714,12 @@ class CWebItem extends BaseModel {
             break;
 
           case 13:
-            $msg = _m('Only owner of listing can reply to comments');
+            $msg = _m('Only the listing owner can reply to comments');
             osc_add_flash_error_message($msg);
             break;
 
           case 14:
-            $msg = _m('Only logged administrator can reply to comments');
+            $msg = _m('Only a logged-in administrator can reply to comments');
             osc_add_flash_error_message($msg);
             break;
 
@@ -807,7 +807,7 @@ class CWebItem extends BaseModel {
         if($item['b_active'] != 1) {
           if(($this->userId == $item['fk_i_user_id']) && ($this->userId > 0) || osc_is_admin_user_logged_in()) {
             if(!osc_isExpired($item['dt_expiration'])) {
-              osc_add_flash_warning_message(_m("The listing hasn't been validated. Please validate it in order to make it public"));
+              osc_add_flash_warning_message(_m("The listing has not been validated. Validate it to make it public"));
 
             } else {
               osc_add_flash_warning_message(_m("The listing is deactivated"));
@@ -820,7 +820,7 @@ class CWebItem extends BaseModel {
 
         } else if($item['b_enabled'] == 0) {
           if(osc_is_admin_user_logged_in()) {
-            osc_add_flash_warning_message(_m("The listing hasn't been enabled. Please enable it in order to make it public"));
+            osc_add_flash_warning_message(_m("The listing has not been enabled. Enable it to make it public"));
 
           } else if(osc_is_web_user_logged_in() && osc_logged_user_id() == $item['fk_i_user_id']) {
             osc_add_flash_warning_message(_m("The listing has been blocked or is awaiting moderation from the admin"));

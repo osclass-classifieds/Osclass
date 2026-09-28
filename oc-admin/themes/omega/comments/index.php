@@ -42,7 +42,7 @@ osc_add_hook('admin_page_header','customPageHeader');
 
 
 function customPageTitle($string) {
-  return sprintf(__('Manage comments - %s'), $string);
+  return sprintf(__('%s - %s'), __('Manage comments'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');
@@ -153,7 +153,7 @@ osc_current_admin_theme_path( 'parts/header.php' );
 <h2 class="render-title">
   <?php
     if(Params::getParam('itemId') > 0) {
-      echo sprintf(__('Comments on item #%d'), Params::getParam('itemId'));
+      echo sprintf(__('Comments on listing #%d'), Params::getParam('itemId'));
     } else if(Params::getParam('replyId') > 0) {
       echo sprintf(__('Replies to comment #%d'), Params::getParam('replyId'));
     } else {

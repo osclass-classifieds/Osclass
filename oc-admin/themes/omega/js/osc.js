@@ -127,3 +127,35 @@ function oscEscapeHTML(str) {
   }
   return "";
 }
+
+function oscTrimQueryTerm(str) {
+  return String(str).replace(/(^|[?&])term=([^&]*)/g, function(match, sep, raw) {
+    var decoded;
+    try {
+      decoded = decodeURIComponent(String(raw).replace(/\+/g, ' '));
+    } catch(e) {
+      decoded = String(raw).replace(/\+/g, ' ');
+    }
+    return sep + 'term=' + encodeURIComponent($.trim(decoded));
+  });
+}
+
+$.ajaxPrefilter(function(options) {
+  if(!options) {
+    return;
+  }
+  if(typeof options.url === 'string' && options.url.indexOf('term=') !== -1) {
+    options.url = oscTrimQueryTerm(options.url);
+  }
+  if(typeof options.data === 'string' && options.data.indexOf('term=') !== -1) {
+    options.data = oscTrimQueryTerm(options.data);
+  } else if(options.data && typeof options.data === 'object' && !$.isArray(options.data) && options.data.term !== undefined) {
+    options.data.term = $.trim(String(options.data.term));
+  }
+});
+
+$(document).on('submit', '#shortcut-filters, #display-filters', function() {
+  $(this).find('input[type="text"], input[type="search"], textarea').each(function() {
+    this.value = $.trim(this.value);
+  });
+});

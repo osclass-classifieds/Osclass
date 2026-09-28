@@ -54,7 +54,7 @@ function customPageHeader() {
 osc_add_hook('admin_page_header','customPageHeader');
 
 function customPageTitle($string) {
-  return sprintf(__('Plugins - %s'), $string);
+  return sprintf(__('%s - %s'), __('Plugins'), $string);
 }
 osc_add_filter('admin_title', 'customPageTitle');
 
@@ -291,7 +291,7 @@ $tab_index = 2;
         <?php } else { ?>
           <tr>
             <td colspan="8" class="text-center">
-              <p style="padding:20px 0;margin:0;"><?php _e('No plugins has been found'); ?></p>
+              <p style="padding:20px 0;margin:0;"><?php _e('No plugins have been found'); ?></p>
             </td>
           </tr>
         <?php } ?>
@@ -375,7 +375,7 @@ $tab_index = 2;
           <?php } else { ?>
             <tr>
               <td colspan="8" class="text-center">
-                <p style="padding:20px 0;margin:0;"><?php _e('No plugins has been found'); ?></p>
+                <p style="padding:20px 0;margin:0;"><?php _e('No plugins have been found'); ?></p>
               </td>
             </tr>
           <?php } ?>
@@ -431,7 +431,7 @@ $tab_index = 2;
   <input type="hidden" name="plugin" value="" />
   <div class="form-horizontal">
     <div class="form-row">
-      <?php _e('This action can not be undone. Uninstalling plugins may result in a permanent loss of data. Are you sure you want to continue?'); ?>
+      <?php _e('This action cannot be undone. Uninstalling plugins may result in a permanent loss of data. Are you sure you want to continue?'); ?>
     </div>
     <div class="form-actions">
       <div class="wrapper">
@@ -481,7 +481,7 @@ $tab_index = 2;
 
           if(data.error == 0) { // no errors
             content += oscEscapeHTML(data.message);
-            content += '<h3><?php echo osc_esc_js(__('Plugin has been downloaded correctly.')); ?></h3><br/>';
+            content += '<h3><?php echo osc_esc_js(__('The package has been downloaded')); ?></h3><br/>';
             content += "<p>";
             content += '<a class="btn btn-mini btn-green" href="<?php echo osc_admin_base_url(true); ?>?page=plugins&marketError='+data.error+'&message='+oscEscapeHTML(data.message)+'&slug='+oscEscapeHTML(data.data['download'])+'"><?php echo osc_esc_js(__('Ok')); ?></a>';
             content += '<a class="btn btn-mini" href="javascript:location.reload(true)"><?php echo osc_esc_js(__('Close')); ?></a>';
@@ -498,7 +498,7 @@ $tab_index = 2;
 
           if(data.error == 0) { // no errors
             content += oscEscapeHTML(data.message);
-            content += '<h3><?php echo osc_esc_js(__('Plugin has been downloaded correctly.')); ?></h3><br/>';
+            content += '<h3><?php echo osc_esc_js(__('The package has been downloaded')); ?></h3><br/>';
             content += "<p>";
             content += '<a class="btn btn-mini btn-green" href="<?php echo osc_admin_base_url(true); ?>?page=plugins&marketError='+data.error+'&message='+oscEscapeHTML(data.message)+'&slug='+oscEscapeHTML(data.data['download'])+'"><?php echo osc_esc_js(__('Ok')); ?></a>';
             content += '<a class="btn btn-mini" href="javascript:location.reload(true)"><?php echo osc_esc_js(__('Close')); ?></a>';

@@ -651,53 +651,6 @@ class ItemStats extends DAO {
 
     return $out;
   }
-
-  /**
-   * Top listings for one measure since from_date
-   *
-   * @param string $column
-   * @param string $from_date
-   * @param int $limit
-   * @param array $filters
-   * @return array
-   */
-  public function getTopByMeasure($column, $from_date, $limit = 10, $filters = array()) {
-    $column = $this->sanitizeColumn($column);
-    $limit = (int)$limit;
-    if($column == '' || $limit <= 0) {
-      return array();
-    }
-
-    $item_id = (isset($filters['item_id']) ? (int)$filters['item_id'] : 0);
-    $category_id = (isset($filters['category_id']) ? (int)$filters['category_id'] : 0);
-    $user_id = (isset($filters['user_id']) ? (int)$filters['user_id'] : 0);
-
-    $this->dao->select('s.fk_i_item_id, SUM(s.'.$column.') AS total, i.fk_i_category_id, i.fk_i_user_id');
-    $this->dao->from($this->getTableName().' AS s');
-    $this->dao->join(DB_TABLE_PREFIX.'t_item AS i', 'i.pk_i_id = s.fk_i_item_id', 'INNER');
-    if($from_date != '') {
-      $this->dao->where('s.dt_date >=', $from_date);
-    }
-    if($item_id > 0) {
-      $this->dao->where('s.fk_i_item_id', $item_id);
-    }
-    if($category_id > 0) {
-      $this->dao->where('i.fk_i_category_id', $category_id);
-    }
-    if($user_id > 0) {
-      $this->dao->where('i.fk_i_user_id', $user_id);
-    }
-    $this->dao->groupBy('s.fk_i_item_id');
-    $this->dao->orderBy('total', 'DESC');
-    $this->dao->limit($limit);
-    $result = $this->dao->get();
-
-    if(!$result) {
-      return array();
-    }
-
-    return $result->result();
-  }
 }
 
 /* file end: ./oc-includes/osclass/model/ItemStats.php */

@@ -47,7 +47,7 @@
     <?php } ?>
 
     <?php if(osc_item_show_email() ) { ?>
-      <p class="email bld"><span><?php _e('E-mail', 'sigma'); ?>:</span> <a href="mailto:<?php echo osc_item_contact_email(); ?>"><?php echo osc_item_contact_email(); ?></a></p>
+      <p class="email bld"><span><?php _e('Email', 'sigma'); ?>:</span> <a href="mailto:<?php echo osc_item_contact_email(); ?>"><?php echo osc_item_contact_email(); ?></a></p>
     <?php } ?>
 
     <?php if(osc_item_contact_phone() != '' && osc_item_show_phone()) { ?>
@@ -68,11 +68,11 @@
         <!-- Contact form disabled -->
       <?php } else if(osc_item_is_expired () ) { ?>
         <p class="problem expired">
-          <?php _e("The listing is expired. You can't contact the publisher.", 'sigma'); ?>
+          <?php _e('The listing is expired. You cannot contact the publisher.', 'sigma'); ?>
         </p>
       <?php } else if(( osc_logged_user_id() == osc_item_user_id() ) && osc_logged_user_id() != 0 ) { ?>
         <p class="problem own">
-          <?php _e("It's your own listing, you can't contact the publisher.", 'sigma'); ?>
+          <?php _e("It's your own listing, you cannot contact the publisher.", 'sigma'); ?>
         </p>
       <?php } else if(osc_reg_user_can_contact() && !osc_is_web_user_logged_in() ) { ?>
         <p class="problem unlogged">
@@ -93,7 +93,7 @@
             <div class="controls"><?php ContactForm::your_name(); ?></div>
           </div>
           <div class="control-group">
-            <label class="control-label" for="yourEmail"><?php _e('Your e-mail address', 'sigma'); ?>:</label>
+            <label class="control-label" for="yourEmail"><?php _e('Your email address', 'sigma'); ?>:</label>
             <div class="controls"><?php ContactForm::your_email(); ?></div>
           </div>
           <div class="control-group">

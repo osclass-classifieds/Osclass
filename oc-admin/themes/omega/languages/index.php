@@ -38,7 +38,7 @@ osc_add_hook('admin_page_header','customPageHeader');
 
 
 function customPageTitle($string) {
-  return sprintf(__('Manage languages - %s'), $string);
+  return sprintf(__('%s - %s'), __('Manage languages'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');
@@ -311,7 +311,7 @@ osc_current_admin_theme_path('parts/header.php');
 
         if(data.error == 0) {
           content += oscEscapeHTML(data.message);
-          content += '<h3><?php echo osc_esc_js(__('Language has been downloaded correctly.')); ?></h3>';
+          content += '<h3><?php echo osc_esc_js(__('The package has been downloaded')); ?></h3>';
           content += "<p>";
           content += '<a class="btn btn-mini btn-green" href="<?php echo osc_admin_base_url(true); ?>?page=languages&marketError='+data.error+'&slug='+oscEscapeHTML(data.data['url'])+'"><?php echo osc_esc_js(__('Ok')); ?></a>';
           content += '<a class="btn btn-mini" href="javascript:location.reload(true)"><?php echo osc_esc_js(__('Close')); ?></a>';

@@ -206,20 +206,20 @@ class UserForm extends Form {
         },
         messages: {
           s_name: {
-            required: "<?php _e("Name: this field is required"); ?>."
+            required: "<?php echo sprintf(__('%s is required'), __('Name')); ?>."
           },
           s_email: {
-            required: "<?php _e("Email: this field is required"); ?>.",
-            email: "<?php _e("Invalid email address"); ?>."
+            required: "<?php echo sprintf(__('%s is required'), __('Email')); ?>.",
+            email: "<?php _e("The email is not valid"); ?>."
           },
           s_password: {
-            required: "<?php _e("Password: this field is required"); ?>.",
+            required: "<?php echo sprintf(__('%s is required'), __('Password')); ?>.",
             minlength: "<?php _e("Password: enter at least 5 characters"); ?>."
           },
           s_password2: {
-            required: "<?php _e("Second password: this field is required"); ?>.",
+            required: "<?php echo sprintf(__('%s is required'), __('Second password')); ?>.",
             minlength: "<?php _e("Second password: enter at least 5 characters"); ?>.",
-            equalTo: "<?php _e("Passwords don't match"); ?>."
+            equalTo: "<?php _e('The passwords do not match'); ?>."
           },
 
           <?php osc_run_hook('user_form_validation_messages'); ?>
@@ -324,18 +324,18 @@ class UserForm extends Form {
         },
         messages: {
           s_name: {
-            required: "<?php _e("Name: this field is required"); ?>."
+            required: "<?php echo sprintf(__('%s is required'), __('Name')); ?>."
           },
           s_email: {
-            required: "<?php _e("Email: this field is required"); ?>.",
-            email: "<?php _e("Invalid email address"); ?>."
+            required: "<?php echo sprintf(__('%s is required'), __('Email')); ?>.",
+            email: "<?php _e("The email is not valid"); ?>."
           },
           s_password: {
             minlength: "<?php _e("Password: enter at least 5 characters"); ?>."
           },
           s_password2: {
             minlength: "<?php _e("Second password: enter at least 5 characters"); ?>.",
-            equalTo: "<?php _e("Passwords don't match"); ?>."
+            equalTo: "<?php _e('The passwords do not match'); ?>."
           },
 
           <?php osc_run_hook('user_form_validation_messages'); ?>
@@ -934,7 +934,7 @@ class UserForm extends Form {
       $types = array();
     }
 
-    parent::generic_select('sItemType', $types, 'pk_i_id', 's_name', __('All items'), $selected);
+    parent::generic_select('sItemType', $types, 'pk_i_id', 's_name', __('All listings'), $selected);
   }
 }
 

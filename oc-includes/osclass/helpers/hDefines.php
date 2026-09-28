@@ -950,10 +950,34 @@ function osc_item_url_from_item($item, $locale = '') {
     }
 
 
-    // Replace keywords in URI
+    // Replace keywords in URI. Empty locale follows the current user locale (same title chain as osc_item_title).
+    $cat_locale = osc_locale_code_from_param($locale);
+    $item_title = '';
+    if($cat_locale != '' && isset($item['locale'][$cat_locale]['s_title']) && $item['locale'][$cat_locale]['s_title'] != '') {
+      $item_title = $item['locale'][$cat_locale]['s_title'];
+    }
+    if($item_title == '') {
+      $default_code = osc_language();
+      if($default_code != '' && isset($item['locale'][$default_code]['s_title']) && $item['locale'][$default_code]['s_title'] != '') {
+        $item_title = $item['locale'][$default_code]['s_title'];
+      }
+    }
+    if($item_title == '' && isset($item['locale']) && is_array($item['locale'])) {
+      foreach($item['locale'] as $loc_row) {
+        if(isset($loc_row['s_title']) && $loc_row['s_title'] != '') {
+          $item_title = $loc_row['s_title'];
+          break;
+        }
+      }
+    }
+    if($item_title == '' && isset($item['s_title'])) {
+      $item_title = $item['s_title'];
+    }
+    $item_title = (string)$item_title;
+
     if(preg_match('|{CATEGORIES}|', $uri)) {
       $sanitized_categories = array();
-      $cat = Category::newInstance()->hierarchy(isset($item['fk_i_category_id']) ? $item['fk_i_category_id'] : NULL);
+      $cat = Category::newInstance()->hierarchy(isset($item['fk_i_category_id']) ? $item['fk_i_category_id'] : NULL, $cat_locale);
 
       for($i = count($cat); $i > 0; $i--) {
         // For category based subdomains, do not repeat top category slug, if it is already in URL
@@ -983,7 +1007,7 @@ function osc_item_url_from_item($item, $locale = '') {
     $uri = str_replace('{ITEM_CONTACT_EMAIL}', osc_sanitizeString(isset($item['s_contact_email']) ? str_replace('@', '-at-', $item['s_contact_email']) : ''), $uri);
     $uri = str_replace('{ITEM_CURRENCY_CODE}', osc_sanitizeString(isset($item['fk_c_currency_code']) ? $item['fk_c_currency_code'] : ''), $uri);
     $uri = str_replace('{ITEM_PUB_DATE}', osc_sanitizeString(isset($item['dt_pub_date']) ? date('Y-m-d', strtotime($item['dt_pub_date'])) : ''), $uri);
-    $uri = str_replace('{ITEM_TITLE}', osc_sanitizeString(str_replace(',' , '-' , isset($item['s_title']) ? $item['s_title'] : '')), $uri);
+    $uri = str_replace('{ITEM_TITLE}', osc_sanitizeString(str_replace(',' , '-' , $item_title)), $uri);
     $uri = str_replace('?', '', $uri);
     $uri = str_replace(array('//','///','////','/////','//////'), '/', $uri);
     $uri = ltrim($uri, '/');
@@ -998,16 +1022,16 @@ function osc_item_url_from_item($item, $locale = '') {
       if(!empty($sub_param)) {
         $base_url = osc_subdomain_base_url($sub_param);
 
-        if($locale != '' && substr($base_url, -(strlen($locale)+2)) != '/' . $locale . '/') {
-          $base_url .= $locale . '/';
+        if($locale != '') {
+          $base_url .= osc_base_url_locale_slug($locale) . '/';
         }
       }
     }
 
     // Subdomain url not found
     if($base_url == '') {
-      if($locale != '' && substr($base_url, -(strlen($locale)+2)) != '/' . $locale . '/') {
-        $base_url = osc_base_url() . $locale . '/';
+      if($locale != '') {
+        $base_url = osc_base_url(false, true, $locale);
       } else {
         $base_url = osc_base_url(false, true);
       }

@@ -66,6 +66,56 @@ class CAdminTools extends AdminSecBaseModel {
     return ($is_db || $is_file);
   }
 
+  private function get_debug_log_redirect_url($file = '') {
+    $url = osc_admin_base_url(true) . '?page=tools&action=debug';
+
+    if($file != '') {
+      $url .= '&log_file=' . rawurlencode($file);
+    }
+
+    return $url;
+  }
+
+  private function is_debug_log_filename($name) {
+    $name = basename((string)$name);
+
+    if($name === '' || $name === '.' || $name === '..') {
+      return false;
+    }
+
+    return (strtolower(pathinfo($name, PATHINFO_EXTENSION)) === 'log');
+  }
+
+  private function get_debug_log_full_path($name) {
+    $name = basename((string)$name);
+
+    if(!$this->is_debug_log_filename($name)) {
+      return false;
+    }
+
+    $path = CONTENT_PATH . $name;
+
+    if(!file_exists($path) || !is_file($path)) {
+      return false;
+    }
+
+    $real = realpath($path);
+    $content_real = realpath(CONTENT_PATH);
+
+    if($real === false || $content_real === false) {
+      return false;
+    }
+
+    $real_norm = str_replace('\\', '/', $real);
+    $content_norm = rtrim(str_replace('\\', '/', $content_real), '/') . '/';
+
+    if(strpos($real_norm, $content_norm) !== 0) {
+      return false;
+    }
+
+    return $real;
+  }
+
   private function get_backup_files($path) {
     $files = array();
 
@@ -140,25 +190,88 @@ class CAdminTools extends AdminSecBaseModel {
         break;
 
       case('debug'):       // calling info view
-        $logs = glob(CONTENT_PATH . '/*.log');
+        $logs = glob(CONTENT_PATH . '*.log');
+        if(!is_array($logs)) {
+          $logs = array();
+        }
 
-        $logs = osc_apply_filter("admin_tools_log_files", $logs);
-        $this->_exportVariableToView('log_files', $logs);
+        $logs = osc_apply_filter('admin_tools_log_files', $logs);
+        if(!is_array($logs)) {
+          $logs = array();
+        }
 
-        // if(Params::getParam('log_file') == '') {
-          // Params::setParam('log_file', 'debug.log');
-        // }
+        $log_files = array();
+        $seen = array();
 
+        foreach($logs as $lfile) {
+          $fname = basename((string)$lfile);
+
+          if(isset($seen[$fname]) || !$this->is_debug_log_filename($fname)) {
+            continue;
+          }
+
+          $full_path = $this->get_debug_log_full_path($fname);
+          if($full_path === false) {
+            continue;
+          }
+
+          $size = (int)@filesize($full_path);
+          $seen[$fname] = true;
+          $log_files[] = array(
+            'name' => $fname,
+            'size' => $size,
+            'size_label' => $this->get_backup_size_label($size)
+          );
+        }
+
+        usort($log_files, function($a, $b) {
+          return strcasecmp($a['name'], $b['name']);
+        });
+
+        $this->_exportVariableToView('log_files', $log_files);
         $this->doView('tools/debug.php');
         break;
 
-      case('debug_delete'):       // calling info view
-        $file = Params::getParam('log_file');
+      case('debug_download'):
+        $file = basename((string)Params::getParam('log_file'));
+        $full_path = $this->get_debug_log_full_path($file);
 
-        if(pathinfo($file, PATHINFO_EXTENSION) === 'log') {
-          if(file_exists(CONTENT_PATH . $file)) {
+        if($full_path === false) {
+          osc_add_flash_error_message(sprintf(_m('Log file "%s" has not been found'), $file), 'admin');
+          $this->redirectTo($this->get_debug_log_redirect_url());
+        }
+
+        header('Content-Description: File Transfer');
+        header('Content-Type: application/octet-stream');
+        header('Content-Disposition: attachment; filename="' . basename($file) . '"');
+        header('Content-Transfer-Encoding: binary');
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+        header('Pragma: public');
+        header('Content-Length: ' . filesize($full_path));
+
+        if(function_exists('apache_setenv')) {
+          @apache_setenv('no-gzip', '1');
+        }
+        @ini_set('zlib.output_compression', 'Off');
+
+        while(ob_get_level() > 0) {
+          @ob_end_clean();
+        }
+
+        flush();
+        readfile($full_path);
+        exit;
+        break;
+
+      case('debug_delete'):       // calling info view
+        $file = basename((string)Params::getParam('log_file'));
+        $full_path = $this->get_debug_log_full_path($file);
+
+        if($this->is_debug_log_filename($file)) {
+          if($full_path !== false) {
             osc_add_flash_ok_message(sprintf(_m('Log file "%s" has been removed'), $file), 'admin');
-            @unlink(CONTENT_PATH . $file);
+            @unlink($full_path);
 
           } else {
             osc_add_flash_error_message(sprintf(_m('Log file "%s" has not been found'), $file), 'admin');
@@ -168,7 +281,7 @@ class CAdminTools extends AdminSecBaseModel {
           osc_add_flash_error_message(sprintf(_m('Log file "%s" is invalid and cannot be removed'), $file), 'admin');
         }
 
-        $this->redirectTo(osc_admin_base_url(true) . '?page=tools&action=debug');
+        $this->redirectTo($this->get_debug_log_redirect_url());
         break;
 
       case('logs'):       // calling info view
@@ -495,7 +608,7 @@ class CAdminTools extends AdminSecBaseModel {
 
           case(-2):
             $dbError = function_exists('mysqli_connect_error') ? mysqli_connect_error() : '';
-            $msg = sprintf(_m('Could not connect with the database. Error: %s'), $dbError);
+            $msg = sprintf(_m('Cannot connect to the database. Error: %s'), $dbError);
             osc_add_flash_error_message( $msg, 'admin');
             break;
 
@@ -510,7 +623,7 @@ class CAdminTools extends AdminSecBaseModel {
             break;
 
           default:
-            $msg = _m('Backup completed successfully');
+            $msg = _m('The backup has been completed');
             osc_add_flash_ok_message( $msg, 'admin');
             break;
         }
@@ -536,7 +649,7 @@ class CAdminTools extends AdminSecBaseModel {
 
           case(-2):
             $dbError = function_exists('mysqli_connect_error') ? mysqli_connect_error() : '';
-            $msg = sprintf(_m('Could not connect with the database. Error: %s'), $dbError);
+            $msg = sprintf(_m('Cannot connect to the database. Error: %s'), $dbError);
             osc_add_flash_error_message( $msg, 'admin');
             break;
 
@@ -551,7 +664,7 @@ class CAdminTools extends AdminSecBaseModel {
             break;
 
           default:
-            $msg = _m('Backup completed successfully');
+            $msg = _m('The backup has been completed');
             osc_add_flash_ok_message( $msg, 'admin');
             header('Content-Description: File Transfer');
             header('Content-Type: application/octet-stream');
@@ -582,7 +695,7 @@ class CAdminTools extends AdminSecBaseModel {
         $path = sys_get_temp_dir()."/";
 
         if(osc_zip_folder(osc_base_path(),$path. $filename)) {
-          $msg = _m('Archived successfully!');
+          $msg = _m('The archive has been created');
           osc_add_flash_ok_message( $msg, 'admin');
           header('Content-Description: File Transfer');
           header('Content-Type: application/octet-stream');
@@ -617,7 +730,7 @@ class CAdminTools extends AdminSecBaseModel {
         $archive_folder = osc_base_path();
 
         if(osc_zip_folder($archive_folder, $archive_name) ) {
-          $msg = _m('Archived successfully!');
+          $msg = _m('The archive has been created');
           osc_add_flash_ok_message( $msg, 'admin');
         }else{
           $msg = _m('Error, the zip file was not created in the specified directory');

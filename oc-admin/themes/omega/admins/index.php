@@ -25,7 +25,7 @@ osc_add_hook('help_box','addHelp');
 
 
 function customPageTitle($string) {
-  return sprintf(__('Manage admins - %s'), $string);
+  return sprintf(__('%s - %s'), __('Manage admins'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');
@@ -161,7 +161,7 @@ osc_current_admin_theme_path('parts/header.php');
       <div class="grid-row grid-50">
         <div class="row-wrapper">
           <div class="form-row">
-            <div class="form-label"><?php _e('E-mail'); ?></div>
+            <div class="form-label"><?php _e('Email'); ?></div>
             <div class="form-controls">
               <input id="s_email" name="s_email" type="text" value="<?php echo osc_esc_html(Params::getParam('s_email')); ?>" />
             </div>

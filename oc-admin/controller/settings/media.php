@@ -232,7 +232,7 @@ class CAdminSettingsMedia extends AdminSecBaseModel {
             break;
           }
         } else {
-          osc_add_flash_ok_message(_m('Media config has been updated'), 'admin');
+          osc_add_flash_ok_message(_m('Settings have been updated'), 'admin');
         }
 
         $this->redirectTo(osc_admin_base_url(true).'?page=settings&action=media');
@@ -253,7 +253,7 @@ class CAdminSettingsMedia extends AdminSecBaseModel {
 
       case('images_post'):
         if(defined('DEMO')) {
-          osc_add_flash_warning_message(_m("This action can't be done because it's a demo site"), 'admin');
+          osc_add_flash_warning_message(_m("This action cannot be done because it is a demo site"), 'admin');
           $this->redirectTo(osc_admin_base_url(true).'?page=settings&action=media');
         }
 

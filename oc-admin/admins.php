@@ -48,7 +48,7 @@ class CAdminAdmins extends AdminSecBaseModel {
 
       case('add_post'):
         if(defined('DEMO') ) {
-          osc_add_flash_warning_message( _m("This action can't be done because it's a demo site"), 'admin');
+          osc_add_flash_warning_message( _m("This action cannot be done because it is a demo site"), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=admins');
         }
 
@@ -83,19 +83,19 @@ class CAdminAdmins extends AdminSecBaseModel {
 
         // Checks for legit data
         if(!osc_validate_email($sEmail, true) ) {
-          osc_add_flash_warning_message( _m("Email invalid"), 'admin');
+          osc_add_flash_warning_message( _m("The email is not valid"), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=admins&action=add');
         }
         if(!osc_validate_username($sUserName) ) {
-          osc_add_flash_warning_message( _m("Username invalid"), 'admin');
+          osc_add_flash_warning_message( sprintf(_m('%s is not valid'), __('Username')), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=admins&action=add');
         }
         if($sName == '' ) {
-          osc_add_flash_warning_message( _m("Name invalid"), 'admin');
+          osc_add_flash_warning_message( sprintf(_m('%s is not valid'), __('Name')), 'admin');
           $this->redirectTo(osc_admin_base_url(true).'?page=admins&action=add');
         }
         if($sPassword == '' ) {
-          osc_add_flash_warning_message( _m("Password invalid"), 'admin');
+          osc_add_flash_warning_message( sprintf(_m('%s is not valid'), __('Password')), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=admins&action=add');
         }
         $admin = $this->adminManager->findByEmail($sEmail);
@@ -174,7 +174,7 @@ class CAdminAdmins extends AdminSecBaseModel {
 
       case('edit_post'):
         if(defined('DEMO') ) {
-          osc_add_flash_warning_message( _m("This action can't be done because it's a demo site"), 'admin');
+          osc_add_flash_warning_message( _m("This action cannot be done because it is a demo site"), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=admins');
         }
 
@@ -213,15 +213,15 @@ class CAdminAdmins extends AdminSecBaseModel {
 
         // Checks for legit data
         if(!osc_validate_email($sEmail, true) ) {
-          osc_add_flash_warning_message( _m("Email invalid"), 'admin');
+          osc_add_flash_warning_message( _m("The email is not valid"), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=admins&action=edit&id=' . $adminId);
         }
         if(!osc_validate_username($sUserName) ) {
-          osc_add_flash_warning_message( _m("Username invalid"), 'admin');
+          osc_add_flash_warning_message( sprintf(_m('%s is not valid'), __('Username')), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=admins&action=edit&id=' . $adminId);
         }
         if($sName == '' ) {
-          osc_add_flash_warning_message( _m("Name invalid"), 'admin');
+          osc_add_flash_warning_message( sprintf(_m('%s is not valid'), __('Name')), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=admins&action=edit&id=' . $adminId);
         }
 
@@ -253,7 +253,7 @@ class CAdminAdmins extends AdminSecBaseModel {
           if($sPassword == $sPassword2) {
             $array['s_password'] = osc_hash_password($sPassword);
           } else {
-            osc_add_flash_warning_message( _m("The password couldn't be updated. Passwords don't match"), 'admin');
+            osc_add_flash_warning_message( _m('The password could not be updated. The passwords do not match'), 'admin');
             $this->redirectTo(osc_admin_base_url(true) . '?page=admins&action=edit&id=' . $adminId);
           }
         }
@@ -300,7 +300,7 @@ class CAdminAdmins extends AdminSecBaseModel {
 
       case('delete'):
         if(defined('DEMO') ) {
-          osc_add_flash_warning_message( _m("This action can't be done because it's a demo site"), 'admin');
+          osc_add_flash_warning_message( _m("This action cannot be done because it is a demo site"), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=admins');
         }
         osc_csrf_check();
@@ -322,7 +322,7 @@ class CAdminAdmins extends AdminSecBaseModel {
         $isDeleted = $this->adminManager->deleteBatch( $adminId );
 
         if($isDeleted ) {
-          osc_add_flash_ok_message( _m('The admin has been deleted correctly'), 'admin');
+          osc_add_flash_ok_message( _m('The admin has been deleted'), 'admin');
         } else {
           osc_add_flash_error_message( _m('The admin couldn\'t be deleted'), 'admin');
         }

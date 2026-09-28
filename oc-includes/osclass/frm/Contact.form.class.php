@@ -134,12 +134,12 @@ class ContactForm extends Form {
         },
         messages: {
           yourEmail: {
-            required: "<?php _e( 'Email: this field is required' ); ?>.",
-            email: "<?php _e( 'Invalid email address' ); ?>."
+            required: "<?php echo sprintf(__('%s is required'), __('Email')); ?>.",
+            email: "<?php _e( 'The email is not valid' ); ?>."
           },
           message: {
-            required: "<?php _e( 'Message: this field is required' ); ?>.",
-            minlength: "<?php _e( 'Message: this field is required' ); ?>."
+            required: "<?php echo sprintf(__('%s is required'), __('Message')); ?>.",
+            minlength: "<?php echo sprintf(__('%s is required'), __('Message')); ?>."
           }
         },
         errorLabelContainer: "#error_list",

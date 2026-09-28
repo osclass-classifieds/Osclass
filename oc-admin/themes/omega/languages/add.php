@@ -27,7 +27,7 @@ osc_add_hook('admin_page_header','customPageHeader');
 
 
 function customPageTitle($string) {
-  return sprintf(__('Add language - %s'), $string);
+  return sprintf(__('%s - %s'), __('Add language'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');
@@ -60,10 +60,10 @@ osc_current_admin_theme_path('parts/header.php');
     <?php } else { ?>
       <div class="flashmessage flashmessage-error">
         <a class="btn ico btn-mini ico-close" href="#">×</a>
-        <p><?php _e("Can't install a new language"); ?></p>
+        <p><?php _e("Cannot install this package"); ?></p>
       </div>
       <p class="text">
-        <?php _e("The translations folder is not writable on your server so you can't upload translations from the administration panel. Please make the translation folder writable and try again."); ?>
+        <?php _e('The translations folder is not writable on your server so you cannot upload translations from the administration panel. Please make the translation folder writable and try again.'); ?>
       </p>
       <p class="text">
         <?php _e('To make the directory writable under UNIX execute this command from the shell:'); ?>

@@ -25,8 +25,8 @@
     <?php osc_show_flash_message('admin'); ?>
 
     <div class="flashmessage">
-      <?php _e('Please enter your username or e-mail address'); ?>.<br/>
-      <?php _e('You will receive a new password via e-mail'); ?>.
+      <?php _e('Please enter your username or email address'); ?>.<br/>
+      <?php _e('You will receive a new password by email'); ?>.
     </div>
 
     <form action="<?php echo osc_admin_base_url(true); ?>" method="post">
@@ -34,7 +34,7 @@
       <input type="hidden" name="action" value="recover_post"/>
 
       <p>
-        <label for="user_email"><span><?php _e('E-mail'); ?></span></label>
+        <label for="user_email"><span><?php _e('Email'); ?></span></label>
         <input type="text" name="email" id="user_email" class="input" value="" size="20" tabindex="10"/>
       </p>
 

@@ -43,16 +43,16 @@ function customHead() {
       },
       messages: {
         pk_c_code: {
-          required: '<?php echo osc_esc_js(__('Currency code: this field is required')); ?>.',
+          required: '<?php echo osc_esc_js(sprintf(__('%s is required'), __('Currency code'))); ?>.',
           minlength: '<?php echo osc_esc_js(__('Currency code: length of code must be exactly 3 characters')); ?>.',
           maxlength: '<?php echo osc_esc_js(__('Currency code: length of code must be exactly 3 characters')); ?>.'
         },
         s_description: {
-          required: '<?php echo osc_esc_js(__('Currency symbol: this field is required')); ?>.',
+          required: '<?php echo osc_esc_js(sprintf(__('%s is required'), __('Currency symbol'))); ?>.',
           minlength: '<?php echo osc_esc_js(__('Currency symbol: length of symbol must be at least 1 character')); ?>.'
         },
         s_name: {
-          required: '<?php echo osc_esc_js(__('Name: this field is required')); ?>.',
+          required: '<?php echo osc_esc_js(sprintf(__('%s is required'), __('Name'))); ?>.',
           minlength: '<?php echo osc_esc_js(__('Name: length of currency name must be at least 1 character')); ?>.'
         }
       },

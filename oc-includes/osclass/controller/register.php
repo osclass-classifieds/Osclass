@@ -26,7 +26,7 @@ class CWebRegister extends BaseModel {
     parent::__construct();
 
     if(!osc_users_enabled()) {
-      osc_add_flash_error_message(_m('Users not enabled'));
+      osc_add_flash_error_message(_m('Users are not enabled'));
       $this->redirectTo(osc_base_url());
     }
 
@@ -76,7 +76,7 @@ class CWebRegister extends BaseModel {
           osc_add_flash_ok_message(_m('The user has been created. An activation email has been sent'));
           $this->redirectTo(osc_base_url());
         } else if($success == 2) {
-          osc_add_flash_ok_message(_m('Your account has been created successfully'));
+          osc_add_flash_ok_message(_m('Your account has been created'));
           Params::setParam('action', 'login_post');
           Params::setParam('email', Params::getParam('s_email'));
           Params::setParam('password', Params::getParam('s_password', false, false));

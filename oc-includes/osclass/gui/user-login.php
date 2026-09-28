@@ -32,7 +32,7 @@
             <input type="hidden" name="action" value="login_post" />
 
             <div class="control-group">
-                <label class="control-label" for="email"><?php _e('E-mail', 'sigma'); ?></label>
+                <label class="control-label" for="email"><?php _e('Email', 'sigma'); ?></label>
                 <div class="controls">
                     <?php UserForm::email_login_text(); ?>
                 </div>

@@ -43,7 +43,7 @@ osc_add_hook('admin_page_header','customPageHeader');
 
 
 function customPageTitle($string) {
-  return sprintf(__('Optimization settings - %s'), $string);
+  return sprintf(__('%s - %s'), __('Optimization settings'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');

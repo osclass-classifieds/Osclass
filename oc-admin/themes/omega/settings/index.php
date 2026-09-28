@@ -89,24 +89,24 @@ function customHead() {
       },
       messages: {
         pageTitle: {
-          required: '<?php echo osc_esc_js(__("Page title: this field is required")); ?>.',
-          minlength: '<?php echo osc_esc_js(__("Page title: this field is required")); ?>.'
+          required: '<?php echo osc_esc_js(sprintf(__('%s is required'), __('Page title'))); ?>.',
+          minlength: '<?php echo osc_esc_js(sprintf(__('%s is required'), __('Page title'))); ?>.'
         },
         contactEmail: {
-          required: '<?php echo osc_esc_js(__("Email: this field is required")); ?>.',
-          email: '<?php echo osc_esc_js(__("Invalid email address")); ?>.'
+          required: '<?php echo osc_esc_js(sprintf(__('%s is required'), __('Email'))); ?>.',
+          email: '<?php echo osc_esc_js(__('The email is not valid')); ?>.'
         },
         num_rss_items: {
-          required: '<?php echo osc_esc_js(__("Listings shown in RSS feed: this field is required")); ?>.',
-          digits: '<?php echo osc_esc_js(__("Listings shown in RSS feed: this field must only contain numeric characters")); ?>.'
+          required: '<?php echo osc_esc_js(sprintf(__('%s is required'), __('Listings shown in RSS feed'))); ?>.',
+          digits: '<?php echo osc_esc_js(__('Listings shown in RSS feed: this field must only contain numeric characters')); ?>.'
         },
         max_latest_items_at_home: {
-          required: '<?php echo osc_esc_js(__("Latest listings shown: this field is required")); ?>.',
-          digits: '<?php echo osc_esc_js(__("Latest listings shown: this field must only contain numeric characters")); ?>.'
+          required: '<?php echo osc_esc_js(sprintf(__('%s is required'), __('Latest listings shown'))); ?>.',
+          digits: '<?php echo osc_esc_js(__('Latest listings shown: this field must only contain numeric characters')); ?>.'
         },
         default_results_per_page: {
-          required: '<?php echo osc_esc_js(__("The search page shows: this field is required")); ?>.',
-          digits: '<?php echo osc_esc_js(__("The search page shows: this field must only contain numeric characters")); ?>.'
+          required: '<?php echo osc_esc_js(sprintf(__('%s is required'), __('The search page shows'))); ?>.',
+          digits: '<?php echo osc_esc_js(__('The search page shows: this field must only contain numeric characters')); ?>.'
         }
       },
 
@@ -180,7 +180,7 @@ osc_add_hook('admin_page_header','customPageHeader');
 
 
 function customPageTitle($string) {
-  return sprintf(__('General settings - %s'), $string);
+  return sprintf(__('%s - %s'), __('General settings'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');
@@ -210,7 +210,7 @@ osc_current_admin_theme_path('parts/header.php');
           </div>
 
           <div class="form-row">
-            <div class="form-label"><?php _e('Contact e-mail'); ?></div>
+            <div class="form-label"><?php _e('Contact email'); ?></div>
             <div class="form-controls"><input type="text" class="large" name="contactEmail" value="<?php echo osc_esc_html(osc_contact_email()); ?>"/></div>
           </div>
 
@@ -299,7 +299,7 @@ osc_current_admin_theme_path('parts/header.php');
               <div class="form-label-checkbox">
                 <label>
                   <input type="checkbox" <?php echo (osc_enhance_canonical_url_enabled() ? 'checked="checked"' : ''); ?> name="enhance_canonical_url_enabled" value="1"/>
-                  <?php _e('Improve canonical tags by removing redundant parameters (sort, pagination, ...) and using default language code in canonical URLs'); ?>
+                  <?php _e('Improve canonical tags by removing redundant parameters (sort, pagination, ...)'); ?>
                 </label>
               </div>
             </div>
@@ -554,6 +554,24 @@ osc_current_admin_theme_path('parts/header.php');
               <?php _e('levels at most'); ?>
             </div>
           </div>
+
+          <div class="form-row">
+            <div class="form-label"><?php _e('Bulk expiration options'); ?></div>
+            <div class="form-controls">
+              <?php
+                $categoryBulkExpDefs = osc_category_bulk_expiration_option_defs();
+                $categoryBulkExpSelected = osc_category_bulk_expiration_options_array();
+              ?>
+              <select name="category_bulk_expiration_options[]" multiple="multiple" style="min-width:360px;height:170px;">
+                <?php foreach($categoryBulkExpDefs as $expKey => $expDef) { ?>
+                <option value="<?php echo osc_esc_html($expKey); ?>" <?php echo (in_array($expKey, $categoryBulkExpSelected, true) ? 'selected="selected"' : ''); ?>><?php echo osc_esc_html(osc_category_bulk_expiration_option_label($expKey)); ?></option>
+                <?php } ?>
+              </select>
+              <span class="help-box"><?php _e('These options appear in Categories bulk actions when setting listing expiration. Hold Ctrl/Cmd to select multiple entries. Defaults: 14 days, 1 month, 3 months.'); ?></span>
+            </div>
+          </div>
+
+          <?php osc_run_hook('admin_settings_category_form'); ?>
 
 
           <h2 class="render-title separate-top"><?php _e('Contact settings'); ?></h2>

@@ -40,7 +40,7 @@ osc_add_hook('admin_page_header','customPageHeader');
 
 
 function customPageTitle($string) {
-  return sprintf(__('Widget settings - %s'), $string);
+  return sprintf(__('%s - %s'), __('Widget settings'), $string);
 }
 osc_add_filter('admin_title', 'customPageTitle');
 

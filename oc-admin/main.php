@@ -81,7 +81,7 @@ class CAdminMain extends AdminSecBaseModel {
           }
 
           if($iUpdated > 0) {
-            osc_add_flash_ok_message(_m("Widget settings have been updated"), 'admin');
+            osc_add_flash_ok_message(_m("Settings have been updated"), 'admin');
           }
           $this->redirectTo(osc_admin_base_url(true) . '?page=main&action=settings');
         break;
@@ -159,7 +159,7 @@ class CAdminMain extends AdminSecBaseModel {
         if($status_subscribe != '') {
           switch($status_subscribe) {
             case -1:
-              osc_add_flash_error_message(_m('Entered an invalid email'), 'admin');
+              osc_add_flash_error_message(_m('The email is not valid'), 'admin');
               break;
 
             case 0:
@@ -167,7 +167,7 @@ class CAdminMain extends AdminSecBaseModel {
               break;
 
             case 1:
-              osc_add_flash_ok_message(_m('Subscribed correctly'), 'admin');
+              osc_add_flash_ok_message(_m('You have been subscribed'), 'admin');
               break;
 
             default:

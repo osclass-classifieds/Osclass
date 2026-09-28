@@ -32,7 +32,7 @@ if(isset($prepare['date']) && strtotime('-3 day') < strtotime($prepare['date']) 
 ?>
 
 <?php if(!is_array($products) || count($products) <= 0) { ?>
-  <div class="empty"><?php _e('No products has been found'); ?></div>
+  <div class="empty"><?php _e('No products have been found'); ?></div>
 <?php } else { ?>
   <?php foreach($products as $p) { ?>
     <div class="row">

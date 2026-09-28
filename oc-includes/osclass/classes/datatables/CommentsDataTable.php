@@ -110,7 +110,7 @@ class CommentsDataTable extends DataTable {
     $this->addColumn('status-border', '');
     $this->addColumn('status', __('Status'));
     $this->addColumn('bulkactions', '<input id="check_all" type="checkbox" />');
-    $this->addColumn('item', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('item', $sort, $direction)) . '">' . __('Item') . '</a>');
+    $this->addColumn('item', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('item', $sort, $direction)) . '">' . __('Listing') . '</a>');
     $this->addColumn('author', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('author', $sort, $direction)) . '">' . __('Author') . '</a>');
     $this->addColumn('comment', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('comment', $sort, $direction)) . '">' . __('Comment') . '</a>');
     $this->addColumn('is_reply', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('is_reply', $sort, $direction)) . '">' . __('Is reply to comment') . '</a>');
@@ -163,8 +163,8 @@ class CommentsDataTable extends DataTable {
           $options[] = '<a href="' . osc_admin_base_url(true) . '?page=comments&amp;action=status&amp;id=' . $aRow['pk_i_id'] . '&amp;' . $csrf_token_url .'&amp;value=ACTIVE">' . __('Activate') . '</a>';
         }
 
-        $options[] = '<a href="' . osc_admin_base_url(true) . '?page=items&action=item_edit&id=' . (int)$aRow['fk_i_item_id'] . '">' . __('Edit item') . '</a>';
-        $options[] = '<a href="' . osc_item_url() . '" target="_blank">' . __('View item') . '</a>';
+        $options[] = '<a href="' . osc_admin_base_url(true) . '?page=items&action=item_edit&id=' . (int)$aRow['fk_i_item_id'] . '">' . __('Edit listing') . '</a>';
+        $options[] = '<a href="' . osc_item_url() . '" target="_blank">' . __('View listing') . '</a>';
 
         if(isset($aRow['fk_i_user_id']) && (int)$aRow['fk_i_user_id'] > 0) {
           $options[] = '<a href="' . osc_admin_base_url(true) . '?page=users&amp;action=edit&amp;id=' . (int)$aRow['fk_i_user_id'] . '">' . __('Edit user') . '</a>';

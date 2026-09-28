@@ -42,7 +42,7 @@ class AlertForm extends Form {
   * @return string
   */
   public static function default_email_text() {
-    return __('Enter your e-mail');
+    return __('Enter your email');
   }
 
   /**

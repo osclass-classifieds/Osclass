@@ -67,7 +67,7 @@ function customPageHeader(){
 osc_add_hook('admin_page_header','customPageHeader');
 
 function customPageTitle($string) {
-  return sprintf(__('Appearance - %s'), $string);
+  return sprintf(__('%s - %s'), __('Appearance'), $string);
 }
 osc_add_filter('admin_title', 'customPageTitle');
 
@@ -179,10 +179,10 @@ function customHead2() {
         },
         messages: {
           description: {
-            required: '<?php echo osc_esc_js(__("Description: this field is required")); ?>.'
+            required: '<?php echo osc_esc_js(sprintf(__('%s is required'), __('Description'))); ?>.'
           },
           location: {
-            required: '<?php echo osc_esc_js(__("Section: this field is required")); ?>.'
+            required: '<?php echo osc_esc_js(sprintf(__('%s is required'), __('Section'))); ?>.'
           }
         },
         errorLabelContainer: "#error_list",

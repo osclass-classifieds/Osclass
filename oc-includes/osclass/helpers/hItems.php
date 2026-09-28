@@ -715,6 +715,51 @@ function osc_item_is_spam() {
   return (osc_item_field("b_spam")==1);
 }
 
+/**
+ * Legacy "Mark as spam" link. Opens the report form with spam preselected.
+ *
+ * @return string
+ */
+function osc_item_link_spam() {
+  return osc_item_mark_url('spam');
+}
+
+/**
+ * Legacy "Mark as bad category" link. Opens the report form with misclassified preselected.
+ *
+ * @return string
+ */
+function osc_item_link_bad_category() {
+  return osc_item_mark_url('badcat');
+}
+
+/**
+ * Legacy "Mark as repeated" link. Opens the report form with duplicate preselected.
+ *
+ * @return string
+ */
+function osc_item_link_repeated() {
+  return osc_item_mark_url('repeated');
+}
+
+/**
+ * Legacy "Mark as offensive" link. Opens the report form with abusive preselected.
+ *
+ * @return string
+ */
+function osc_item_link_offensive() {
+  return osc_item_mark_url('offensive');
+}
+
+/**
+ * Legacy "Mark as expired" link. Opens the report form with sold preselected.
+ *
+ * @return string
+ */
+function osc_item_link_expired() {
+  return osc_item_mark_url('expired');
+}
+
 // DEPRECATED: This function will be removed in version 4.0
 function osc_list_page() {
   return osc_search_page();

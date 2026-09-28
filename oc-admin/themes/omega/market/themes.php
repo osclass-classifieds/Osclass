@@ -204,10 +204,10 @@ osc_current_admin_theme_path( 'market/header.php' );
                   <a class="mkt-update btn btn-gray is-update" href="<?php echo $p['s_download_url']; ?>" data-product-key="<?php echo osc_esc_html($p['s_product_key']); ?>"><i class="fa fa-refresh"></i> <?php _e('Update'); ?></a>
 
                 <?php } elseif($pstat != 'NOT' && $need_update && ($p['b_purchased'] == 1 || $p['i_price'] <= 0) && $compatible_from && $compatible_to && $pstat == 'ACTIVATED') { ?>
-                  <a href="#" onclick="return false;" class="btn btn-gray" title="<?php echo osc_esc_html(__('Theme must be deactivated before update')); ?>"><i class="fa fa-exclamation-circle"></i> <?php _e('Can\'t update'); ?></a>
+                  <a href="#" onclick="return false;" class="btn btn-gray" title="<?php echo osc_esc_html(__('Theme must be deactivated before update')); ?>"><i class="fa fa-exclamation-circle"></i> <?php _e('Cannot update'); ?></a>
 
                 <?php } elseif($pstat != 'NOT' && $need_update && ($p['b_purchased'] == 1 || $p['i_price'] <= 0)) { ?>
-                  <a href="#" onclick="return false;" class="btn btn-gray" title="<?php echo osc_esc_html(__('Not compatible with your osclass version')); ?>"><i class="fa fa-exclamation-circle"></i> <?php _e('Can\'t update'); ?></a>
+                  <a href="#" onclick="return false;" class="btn btn-gray" title="<?php echo osc_esc_html(__('Not compatible with your osclass version')); ?>"><i class="fa fa-exclamation-circle"></i> <?php _e('Cannot update'); ?></a>
 
                 <?php } else if(($p['b_purchased'] == 1 || $p['i_price'] <= 0) && $pstat == 'NOT') { ?>
                   <a class="mkt-update btn btn-gray" href="<?php echo $p['s_download_url']; ?>" data-product-key="<?php echo osc_esc_html($p['s_product_key']); ?>"><i class="fa fa-download"></i> <?php _e('Download'); ?></a>
@@ -389,9 +389,9 @@ osc_current_admin_theme_path( 'market/header.php' );
           content += oscEscapeHTML(data.message);
 
           if(elem.hasClass('is-update')) {
-            content += '<h3><?php echo osc_esc_js(__('Theme has been updated correctly.')); ?></h3>';
+            content += '<h3><?php echo osc_esc_js(__('The package has been updated')); ?></h3>';
           } else {
-            content += '<h3><?php echo osc_esc_js(__('Theme has been downloaded correctly.')); ?></h3>';
+            content += '<h3><?php echo osc_esc_js(__('The package has been downloaded')); ?></h3>';
           }
 
           content += "<p>";

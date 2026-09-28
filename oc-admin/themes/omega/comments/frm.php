@@ -44,7 +44,7 @@ function customPageTitle($string) {
   if(isset($comment['pk_i_id'])) {
     return sprintf(__('Edit comment #%s - %s'), $comment['pk_i_id'], $string);
   }
-  return sprintf(__('Add comment - %s'), $string);
+  return sprintf(__('%s - %s'), __('Add comment'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');
@@ -132,7 +132,7 @@ if(Params::getParam('itemId') > 0) {
       </div>
 
       <div class="form-row">
-        <div class="form-label"><?php _e("Author's e-mail"); ?></div>
+        <div class="form-label"><?php _e("Author's email"); ?></div>
         <div class="form-controls">
           <?php CommentForm::email_input_text($comment); ?>
         </div>

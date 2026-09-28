@@ -39,7 +39,7 @@
                 </div>
             </div>
             <div class="control-group">
-                <label class="control-label" for="email"><?php _e('E-mail', 'sigma'); ?></label>
+                <label class="control-label" for="email"><?php _e('Email', 'sigma'); ?></label>
                 <div class="controls">
                     <?php UserForm::email_text(); ?>
                 </div>
@@ -55,7 +55,7 @@
                 <div class="controls">
                     <?php UserForm::check_password_text(); ?>
                     <p id="password-error" style="display:none;">
-                        <?php _e("Passwords don't match", 'sigma'); ?>
+                        <?php _e('The passwords do not match', 'sigma'); ?>
                     </p>
                 </div>
             </div>

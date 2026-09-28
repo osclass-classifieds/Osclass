@@ -84,19 +84,22 @@ $cron = Cron::newInstance()->getCronByType('MINUTELY');
 
 if(is_array($cron)) {
   $i_next = (isset($cron['d_next_exec']) && $cron['d_next_exec'] !== '' ? (strtotime($cron['d_next_exec']) ?: 0) : 0);
+  $i_last = (isset($cron['d_last_exec']) && $cron['d_last_exec'] !== '' ? (strtotime($cron['d_last_exec']) ?: 0) : 0);
+  // auto_cron=1: parent claimed d_next_exec; still require last run older than ~5 min (blocks forced re-entry)
+  $from_auto_cron = (!CLI && Params::getParam('auto_cron') == 1 && ($i_now - $i_last + $shift_seconds_minutely) >= (5 * 60));
 
   if((CLI && $type === 'minutely')
     || ($force && $type === 'minutely')
+    || $from_auto_cron
     || (!CLI && ($i_now - $i_next + $shift_seconds_minutely) >= 0)
   ) {
-    // Update the next execution time in t_cron
+    // Update t_cron first, then run work (avoids re-entry if PHP fatals mid-job)
     $d_next = date('Y-m-d H:i:s', $i_now_truncated + (5 * 60));  // once per 5 minutes
-    $d_last_exec = ($force_last_exec != '' ? $force_last_exec : ($cron['d_last_exec'] ?? ''));
+    $d_last_exec = ($force_last_exec != '' ? $force_last_exec : (isset($cron['d_last_exec']) ? $cron['d_last_exec'] : ''));
+    Cron::newInstance()->update(array('d_last_exec' => $d_now, 'd_next_exec' => $d_next), array('e_type' => 'MINUTELY'));
 
     $messages[] = str_repeat('-', 100);
     $messages[] = ' > ' . sprintf(__('Starting cron type "%s", last run: %s, next run at %s'), 'MINUTELY', ($cron['d_last_exec'] ?? '-'), $d_next);
-
-    Cron::newInstance()->update(array('d_last_exec' => $d_now, 'd_next_exec' => $d_next), array('e_type' => 'MINUTELY'));
 
     osc_runAlert('INSTANT', $d_last_exec);
     $messages[] = ' >>> ' . sprintf(__('Executed explicit function "%s"'), 'osc_runAlert(INSTANT)');

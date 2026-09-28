@@ -171,7 +171,7 @@ class LogsDataTable extends DataTable {
         $actions = $this->buildRowActions($options, $options_more, 8);
         $details = '<div id="details-' . $detail_id . '" class="log-details" style="display:none;"><code>'. ($aRow['s_detail'] <> '' ? $aRow['s_detail'] : '- ' . __('No details found') . ' -') .'</code></div>'.PHP_EOL;
 
-        $row['bulkactions'] = '<input type="checkbox" name="id[]" value="' . $delete_token . '" /></div>';
+        $row['bulkactions'] = '<input type="checkbox" name="id[]" value="' . $delete_token . '" />';
 
         $section_value = ($aRow['s_section'] <> '' ? $aRow['s_section'] : '-');
         if($section_value != '-') {

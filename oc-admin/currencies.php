@@ -120,7 +120,7 @@ class CAdminCurrencies extends AdminSecBaseModel {
         $currencyCode = trim(strip_tags($currencyCode));
 
         if(!preg_match('/.{1,3}/', $currencyCode)) {
-          osc_add_flash_error_message(_m('Error: the currency code is not in the correct format'), 'admin');
+          osc_add_flash_error_message(_m('The currency code is not in the correct format'), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=currencies');
         }
 
@@ -258,7 +258,7 @@ class CAdminCurrencies extends AdminSecBaseModel {
             continue;
           }
           if($currencyCode == osc_currency()) {
-            $msg_current .= sprintf('</p><p>' . _m("%s can't be disabled because it's the default currency"), $currencyCode);
+            $msg_current .= sprintf('</p><p>' . _m('%s cannot be disabled because it is the default currency'), $currencyCode);
             continue;
           }
           $rowChanged += (int)Currency::newInstance()->update(array('b_enabled' => 0), array('pk_c_code' => $currencyCode));

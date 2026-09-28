@@ -124,7 +124,7 @@ function customPageHeader() {
 }
 
 function customPageTitle($string) {
-  return sprintf(__('Upgrade - %s'), $string);
+  return sprintf(__('%s - %s'), __('Upgrade'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');
@@ -155,7 +155,7 @@ osc_current_admin_theme_path( 'parts/header.php' );
             </p>
           <?php } else { ?>
             <p class="text">
-              <?php _e("Your Osclass installation can't be auto-upgraded. Files and folders need to be writable. You can apply write permissions via SSH with the command \"chmod -R a+w *\" (without quotes) or via an FTP client, it depends on the program so we can not provide more information. You can also upgrade Osclass by downloading the upgrade package, unzipping it and replacing the files on your server with the ones in the package."); ?>
+              <?php _e('Your Osclass installation cannot be auto-upgraded. Files and folders need to be writable. You can apply write permissions via SSH with the command "chmod -R a+w *" (without quotes) or via an FTP client, it depends on the program so we cannot provide more information. You can also upgrade Osclass by downloading the upgrade package, unzipping it and replacing the files on your server with the ones in the package.'); ?>
             </p>
           <?php } ?>
             <div id="steps_div">

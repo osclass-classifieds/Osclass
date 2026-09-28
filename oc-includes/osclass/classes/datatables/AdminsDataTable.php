@@ -77,7 +77,7 @@ class AdminsDataTable extends DataTable {
     $this->addColumn('bulkactions', '<input id="check_all" type="checkbox" />');
     $this->addColumn('username', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('username', $sort, $direction)) . '">' . __('Username') . '</a>');
     $this->addColumn('name', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('name', $sort, $direction)) . '">' . __('Name') . '</a>');
-    $this->addColumn('email', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('email', $sort, $direction)) . '">' . __('E-mail') . '</a>');
+    $this->addColumn('email', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('email', $sort, $direction)) . '">' . __('Email') . '</a>');
     $this->addColumn('type', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('type', $sort, $direction)) . '">' . __('Type') . '</a>');
 
     $dummy = &$this;
@@ -102,7 +102,7 @@ class AdminsDataTable extends DataTable {
         $options = osc_apply_filter('actions_manage_admins', $options, $aRow);
         $actions = $this->buildRowActions($options, $options_more, 8);
 
-        $row['bulkactions'] = '<input type="checkbox" name="id[]" value="' . $aRow['pk_i_id'] . '" /></div>';
+        $row['bulkactions'] = '<input type="checkbox" name="id[]" value="' . $aRow['pk_i_id'] . '" />';
         $row['username'] = osc_esc_html($aRow['s_username']) . $actions;
         $row['name'] = osc_esc_html($aRow['s_name']);
         $row['email'] = osc_esc_html($aRow['s_email']);

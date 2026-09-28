@@ -125,7 +125,8 @@ body.translations-edit #content-page {padding-bottom:20px!important;}
 #btn-test-it2.loading {opacity:0.5;cursor:wait;}
 #btn-test-it2.loading i {display:block;}
 
-.widget-box-title select[name="log_file"] {float: left; height: 27px; padding: 0 4px; font-size: 13px; min-width: 100px; width: auto; margin: -5px 0 0 12px;}
+.widget-box-title select[name="log_file"] {float: left; height: 27px; padding: 0 4px; font-size: 13px; min-width: 100px; max-width: 160px; width: auto; margin: -5px 0 0 12px;}
+.widget-box-title h3 form {width: auto;}
 .widget-box-content.dbgfl {min-height:320px;}
 
 
@@ -1079,7 +1080,7 @@ table {max-width:100%;background-color:transparent;border-spacing:0}
 td.children-cat, #widget-items-category .table td.children-cat {padding-left:20px}
 table.table-small {width:280px}
 strong.code {font-family:monospace;}
-.widget-box.debg.cnf .widget-box-content > p {display: flex; flex-wrap: nowrap; justify-content: space-between; align-items: center;}
+.widget-box.debg.cnf .widget-box-content > p {display: flex; flex-wrap: nowrap; justify-content: space-between; align-items: center;word-wrap: break-word; word-break: break-word;}
 .widget-box.debg .widget-box-content > p > strong {width:100%;display:inline-block;}
 .widget-box.debg .widget-box-content > p > span i {margin-right:3px;}
 .widget-box.debg .widget-box-content span.bubble {display:none!important;background: #333; color: #fff; padding: 2px 4px; font-size: 11px; line-height: 12px; font-family: consolas; border-radius: 5px;}
@@ -1576,7 +1577,7 @@ body .ui-dialog .table {min-width:0;}
   #datatablesForm #bulk-actions {float:left;margin: 0 0 10px 0;position:relative;top:auto;left:auto;clear:both;}
   #listing-toolbar .float-right {float:left!important;}
   #listing-toolbar, .table-toolbar {height:auto;margin-bottom:10px;float:left;clear:both;}
-  #stats-page > .grid-row.grid-50 {width:100%;}
+  #stats-page > .grid-row.grid-30, #stats-page > .grid-row.grid-70 {width:100%;}
   #stats-page .btn-group,
   #stats-page .btn-group.float-right {float:left!important;}
   #stats-page .stats-main .graph-placeholder {height:280px;}

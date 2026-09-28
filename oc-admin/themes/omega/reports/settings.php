@@ -42,16 +42,16 @@ function customHead() {
       },
       messages: {
         reports_per_day: {
-          required: '<?php echo osc_esc_js(__("Reports per day: this field is required")); ?>.',
-          digits: '<?php echo osc_esc_js(__("Reports per day: this field must only contain numeric characters")); ?>.'
+          required: '<?php echo osc_esc_js(sprintf(__('%s is required'), __('Reports per day'))); ?>.',
+          digits: '<?php echo osc_esc_js(__('Reports per day: this field must only contain numeric characters')); ?>.'
         },
         reports_auto_close_days: {
-          required: '<?php echo osc_esc_js(__("Auto-close days: this field is required")); ?>.',
-          digits: '<?php echo osc_esc_js(__("Auto-close days: this field must only contain numeric characters")); ?>.'
+          required: '<?php echo osc_esc_js(sprintf(__('%s is required'), __('Auto-close days'))); ?>.',
+          digits: '<?php echo osc_esc_js(__('Auto-close days: this field must only contain numeric characters')); ?>.'
         },
         reports_retention_months: {
-          required: '<?php echo osc_esc_js(__("Retention months: this field is required")); ?>.',
-          digits: '<?php echo osc_esc_js(__("Retention months: this field must only contain numeric characters")); ?>.'
+          required: '<?php echo osc_esc_js(sprintf(__('%s is required'), __('Retention months'))); ?>.',
+          digits: '<?php echo osc_esc_js(__('Retention months: this field must only contain numeric characters')); ?>.'
         }
       },
       wrapper: "li",
@@ -104,7 +104,7 @@ osc_add_hook('admin_page_header','customPageHeader');
 
 
 function customPageTitle($string) {
-  return sprintf(__('Reports settings - %s'), $string);
+  return sprintf(__('%s - %s'), __('Reports settings'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');

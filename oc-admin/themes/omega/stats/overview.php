@@ -58,7 +58,7 @@ function customPageHeader() {
 osc_add_hook('admin_page_header', 'customPageHeader');
 
 function customPageTitle($string) {
-  return sprintf(__('Statistics overview - %s'), $string);
+  return sprintf(__('%s - %s'), __('Statistics overview'), $string);
 }
 osc_add_filter('admin_title', 'customPageTitle');
 
@@ -86,7 +86,7 @@ function customHead() {
     array('s_label' => __('Blocked'), 'num' => (int)(isset($comments_by_status['blocked']) ? $comments_by_status['blocked'] : 0))
   );
   $chart_color = omg_current_color_scheme_chart();
-  echo '<link rel="stylesheet" href="' . osc_esc_html(osc_assets_url('css/item-stats.css')) . '" />';
+  echo '<link rel="stylesheet" href="' . osc_esc_html(osc_assets_url('css/user-stats.css')) . '" />';
   $view_chart = array();
   $view_labels = array(__('Date'));
   $view_colors = array();
@@ -149,10 +149,10 @@ if(!is_array($comments_by_status)) {
 $comments_by_status_sum = (int)(isset($comments_by_status['pending']) ? $comments_by_status['pending'] : 0) + (int)(isset($comments_by_status['active']) ? $comments_by_status['active'] : 0) + (int)(isset($comments_by_status['blocked']) ? $comments_by_status['blocked'] : 0);
 ?>
 <div class="grid-system" id="stats-page">
-  <div class="grid-row grid-50">
+  <div class="grid-row grid-30">
     <div class="row-wrapper"><h2 class="render-title"><?php _e('Overview'); ?></h2></div>
   </div>
-  <div class="grid-row grid-50">
+  <div class="grid-row grid-70">
     <div class="row-wrapper"><?php echo osc_admin_stats_period_links('overview'); ?></div>
   </div>
   <div class="grid-row grid-100">

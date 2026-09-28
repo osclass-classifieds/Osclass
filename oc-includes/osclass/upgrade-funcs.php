@@ -966,6 +966,20 @@ if($current_version < 840) {
   $comm->query(sprintf("ALTER TABLE %st_widget DROP COLUMN s_content", DB_TABLE_PREFIX));
   $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'widget_locale_strict', '0', 'BOOLEAN')", DB_TABLE_PREFIX));
   $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'widget_custom_sections', '', 'STRING')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'category_bulk_expiration_options', '14d,1m,3m', 'STRING')", DB_TABLE_PREFIX));
+
+  // Alert notification emails: replace unmodified en_US stock bodies, then append manage-alerts sentence if missing
+  $alert_email_new = '<p>Hi {USER_NAME},</p><p>{ALERT_INTRO}</p><p>{ADS}</p><p><hr/></p><p><b>{ALERT_NAME}</b><br />Frequency: {ALERT_FREQUENCY}<br />Created: {ALERT_DATE}<br />Expires: {ALERT_EXPIRE_DATE}</p><p>Open this alert in search: {SEARCH_LINK}</p><p>To unsubscribe from this alert, click on: {UNSUB_LINK}</p><p>You can manage your alerts in {USER_ALERTS_LINK}.</p><p>{WEB_LINK}</p>';
+  $alert_email_old = array(
+    'alert_email_hourly' => '<p>Hi {USER_NAME},</p><p>New listings have been published in the last hour. Take a look at them:</p><p>{ADS}</p><p><hr/></p><p>To unsubscribe from this alert, click on: {UNSUB_LINK}</p><p>{WEB_LINK}</p>',
+    'alert_email_daily' => '<p>Hi {USER_NAME},</p><p>New listings have been published in the last day. Take a look at them:</p><p>{ADS}</p><p><hr/></p><p>To unsubscribe from this alert, click on: {UNSUB_LINK}</p><p>{WEB_LINK}</p>',
+    'alert_email_weekly' => '<p>Hi {USER_NAME},</p><p>New listings have been published in the last week. Take a look at them:</p><p>{ADS}</p><p><hr/></p><p>To unsubscribe from this alert, click on: {UNSUB_LINK}</p><p>{WEB_LINK}</p>',
+    'alert_email_instant' => '<p>Hi {USER_NAME},</p><p>A new listing has been published, check it out!</p><p>{ADS}</p><p><hr/></p><p>To unsubscribe from this alert, click on: {UNSUB_LINK}</p><p>{WEB_LINK}</p>'
+  );
+  foreach($alert_email_old as $alert_email_name => $alert_email_text) {
+    $comm->query(sprintf("UPDATE %st_pages_description pd INNER JOIN %st_pages p ON p.pk_i_id = pd.fk_i_pages_id SET pd.s_text = '%s' WHERE p.s_internal_name = '%s' AND pd.fk_c_locale_code = 'en_US' AND pd.s_text = '%s'", DB_TABLE_PREFIX, DB_TABLE_PREFIX, addslashes($alert_email_new), addslashes($alert_email_name), addslashes($alert_email_text)));
+  }
+  $comm->query(sprintf("UPDATE %st_pages_description pd INNER JOIN %st_pages p ON p.pk_i_id = pd.fk_i_pages_id SET pd.s_text = CONCAT(pd.s_text, '%s') WHERE p.s_internal_name IN ('alert_email_hourly', 'alert_email_daily', 'alert_email_weekly', 'alert_email_instant') AND pd.s_text NOT LIKE '%%{USER_ALERTS_LINK}%%'", DB_TABLE_PREFIX, DB_TABLE_PREFIX, addslashes('<p>You can manage your alerts in {USER_ALERTS_LINK}.</p>')));
 
   $updated_version = 840;       // Version 8.4.0
 }
@@ -995,7 +1009,7 @@ if(!defined('IS_AJAX') || !IS_AJAX) {
     echo '<script type="text/javascript"> window.location = "'.osc_admin_base_url(true).'?page=tools&action=version"; </script>';
   } else {
     echo '<div class="well ui-rounded-corners separate-top-medium">';
-    echo '<p>'.__('Osclass updated correctly').'</p>';
+    echo '<p>'.__('Osclass has been updated').'</p>';
     echo '<p>'.__('Osclass has been updated successfully. <a href="https://forums.osclasspoint.com">Need more help?</a>').'</p>';
     foreach($aMessages as $msg) {
       echo '<p>' . $msg . '</p>';

@@ -36,7 +36,7 @@ class CAdminTranslations extends AdminSecBaseModel {
     switch($this->action) {
       case('edit'):
         if(defined('DEMO')) {
-          osc_add_flash_warning_message( _m("This action can't be done because it's a demo site"), 'admin');
+          osc_add_flash_warning_message( _m("This action cannot be done because it is a demo site"), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=translations');
         }
 
@@ -79,7 +79,7 @@ class CAdminTranslations extends AdminSecBaseModel {
 
       case('edit_post'):
         if(defined('DEMO')) {
-          osc_add_flash_warning_message( _m("This action can't be done because it's a demo site"), 'admin');
+          osc_add_flash_warning_message( _m("This action cannot be done because it is a demo site"), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=translations');
         }
 
@@ -268,14 +268,14 @@ class CAdminTranslations extends AdminSecBaseModel {
           }
         }
 
-        osc_add_flash_ok_message(_m('Translations has been updated'), 'admin');
+        osc_add_flash_ok_message(_m('Translations have been updated'), 'admin');
 
         $this->redirectTo(osc_admin_base_url(true) . '?page=translations&action=edit&language=' . Params::getParam('language') . '&type=' . Params::getParam('type') . '&section=' . Params::getParam('section') . '&theme=' . Params::getParam('theme') . '&plugin=' . Params::getParam('plugin'));
         break;
 
       case('update_from_source'):
         if(defined('DEMO')) {
-          osc_add_flash_warning_message( _m("This action can't be done because it's a demo site"), 'admin');
+          osc_add_flash_warning_message( _m("This action cannot be done because it is a demo site"), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=translations');
         }
 
@@ -371,9 +371,9 @@ class CAdminTranslations extends AdminSecBaseModel {
         $mo_generator->generateFile($data, $path_mo);
 
         if($is_new) {
-          osc_add_flash_ok_message(_m('Translations has been successfully created from source code.'), 'admin');
+          osc_add_flash_ok_message(_m('Translations have been created from source code.'), 'admin');
         } else {
-          osc_add_flash_ok_message(_m('Translations has been successfully updated from source code.'), 'admin');
+          osc_add_flash_ok_message(_m('Translations have been updated from source code.'), 'admin');
         }
 
         $this->redirectTo(osc_admin_base_url(true) . '?page=translations&action=edit&language=' . Params::getParam('language') . '&type=' . Params::getParam('type') . '&section=' . Params::getParam('section') . '&theme=' . Params::getParam('theme') . '&plugin=' . Params::getParam('plugin'));
@@ -522,7 +522,7 @@ class CAdminTranslations extends AdminSecBaseModel {
 
       case('remove'):
         if(defined('DEMO')) {
-          osc_add_flash_warning_message( _m("This action can't be done because it's a demo site"), 'admin');
+          osc_add_flash_warning_message( _m("This action cannot be done because it is a demo site"), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=translations');
         }
 
@@ -540,13 +540,13 @@ class CAdminTranslations extends AdminSecBaseModel {
         osc_deleteDir($dir_path);
         @unlink($dir_path);
 
-        osc_add_flash_ok_message(_m('Translation successfully removed'), 'admin');
+        osc_add_flash_ok_message(_m('The translation has been removed'), 'admin');
         $this->redirectTo(osc_admin_base_url(true) . '?page=translations&action=edit&language=' . Params::getParam('language') . '&type=' . Params::getParam('type') . '&section=' . Params::getParam('section') . '&theme=' . Params::getParam('theme') . '&plugin=' . Params::getParam('plugin'));
         break;
 
       case('copy'):
         if(defined('DEMO')) {
-          osc_add_flash_warning_message( _m("This action can't be done because it's a demo site"), 'admin');
+          osc_add_flash_warning_message( _m("This action cannot be done because it is a demo site"), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=translations');
         }
 

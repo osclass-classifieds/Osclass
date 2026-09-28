@@ -54,7 +54,7 @@ function customPageHeader() {
 osc_add_hook('admin_page_header', 'customPageHeader');
 
 function customPageTitle($string) {
-  return sprintf(__('Listing details - %s'), $string);
+  return sprintf(__('%s - %s'), __('Listing details'), $string);
 }
 osc_add_filter('admin_title', 'customPageTitle');
 
@@ -76,7 +76,7 @@ function customHead() {
     }
     $chart_rows[$row['d_date']] = $vals;
   }
-  echo '<link rel="stylesheet" href="' . osc_esc_html(osc_assets_url('css/item-stats.css')) . '" />';
+  echo '<link rel="stylesheet" href="' . osc_esc_html(osc_assets_url('css/user-stats.css')) . '" />';
   echo osc_admin_stats_chart_js(array(
     array('id' => 'placeholder-details', 'type' => 'area', 'labels' => $labels, 'rows' => $chart_rows, 'colors' => $colors, 'legendFontSize' => 10, 'chartAreaBottom' => 140)
   ), array('page' => 'details'));
@@ -98,10 +98,10 @@ $qs = array(
 $csv = osc_admin_base_url(true) . '?' . http_build_query($qs) . '&action=details_csv&' . osc_csrf_token_url();
 ?>
 <div class="grid-system" id="stats-page">
-  <div class="grid-row grid-50">
+  <div class="grid-row grid-30">
     <div class="row-wrapper"><h2 class="render-title"><?php _e('Listing details'); ?></h2></div>
   </div>
-  <div class="grid-row grid-50">
+  <div class="grid-row grid-70">
     <div class="row-wrapper"><?php echo osc_admin_stats_period_links('details'); ?></div>
   </div>
   <div class="grid-row grid-100">

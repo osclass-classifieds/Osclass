@@ -121,7 +121,7 @@ $locales  = OSCLocale::newInstance()->listAllEnabled();
         error: function(){
           $(".jsMessage").fadeIn("fast");
           $(".jsMessage p").attr('class', '');
-          $(".jsMessage p").html('<?php echo osc_esc_js(__('Ajax error, please try again.')); ?>');
+          $(".jsMessage p").html('<?php echo osc_esc_js(__('Ajax error. Please try again.')); ?>');
         }
       });
       return false;

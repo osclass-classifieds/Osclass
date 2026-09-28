@@ -35,7 +35,7 @@ function addHelp() {
   echo '<ul>';
   echo '<li><strong>' . osc_report_status_label('submitted') . '</strong>: ' . __('New report.') . '</li>';
   echo '<li><strong>' . osc_report_status_label('in_review') . '</strong>: ' . __('Under review.') . '</li>';
-  echo '<li><strong>' . osc_report_status_label('on_hold') . '</strong>: ' . __('Paused.') . '</li>';
+  echo '<li><strong>' . osc_report_status_label('on_hold') . '</strong>: ' . __('Paused') . '</li>';
   echo '<li><strong>' . osc_report_status_label('awaiting_feedback') . '</strong>: ' . __('Ask the reported user for a reply on front.') . '</li>';
   echo '<li><strong>' . osc_report_status_label('resolved') . '</strong> / <strong>' . osc_report_status_label('rejected') . '</strong> / <strong>' . osc_report_status_label('cancelled') . '</strong>: ' . __('Close the report.') . '</li>';
   echo '</ul>';

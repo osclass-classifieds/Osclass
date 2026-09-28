@@ -72,7 +72,7 @@ class CAdminSettingsOptimization extends AdminSecBaseModel
         $iUpdated += osc_set_preference('optimization_cleanup_frequency', $cleanupFrequency);
 
         if($iUpdated > 0) {
-          osc_add_flash_ok_message( _m("Optimization settings have been updated"), 'admin');
+          osc_add_flash_ok_message( _m("Settings have been updated"), 'admin');
         }
 
         $this->redirectTo(osc_admin_base_url(true) . '?page=settings&action=optimization#database-settings');
@@ -81,7 +81,7 @@ class CAdminSettingsOptimization extends AdminSecBaseModel
       case('optimization_clean'):
         osc_clean_optimization_files();
 
-        osc_add_flash_ok_message(_m("Optimized CSS & JS files has been removed"), 'admin');
+        osc_add_flash_ok_message(_m("Optimized CSS and JS files have been removed"), 'admin');
         $this->redirectTo(osc_admin_base_url(true) . '?page=settings&action=optimization#database-settings');
       break;
 
@@ -109,7 +109,7 @@ class CAdminSettingsOptimization extends AdminSecBaseModel
         $iUpdated += osc_set_preference('database_optimization_operations', implode(',', $dbOperationsList));
 
         if($iUpdated > 0) {
-          osc_add_flash_ok_message( _m("Database optimization settings have been updated"), 'admin');
+          osc_add_flash_ok_message( _m("Settings have been updated"), 'admin');
         }
 
         $this->redirectTo(osc_admin_base_url(true) . '?page=settings&action=optimization');

@@ -44,7 +44,7 @@ class CAdminLanguages extends AdminSecBaseModel {
 
       case('add_post'):       // adding a new language
         if(defined('DEMO')) {
-          osc_add_flash_warning_message(_m("This action can't be done because it's a demo site"), 'admin');
+          osc_add_flash_warning_message(_m("This action cannot be done because it is a demo site"), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=languages');
         }
 
@@ -67,7 +67,7 @@ class CAdminLanguages extends AdminSecBaseModel {
 
           case(1):
             if(osc_checkLocales()) {
-              $msg = _m('The language has been installed correctly');
+              $msg = _m('The language has been installed');
               osc_add_flash_ok_message($msg, 'admin');
             } else {
               $msg = _m('File uploaded but unable to activate the language');
@@ -81,14 +81,14 @@ class CAdminLanguages extends AdminSecBaseModel {
             break;
 
           case(3):
-            $msg = _m('No file was uploaded');
+            $msg = _m('No files were uploaded');
             osc_add_flash_warning_message($msg, 'admin');
             $this->redirectTo(osc_admin_base_url(true) . '?page=languages&action=add');
             break;
 
           case(-1):
           default:
-            $msg = _m('There was a problem adding the language');
+            $msg = _m('There was a problem adding this package');
             osc_add_flash_error_message($msg, 'admin');
             break;
         }
@@ -154,16 +154,16 @@ class CAdminLanguages extends AdminSecBaseModel {
 
         $msg = '';
         if(!osc_validate_text($languageName)) {
-          $msg .= _m('Language name field is required') . '<br/>';
+          $msg .= sprintf(_m('%s is required'), __('Language name')) . '<br/>';
         }
         if(!osc_validate_text($languageShortName)) {
-          $msg .= _m('Language short name field is required') . '<br/>';
+          $msg .= sprintf(_m('%s is required'), __('Language short name')) . '<br/>';
         }
         if(!osc_validate_text($languageDescription)) {
-          $msg .= _m('Language description field is required') . '<br/>';
+          $msg .= sprintf(_m('%s is required'), __('Language description')) . '<br/>';
         }
         if(!osc_validate_text($languageCurrencyFormat)) {
-          $msg .= _m('Currency format field is required') . '<br/>';
+          $msg .= sprintf(_m('%s is required'), __('Currency format')) . '<br/>';
         }
         if(!osc_validate_int($languageNumDec)) {
           $msg .= _m('Number of decimals must only contain numeric characters') . '<br/>';
@@ -248,7 +248,7 @@ class CAdminLanguages extends AdminSecBaseModel {
 
         foreach($id as $i) {
           if(osc_language() == $i) {
-            $msg_warning = sprintf(_m("%s can't be disabled because it's the default language"), osc_language());
+            $msg_warning = sprintf(_m("%s cannot be disabled because it is the default language"), osc_language());
             continue;
           }
 
@@ -309,7 +309,7 @@ class CAdminLanguages extends AdminSecBaseModel {
 
         foreach($id as $i) {
           if(osc_language() == $i) {
-            $msg_warning = sprintf(_m("%s can't be disabled because it's the default language"), osc_language());
+            $msg_warning = sprintf(_m("%s cannot be disabled because it is the default language"), osc_language());
             continue;
           }
 
@@ -340,12 +340,12 @@ class CAdminLanguages extends AdminSecBaseModel {
                   osc_add_flash_error_message(sprintf(_m("Directory '%s' couldn't be removed"), $code), 'admin');
                 } else {
                   osc_add_flash_ok_message(
-                    sprintf(_m('Directory "%s" has been successfully removed'), $code),
+                    sprintf(_m('Directory "%s" has been removed'), $code),
                     'admin'
                   );
                 }
               } else {
-                osc_add_flash_error_message(sprintf(_m("Directory '%s' couldn't be removed;)"), $code), 'admin');
+                osc_add_flash_error_message(sprintf(_m("Directory '%s' couldn't be removed"), $code), 'admin');
               }
             } else {
               osc_add_flash_error_message(

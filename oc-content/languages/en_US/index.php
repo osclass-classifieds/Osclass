@@ -21,7 +21,7 @@ function locale_en_US_info() {
     'name'            => 'English (US)',
     'short_name'      => 'English',
     'description'     => 'American english translation',
-    'version'         => '8.3.1',
+    'version'         => '8.4.0',
     'author_name'     => 'OsclassPoint',
     'author_url'      => 'https://osclass-classifieds.com/',
     'currency_format' => '{NUMBER} {CURRENCY}',
@@ -29,5 +29,3 @@ function locale_en_US_info() {
     'stop_words'      => 'i,a,about,an,are,as,at,be,by,com,for,from,how,in,is,it,of,on,or,that,the,this,to,was,what,when,where,who,will,with,the'
   );
 }
-
-?>

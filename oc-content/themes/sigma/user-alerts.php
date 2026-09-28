@@ -50,7 +50,7 @@
                 ?>
               </h3>
 
-              <a onclick="javascript:return confirm('<?php echo osc_esc_js(__('This action can\'t be undone. Are you sure you want to continue?', 'sigmaw')); ?>');" href="<?php echo osc_user_unsubscribe_alert_url(); ?>"><?php _e('Delete this alert', 'sigma'); ?></a>
+              <a onclick="javascript:return confirm('<?php echo osc_esc_js(__('This action cannot be undone. Are you sure you want to continue?', 'sigmaw')); ?>');" href="<?php echo osc_user_unsubscribe_alert_url(); ?>"><?php _e('Delete this alert', 'sigma'); ?></a>
               <a href="<?php echo osc_search_alert_url(); ?>"><?php _e('Open in search', 'sigma'); ?></a>
 
               <div class="clear">

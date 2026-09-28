@@ -38,7 +38,7 @@ osc_add_hook('admin_page_header','customPageHeader');
 
 
 function customPageTitle($string) {
-  return sprintf(__('Manage ban rules - %s'), $string);
+  return sprintf(__('%s - %s'), __('Manage ban rules'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');

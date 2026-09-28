@@ -23,7 +23,7 @@ function customPageHeader() {
 osc_add_hook('admin_page_header','customPageHeader');
 
 function customPageTitle($string) {
-  return sprintf(__('Quick management - %s'), $string);
+  return sprintf(__('%s - %s'), __('Quick management'), $string);
 }
 osc_add_filter('admin_title', 'customPageTitle');
 
@@ -121,7 +121,7 @@ function customHead() {
               error: function(){
                 $(".jsMessage").fadeIn("fast");
                 $(".jsMessage p").attr('class', '');
-                $(".jsMessage p").html('<?php echo osc_esc_js(__('Ajax error, please try again.')); ?>');
+                $(".jsMessage p").html('<?php echo osc_esc_js(__('Ajax error. Please try again.')); ?>');
               }
             });
             list_original = list;
@@ -193,7 +193,7 @@ function customHead() {
           if($btn) { $btn.text(cancelLabel); }
         },
         error: function(){
-          $container.html('<p class="error"><?php echo osc_esc_js(__('Ajax error, please try again.')); ?></p>');
+          $container.html('<p class="error"><?php echo osc_esc_js(__('Ajax error. Please try again.')); ?></p>');
           if($btn) { $btn.text(quickEditLabel); }
         }
       });

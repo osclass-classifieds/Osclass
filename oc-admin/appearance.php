@@ -34,7 +34,7 @@ class CAdminAppearance extends AdminSecBaseModel {
 
       case('add_post'):
         if(defined('DEMO') ) {
-          osc_add_flash_warning_message( _m("This action can't be done because it's a demo site"), 'admin');
+          osc_add_flash_warning_message( _m("This action cannot be done because it is a demo site"), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=appearance');
         }
 
@@ -58,7 +58,7 @@ class CAdminAppearance extends AdminSecBaseModel {
             break;
 
           case(1):
-            $msg = _m('The theme has been installed correctly');
+            $msg = _m('The theme has been installed');
             osc_add_flash_ok_message($msg, 'admin');
             break;
 
@@ -68,14 +68,14 @@ class CAdminAppearance extends AdminSecBaseModel {
             break;
 
           case(3):
-            $msg = _m('No file was uploaded');
+            $msg = _m('No files were uploaded');
             osc_add_flash_error_message($msg, 'admin');
             $this->redirectTo(osc_admin_base_url(true)."?page=appearance&action=add");
             break;
 
           case(-1):
           default:
-            $msg = _m('There was a problem adding the theme');
+            $msg = _m('There was a problem adding this package');
             osc_add_flash_error_message($msg, 'admin');
             break;
 
@@ -86,7 +86,7 @@ class CAdminAppearance extends AdminSecBaseModel {
 
       case('delete'):
         if(defined('DEMO') ) {
-          osc_add_flash_warning_message( _m("This action can't be done because it's a demo site"), 'admin');
+          osc_add_flash_warning_message( _m("This action cannot be done because it is a demo site"), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=appearance');
         }
 
@@ -103,12 +103,12 @@ class CAdminAppearance extends AdminSecBaseModel {
             }
             osc_run_hook("theme_delete_".$theme);
             if(osc_deleteDir(osc_content_path()."themes/".$theme."/")) {
-              osc_add_flash_ok_message(_m("Theme removed successfully"), "admin");
+              osc_add_flash_ok_message(_m("The theme has been removed"), "admin");
             } else {
               osc_add_flash_error_message(_m("There was a problem removing the theme"), "admin");
             }
           } else {
-            osc_add_flash_error_message(_m("Current theme can not be deleted"), "admin");
+            osc_add_flash_error_message(_m("The current theme cannot be deleted"), "admin");
           }
         } else {
           osc_add_flash_error_message(_m("No theme selected"), "admin");
@@ -194,7 +194,7 @@ class CAdminAppearance extends AdminSecBaseModel {
         $slugs = array_values(array_unique($slugs));
         osc_set_preference('widget_custom_sections', implode(',', $slugs));
         osc_set_preference('widget_locale_strict', (Params::getParam('widget_locale_strict') != '' ? '1' : '0'));
-        osc_add_flash_ok_message(_m('Widget settings have been updated'), 'admin');
+        osc_add_flash_ok_message(_m('Settings have been updated'), 'admin');
         $this->redirectTo(osc_admin_base_url(true) . '?page=appearance&action=widget_settings');
         break;
 
@@ -229,9 +229,9 @@ class CAdminAppearance extends AdminSecBaseModel {
         }
 
         if($deleted > 1) {
-          osc_add_flash_ok_message(sprintf(_m('%s widgets have been deleted correctly'), $deleted), 'admin');
+          osc_add_flash_ok_message(sprintf(_m('%s widgets have been deleted'), $deleted), 'admin');
         } else if($deleted == 1) {
-          osc_add_flash_ok_message(_m('Widget removed correctly'), 'admin');
+          osc_add_flash_ok_message(_m('The widget has been removed'), 'admin');
         } else {
           osc_add_flash_error_message(_m('Widget cannot be deleted'), 'admin');
         }
@@ -252,7 +252,7 @@ class CAdminAppearance extends AdminSecBaseModel {
       case('activate'):
         osc_csrf_check();
         osc_set_preference('theme', Params::getParam('theme'));
-        osc_add_flash_ok_message( _m('Theme activated correctly'), 'admin');
+        osc_add_flash_ok_message( _m('The theme has been activated'), 'admin');
         osc_run_hook("theme_activate", Params::getParam('theme'));
         $this->redirectTo( osc_admin_base_url(true) . "?page=appearance" );
         break;
@@ -314,9 +314,9 @@ class CAdminAppearance extends AdminSecBaseModel {
 
         if($iUpdated > 0 ) {
           if($error != '' ) {
-            osc_add_flash_error_message( $error . "</p><p>" . _m('Customization settings have been updated'), 'admin');
+            osc_add_flash_error_message( $error . "</p><p>" . _m('Settings have been updated'), 'admin');
           } else {
-            osc_add_flash_ok_message( _m('Customization settings have been updated'), 'admin');
+            osc_add_flash_ok_message( _m('Settings have been updated'), 'admin');
           }
         } else if($error != '') {
           osc_add_flash_error_message( $error , 'admin');
@@ -437,12 +437,12 @@ class CAdminAppearance extends AdminSecBaseModel {
     $back = ($edit ? $backEdit : $backAdd);
 
     if($location == '') {
-      osc_add_flash_error_message(_m('Section field is required'), 'admin');
+      osc_add_flash_error_message(sprintf(_m('%s is required'), __('Section')), 'admin');
       $this->redirectTo($back);
     }
 
     if($description == '' || !osc_validate_text($description)) {
-      osc_add_flash_error_message(_m('Description field is required'), 'admin');
+      osc_add_flash_error_message(sprintf(_m('%s is required'), __('Description')), 'admin');
       $this->redirectTo($back);
     }
 
@@ -481,9 +481,9 @@ class CAdminAppearance extends AdminSecBaseModel {
       osc_run_hook('edit_widget', $id);
 
       if($res !== false) {
-        osc_add_flash_ok_message(_m('Widget updated correctly'), 'admin');
+        osc_add_flash_ok_message(_m('The widget has been updated'), 'admin');
       } else {
-        osc_add_flash_error_message(_m('Widget cannot be updated correctly'), 'admin');
+        osc_add_flash_error_message(_m('The widget could not be updated'), 'admin');
       }
       $this->redirectTo(osc_admin_base_url(true) . '?page=appearance&action=widgets');
     }
@@ -512,7 +512,7 @@ class CAdminAppearance extends AdminSecBaseModel {
 
     $this->saveWidgetLocales($id, $locales, $single);
     osc_run_hook('add_widget', $id);
-    osc_add_flash_ok_message(_m('Widget added correctly'), 'admin');
+    osc_add_flash_ok_message(_m('The widget has been added'), 'admin');
     $this->redirectTo(osc_admin_base_url(true) . '?page=appearance&action=widgets');
   }
 

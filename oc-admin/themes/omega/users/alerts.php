@@ -35,7 +35,7 @@ osc_add_hook('admin_page_header','customPageHeader');
 
 
 function customPageTitle($string) {
-  return sprintf(__('Manage alerts - %s'), $string);
+  return sprintf(__('%s - %s'), __('Manage alerts'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');
@@ -106,14 +106,10 @@ function customHead() {
     });
 
     $("#bulk-actions-submit").click(function() {
-      if($("#bulk_actions").attr("value")=="delete") {
+      if($("#bulk_actions option:selected").val() == "delete") {
         $("#action").attr("value", "delete_alerts");
-      } else if($("#bulk_actions").attr("value")=="activate") {
-        $("#action").attr("value", "status_alerts");
-        $("#status").attr("value", "1");
       } else {
         $("#action").attr("value", "status_alerts");
-        $("#status").attr("value", "0");
       }
 
       $("#datatablesForm").submit();
@@ -232,16 +228,18 @@ osc_current_admin_theme_path( 'parts/header.php' );
   </div>
 
   <form class="" id="datatablesForm" action="<?php echo osc_admin_base_url(true); ?>" method="post">
+    <?php echo osc_csrf_token_form(); ?>
     <input type="hidden" name="page" value="users" />
     <input type="hidden" name="action" id="action" value="status_alerts" />
-    <input type="hidden" name="status" id="status" value="0" />
 
     <div id="bulk-actions">
       <label>
         <select name="alert_action" id="bulk_actions" class="select-box-extra">
-          <option value=""><?php _e('Bulk Actions'); ?></option>
+          <option value=""><?php _e('Bulk actions'); ?></option>
           <option value="activate" data-dialog-content="<?php printf(__('Are you sure you want to %s the selected alerts?'), strtolower(__('Activate'))); ?>"><?php _e('Activate'); ?></option>
           <option value="deactivate" data-dialog-content="<?php printf(__('Are you sure you want to %s the selected alerts?'), strtolower(__('Deactivate'))); ?>"><?php _e('Deactivate'); ?></option>
+          <option value="renew" data-dialog-content="<?php printf(__('Are you sure you want to %s the selected alerts?'), strtolower(__('Renew'))); ?>"><?php _e('Renew'); ?></option>
+          <option value="expire" data-dialog-content="<?php printf(__('Are you sure you want to %s the selected alerts?'), strtolower(__('Expire'))); ?>"><?php _e('Expire'); ?></option>
           <option value="delete" data-dialog-content="<?php printf(__('Are you sure you want to %s the selected alerts?'), strtolower(__('Delete'))); ?>"><?php _e('Delete'); ?></option>
         </select> <input type="submit" id="bulk_apply" class="btn" value="<?php echo osc_esc_html( __('Apply') ); ?>" />
       </label>
@@ -309,6 +307,7 @@ osc_current_admin_theme_path( 'parts/header.php' );
   <input type="hidden" name="action" value="delete_alerts" />
   <input type="hidden" name="alert_id[]" id="alert_id" value="" />
   <input type="hidden" name="alert_user_id" value="" />
+  <?php echo osc_csrf_token_form(); ?>
   <div class="form-horizontal">
     <div class="form-row">
       <?php _e('Are you sure you want to delete this alert?'); ?>

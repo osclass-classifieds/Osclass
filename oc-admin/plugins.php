@@ -37,7 +37,7 @@ class CAdminPlugins extends AdminSecBaseModel {
         osc_csrf_check();
 
         if(defined('DEMO')) {
-          osc_add_flash_warning_message( _m("This action can't be done because it's a demo site"), 'admin');
+          osc_add_flash_warning_message( _m("This action cannot be done because it is a demo site"), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=plugins');
         }
 
@@ -79,9 +79,9 @@ class CAdminPlugins extends AdminSecBaseModel {
               $msg = ($msg <> '' ? ' (' . $msg . ')' : '');
 
               if($msg == '' && $numFailed == 0) {
-                osc_add_flash_ok_message(sprintf(__('%d plugins has been %s.'), $numSuccess, __('enabled')), 'admin');
+                osc_add_flash_ok_message(sprintf(__('%d plugins have been %s.'), $numSuccess, __('enabled')), 'admin');
               } else {
-                osc_add_flash_ok_message(sprintf(__('%d plugins has been %s, %d plugins could not be %s%s.'), $numSuccess, __('enabled'), $numFailed, __('enabled'), $msg), 'admin');
+                osc_add_flash_ok_message(sprintf(__('%d plugins have been %s. %d plugins could not be %s%s.'), $numSuccess, __('enabled'), $numFailed, __('enabled'), $msg), 'admin');
               }
 
               $this->redirectTo(osc_admin_base_url(true)."?page=plugins");
@@ -115,9 +115,9 @@ class CAdminPlugins extends AdminSecBaseModel {
               $msg = ($msg <> '' ? ' (' . $msg . ')' : '');
 
               if($msg == '' && $numFailed == 0) {
-                osc_add_flash_ok_message(sprintf(__('%d plugins has been %s.'), $numSuccess, __('disabled')), 'admin');
+                osc_add_flash_ok_message(sprintf(__('%d plugins have been %s.'), $numSuccess, __('disabled')), 'admin');
               } else {
-                osc_add_flash_ok_message(sprintf(__('%d plugins has been %s, %d plugins could not be %s%s.'), $numSuccess, __('disabled'), $numFailed, __('disabled'), $msg), 'admin');
+                osc_add_flash_ok_message(sprintf(__('%d plugins have been %s. %d plugins could not be %s%s.'), $numSuccess, __('disabled'), $numFailed, __('disabled'), $msg), 'admin');
               }
 
               $this->redirectTo(osc_admin_base_url(true)."?page=plugins");
@@ -153,9 +153,9 @@ class CAdminPlugins extends AdminSecBaseModel {
               $msg = ($msg <> '' ? ' (' . $msg . ')' : '');
 
               if($msg == '' && $numFailed == 0) {
-                osc_add_flash_ok_message(sprintf(__('%d plugins has been %s.'), $numSuccess, __('deleted')), 'admin');
+                osc_add_flash_ok_message(sprintf(__('%d plugins have been %s.'), $numSuccess, __('deleted')), 'admin');
               } else {
-                osc_add_flash_ok_message(sprintf(__('%d plugins has been %s, %d plugins could not be %s%s.'), $numSuccess, __('deleted'), $numFailed, __('deleted'), $msg), 'admin');
+                osc_add_flash_ok_message(sprintf(__('%d plugins have been %s. %d plugins could not be %s%s.'), $numSuccess, __('deleted'), $numFailed, __('deleted'), $msg), 'admin');
               }
 
               $this->redirectTo(osc_admin_base_url(true)."?page=plugins");
@@ -193,9 +193,9 @@ class CAdminPlugins extends AdminSecBaseModel {
               $msg = ($msg <> '' ? ' (' . $msg . ')' : '');
 
               if($msg == '' && $numFailed == 0) {
-                osc_add_flash_ok_message(sprintf(__('%d plugins has been %s.'), $numSuccess, __('installed')), 'admin');
+                osc_add_flash_ok_message(sprintf(__('%d plugins have been %s.'), $numSuccess, __('installed')), 'admin');
               } else {
-                osc_add_flash_ok_message(sprintf(__('%d plugins has been %s, %d plugins could not be %s%s.'), $numSuccess, __('installed'), $numFailed, __('installed'), $msg), 'admin');
+                osc_add_flash_ok_message(sprintf(__('%d plugins have been %s. %d plugins could not be %s%s.'), $numSuccess, __('installed'), $numFailed, __('installed'), $msg), 'admin');
               }
 
               $this->redirectTo(osc_admin_base_url(true)."?page=plugins");
@@ -245,9 +245,9 @@ class CAdminPlugins extends AdminSecBaseModel {
               $msg = ($msg <> '' ? ' (' . $msg . ')' : '');
 
               if($msg == '' && $numFailed == 0) {
-                osc_add_flash_ok_message(sprintf(__('%d plugins has been %s.'), $numSuccess, __('uninstalled')), 'admin');
+                osc_add_flash_ok_message(sprintf(__('%d plugins have been %s.'), $numSuccess, __('uninstalled')), 'admin');
               } else {
-                osc_add_flash_ok_message(sprintf(__('%d plugins has been %s, %d plugins could not be %s%s.'), $numSuccess, __('uninstalled'), $numFailed, __('uninstalled'), $msg), 'admin');
+                osc_add_flash_ok_message(sprintf(__('%d plugins have been %s. %d plugins could not be %s%s.'), $numSuccess, __('uninstalled'), $numFailed, __('uninstalled'), $msg), 'admin');
               }
 
               $this->redirectTo(osc_admin_base_url(true)."?page=plugins");
@@ -256,7 +256,7 @@ class CAdminPlugins extends AdminSecBaseModel {
           }
 
         } else {
-          osc_add_flash_warning_message( _m('No plugins has been selected'), 'admin');
+          osc_add_flash_warning_message( _m('No plugins have been selected'), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=plugins');
         }
 
@@ -268,7 +268,7 @@ class CAdminPlugins extends AdminSecBaseModel {
 
       case 'add_post':
         if(defined('DEMO')) {
-          osc_add_flash_warning_message( _m("This action can't be done because it's a demo site"), 'admin');
+          osc_add_flash_warning_message( _m("This action cannot be done because it is a demo site"), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=plugins');
         }
 
@@ -292,7 +292,7 @@ class CAdminPlugins extends AdminSecBaseModel {
             break;
 
           case(1):
-            $msg = _m('The plugin has been uploaded correctly');
+            $msg = _m('The plugin has been uploaded');
             osc_add_flash_ok_message($msg, 'admin');
             break;
 
@@ -302,14 +302,14 @@ class CAdminPlugins extends AdminSecBaseModel {
             break;
 
           case(3):
-            $msg = _m('No file was uploaded');
+            $msg = _m('No files were uploaded');
             osc_add_flash_error_message($msg, 'admin');
             $this->redirectTo(osc_admin_base_url(true)."?page=plugins&action=add");
             break;
 
           case(-1):
           default:
-            $msg = _m('There was a problem adding the plugin');
+            $msg = _m('There was a problem adding this package');
             osc_add_flash_error_message($msg, 'admin');
             break;
         }
@@ -319,7 +319,7 @@ class CAdminPlugins extends AdminSecBaseModel {
 
       case 'install':
         if(defined('DEMO')) {
-          osc_add_flash_warning_message( _m("This action can't be done because it's a demo site"), 'admin');
+          osc_add_flash_warning_message( _m("This action cannot be done because it is a demo site"), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=plugins');
         }
 
@@ -365,7 +365,7 @@ class CAdminPlugins extends AdminSecBaseModel {
 
       case 'uninstall':
         if(defined('DEMO')) {
-          osc_add_flash_warning_message( _m("This action can't be done because it's a demo site"), 'admin');
+          osc_add_flash_warning_message( _m("This action cannot be done because it is a demo site"), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=plugins');
         }
         osc_csrf_check();
@@ -383,7 +383,7 @@ class CAdminPlugins extends AdminSecBaseModel {
 
       case 'enable':
         if(defined('DEMO')) {
-          osc_add_flash_warning_message( _m("This action can't be done because it's a demo site"), 'admin');
+          osc_add_flash_warning_message( _m("This action cannot be done because it is a demo site"), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=plugins');
         }
         osc_csrf_check();
@@ -401,7 +401,7 @@ class CAdminPlugins extends AdminSecBaseModel {
 
       case 'disable':
         if(defined('DEMO')) {
-          osc_add_flash_warning_message( _m("This action can't be done because it's a demo site"), 'admin');
+          osc_add_flash_warning_message( _m("This action cannot be done because it is a demo site"), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=plugins');
         }
 
@@ -483,7 +483,7 @@ class CAdminPlugins extends AdminSecBaseModel {
             Plugins::addToCategoryPlugin($categories, $plugin_short_name);
           }
           osc_run_hook('plugin_categories_'.Params::getParam('plugin'), $categories);
-          osc_add_flash_ok_message( _m('Configuration was saved'), 'admin');
+          osc_add_flash_ok_message( _m('Settings have been updated'), 'admin');
           $this->redirectTo(osc_admin_base_url(true)."?page=plugins");
         }
 

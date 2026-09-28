@@ -60,7 +60,7 @@ osc_add_hook('admin_header','customHead', 10);
 
 
 function customPageTitle($string) {
-  return sprintf(__('Plugins - %s'), $string);
+  return sprintf(__('%s - %s'), __('Plugins'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');
@@ -79,7 +79,7 @@ osc_current_admin_theme_path( 'parts/header.php' );
       <h2 class="render-title"><?php  echo $plugin_data['plugin_name']; ?></h2>
       <p class="text"><?php echo $plugin_data['description']; ?></p>
       <div class="form-row">
-        <div><?php _e('Select the categories where you want to apply these attribute:'); ?></div>
+        <div><?php _e('Select the categories where you want to apply this attribute:'); ?></div>
         <div class="separate-top">
           <div class="form-label">
             <a href="javascript:void(0);" onclick="checkAll('plugin_tree', true); return false;"><?php _e('Check all'); ?></a> &middot;

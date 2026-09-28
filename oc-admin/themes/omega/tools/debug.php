@@ -40,7 +40,7 @@ osc_add_hook('admin_page_header','customPageHeader');
 
 
 function customPageTitle($string) {
-  return sprintf(__('Tools - %s'), $string);
+  return sprintf(__('%s - %s'), __('Tools'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');
@@ -48,16 +48,20 @@ osc_add_filter('admin_title', 'customPageTitle');
 osc_current_admin_theme_path( 'parts/header.php' );
 
 $log_files = __get('log_files');
-$file = Params::getParam('log_file');
+if(!is_array($log_files)) {
+  $log_files = array();
+}
+
+$file = basename((string)Params::getParam('log_file'));
 
 $log_file = '';
-$log_file_url = '';
+$log_download_url = '';
 $limit_lines = 2000;
 $log_exists = false;
 
-if($file != '' && file_exists(CONTENT_PATH . $file)) {
+if($file != '' && strtolower(pathinfo($file, PATHINFO_EXTENSION)) === 'log' && file_exists(CONTENT_PATH . $file) && is_file(CONTENT_PATH . $file)) {
   $log_exists = true;
-  $log_file_url = osc_base_url() . OC_CONTENT_FOLDER . '/' . $file;
+  $log_download_url = osc_admin_base_url(true) . '?page=tools&action=debug_download&log_file=' . rawurlencode($file);
 
   $i = 0;
   $log_file = '';
@@ -120,22 +124,24 @@ if($file != '' && file_exists(CONTENT_PATH . $file)) {
             <select name="log_file" class="select-box-extra select-box-medium float-left" onchange="this.form.submit();">
               <option value=""><?php _e('Select log file'); ?></option>
 
-              <?php if(is_array($log_files) && count($log_files) > 0) { ?>
+              <?php if(count($log_files) > 0) { ?>
                 <?php foreach($log_files as $lfile) { ?>
                   <?php
-                    $fname = basename($lfile);
-                    $fsize = round(filesize($lfile) / 1024, 2) . 'kb';
+                    $fname = isset($lfile['name']) ? $lfile['name'] : '';
+                    $fsize = isset($lfile['size_label']) ? $lfile['size_label'] : '';
+                    if($fname == '') {
+                      continue;
+                    }
                   ?>
-
-                  <option value="<?php echo $fname; ?>" <?php if($fname == $file) { ?>selected="selected"<?php } ?>><?php echo $fname . ' (' . $fsize . ')'; ?></option>
+                  <option value="<?php echo osc_esc_html($fname); ?>" <?php if($fname == $file) { ?>selected="selected"<?php } ?>><?php echo osc_esc_html($fname . ($fsize != '' ? ' (' . $fsize . ')' : '')); ?></option>
                 <?php } ?>
               <?php } ?>
             </select>
           </form>
 
-          <?php if($log_file_url <> '') { ?>
-            <a href="<?php echo $log_file_url; ?>" target="_blank" class="btn float-right" style="margin-top: -4px;"><?php _e('Download'); ?></a>
-            <a href="<?php echo osc_admin_base_url(true); ?>?page=tools&action=debug_delete&log_file=<?php echo $file; ?>" class="btn float-right" style="margin-top: -4px;"><?php _e('Remove'); ?></a>
+          <?php if($log_download_url <> '') { ?>
+            <a href="<?php echo osc_esc_html($log_download_url); ?>" class="btn float-right" style="margin-top: -4px;"><?php _e('Download'); ?></a>
+            <a href="<?php echo osc_admin_base_url(true); ?>?page=tools&action=debug_delete&log_file=<?php echo rawurlencode($file); ?>" class="btn float-right" style="margin-top: -4px;"><?php _e('Remove'); ?></a>
           <?php } ?>
         </h3>
       </div>

@@ -145,9 +145,9 @@ function customHead(){
   var editNewCityText = '<?php echo osc_esc_js(__('Edit city')); ?>';
   var addNewCityText = '<?php echo osc_esc_js(__('Add new city')); ?>';
   var importLocationText = '<?php echo osc_esc_js(__('Import a location')); ?>';
-  var noentry = '<?php echo osc_esc_js(__('No entries has been found')); ?>';
-  var noentryCountry = '<?php echo osc_esc_js(__('No regions has been found for country code:')); ?>';
-  var noentryRegion = '<?php echo osc_esc_js(__('No cities has been found for region ID:')); ?>';
+  var noentry = '<?php echo osc_esc_js(__('No entries have been found')); ?>';
+  var noentryCountry = '<?php echo osc_esc_js(__('No regions have been found for country code:')); ?>';
+  var noentryRegion = '<?php echo osc_esc_js(__('No cities have been found for region ID:')); ?>';
 
   // dialog delete function
   function delete_dialog(item_id, item_type) {
@@ -182,7 +182,7 @@ osc_add_hook('admin_page_header','customPageHeader');
 
 
 function customPageTitle($string) {
-  return sprintf(__('Manage locations - %s'), $string);
+  return sprintf(__('%s - %s'), __('Manage locations'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');
@@ -467,7 +467,7 @@ osc_current_admin_theme_path('parts/header.php');
     <input type="hidden" name="id[]" value="" />
     <div class="form-horizontal">
       <div class="form-row">
-        <?php _e("This action can't be undone. Items associated to this location will be deleted. Users from this location will be unlinked, but not deleted. Are you sure you want to continue?");?>
+        <?php _e("This action cannot be undone. Listings associated to this location will be deleted. Users from this location will be unlinked, but not deleted. Are you sure you want to continue?");?>
       </div>
       <div class="form-actions">
         <div class="wrapper">

@@ -131,7 +131,7 @@ osc_current_admin_theme_path( 'market/header.php' );
                 <a class="mkt-update btn btn-gray" href="<?php echo $p['url']; ?>" data-product-key="<?php echo osc_esc_html($p['code']); ?>"><i class="fa fa-download"></i> <?php _e('Download'); ?></a>
 
               <?php } else if(!$compatible_from) { ?>
-                <a class="btn btn-gray" href="#" onclick="return false" title="<?php echo osc_esc_html(__('Not compatible with your osclass version')); ?>"><i class="fa fa-ban"></i> <?php _e('Can\'t download'); ?></a>
+                <a class="btn btn-gray" href="#" onclick="return false" title="<?php echo osc_esc_html(__('Not compatible with your osclass version')); ?>"><i class="fa fa-ban"></i> <?php _e('Cannot download'); ?></a>
 
               <?php } else { ?>
                 <a href="<?php echo osc_admin_base_url(true); ?>?page=locations&country_code=<?php echo $p['code']; ?>"" class="btn btn-gray" title="<?php echo osc_esc_html(__('Click to open country configuration')); ?>"><i class="fa fa-check"></i> <?php _e('Active'); ?></a>
@@ -245,9 +245,9 @@ osc_current_admin_theme_path( 'market/header.php' );
           content += oscEscapeHTML(data.message);
 
           if(elem.hasClass('is-update')) {
-            content += '<h3><?php echo osc_esc_js(__('Location has been updated correctly.')); ?></h3>';
+            content += '<h3><?php echo osc_esc_js(__('The package has been updated')); ?></h3>';
           } else {
-            content += '<h3><?php echo osc_esc_js(__('Location has been downloaded correctly.')); ?></h3>';
+            content += '<h3><?php echo osc_esc_js(__('The package has been downloaded')); ?></h3>';
           }
 
           content += "<p>";

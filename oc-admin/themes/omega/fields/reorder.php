@@ -95,7 +95,7 @@ function customHead() {
               }
             },
             error: function(){
-              showFieldsAdminMessage('error', '<?php echo osc_esc_js(__('Ajax error, please try again.')); ?>');
+              showFieldsAdminMessage('error', '<?php echo osc_esc_js(__('Ajax error. Please try again.')); ?>');
             }
           });
         }
@@ -171,7 +171,7 @@ function customHead() {
           }
         },
         error: function(){
-          showFieldsAdminMessage('error', '<?php echo osc_esc_js(__("Ajax error, try again.")); ?>');
+          showFieldsAdminMessage('error', '<?php echo osc_esc_js(__("Ajax error. Please try again.")); ?>');
         }
       });
       $('#dialog-delete-field').dialog('close');
@@ -229,7 +229,7 @@ function customHead() {
 osc_add_hook('admin_header','customHead', 10);
 
 function customPageTitle($string) {
-  return sprintf(__('Quick management - %s'), $string);
+  return sprintf(__('%s - %s'), __('Quick management'), $string);
 }
 osc_add_filter('admin_title', 'customPageTitle');
 
@@ -237,7 +237,7 @@ osc_current_admin_theme_path('parts/header.php');
 ?>
 
 <div class="flashmessage flashmessage-info">
-  <p class="info"><?php _e('Drag & drop the custom fields to reorder them. Use Quick edit for inline changes or Edit for the full form.'); ?></p>
+  <p class="info"><?php _e('Drag and drop custom fields to reorder them. Use Quick edit for inline changes or Edit for the full form.'); ?></p>
 </div>
 
 <div class="header_title">

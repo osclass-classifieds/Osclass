@@ -535,7 +535,22 @@ class User extends DAO {
     $users['total_results'] = 0;
     $users['users']     = array();
 
-    $allowed_sort = array('pk_i_id', 's_email', 's_username', 's_name', 'i_items', 'dt_mod_date', 'dt_reg_date', 'dt_access_date', 'COALESCE(dt_mod_date, dt_reg_date)', 'COALESCE(s_phone_mobile, s_phone_land)');
+    $allowed_sort = array(
+      'pk_i_id',
+      's_email',
+      'COALESCE(s_email, \'\')',
+      's_username',
+      'COALESCE(s_username, \'\')',
+      's_name',
+      'COALESCE(s_name, \'\')',
+      'i_items',
+      'COALESCE(i_items, 0)',
+      'dt_mod_date',
+      'dt_reg_date',
+      'dt_access_date',
+      'COALESCE(dt_mod_date, dt_reg_date)',
+      'COALESCE(s_phone_mobile, s_phone_land)'
+    );
     if(!in_array($order_column, $allowed_sort)) {
       $order_column = 'pk_i_id';
     }

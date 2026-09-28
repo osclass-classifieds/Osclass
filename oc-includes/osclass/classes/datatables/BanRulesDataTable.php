@@ -87,7 +87,7 @@ class BanRulesDataTable extends DataTable {
     $this->addColumn('bulkactions', '<input id="check_all" type="checkbox" />');
     $this->addColumn('name', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('name', $sort, $direction)) . '">' . __('Ban name / Reason') . '</a>');
     $this->addColumn('ip', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('ip', $sort, $direction)) . '">' . __('IP rule') . '</a>');
-    $this->addColumn('email', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('email', $sort, $direction)) . '">' . __('E-mail rule') . '</a>');
+    $this->addColumn('email', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('email', $sort, $direction)) . '">' . __('Email rule') . '</a>');
     $this->addColumn('hit', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('hit', $sort, $direction)) . '">' . __('Hits') . '</a>');
     $this->addColumn('expire_date', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('expire_date', $sort, $direction)) . '">' . __('Expire Date') . '</a>');
     $this->addColumn('cdate', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('cdate', $sort, $direction)) . '">' . __('Create Date') . '</a>');
@@ -148,7 +148,7 @@ class BanRulesDataTable extends DataTable {
         $actions = $this->buildRowActions($options, $options_more, 8);
 
         $row['id'] = $aRow['pk_i_id'];
-        $row['bulkactions'] = '<input type="checkbox" name="id[]" value="' . $aRow['pk_i_id'] . '" /></div>';
+        $row['bulkactions'] = '<input type="checkbox" name="id[]" value="' . $aRow['pk_i_id'] . '" />';
         $row['name'] = $aRow['s_name'];
         $row['name'] .= $actions;
 

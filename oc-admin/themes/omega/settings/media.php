@@ -89,20 +89,20 @@ function customHead() {
         },
         messages: {
           dimThumbnail: {
-            required: '<?php echo osc_esc_js(__("Thumbnail size: this field is required")); ?>',
-            regexp: '<?php echo osc_esc_js(__("Thumbnail size: is not in the correct format")); ?>'
+            required: '<?php echo osc_esc_js(sprintf(__('%s is required'), __('Thumbnail size'))); ?>',
+            regexp: '<?php echo osc_esc_js(__('Thumbnail size is not in the correct format')); ?>'
           },
           dimPreview: {
-            required: '<?php echo osc_esc_js(__("Preview size: this field is required")); ?>',
-            regexp: '<?php echo osc_esc_js(__("Preview size: is not in the correct format")); ?>'
+            required: '<?php echo osc_esc_js(sprintf(__('%s is required'), __('Preview size'))); ?>',
+            regexp: '<?php echo osc_esc_js(__('Preview size is not in the correct format')); ?>'
           },
           dimNormal: {
-            required: '<?php echo osc_esc_js(__("Normal size: this field is required")); ?>',
-            regexp: '<?php echo osc_esc_js(__("Normal size: is not in the correct format")); ?>'
+            required: '<?php echo osc_esc_js(sprintf(__('%s is required'), __('Normal size'))); ?>',
+            regexp: '<?php echo osc_esc_js(__('Normal size is not in the correct format')); ?>'
           },
           maxSizeKb: {
-            required: '<?php echo osc_esc_js(__("Maximum size: this field is required")); ?>',
-            digits: '<?php echo osc_esc_js(__("Maximum size: this field must only contain numeric characters")); ?>'
+            required: '<?php echo osc_esc_js(sprintf(__('%s is required'), __('Maximum size'))); ?>',
+            digits: '<?php echo osc_esc_js(__('Maximum size: this field must only contain numeric characters')); ?>'
           }
         },
         wrapper: "li",
@@ -330,7 +330,7 @@ osc_add_hook('admin_page_header','customPageHeader');
 
 
 function customPageTitle($string) {
-  return sprintf(__('Media settings - %s'), $string);
+  return sprintf(__('%s - %s'), __('Media settings'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');
@@ -673,8 +673,8 @@ osc_current_admin_theme_path('parts/header.php');
             </div>
           <?php } ?>
 
-          <p><b><?php _e('Regenerate images:'); ?></b> <?php _e('Recreate all image sizes (types) from original image if it exists. Execute regenerate when you have changed size for thumbnails, preview or normal image.'); ?></p>
-          <p><b><?php _e('Refresh images:'); ?></b> <?php _e('Run image-related hooks that are often used by plugins.'); ?></p>
+          <p><b><?php _e('Regenerate images'); ?></b> <?php _e('Recreate all image sizes (types) from original image if it exists. Execute regenerate when you have changed size for thumbnails, preview or normal image.'); ?></p>
+          <p><b><?php _e('Refresh images'); ?></b> <?php _e('Run image-related hooks that are often used by plugins.'); ?></p>
           <hr/>
           <p><?php echo sprintf(__('Your Osclass installation has <u>%s resources</u>.'), $count_all); ?></p>
           <p><?php echo sprintf(__('Estimated regenerate time with current batch settings (%s resources per batch) is: %s.'), $media_regen_batch, osc_esc_html(media_format_estimated_time($estimate_regen_seconds))); ?></p>

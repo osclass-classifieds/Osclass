@@ -137,14 +137,14 @@ class AlertsDataTable extends DataTable {
         } else {
           $row['status'] = ($aRow['b_active'] == 1 ? __('Active') : __('Inactive'));
         }
-        $row['bulkactions'] = '<input type="checkbox" name="alert_id[]" value="' . $aRow['pk_i_id'] . '" /></div>';
+        $row['bulkactions'] = '<input type="checkbox" name="alert_id[]" value="' . $aRow['pk_i_id'] . '" />';
 
         $options[] = '<a onclick="return delete_alert(\'' . $aRow['pk_i_id'] . '\');" href="#">' . __('Delete') . '</a>';
 
         if($aRow['b_active'] == 1 ) {
-          $options[] = '<a href="' . osc_admin_base_url(true) . '?page=users&action=status_alerts&amp;alert_id[]=' . $aRow['pk_i_id'] . '&amp;' . $csrf_token_url . '&amp;status=0" >' . __('Deactivate') . '</a>';
+          $options[] = '<a href="' . osc_admin_base_url(true) . '?page=users&action=status_alerts&amp;alert_id[]=' . $aRow['pk_i_id'] . '&amp;' . $csrf_token_url . '&amp;alert_action=deactivate" >' . __('Deactivate') . '</a>';
         } else {
-          $options[] = '<a href="' . osc_admin_base_url(true) . '?page=users&action=status_alerts&amp;alert_id[]=' . $aRow['pk_i_id'] . '&amp;' . $csrf_token_url . '&amp;status=1" >' . __('Activate') . '</a>';
+          $options[] = '<a href="' . osc_admin_base_url(true) . '?page=users&action=status_alerts&amp;alert_id[]=' . $aRow['pk_i_id'] . '&amp;' . $csrf_token_url . '&amp;alert_action=activate" >' . __('Activate') . '</a>';
         }
 
         if(is_array($user) && isset($user['pk_i_id']) && (int)$user['pk_i_id'] > 0) {

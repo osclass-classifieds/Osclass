@@ -34,6 +34,15 @@ class CAdminCFields extends AdminSecBaseModel {
   function doModel() {
     parent::doModel();
 
+    // Bulk form posts action=delete|... with id[]; those names must not hit single-id cases
+    if($this->action != '' && is_array(Params::getParam('id'))) {
+      $bulkIds = Params::getParam('id');
+      $bulkIds = osc_apply_filter('field_bulk_ids', $bulkIds, $this->action);
+      osc_run_hook('field_bulk_' . $this->action, $bulkIds);
+      $this->processBulkAction($this->action, $bulkIds);
+      $this->redirectTo($this->fieldsAdminListUrl());
+    }
+
     switch($this->action) {
       case('add'):
         $categories = Category::newInstance()->toTreeAll();
@@ -160,15 +169,6 @@ class CAdminCFields extends AdminSecBaseModel {
         break;
 
       default:
-        if(Params::getParam('action') != '') {
-          osc_run_hook('field_bulk_' . Params::getParam('action'), Params::getParam('id'));
-        }
-
-        $bulkAction = Params::getParam('action');
-        if($bulkAction != '' && is_array(Params::getParam('id'))) {
-          $this->processBulkAction($bulkAction, Params::getParam('id'));
-        }
-
         require_once osc_lib_path() . 'osclass/classes/datatables/FieldsDataTable.php';
 
         if(Params::getParam('iDisplayLength') != '') {
@@ -247,6 +247,7 @@ class CAdminCFields extends AdminSecBaseModel {
 
     osc_csrf_check();
     $changed = 0;
+    $handled = true;
 
     switch($action) {
       case('delete'):
@@ -301,9 +302,15 @@ class CAdminCFields extends AdminSecBaseModel {
         break;
 
       default:
-        return;
+        $handled = false;
+        break;
     }
 
+    if(!$handled) {
+      return;
+    }
+
+    osc_run_hook('field_bulk_done', $action, $ids, $changed);
     $this->redirectTo($this->fieldsAdminListUrl());
   }
 

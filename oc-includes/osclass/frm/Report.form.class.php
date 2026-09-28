@@ -40,10 +40,10 @@ class ReportForm extends Form {
           },
           messages: {
             reason: {
-              required: "<?php echo osc_esc_js(__('Reason: this field is required')); ?>."
+              required: "<?php echo osc_esc_js(sprintf(__('%s is required'), __('Reason'))); ?>."
             },
             comment: {
-              required: "<?php echo osc_esc_js(__('Comment: this field is required')); ?>.",
+              required: "<?php echo osc_esc_js(sprintf(__('%s is required'), __('Comment'))); ?>.",
               minlength: "<?php echo osc_esc_js(__('Comment: enter at least 3 characters')); ?>."
             }
           },
@@ -76,7 +76,7 @@ class ReportForm extends Form {
           },
           messages: {
             comment: {
-              required: "<?php echo osc_esc_js(__('Reply: this field is required')); ?>.",
+              required: "<?php echo osc_esc_js(sprintf(__('%s is required'), __('Reply'))); ?>.",
               minlength: "<?php echo osc_esc_js(__('Reply: enter at least 3 characters')); ?>."
             }
           },

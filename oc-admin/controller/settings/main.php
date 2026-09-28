@@ -91,6 +91,7 @@ class CAdminSettingsMain extends AdminSecBaseModel {
         $webContactCreateReport = Params::getParam('web_contact_create_report');
         $contactAttachment = Params::getParam('enabled_attachment');
         $selectableParent = Params::getParam('selectable_parent_categories');
+        $aCategoryBulkExpiration = Params::getParam('category_bulk_expiration_options');
         $adminTheme = Params::getParam('admin_theme');
         $adminColorScheme = Params::getParam('admin_color_scheme');
         $jqueryVersion = Params::getParam('jquery_version');
@@ -168,15 +169,44 @@ class CAdminSettingsMain extends AdminSecBaseModel {
 
         $sCleanupAutoTypes = implode(',', $aCleanupTypes);
 
+        if(!is_array($aCategoryBulkExpiration)) {
+          $aCategoryBulkExpiration = array();
+        }
+        $aCategoryBulkExpirationDefs = osc_category_bulk_expiration_option_defs();
+        $aCategoryBulkExpirationKeys = array();
+        foreach($aCategoryBulkExpiration as $expKey) {
+          $expKey = trim((string)$expKey);
+          if($expKey !== '' && isset($aCategoryBulkExpirationDefs[$expKey]) && !in_array($expKey, $aCategoryBulkExpirationKeys, true)) {
+            $aCategoryBulkExpirationKeys[] = $expKey;
+          }
+        }
+        if(count($aCategoryBulkExpirationKeys) === 0) {
+          $aCategoryBulkExpirationKeys = osc_category_bulk_expiration_options_default();
+        }
+        $aCategoryBulkExpirationKeys = osc_apply_filter('osc_category_bulk_expiration_options_save', $aCategoryBulkExpirationKeys);
+        if(!is_array($aCategoryBulkExpirationKeys)) {
+          $aCategoryBulkExpirationKeys = osc_category_bulk_expiration_options_default();
+        }
+        $aCategoryBulkExpirationKeysValid = array();
+        foreach($aCategoryBulkExpirationKeys as $expKey) {
+          $expKey = trim((string)$expKey);
+          if($expKey !== '' && isset($aCategoryBulkExpirationDefs[$expKey]) && !in_array($expKey, $aCategoryBulkExpirationKeysValid, true)) {
+            $aCategoryBulkExpirationKeysValid[] = $expKey;
+          }
+        }
+        if(count($aCategoryBulkExpirationKeysValid) === 0) {
+          $aCategoryBulkExpirationKeysValid = osc_category_bulk_expiration_options_default();
+        }
+        $sCategoryBulkExpiration = implode(',', $aCategoryBulkExpirationKeysValid);
 
         $error = "";
 
         $msg = '';
         if(!osc_validate_text($sPageTitle)) {
-          $msg .= _m("Page title field is required")."<br/>";
+          $msg .= sprintf(_m('%s is required'), __('Page title'))."<br/>";
         }
         if(!osc_validate_text($sContactEmail)) {
-          $msg .= _m("Contact email field is required")."<br/>";
+          $msg .= sprintf(_m('%s is required'), __('Contact email'))."<br/>";
         }
         if(!osc_validate_int($sNumRssItems)) {
           $msg .= _m("Number of listings in the RSS has to be a numeric value")."<br/>";
@@ -245,6 +275,7 @@ class CAdminSettingsMain extends AdminSecBaseModel {
         $iUpdated += osc_set_preference('gen_hreflang_tags', $bGenerateHreflangTags);
         $iUpdated += osc_set_preference('hide_generator', $hideGenerator);
         $iUpdated += osc_set_preference('selectable_parent_categories', $selectableParent);
+        $iUpdated += osc_set_preference('category_bulk_expiration_options', $sCategoryBulkExpiration);
         $iUpdated += osc_set_preference('admin_theme', $adminTheme);
         $iUpdated += osc_set_preference('admin_color_scheme', $adminColorScheme);
         $iUpdated += osc_set_preference('jquery_version', $jqueryVersion);
@@ -259,9 +290,9 @@ class CAdminSettingsMain extends AdminSecBaseModel {
 
         if($iUpdated > 0) {
           if($error != '') {
-          osc_add_flash_error_message($error . "</p><p>" . _m('General settings have been updated'), 'admin');
+          osc_add_flash_error_message($error . "</p><p>" . _m('Settings have been updated'), 'admin');
           } else {
-          osc_add_flash_ok_message(_m('General settings have been updated'), 'admin');
+          osc_add_flash_ok_message(_m('Settings have been updated'), 'admin');
           }
         } else if($error != '') {
           osc_add_flash_error_message($error, 'admin');

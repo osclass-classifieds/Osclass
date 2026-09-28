@@ -32,7 +32,7 @@ class CWebContact extends BaseModel {
     switch($this->action) {
       case('contact_post'):   //contact_post
         if(osc_web_contact_form_disabled()) {
-          osc_add_flash_warning_message(_m('Sorry, contact form is disabled.'));
+          osc_add_flash_warning_message(_m('Sorry, the contact form is disabled'));
           $this->redirectTo(osc_base_url());
         }
 
@@ -73,7 +73,7 @@ class CWebContact extends BaseModel {
         }
 
         if(!osc_validate_email($yourEmail)) {
-          osc_add_flash_error_message(_m('Please enter a correct email'));
+          osc_add_flash_error_message(_m('The email is not valid'));
           Session::newInstance()->_setForm('yourName', $yourName);
           Session::newInstance()->_setForm('subject', $subject);
           Session::newInstance()->_setForm('message_body', $message);
@@ -157,7 +157,7 @@ MESSAGE;
 
           if(osc_apply_filter('contact_send_mail', true, $params)) {
             osc_sendMail(osc_apply_filter('contact_params', $params));
-            osc_add_flash_ok_message(_m('Your email has been sent properly. Thank you for contacting us!'));
+            osc_add_flash_ok_message(_m('Your email has been sent. Thank you for contacting us!'));
           } else if(osc_report_web_contact_created()) {
             osc_add_flash_ok_message(_m('Your message has been sent properly. Thank you for contacting us!'));
           }
@@ -175,7 +175,7 @@ MESSAGE;
 
       default:        //contact
         if(osc_web_contact_form_disabled()) {
-          osc_add_flash_warning_message(_m('Sorry, contact form is disabled.'));
+          osc_add_flash_warning_message(_m('Sorry, the contact form is disabled'));
           $this->redirectTo(osc_base_url());
         }
 

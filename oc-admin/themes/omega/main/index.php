@@ -49,7 +49,7 @@ osc_add_hook('admin_page_header','customPageHeader');
 
 
 function customPageTitle($string) {
-  return sprintf(__('Dashboard - %s'), $string);
+  return sprintf(__('%s - %s'), __('Dashboard'), $string);
 }
 osc_add_filter('admin_title', 'customPageTitle');
 
@@ -374,7 +374,7 @@ function osc_admin_widget_title_controls($id) {
                 ?>
 
                 <?php if(count($items) <= 0) { ?>
-                  <div class="empty"><?php _e('No listings has been found'); ?></div>
+                  <div class="empty"><?php _e('No listings have been found'); ?></div>
                 <?php } else { ?>
                   <?php foreach($items as $i) { ?>
                     <div class="row">
@@ -446,7 +446,7 @@ function osc_admin_widget_title_controls($id) {
                 <h4><?php _e('Recently published'); ?></h4>
 
                 <?php if(count($comments) <= 0) { ?>
-                  <div class="empty"><?php _e('No comments has been found'); ?></div>
+                  <div class="empty"><?php _e('No comments have been found'); ?></div>
                 <?php } else { ?>
                   <?php foreach($comments as $c) { ?>
                     <div class="row">
@@ -513,7 +513,7 @@ function osc_admin_widget_title_controls($id) {
                 <h4><?php _e('Recently registered'); ?></h4>
 
                 <?php if(count($users) <= 0) { ?>
-                  <div class="empty"><?php _e('No users has been found'); ?></div>
+                  <div class="empty"><?php _e('No users have been found'); ?></div>
                 <?php } else { ?>
                   <?php foreach($users as $u) { ?>
                     <div class="row">
@@ -564,7 +564,7 @@ function osc_admin_widget_title_controls($id) {
                 <h4><?php _e('Latest rules'); ?></h4>
 
                 <?php if(count($rules) <= 0) { ?>
-                  <div class="empty"><?php _e('No ban rules has been found'); ?></div>
+                  <div class="empty"><?php _e('No ban rules have been found'); ?></div>
                 <?php } else { ?>
                   <div class="widget-cont-wrap">
                     <?php foreach($rules as $r) { ?>

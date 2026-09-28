@@ -143,7 +143,7 @@ class CAdminAjax extends AdminSecBaseModel {
         if($error) {
           $result = array('error' => __("An error occurred"));
         } else {
-          $result = array('ok' => __("Order saved"));
+          $result = array('ok' => __("The order has been saved"));
         }
 
         osc_run_hook('edited_category_order', $error);
@@ -196,7 +196,7 @@ class CAdminAjax extends AdminSecBaseModel {
         if($error) {
           $result = array('error' => __("An error occurred"));
         } else {
-          $result = array('ok' => __("Order saved"));
+          $result = array('ok' => __("The order has been saved"));
         }
 
         echo json_encode($result);
@@ -290,7 +290,7 @@ class CAdminAjax extends AdminSecBaseModel {
         // subcategory
         $parentCategory = $mCategory->findRootCategory($id);
         if(!$parentCategory['b_enabled']) {
-          $result = array('error' => __('Parent category is disabled, you can not enable that category'));
+          $result = array('error' => __('The parent category is disabled. You cannot enable this category.'));
           echo json_encode($result);
           break;
         }
@@ -378,11 +378,11 @@ class CAdminAjax extends AdminSecBaseModel {
         osc_run_hook('edited_category', (int)($id), $error);
 
         if($error==0) {
-          $msg = __("Category updated correctly");
+          $msg = __("The category has been updated");
         } else if($error==1) {
           if($has_one_title==1) {
             $error = 4;
-            $msg = __('Category updated correctly, but some titles are empty');
+            $msg = __('The category has been updated, but some titles are empty');
           } else {
             $msg = __('Sorry, including at least a title is mandatory');
           }
@@ -490,7 +490,7 @@ class CAdminAjax extends AdminSecBaseModel {
           exit;
 
         } elseif(!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-          echo json_encode(array('status' => '0', 'html' => __('Invalid email format')));
+          echo json_encode(array('status' => '0', 'html' => __('The email is not valid')));
           exit;
 
         } else if(defined('DEMO')) {
@@ -646,7 +646,7 @@ class CAdminAjax extends AdminSecBaseModel {
 
         }
         if($result['error'] == 0) {
-          osc_add_flash_ok_message(sprintf(__('%s successfully updated'), $prod), 'admin');
+          osc_add_flash_ok_message(sprintf(__('%s has been updated'), $prod), 'admin');
         } else {
           osc_add_flash_warning_message(sprintf(__('Product not updated: %s'), $result['message']), 'admin');
         }
@@ -723,7 +723,7 @@ class CAdminAjax extends AdminSecBaseModel {
 
       case 'locations_import':
         if(defined('DEMO')) {
-          echo json_encode(array('error' => _m("This action can't be done because it's a demo site")));
+          echo json_encode(array('error' => _m("This action cannot be done because it is a demo site")));
           exit;
         }
 
@@ -744,7 +744,7 @@ class CAdminAjax extends AdminSecBaseModel {
             $imported = $comm->importSQL($sql);
             $comm->query('SET FOREIGN_KEY_CHECKS = 1');
 
-            echo json_encode(array('error' => 0, 'message' => _m("Location imported successfully")));
+            echo json_encode(array('error' => 0, 'message' => _m("The location has been imported")));
             exit;
           }
 

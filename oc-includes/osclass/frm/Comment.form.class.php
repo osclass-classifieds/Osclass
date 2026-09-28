@@ -152,12 +152,12 @@ class CommentForm extends Form
         },
         messages: {
           authorEmail: {
-            required: "<?php _e( 'Email: this field is required' ); ?>.",
-            email: "<?php _e( 'Invalid email address' ); ?>."
+            required: "<?php echo sprintf(__('%s is required'), __('Email')); ?>.",
+            email: "<?php _e( 'The email is not valid' ); ?>."
           },
           body: {
-            required: "<?php _e( 'Comment: this field is required' ); ?>.",
-            minlength: "<?php _e( 'Comment: this field is required' ); ?>."
+            required: "<?php echo sprintf(__('%s is required'), __('Comment')); ?>.",
+            minlength: "<?php echo sprintf(__('%s is required'), __('Comment')); ?>."
           }
         },
         wrapper: "li",

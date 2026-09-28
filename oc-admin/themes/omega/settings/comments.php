@@ -38,12 +38,12 @@ function customHead() {
       },
       messages: {
         num_moderate_comments: {
-          required: '<?php echo osc_esc_js(__("Moderated comments: this field is required")); ?>.',
-          digits: '<?php echo osc_esc_js(__("Moderated comments: this field must only contain numeric characters")); ?>.'
+          required: '<?php echo osc_esc_js(sprintf(__('%s is required'), __('Moderated comments'))); ?>.',
+          digits: '<?php echo osc_esc_js(__('Moderated comments: this field must only contain numeric characters')); ?>.'
         },
         comments_per_page: {
-          required: '<?php echo osc_esc_js(__("Comments per page: this field is required")); ?>.',
-          digits: '<?php echo osc_esc_js(__("Comments per page: this field must only contain numeric characters")); ?>.'
+          required: '<?php echo osc_esc_js(sprintf(__('%s is required'), __('Comments per page'))); ?>.',
+          digits: '<?php echo osc_esc_js(__('Comments per page: this field must only contain numeric characters')); ?>.'
         }
       },
       wrapper: "li",
@@ -97,7 +97,7 @@ osc_add_hook('admin_page_header','customPageHeader');
 
 
 function customPageTitle($string) {
-  return sprintf(__('Comment settings - %s'), $string);
+  return sprintf(__('%s - %s'), __('Comment settings'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');
@@ -168,7 +168,7 @@ osc_current_admin_theme_path('parts/header.php');
           <div class="form-controls">
             <div class="form-label-checkbox">
               <label>
-                <input type="checkbox" <?php echo (osc_enable_comment_reply() ? 'checked="checked"' : ''); ?> name="enable_comment_reply" value="1" /> <?php _e('Enable reply on comments'); ?>
+                <input type="checkbox" <?php echo (osc_enable_comment_reply() ? 'checked="checked"' : ''); ?> name="enable_comment_reply" value="1" /> <?php _e('Enable replies to comments'); ?>
               </label>
             </div>
 
@@ -185,9 +185,9 @@ osc_current_admin_theme_path('parts/header.php');
           <div class="form-controls">
             <select name="comment_reply_user_type">
               <option value="" <?php if(osc_comment_reply_user_type() == '') { ?>selected="selected"<?php } ?>><?php echo __('Anyone can reply on comment'); ?></option>
-              <option value="LOGGED" <?php if(osc_comment_reply_user_type() == 'LOGGED') { ?>selected="selected"<?php } ?>><?php echo __('Only logged-in users can reply on comments'); ?></option>
-              <option value="OWNER" <?php if(osc_comment_reply_user_type() == 'OWNER') { ?>selected="selected"<?php } ?>><?php echo __('Only owner of listing can reply on comments'); ?></option>
-              <option value="ADMIN" <?php if(osc_comment_reply_user_type() == 'ADMIN') { ?>selected="selected"<?php } ?>><?php echo __('Only logged-in admin can reply on comments'); ?></option>
+              <option value="LOGGED" <?php if(osc_comment_reply_user_type() == 'LOGGED') { ?>selected="selected"<?php } ?>><?php echo __('Only logged-in users can reply to comments'); ?></option>
+              <option value="OWNER" <?php if(osc_comment_reply_user_type() == 'OWNER') { ?>selected="selected"<?php } ?>><?php echo __('Only the listing owner can reply to comments'); ?></option>
+              <option value="ADMIN" <?php if(osc_comment_reply_user_type() == 'ADMIN') { ?>selected="selected"<?php } ?>><?php echo __('Only a logged-in administrator can reply to comments'); ?></option>
             </select>
           </div>
         </div>
@@ -196,7 +196,7 @@ osc_current_admin_theme_path('parts/header.php');
         <h2 class="render-title"><?php _e('Notifications'); ?></h2>
 
         <div class="form-row">
-          <div class="form-label"><?php _e('E-mail admin whenever') ?></div>
+          <div class="form-label"><?php _e('Email admin whenever') ?></div>
           <div class="form-controls">
             <div class="form-label-checkbox">
               <label>
@@ -212,7 +212,7 @@ osc_current_admin_theme_path('parts/header.php');
           </div>
         </div>
         <div class="form-row">
-          <div class="form-label"><?php _e('E-mail user whenever') ?></div>
+          <div class="form-label"><?php _e('Email user whenever') ?></div>
           <div class="form-controls">
             <div class="form-label-checkbox">
               <label>

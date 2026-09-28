@@ -38,6 +38,10 @@ if(CLI) {
   }
 }
 
+if(Params::getParam('page') == 'cron' && !defined('__FROM_CRON__')) {
+  define('__FROM_CRON__', true);
+}
+
 if(file_exists(ABS_PATH . '.maintenance')) {
   if(!osc_is_admin_user_logged_in()) {
     header('HTTP/1.1 503 Service Temporarily Unavailable');
@@ -77,62 +81,29 @@ if(osc_is_web_user_logged_in()) {
 
 
 // Manage lang param in URL here so no redirect is required
-$lang = str_replace('-', '_', Params::getParam('lang'));
-$lang_strict = strtolower(substr($lang, 0, 2)) . '_' . strtoupper(substr($lang, 3, 2));
-$locale = osc_current_user_locale();
+$lang = str_replace('-', '_', (string)Params::getParam('lang'));
+$locale = (string)osc_current_user_locale();
+$lang_is_long = (preg_match('/^[a-z]{2}_[a-zA-Z]{2}$/i', $lang) === 1);
+$lang_is_short = (!$lang_is_long && preg_match('/^[a-z]{2}$/i', $lang) === 1);
+$lang_strict = '';
+if($lang_is_long) {
+  $lang_strict = strtolower(substr($lang, 0, 2)) . '_' . strtoupper(substr($lang, 3, 2));
+}
 
-//if(osc_rewrite_enabled() && Params::getParam('page') != 'language' && $lang != '' && (preg_match('/.{2}_.{2}/', $lang) && $locale != $lang || preg_match('/.{2}/', $lang) && substr($locale, 0, 2) != $lang)) {
-if(osc_rewrite_enabled() && Params::getParam('page') != 'language' && $lang != '' && ((preg_match('/[a-z]{2}_[a-zA-Z]{2}/', $lang) || preg_match('/[a-z]{2}-[a-zA-Z]{2}/', $lang)) && $locale != $lang || preg_match('/[a-z]{2}/', $lang) && substr($locale, 0, 2) != $lang)) {
-
-  // Update os812
-  $original_url = '';     // URL before redirect
-  if(Params::getServerParam('HTTP_REFERER', false, false) != '') {
-    $original_url = Params::getServerParam('HTTP_REFERER', false, false);
-  }
-  
-  if($original_url != '') {
-    
-    // Check if language has changed
-    if($locale != $lang_strict) {
-    //if($type == 'SHORT' && $old_lang != substr($locale, 0, 2) || $type == 'LONG' && $old_lang != str_replace($locale, '_', '-') || $type == 'STRICT' && $old_lang != $locale) {
-      // URL contains language in format .../en/...
-      if(preg_match('/\/[a-z]{2}\//', $original_url)) {
-        $original_url = preg_replace('/\/[a-z]{2}\//', '/' . substr($lang_strict, 0, 2) . '/', $original_url);
-        
-      // URL contains language in format .../en-US/... 
-      // This might only support /en-us/ in future!
-      } else if(preg_match('/\/[a-z]{2}-[a-zA-Z]{2}\//', $original_url)) {
-        $original_url = preg_replace('/\/[a-z]{2}-[a-zA-Z]{2}\//', '/' . str_replace('_', '-', $lang_strict) . '/', $original_url);
-
-      // URL contains language in format .../en_US/...
-      } else if(preg_match('/\/[a-z]{2}_[a-zA-Z]{2}\//', $original_url)) {
-        $original_url = preg_replace('/\/[a-z]{2}_[a-zA-Z]{2}\//', '/' . $lang_strict . '/', $original_url);
-      }
-
-    }
-  }
-  
-
-  // We cannot or do not want to redirect, only update locale
-  //if(preg_match('/.{2}_.{2}/', $lang)) {
-  if(preg_match('/[a-z]{2}_[a-zA-Z]{2}/', $lang) || preg_match('/[a-z]{2}-[a-zA-Z]{2}/', $lang)) {
+// Long format (en-us) becomes en_us after hyphen replace. Compare to en_US, not the raw slug.
+if(osc_rewrite_enabled() && Params::getParam('page') != 'language' && $lang != '') {
+  if($lang_is_long && $lang_strict != '' && strcasecmp($locale, $lang_strict) != 0) {
     Session::newInstance()->_set('userLocale', $lang_strict);
     Translation::init();
     osc_run_hook('user_locale_changed', $lang_strict);
-  //} else if(preg_match('/.{2}/', $lang)) {
-  } else if(preg_match('/[a-z]{2}/', $lang)) {
+  } else if($lang_is_short && strtolower(substr($locale, 0, 2)) != strtolower($lang)) {
     $find_lang = OSCLocale::newInstance()->findByShortCode($lang);
-    
+
     if($find_lang !== false && isset($find_lang['pk_c_code']) && $find_lang['pk_c_code'] != '') {
       Session::newInstance()->_set('userLocale', $find_lang['pk_c_code']);
       Translation::init();
       osc_run_hook('user_locale_changed', $find_lang['pk_c_code']);
     }
-  }
-
-  // Update os812
-  if($original_url != '' && osc_get_current_url() != $original_url) {
-    osc_redirect_to($original_url);
   }
 }
 
@@ -243,7 +214,9 @@ if(osc_subdomain_enabled() && Params::getParam('page') != 'cron' && Params::getP
 
 switch(Params::getParam('page')){
   case ('cron'):    // cron system
-    define('__FROM_CRON__', true);
+    if(!defined('__FROM_CRON__')) {
+      define('__FROM_CRON__', true);
+    }
     require_once(osc_lib_path() . 'osclass/cron.php');
     break;
 
@@ -333,9 +306,24 @@ switch(Params::getParam('page')){
 }
 
 
-if(!defined('__FROM_CRON__')) {
-  if(osc_auto_cron()) {
-    osc_doRequest(osc_base_url(), array('page' => 'cron'));
+// Built-in auto-cron: at most once per 5 minutes (MINUTELY), never from a cron/self request
+if(
+  !defined('__FROM_CRON__')
+  && Params::getParam('page') != 'cron'
+  && Params::getParam('auto_cron') != 1
+  && strpos((string)Params::getServerParam('HTTP_USER_AGENT', false, false), 'Osclass (v.') !== 0
+  && strpos((string)Params::getServerParam('HTTP_REFERER', false, false), 'Osclass') !== 0
+  && osc_auto_cron()
+) {
+  $cron_minutely = Cron::newInstance()->getCronByType('MINUTELY');
+  if(is_array($cron_minutely)) {
+    $i_next = (isset($cron_minutely['d_next_exec']) && $cron_minutely['d_next_exec'] !== '' ? (strtotime($cron_minutely['d_next_exec']) ?: 0) : 0);
+    if((time() - $i_next) >= 0) {
+      // Claim slot first so concurrent page loads cannot stampede
+      $d_next = date('Y-m-d H:i:s', strtotime(date('Y-m-d H:i:00')) + (5 * 60));
+      Cron::newInstance()->update(array('d_next_exec' => $d_next), array('e_type' => 'MINUTELY'));
+      osc_doRequest(osc_base_url(true) . '?page=cron', array('page' => 'cron', 'auto_cron' => 1), 5, false);
+    }
   }
 }
 

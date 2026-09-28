@@ -26,7 +26,7 @@ class CWebLogin extends BaseModel {
     parent::__construct();
 
     if(!osc_users_enabled()) {
-      osc_add_flash_error_message(_m('Users not enabled'));
+      osc_add_flash_error_message(_m('Users are not enabled'));
       $this->redirectTo(osc_base_url());
     }
 
@@ -272,7 +272,7 @@ class CWebLogin extends BaseModel {
 
         // e-mail is incorrect
         if(!osc_validate_email(Params::getParam('s_email'))) {
-          osc_add_flash_error_message(_m('Invalid email address'));
+          osc_add_flash_error_message(_m('The email is not valid'));
           $this->redirectTo(osc_recover_user_password_url());
         }
 
@@ -332,7 +332,7 @@ class CWebLogin extends BaseModel {
             osc_add_flash_ok_message(_m('The password has been changed'));
             $this->redirectTo(osc_user_login_url());
           } else {
-            osc_add_flash_error_message(_m("Error, the password don't match"));
+            osc_add_flash_error_message(_m("The passwords do not match"));
             $this->redirectTo(osc_forgot_user_password_confirm_url(Params::getParam('userId'), Params::getParam('code')));
           }
         } else {

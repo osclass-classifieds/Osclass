@@ -55,7 +55,7 @@ class UserActions {
     }
 
     if(Params::getParam('s_password', false, false) != Params::getParam('s_password2', false, false)) {
-      $flash_error .= _m("Passwords don't match") . PHP_EOL;
+      $flash_error .= _m('The passwords do not match') . PHP_EOL;
       $error[] = 7;
     }
 
@@ -74,7 +74,7 @@ class UserActions {
     $email_taken = $this->manager->findByEmail($input['s_email']);
     if($email_taken != false) {
       osc_run_hook('register_email_taken', $input['s_email']);
-      $flash_error .= _m('The specified e-mail is already in use') . PHP_EOL;
+      $flash_error .= _m('This email is already in use') . PHP_EOL;
       $error[] = 3;
     }
 
@@ -192,7 +192,7 @@ class UserActions {
     if($this->is_admin) {
       $user_email = $this->manager->findByEmail($input['s_email']);
       if(isset($user_email['pk_i_id']) && $user_email['pk_i_id'] != $userId) {
-        $flash_error .= sprintf(_m('The specified e-mail is already used by %s'), $user_email['s_username']) . PHP_EOL;
+        $flash_error .= sprintf(_m('This email is already used by %s'), $user_email['s_username']) . PHP_EOL;
         $error[] = 3;
       }
     }
@@ -204,7 +204,7 @@ class UserActions {
 
     if($this->is_admin){
       if(Params::getParam('s_password', false, false) != Params::getParam('s_password2', false, false)) {
-        $flash_error .= _m("Passwords don't match") . PHP_EOL;
+        $flash_error .= _m('The passwords do not match') . PHP_EOL;
         $error[] = 7;
       }
     }

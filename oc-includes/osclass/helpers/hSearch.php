@@ -479,7 +479,7 @@ function osc_search_url($params = null, $lang_code = '') {
   $lang_slug = '';
 
   if(osc_locale_to_base_url_enabled() && osc_subdomain_type() != 'language') {
-    $lang_slug = osc_base_url_locale_slug() . '/';
+    $lang_slug = osc_base_url_locale_slug($lang_code) . '/';
     unset($params['lang']);
   }
 
@@ -494,7 +494,7 @@ function osc_search_url($params = null, $lang_code = '') {
       }
 
       if($params['sCategory'] != '' && strpos($params['sCategory'], ",") === false) {
-        $category_slug = osc_search_param_value_to_slug('sCategory', $params['sCategory']);
+        $category_slug = osc_search_param_value_to_slug('sCategory', $params['sCategory'], false, false, $lang_code);
 
         if($category_slug != '') {
           $base_url = $http_url . $category_slug . '.' . osc_subdomain_host() . REL_WEB_URL . $lang_slug;
@@ -634,7 +634,7 @@ function osc_search_url($params = null, $lang_code = '') {
 
       if($rule_id != '') {
         $rule = $custom_rules[$rule_id];
-        $rule_populated = osc_custom_search_rule_populate($rule, $params);
+        $rule_populated = osc_custom_search_rule_populate($rule, $params, $lang_code);
       }
 
 
@@ -729,16 +729,17 @@ function osc_search_url($params = null, $lang_code = '') {
 
       if(isset($category['pk_i_id'])) {
         $url = osc_get_preference('rewrite_cat_url');
+        $cat_locale = ($lang_code != '' ? osc_locale_code_from_param($lang_code) : '');
+        $categories = Category::newInstance()->hierarchy($category['pk_i_id'], $cat_locale);
+        if(isset($categories[0]['s_slug'])) {
+          $category['s_slug'] = $categories[0]['s_slug'];
+        }
 
         if(preg_match('|{CATEGORIES}|', $url)) {
-          $categories = Category::newInstance()->hierarchy($category['pk_i_id']);
           $sanitized_categories = array();
-          $mCat = Category::newInstance();
 
           for($i = count($categories); $i > 0; $i--) {
-            // $tmpcat = $mCat->findByPrimaryKey($categories[$i - 1]['pk_i_id']);
-            $tmpcat = osc_get_category_row($categories[$i - 1]['pk_i_id']);
-            $sanitized_categories[] = $tmpcat['s_slug'];
+            $sanitized_categories[] = $categories[$i - 1]['s_slug'];
           }
 
           $url = str_replace('{CATEGORIES}', implode("/", $sanitized_categories), $url);
@@ -780,7 +781,7 @@ function osc_search_url($params = null, $lang_code = '') {
       }
 
       if(isset($params['sCategory'])) {
-        $_auxSlug = _aux_search_category_slug($params['sCategory']);
+        $_auxSlug = _aux_search_category_slug($params['sCategory'], $lang_code);
 
         if($_auxSlug != '') {
           $url .= $_auxSlug . SEARCH_URL_CANONICAL_DELIMITER;
@@ -823,7 +824,7 @@ function osc_search_url($params = null, $lang_code = '') {
       }
 
       if(isset($params['sCategory'])) {
-        $_auxSlug = _aux_search_category_slug($params['sCategory']);
+        $_auxSlug = _aux_search_category_slug($params['sCategory'], $lang_code);
         if($_auxSlug != '') {
           $url .= $_auxSlug . SEARCH_URL_CANONICAL_DELIMITER;
         }
@@ -895,7 +896,7 @@ function osc_search_url($params = null, $lang_code = '') {
             } else {
               // For category ID search for slug
               if(is_numeric($v)) {
-                $_auxSlug = _aux_search_category_slug($v);
+                $_auxSlug = _aux_search_category_slug($v, $lang_code);
 
                 if($_auxSlug != '') {
                   $v = $_auxSlug;
@@ -1296,7 +1297,7 @@ function osc_custom_search_rule_check_match($rule, $params = array(), $strict_ma
 
 
 // Replace rule keywords with real values
-function osc_custom_search_rule_populate($rule, $params = array()) {
+function osc_custom_search_rule_populate($rule, $params = array(), $lang_code = '') {
   if(!is_array($params) || count($params) <= 0 || trim((string)$rule) == '') {
     return 0;
   }
@@ -1321,7 +1322,7 @@ function osc_custom_search_rule_populate($rule, $params = array()) {
         }
 
         if($param_value != '' && '{' . $rule_param . '}' != urldecode($param_value)) {
-          $param_value = osc_search_param_value_to_slug($rule_param, $param_value);
+          $param_value = osc_search_param_value_to_slug($rule_param, $param_value, false, false, $lang_code);
           $rule_populated = str_replace('{' . $rule_param . '}', $param_value, $rule_populated);
 
         } else {
@@ -1423,7 +1424,7 @@ function osc_custom_search_rule_params($rule) {
 
 
 // Replace IDs with slugs in URLs
-function osc_search_param_value_to_slug($param, $value, $slug_strict = false, $with_id_canonical = false) {
+function osc_search_param_value_to_slug($param, $value, $slug_strict = false, $with_id_canonical = false, $locale = '') {
   $value_original = $value;
 
   switch($param) {
@@ -1432,7 +1433,7 @@ function osc_search_param_value_to_slug($param, $value, $slug_strict = false, $w
       $value = urlencode($value);
 
     case 'sCategory':
-      $slug = _aux_search_category_slug($value);
+      $slug = _aux_search_category_slug($value, $locale);
       $value = ($slug != '' ? $slug : $value);
       break;
 
@@ -2014,8 +2015,8 @@ function osc_get_raw_search($conditions) {
 }
 
 
-// Get search category slug for single/array category input
-function _aux_search_category_slug($paramCat) {
+// Get search category slug for single/array category input. $locale is optional (plugins/themes may omit it).
+function _aux_search_category_slug($paramCat, $locale = '') {
   if(is_array($paramCat)) {
     if(count($paramCat) == 1) {
       $paramCat = $paramCat[0];
@@ -2024,15 +2025,44 @@ function _aux_search_category_slug($paramCat) {
     }
   }
 
-  if(osc_category_id() == $paramCat) {
-    $category['s_slug'] = osc_category_slug();
-  } else {
-    if(is_numeric($paramCat)) {
-      $category = osc_get_category_row($paramCat);
+  if(!is_string($locale) && !is_numeric($locale)) {
+    $locale = '';
+  }
+  $locale = trim((string)$locale);
+  $cat_locale = ($locale != '' ? osc_locale_code_from_param($locale) : '');
+
+  if($cat_locale == '') {
+    if(osc_category_id() == $paramCat) {
+      $category['s_slug'] = osc_category_slug();
     } else {
-      $category = osc_get_category_row_by_slug($paramCat);
+      if(is_numeric($paramCat)) {
+        $category = osc_get_category_row($paramCat);
+      } else {
+        $category = osc_get_category_row_by_slug($paramCat);
+      }
+    }
+
+    return isset($category['s_slug']) ? $category['s_slug'] : '';
+  }
+
+  $category_id = 0;
+  if(is_numeric($paramCat)) {
+    $category_id = (int)$paramCat;
+  } else {
+    $row = osc_get_category_row_by_slug($paramCat);
+    if(isset($row['pk_i_id'])) {
+      $category_id = (int)$row['pk_i_id'];
+    } else if(osc_category_id() > 0 && (osc_category_id() == $paramCat || osc_category_slug() == $paramCat)) {
+      $category_id = (int)osc_category_id();
     }
   }
 
-  return isset($category['s_slug']) ? $category['s_slug'] : '';
+  if($category_id > 0) {
+    $category = Category::newInstance()->findByPrimaryKey($category_id, $cat_locale);
+    if(isset($category['s_slug'])) {
+      return $category['s_slug'];
+    }
+  }
+
+  return '';
 }

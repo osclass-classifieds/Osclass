@@ -145,14 +145,14 @@ class ItemActions {
       $is_spam = 1;
     }
 
-    $flash_error .= ((!osc_validate_category($aItem['catId'])) ? _m('Category invalid.') . PHP_EOL : '');
+    $flash_error .= ((!osc_validate_category($aItem['catId'])) ? sprintf(_m('%s is not valid'), __('Category')) . PHP_EOL : '');
     $flash_error .= ((!osc_validate_number($aItem['price'])) ? _m('Price must be a number.') . PHP_EOL : '');
     $flash_error .= ((!osc_validate_max(number_format((float)$aItem['price'], 0, '', ''), 25)) ? _m('Price too long.') . PHP_EOL : '');
     $flash_error .= (($aItem['price'] !== null && (int)$aItem['price'] < 0) ? _m('Price must be positive number.') . PHP_EOL : '');
     $flash_error .= ((!osc_validate_max($contactName, 35)) ? _m('Name too long.') . PHP_EOL : '');
     $flash_error .= ((!osc_validate_max($contactPhone, 100)) ? _m('Phone too long.') . PHP_EOL : '');
     $flash_error .= ((!osc_validate_max($contactOther, 100)) ? _m('Other contact information too long.') . PHP_EOL : '');
-    $flash_error .= ((!osc_validate_email($contactEmail)) ? _m('Email invalid.') . PHP_EOL : '');
+    $flash_error .= ((!osc_validate_email($contactEmail)) ? _m('The email is not valid') . PHP_EOL : '');
     $flash_error .= ((!osc_validate_text($aItem['countryName'], 2, false)) ? _m('Country too short.') . PHP_EOL : '');
     $flash_error .= ((!osc_validate_max($aItem['countryName'], 50)) ? _m('Country too long.') . PHP_EOL : '');
     $flash_error .= ((!osc_validate_text($aItem['regionName'], 2, false)) ? _m('Region too short.') . PHP_EOL : '');
@@ -183,7 +183,7 @@ class ItemActions {
         if($v == '') {
           $field = $mField->findByPrimaryKey($k);
           if($field['b_required'] == 1) {
-            $flash_error .= sprintf(_m('%s field is required.'), $field['s_name']) . PHP_EOL;
+            $flash_error .= sprintf(_m('%s is required'), $field['s_name']) . PHP_EOL;
           }
         }
       }
@@ -610,7 +610,7 @@ class ItemActions {
       }
 
       if($limit_reached) {
-        osc_add_flash_warning_message(_m('Image limit reached, some images were not uploaded!'));
+        osc_add_flash_warning_message(_m('You cannot upload more images. Image limit reached.'));
       }
 
       unset($itemResourceManager);
@@ -759,7 +759,7 @@ class ItemActions {
 
     $flash_error .= $desc_message;
 
-    $flash_error .= ((!osc_validate_category($aItem['catId'] ?? '')) ? _m('Category invalid.') . PHP_EOL : '');
+    $flash_error .= ((!osc_validate_category($aItem['catId'] ?? '')) ? sprintf(_m('%s is not valid'), __('Category')) . PHP_EOL : '');
     $flash_error .= ((!osc_validate_number($aItem['price'])) ? _m('Price must be a number.') . PHP_EOL : '');
     $flash_error .= ((!osc_validate_max(number_format((float)$aItem['price'], 0, '', ''), 15)) ? _m('Price too long.') . PHP_EOL : '');
     $flash_error .= (($aItem['price'] !== null && (int)$aItem['price'] < 0) ? _m('Price must be positive number.') . PHP_EOL : '');
@@ -790,7 +790,7 @@ class ItemActions {
         if($v == '') {
           $field = $mField->findByPrimaryKey($k);
           if($field['b_required'] == 1) {
-            $flash_error .= sprintf(_m('%s field is required.'), $field['s_name']) . PHP_EOL;
+            $flash_error .= sprintf(_m('%s is required'), $field['s_name']) . PHP_EOL;
           }
         }
       }
@@ -1404,11 +1404,13 @@ class ItemActions {
 
   /**
    * Legacy "Mark as" action. Kept so old themes and plugins do not fatal.
+   * Front urls now redirect to the report form; this no longer writes stats.
    *
    * @param mixed $id
+   * @param mixed $as
    * @return bool
    */
-  public function mark($id = null) {
+  public function mark($id = null, $as = null) {
     return false;
   }
 
@@ -1534,13 +1536,13 @@ class ItemActions {
     $flash_error = '';
     // check parameters
     if(!osc_validate_text($aItem['yourName'])) {
-      $flash_error = __('Your name: this field is required') . PHP_EOL;
+      $flash_error = sprintf(__('%s is required'), __('Your name')) . PHP_EOL;
     }
     if(!osc_validate_email($aItem['yourEmail'])) {
-      $flash_error .= __('Invalid email address') . PHP_EOL;
+      $flash_error .= __('The email is not valid') . PHP_EOL;
     }
     if(!osc_validate_text($aItem['message'])) {
-      $flash_error .= __('Message: this field is required') . PHP_EOL;
+      $flash_error .= sprintf(__('%s is required'), __('Message')) . PHP_EOL;
     }
 
 

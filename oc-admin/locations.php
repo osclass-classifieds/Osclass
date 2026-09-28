@@ -28,7 +28,7 @@ class CAdminLocations extends AdminSecBaseModel {
     switch($action) {
       case('add_country'):  // add country
         if(defined('DEMO')) {
-          osc_add_flash_warning_message(_m("This action can't be done because it's a demo site"), 'admin');
+          osc_add_flash_warning_message(_m("This action cannot be done because it is a demo site"), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=locations');
         }
 
@@ -76,7 +76,7 @@ class CAdminLocations extends AdminSecBaseModel {
 
       case('edit_country'):   // edit country
         if(defined('DEMO')) {
-          osc_add_flash_warning_message(_m("This action can't be done because it's a demo site"), 'admin');
+          osc_add_flash_warning_message(_m("This action cannot be done because it is a demo site"), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=locations');
         }
 
@@ -160,7 +160,7 @@ class CAdminLocations extends AdminSecBaseModel {
 
       case('delete_country'): // delete country
         if(defined('DEMO')) {
-          osc_add_flash_warning_message(_m("This action can't be done because it's a demo site"), 'admin');
+          osc_add_flash_warning_message(_m("This action cannot be done because it is a demo site"), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=locations');
         }
 
@@ -196,7 +196,7 @@ class CAdminLocations extends AdminSecBaseModel {
 
       case('add_region'):   // add region
         if(defined('DEMO')) {
-          osc_add_flash_warning_message(_m("This action can't be done because it's a demo site"), 'admin');
+          osc_add_flash_warning_message(_m("This action cannot be done because it is a demo site"), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=locations');
         }
 
@@ -241,7 +241,7 @@ class CAdminLocations extends AdminSecBaseModel {
 
       case('edit_region'):  // edit region
         if(defined('DEMO')) {
-          osc_add_flash_warning_message(_m("This action can't be done because it's a demo site"), 'admin');
+          osc_add_flash_warning_message(_m("This action cannot be done because it is a demo site"), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=locations');
         }
 
@@ -312,7 +312,7 @@ class CAdminLocations extends AdminSecBaseModel {
 
       case('delete_region'):  // delete region
         if(defined('DEMO')) {
-          osc_add_flash_warning_message(_m("This action can't be done because it's a demo site"), 'admin');
+          osc_add_flash_warning_message(_m("This action cannot be done because it is a demo site"), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=locations');
         }
 
@@ -355,7 +355,7 @@ class CAdminLocations extends AdminSecBaseModel {
 
       case('add_city'):     // add city
         if(defined('DEMO')) {
-          osc_add_flash_warning_message(_m("This action can't be done because it's a demo site"), 'admin');
+          osc_add_flash_warning_message(_m("This action cannot be done because it is a demo site"), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=locations');
         }
 
@@ -404,7 +404,7 @@ class CAdminLocations extends AdminSecBaseModel {
 
       case('edit_city'):    // edit city
         if(defined('DEMO')) {
-          osc_add_flash_warning_message(_m("This action can't be done because it's a demo site"), 'admin');
+          osc_add_flash_warning_message(_m("This action cannot be done because it is a demo site"), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=locations');
         }
 
@@ -486,7 +486,7 @@ class CAdminLocations extends AdminSecBaseModel {
 
       case('delete_city'):  // delete city
         if(defined('DEMO')) {
-          osc_add_flash_warning_message(_m("This action can't be done because it's a demo site"), 'admin');
+          osc_add_flash_warning_message(_m("This action cannot be done because it is a demo site"), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=locations');
         }
 
@@ -526,7 +526,7 @@ class CAdminLocations extends AdminSecBaseModel {
 
       case('locations_import'): // import locations
         if(defined('DEMO')) {
-          osc_add_flash_warning_message(_m("This action can't be done because it's a demo site"), 'admin');
+          osc_add_flash_warning_message(_m("This action cannot be done because it is a demo site"), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=locations');
         }
 
@@ -546,7 +546,7 @@ class CAdminLocations extends AdminSecBaseModel {
             $imported = $comm->importSQL($sql);
             $comm->query('SET FOREIGN_KEY_CHECKS = 1');
 
-            osc_add_flash_ok_message(_m('Location imported successfully'), 'admin');
+            osc_add_flash_ok_message(_m('The location has been imported'), 'admin');
             $this->redirectTo(osc_admin_base_url(true) . '?page=locations');
 
             return true;

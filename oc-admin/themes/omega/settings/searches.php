@@ -90,7 +90,7 @@ osc_add_hook('admin_page_header','customPageHeader');
 
 
 function customPageTitle($string) {
-  return sprintf(__('Latest searches settings - %s'), $string);
+  return sprintf(__('%s - %s'), __('Latest searches settings'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');

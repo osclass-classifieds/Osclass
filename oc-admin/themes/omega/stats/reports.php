@@ -58,7 +58,7 @@ osc_add_hook('admin_page_header','customPageHeader');
 
 
 function customPageTitle($string) {
-  return sprintf(__('Report statistics - %s'), $string);
+  return sprintf(__('%s - %s'), __('Report statistics'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');
@@ -158,12 +158,12 @@ osc_current_admin_theme_path( 'parts/header.php' );
 ?>
 
 <div class="grid-system" id="stats-page">
-  <div class="grid-row grid-50">
+  <div class="grid-row grid-30">
     <div class="row-wrapper">
       <h2 class="render-title"><?php _e('Report statistics'); ?></h2>
     </div>
   </div>
-  <div class="grid-row grid-50">
+  <div class="grid-row grid-70">
     <div class="row-wrapper">
       <a id="monthly" class="btn float-right <?php if($type=='month') echo 'btn-green';?>" href="<?php echo osc_admin_base_url(true); ?>?page=stats&amp;action=reports&amp;type_stat=month"><?php _e('Last 10 months'); ?></a>
       <a id="weekly"  class="btn float-right <?php if($type=='week') echo 'btn-green';?>" href="<?php echo osc_admin_base_url(true); ?>?page=stats&amp;action=reports&amp;type_stat=week"><?php _e('Last 10 weeks'); ?></a>

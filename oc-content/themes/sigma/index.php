@@ -20,7 +20,7 @@
 Theme Name: Sigma Osclass Theme
 Theme URI: https://osclasspoint.com/osclass-themes/general/sigma-osclass-theme_i115
 Description: New default osclass theme with attractive design
-Version: 1.7.0
+Version: 1.8.0
 Author: MB Themes
 Author URI: https://osclasspoint.com
 Widgets: header,footer
@@ -31,7 +31,7 @@ Product Key: LNlXIJmlaVMAICJ7o728
 function sigma_theme_info() {
   return array(
     'name' => 'sigma'
-    ,'version' => '1.7.0'
+    ,'version' => '1.8.0'
     ,'description' => 'Sigma default osclass theme'
     ,'author_name' => 'MB Themes'
     ,'author_url' => 'https://osclasspoint.com'

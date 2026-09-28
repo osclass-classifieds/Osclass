@@ -59,7 +59,7 @@ class CAdminCategories extends AdminSecBaseModel {
 
     $parentCategory = $mCategory->findRootCategory($id);
     if($enabled && (!$parentCategory || !(int)$parentCategory['b_enabled'])) {
-      return array('ok' => false, 'msg' => __('Parent category is disabled, you can not enable that category'));
+      return array('ok' => false, 'msg' => __('The parent category is disabled. You cannot enable this category.'));
     }
 
     $mCategory->update(array('b_enabled' => $enabled), array('pk_i_id' => $id));
@@ -71,6 +71,15 @@ class CAdminCategories extends AdminSecBaseModel {
 
   function doModel() {
     parent::doModel();
+
+    // Bulk form posts action=delete|enable|... with id[]; those names must not hit single-id cases
+    if($this->action != '' && is_array(Params::getParam('id'))) {
+      $bulkIds = Params::getParam('id');
+      $bulkIds = osc_apply_filter('category_bulk_ids', $bulkIds, $this->action);
+      osc_run_hook('category_bulk_' . $this->action, $bulkIds);
+      $this->processBulkAction($this->action, $bulkIds);
+      $this->redirectTo($this->categoriesAdminListUrl());
+    }
 
     switch($this->action) {
       case('add_post_default'):
@@ -224,9 +233,9 @@ class CAdminCategories extends AdminSecBaseModel {
         osc_run_hook('add_category', (int)$categoryId);
 
         if($error == 0) {
-          osc_add_flash_ok_message(__('Category added correctly'), 'admin');
+          osc_add_flash_ok_message(__('The category has been added'), 'admin');
         } else {
-          osc_add_flash_warning_message(__('Category added correctly, but some titles are empty'), 'admin');
+          osc_add_flash_warning_message(__('The category has been added, but some titles are empty'), 'admin');
         }
 
         $redirectParent = ($newParentId > 0 ? $newParentId : (int)Params::getParam('parent'));
@@ -331,9 +340,9 @@ class CAdminCategories extends AdminSecBaseModel {
         osc_run_hook('edited_category', (int)($id), $error);
 
         if($error == 0) {
-          osc_add_flash_ok_message(__('Category updated correctly'), 'admin');
+          osc_add_flash_ok_message(__('The category has been updated'), 'admin');
         } else if($error == 1 && $has_one_title == 1) {
-          osc_add_flash_warning_message(__('Category updated correctly, but some titles are empty'), 'admin');
+          osc_add_flash_warning_message(__('The category has been updated, but some titles are empty'), 'admin');
         } else if($error == 2) {
           osc_add_flash_error_message(__('An error occurred while updating'), 'admin');
         } else {
@@ -407,15 +416,6 @@ class CAdminCategories extends AdminSecBaseModel {
         break;
 
       default:
-        if(Params::getParam('action') != '') {
-          osc_run_hook('category_bulk_' . Params::getParam('action'), Params::getParam('id'));
-        }
-
-        $bulkAction = Params::getParam('action');
-        if($bulkAction != '' && is_array(Params::getParam('id'))) {
-          $this->processBulkAction($bulkAction, Params::getParam('id'));
-        }
-
         require_once osc_lib_path() . 'osclass/classes/datatables/CategoriesDataTable.php';
 
         if(Params::getParam('iDisplayLength') != '') {
@@ -476,12 +476,25 @@ class CAdminCategories extends AdminSecBaseModel {
           array('value' => 'enable', 'data-dialog-content' => sprintf(__('Are you sure you want to %s the selected categories?'), strtolower(__('Enable'))), 'label' => __('Enable')),
           array('value' => 'disable', 'data-dialog-content' => sprintf(__('Are you sure you want to %s the selected categories?'), strtolower(__('Disable'))), 'label' => __('Disable')),
           array('value' => 'delete', 'data-dialog-content' => sprintf(__('Are you sure you want to %s the selected categories?'), strtolower(__('Delete'))), 'label' => __('Delete')),
-          array('value' => 'expiration_30', 'data-dialog-content' => sprintf(__('Are you sure you want to %s the selected categories?'), strtolower(__('Set expiration to 30 days'))), 'label' => __('Expiration 30 days')),
-          array('value' => 'expiration_90', 'data-dialog-content' => sprintf(__('Are you sure you want to %s the selected categories?'), strtolower(__('Set expiration to 90 days'))), 'label' => __('Expiration 90 days')),
-          array('value' => 'disable_expiration', 'data-dialog-content' => sprintf(__('Are you sure you want to %s the selected categories?'), strtolower(__('Disable expiration'))), 'label' => __('Disable expiration')),
-          array('value' => 'enable_price', 'data-dialog-content' => sprintf(__('Are you sure you want to %s the selected categories?'), strtolower(__('Enable price'))), 'label' => __('Enable price')),
-          array('value' => 'disable_price', 'data-dialog-content' => sprintf(__('Are you sure you want to %s the selected categories?'), strtolower(__('Disable price'))), 'label' => __('Disable price')),
         );
+
+        $expDefs = osc_category_bulk_expiration_option_defs();
+        foreach(osc_category_bulk_expiration_options_array() as $expKey) {
+          if(!isset($expDefs[$expKey])) {
+            continue;
+          }
+          $expLabel = osc_category_bulk_expiration_option_label($expKey);
+          $expDays = (int)$expDefs[$expKey]['days'];
+          $bulk_options[] = array(
+            'value' => 'expiration_' . $expDays,
+            'data-dialog-content' => sprintf(__('Are you sure you want to set expiration to %s for the selected categories?'), $expLabel),
+            'label' => sprintf(__('Expiration: %s'), $expLabel),
+          );
+        }
+
+        $bulk_options[] = array('value' => 'disable_expiration', 'data-dialog-content' => sprintf(__('Are you sure you want to %s the selected categories?'), strtolower(__('Disable expiration'))), 'label' => __('Disable expiration'));
+        $bulk_options[] = array('value' => 'enable_price', 'data-dialog-content' => sprintf(__('Are you sure you want to %s the selected categories?'), strtolower(__('Enable price'))), 'label' => __('Enable price'));
+        $bulk_options[] = array('value' => 'disable_price', 'data-dialog-content' => sprintf(__('Are you sure you want to %s the selected categories?'), strtolower(__('Disable price'))), 'label' => __('Disable price'));
         $bulk_options = osc_apply_filter('category_bulk_filter', $bulk_options);
 
         $this->_exportVariableToView('aData', $aData);
@@ -540,81 +553,100 @@ class CAdminCategories extends AdminSecBaseModel {
     }
 
     osc_csrf_check();
+
+    $cleanIds = array();
+    foreach($ids as $rawId) {
+      $id = (int)$rawId;
+      if($id > 0 && !in_array($id, $cleanIds, true)) {
+        $cleanIds[] = $id;
+      }
+    }
+    if(count($cleanIds) == 0) {
+      return;
+    }
+
     $changed = 0;
+    $handled = true;
+
+    if(preg_match('/^expiration_(\d+)$/', (string)$action, $m)) {
+      $days = (int)$m[1];
+      $allowedDays = osc_apply_filter('osc_category_bulk_expiration_allowed_days', osc_category_bulk_expiration_selected_days(), $action, $cleanIds);
+      if(!is_array($allowedDays) || !in_array($days, $allowedDays, true)) {
+        osc_add_flash_error_message(__('Invalid expiration option'), 'admin');
+        $this->redirectTo($this->categoriesAdminListUrl());
+        return;
+      }
+      foreach($cleanIds as $id) {
+        $this->categoryManager->updateExpiration($id, $days, false);
+        $changed++;
+      }
+      if($changed > 0) {
+        osc_add_flash_ok_message(sprintf(__('Expiration set to %s'), osc_category_bulk_expiration_days_label($days)), 'admin');
+      }
+      osc_run_hook('category_bulk_done', $action, $cleanIds, $changed);
+      $this->redirectTo($this->categoriesAdminListUrl());
+      return;
+    }
 
     switch($action) {
       case('enable'):
-        foreach($ids as $id) {
-          $res = $this->setCategoryEnabled((int)$id, 1);
+        foreach($cleanIds as $id) {
+          $res = $this->setCategoryEnabled($id, 1);
           if($res['ok']) {
             $changed++;
           }
         }
         if($changed > 0) {
           osc_add_flash_ok_message(sprintf(_n('One category has been enabled', '%d categories have been enabled', $changed), $changed), 'admin');
+        } else {
+          osc_add_flash_error_message(__('No categories have been enabled'), 'admin');
         }
         break;
 
       case('disable'):
-        foreach($ids as $id) {
-          $res = $this->setCategoryEnabled((int)$id, 0);
+        foreach($cleanIds as $id) {
+          $res = $this->setCategoryEnabled($id, 0);
           if($res['ok']) {
             $changed++;
           }
         }
         if($changed > 0) {
           osc_add_flash_ok_message(sprintf(_n('One category has been disabled', '%d categories have been disabled', $changed), $changed), 'admin');
+        } else {
+          osc_add_flash_error_message(__('No categories have been disabled'), 'admin');
         }
         break;
 
       case('delete'):
-        foreach($ids as $id) {
-          if($this->categoryManager->deleteByPrimaryKey((int)$id) > 0) {
+        foreach($cleanIds as $id) {
+          if(!$this->categoryManager->findByPrimaryKey($id)) {
+            continue;
+          }
+          if($this->categoryManager->deleteByPrimaryKey($id) > 0) {
             $changed++;
           }
         }
         if($changed > 0) {
           osc_add_flash_ok_message(sprintf(_n('One category has been deleted', '%d categories have been deleted', $changed), $changed), 'admin');
-        }
-        break;
-
-      case('expiration_30'):
-        foreach($ids as $id) {
-          $this->categoryManager->update(array('i_expiration_days' => 30), array('pk_i_id' => (int)$id));
-          $this->categoryManager->updateExpiration((int)$id, 30, false);
-          $changed++;
-        }
-        if($changed > 0) {
-          osc_add_flash_ok_message(__('Expiration updated'), 'admin');
-        }
-        break;
-
-      case('expiration_90'):
-        foreach($ids as $id) {
-          $this->categoryManager->update(array('i_expiration_days' => 90), array('pk_i_id' => (int)$id));
-          $this->categoryManager->updateExpiration((int)$id, 90, false);
-          $changed++;
-        }
-        if($changed > 0) {
-          osc_add_flash_ok_message(__('Expiration updated'), 'admin');
+        } else {
+          osc_add_flash_error_message(__('An error occurred while deleting'), 'admin');
         }
         break;
 
       case('disable_expiration'):
       case('expiration_default'):
-        foreach($ids as $id) {
-          $this->categoryManager->update(array('i_expiration_days' => 0), array('pk_i_id' => (int)$id));
-          $this->categoryManager->updateExpiration((int)$id, 0, false);
+        foreach($cleanIds as $id) {
+          $this->categoryManager->updateExpiration($id, 0, false);
           $changed++;
         }
         if($changed > 0) {
-          osc_add_flash_ok_message(__('Expiration updated'), 'admin');
+          osc_add_flash_ok_message(__('Expiration disabled'), 'admin');
         }
         break;
 
       case('enable_price'):
-        foreach($ids as $id) {
-          $this->categoryManager->updatePriceEnabled((int)$id, 1, false);
+        foreach($cleanIds as $id) {
+          $this->categoryManager->updatePriceEnabled($id, 1, false);
           $changed++;
         }
         if($changed > 0) {
@@ -623,8 +655,8 @@ class CAdminCategories extends AdminSecBaseModel {
         break;
 
       case('disable_price'):
-        foreach($ids as $id) {
-          $this->categoryManager->updatePriceEnabled((int)$id, 0, false);
+        foreach($cleanIds as $id) {
+          $this->categoryManager->updatePriceEnabled($id, 0, false);
           $changed++;
         }
         if($changed > 0) {
@@ -633,9 +665,15 @@ class CAdminCategories extends AdminSecBaseModel {
         break;
 
       default:
-        return;
+        $handled = false;
+        break;
     }
 
+    if(!$handled) {
+      return;
+    }
+
+    osc_run_hook('category_bulk_done', $action, $cleanIds, $changed);
     $this->redirectTo($this->categoriesAdminListUrl());
   }
 

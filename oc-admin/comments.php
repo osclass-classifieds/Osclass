@@ -184,7 +184,7 @@ class CAdminItemComments extends AdminSecBaseModel {
         }
 
         if(!osc_validate_email(Params::getParam('authorEmail'), true)) {
-          $msg .= _m('Email is not correct')."<br/>";
+          $msg .= _m('The email is not valid')."<br/>";
         }
         if(!osc_validate_text(Params::getParam('body'), 1, true)) {
           $msg .= _m('Comment is required')."<br/>";
@@ -313,7 +313,7 @@ class CAdminItemComments extends AdminSecBaseModel {
 
         $msg = '';
         if(!osc_validate_email(Params::getParam('authorEmail'),true)) {
-          $msg .= _m('Email is not correct')."<br/>";
+          $msg .= _m('The email is not valid')."<br/>";
         }
         if(!osc_validate_text(Params::getParam('body'),1 , true)) {
           $msg .= _m('Comment is required')."<br/>";
@@ -384,7 +384,7 @@ class CAdminItemComments extends AdminSecBaseModel {
           osc_run_hook('edit_comment_reply', Params::getParam('replyId'));
         }
 
-        osc_add_flash_ok_message(_m('Great! We just updated your comment'), 'admin');
+        osc_add_flash_ok_message(_m('The comment has been updated'), 'admin');
         //$this->redirectTo(osc_admin_base_url(true) . "?page=comments");
         $this->redirectTo(osc_admin_base_url(true) . "?page=comments&action=comment_edit&id=".Params::getParam('id'));
         break;

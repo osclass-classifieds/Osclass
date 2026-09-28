@@ -189,7 +189,7 @@
                 </div>
 
                 <div class="control-group">
-                  <label class="control-label" for="contactEmail"><?php _e('E-mail', 'sigma'); ?></label>
+                  <label class="control-label" for="contactEmail"><?php _e('Email', 'sigma'); ?></label>
                   <div class="controls">
                     <?php ItemForm::contact_email_text(); ?>
                   </div>
@@ -197,7 +197,7 @@
 
                 <div class="control-group">
                   <div class="controls checkbox">
-                    <?php ItemForm::show_email_checkbox(); ?> <label for="showEmail"><?php _e('Show e-mail on the listing page', 'sigma'); ?></label>
+                    <?php ItemForm::show_email_checkbox(); ?> <label for="showEmail"><?php _e('Show email on the listing page', 'sigma'); ?></label>
                   </div>
                 </div>
               <?php } ?>

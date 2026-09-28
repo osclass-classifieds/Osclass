@@ -66,11 +66,11 @@ class CAdminUsers extends AdminSecBaseModel {
 
         switch($success) {
           case 1:
-            osc_add_flash_ok_message(_m("The user has been created. We've sent an activation e-mail"), 'admin');
+            osc_add_flash_ok_message(_m("The user has been created. An activation email has been sent"), 'admin');
             break;
 
           case 2:
-            osc_add_flash_ok_message(_m('The user has been created successfully'), 'admin');
+            osc_add_flash_ok_message(_m('The user has been created'), 'admin');
             break;
 
           default:
@@ -110,7 +110,7 @@ class CAdminUsers extends AdminSecBaseModel {
           $actions[] = '<a class="btn float-left" href="' . osc_admin_base_url(true) . '?page=users&action=login&amp;id=' . $aUser['pk_i_id'] . '&amp;' . $csrf_token . '" target="_blank">' . sprintf(__('Log in as %s'), osc_highlight($aUser['s_name'], 20)) . '</a>';
         }
 
-        $actions[] = '<a class="btn float-left" href="'.osc_admin_base_url(true).'?page=items&user='.$aUser['s_username'].'&userId='.$aUser['pk_i_id'].'">'.__('View items') .'</a>';
+        $actions[] = '<a class="btn float-left" href="'.osc_admin_base_url(true).'?page=items&user='.$aUser['s_username'].'&userId='.$aUser['pk_i_id'].'">'.__('View listings') .'</a>';
         if(osc_alerts_enabled()) {
           $actions[] = '<a class="btn float-left" href="'.osc_admin_base_url(true).'?page=users&action=alerts&alertUserId='.$aUser['pk_i_id'].'">'.__('View alerts') .'</a>';
         }
@@ -530,6 +530,7 @@ class CAdminUsers extends AdminSecBaseModel {
         break;
 
       case('delete_alerts'):     //delete
+        osc_csrf_check();
         $iDeleted = 0;
         $alertId = Params::getParam('alert_id');
         if(!is_array($alertId)) {
@@ -562,10 +563,10 @@ class CAdminUsers extends AdminSecBaseModel {
         break;
 
       case('status_alerts'):     // bulk alert update
-        // $status = Params::getParam('status');
+        osc_csrf_check();
         $iUpdated = 0;
         $alertId = Params::getParam('alert_id');
-        $alert_action = Params::getParam('alert_action');     // activate, deactivate, delete
+        $alert_action = Params::getParam('alert_action');
         $alert_action_text = '';
 
 
@@ -615,8 +616,10 @@ class CAdminUsers extends AdminSecBaseModel {
 
         if($iUpdated == 0) {
           $msg = sprintf(_m('No alerts have been %s'), $alert_action_text);
+        } else if($iUpdated == 1) {
+          $msg = sprintf(_m('One alert has been %s'), $alert_action_text);
         } else {
-          $msg = sprintf(_m('%s alerts have been %s', $iUpdated), $iUpdated, $alert_action_text);
+          $msg = sprintf(_m('%d alerts have been %s'), $iUpdated, $alert_action_text);
         }
 
         osc_add_flash_ok_message($msg, 'admin');
@@ -696,7 +699,7 @@ class CAdminUsers extends AdminSecBaseModel {
         $iUpdated += osc_set_preference('dimProfileImg', $dimProfileImg);
 
         if($iUpdated > 0) {
-          osc_add_flash_ok_message(_m("User settings have been updated"), 'admin');
+          osc_add_flash_ok_message(_m("Settings have been updated"), 'admin');
         }
 
         $this->redirectTo(osc_admin_base_url(true) . '?page=users&action=settings');
@@ -848,7 +851,7 @@ class CAdminUsers extends AdminSecBaseModel {
         osc_csrf_check();
 
         if(Params::getParam('s_ip') == '' && Params::getParam('s_email') == '') {
-          osc_add_flash_warning_message(_m("Both rules can not be empty"), 'admin');
+          osc_add_flash_warning_message(_m("Both rules cannot be empty"), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=users&action=ban');
         }
 
@@ -860,7 +863,7 @@ class CAdminUsers extends AdminSecBaseModel {
           'dt_date' => date('Y-m-d H:i:s')
         ), array('pk_i_id' => Params::getParam('id')));
 
-        osc_add_flash_ok_message(_m('Rule updated correctly'), 'admin');
+        osc_add_flash_ok_message(_m('The rule has been updated'), 'admin');
         $this->redirectTo(osc_admin_base_url(true) . '?page=users&action=ban');
         break;
 
@@ -872,7 +875,7 @@ class CAdminUsers extends AdminSecBaseModel {
       case('create_ban_rule_post'):
         osc_csrf_check();
         if(Params::getParam('s_ip') == '' && Params::getParam('s_email') == '') {
-          osc_add_flash_warning_message(_m("Both rules can not be empty"), 'admin');
+          osc_add_flash_warning_message(_m("Both rules cannot be empty"), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=users&action=ban');
         }
 
@@ -884,7 +887,7 @@ class CAdminUsers extends AdminSecBaseModel {
           'dt_date' => date('Y-m-d H:i:s')
         ));
 
-        osc_add_flash_ok_message(_m('Rule saved correctly'), 'admin');
+        osc_add_flash_ok_message(_m('The rule has been saved'), 'admin');
         $this->redirectTo(osc_admin_base_url(true) . '?page=users&action=ban');
         break;
 
@@ -933,7 +936,7 @@ class CAdminUsers extends AdminSecBaseModel {
         Session::newInstance()->_set('userPhone', $user['s_phone_mobile'] ? $user['s_phone_mobile'] : $user['s_phone_land']);
 
         osc_run_hook('after_login', $user, osc_user_dashboard_url());
-        osc_add_flash_ok_message(sprintf(_m('You have successfully logged in as %s'), '<strong>' . $user['s_name'] . '</strong>'));
+        osc_add_flash_ok_message(sprintf(_m('You have logged in as %s'), '<strong>' . $user['s_name'] . '</strong>'));
         $this->redirectTo(osc_apply_filter('correct_login_url_redirect', osc_user_dashboard_url()));
 
       default:        // manage users view

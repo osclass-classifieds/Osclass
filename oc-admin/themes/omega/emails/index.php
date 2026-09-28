@@ -36,7 +36,7 @@ osc_add_hook('admin_page_header','customPageHeader');
 
 
 function customPageTitle($string) {
-  return sprintf(__('Email templates - %s'), $string);
+  return sprintf(__('%s - %s'), __('Email templates'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');

@@ -79,7 +79,7 @@ class MediaDataTable extends DataTable {
 
     // Table header columns rendered in admin
     $this->addColumn('bulkactions', '<input id="check_all" type="checkbox" />');
-    $this->addColumn('item', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('item', $sort, $direction)) . '">' . __('Item') . '</a>');
+    $this->addColumn('item', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('item', $sort, $direction)) . '">' . __('Listing') . '</a>');
     $this->addColumn('file', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('file', $sort, $direction)) . '">' . __('File') . '</a>');
     $this->addColumn('extension', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('extension', $sort, $direction)) . '">' . __('Extension') . '</a>');
     $this->addColumn('order', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('order', $sort, $direction)) . '">' . __('Order') . '</a>');
@@ -100,7 +100,7 @@ class MediaDataTable extends DataTable {
       foreach($media as $aRow) {
         $row = array();
         $item = osc_get_item_row($aRow['fk_i_item_id']);
-        $itemTitle = ($item !== false && isset($item['s_title']) ? $item['s_title'] : __('Item'));
+        $itemTitle = ($item !== false && isset($item['s_title']) ? $item['s_title'] : __('Listing'));
         $resourcePath = osc_apply_filter('resource_path', osc_base_url() . $aRow['s_path']) . $aRow['pk_i_id'] . '.' . $aRow['s_extension'];
         $thumbnailPath = osc_apply_filter('resource_thumbnail_url', osc_apply_filter('resource_path', osc_base_url() . $aRow['s_path']) . $aRow['pk_i_id'] . '_thumbnail.' . $aRow['s_extension']);
         $editItemUrl = osc_admin_base_url(true) . '?page=items&action=item_edit&id=' . $aRow['fk_i_item_id'];
@@ -135,10 +135,10 @@ class MediaDataTable extends DataTable {
         $options = array();
         $options[] = '<a onclick="return delete_dialog(\'' . $aRow['pk_i_id'] . '\');" href="#">' . __('Delete') . '</a>';
         $options[] = '<a href="' . osc_esc_html($resourcePath) . '" target="_blank">' . __('View') . '</a>';
-        $options[] = '<a href="' . osc_esc_html($editItemUrl) . '" target="_blank">' . __('Edit item') . '</a>';
-        $options[] = '<a href="' . osc_esc_html($viewItemUrl) . '" target="_blank">' . __('View item') . '</a>';
+        $options[] = '<a href="' . osc_esc_html($editItemUrl) . '" target="_blank">' . __('Edit listing') . '</a>';
+        $options[] = '<a href="' . osc_esc_html($viewItemUrl) . '" target="_blank">' . __('View listing') . '</a>';
         $options[] = '<a href="' . osc_esc_html($showItemMediaUrl) . '">' . __('View all item media') . '</a>';
-        $options[] = '<a href="' . osc_esc_html($deleteItemMediaUrl) . '" onclick="return confirm(\'' . osc_esc_js(__('Are you sure you want to delete all media of this item?')) . '\');">' . __('Delete all item media') . '</a>';
+        $options[] = '<a href="' . osc_esc_html($deleteItemMediaUrl) . '" onclick="return confirm(\'' . osc_esc_js(__('Are you sure you want to delete all media of this listing?')) . '\');">' . __('Delete all listing media') . '</a>';
         $auxOptions = '<ul>' . PHP_EOL;
         foreach($options as $actual) {
           $auxOptions .= '<li>' . $actual . '</li>' . PHP_EOL;

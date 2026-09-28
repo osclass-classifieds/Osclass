@@ -53,7 +53,7 @@
 
         <?php if(osc_item_user_id() > 0 && osc_item_user_id() == osc_logged_user_id()){ ?>
           <span class="admin-options">
-            <a href="<?php echo osc_item_edit_url(); ?>" rel="nofollow"><?php _e('Edit item', 'sigma'); ?></a>
+            <a href="<?php echo osc_item_edit_url(); ?>" rel="nofollow"><?php _e('Edit listing', 'sigma'); ?></a>
 
             <?php if(osc_item_can_renew()) { ?>
               <a href="<?php echo osc_item_renew_url();?>" ><?php _e('Renew', 'sigma'); ?></a>
@@ -67,7 +67,7 @@
               <a href="<?php echo osc_item_deactivate_url();?>" ><?php _e('Deactivate', 'sigma'); ?></a>
             <?php } ?>
 
-            <a class="delete" onclick="javascript:return confirm('<?php echo osc_esc_js(__('This action can not be undone. Are you sure you want to continue?', 'sigma')); ?>')" href="<?php echo osc_item_delete_url();?>" ><?php _e('Delete', 'sigma'); ?></a>
+            <a class="delete" onclick="javascript:return confirm('<?php echo osc_esc_js(__('This action cannot be undone. Are you sure you want to continue?', 'sigma')); ?>')" href="<?php echo osc_item_delete_url();?>" ><?php _e('Delete', 'sigma'); ?></a>
           </span>
         <?php } ?>
       </div>

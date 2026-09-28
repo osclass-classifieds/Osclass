@@ -72,7 +72,7 @@ $fieldId = (int)$field['pk_i_id'];
       </div>
       <div class="form-row">
         <div class="form-label"><?php _e('Required'); ?></div>
-        <div class="form-controls cf-checkbox"><label><?php FieldForm::required_checkbox($field); ?> <span><?php _e('Required field on publish item page'); ?></span></label></div>
+        <div class="form-controls cf-checkbox"><label><?php FieldForm::required_checkbox($field); ?> <span><?php _e('Required field on the publish listing page'); ?></span></label></div>
       </div>
       <div class="form-row">
         <div class="form-label"><?php _e('Searchable'); ?></div>
@@ -140,7 +140,7 @@ $fieldId = (int)$field['pk_i_id'];
         },
         error: function(){
           if(typeof showFieldsAdminMessage === 'function') {
-            showFieldsAdminMessage('error', '<?php echo osc_esc_js(__('Ajax error, try again.')); ?>');
+            showFieldsAdminMessage('error', '<?php echo osc_esc_js(__('Ajax error. Please try again.')); ?>');
           }
         }
       });

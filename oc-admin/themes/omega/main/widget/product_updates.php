@@ -31,7 +31,7 @@ $list = isset($updates['updates']) ? $updates['updates'] : array();
 ?>
 
 <?php if(!is_array($list) || count($list) <= 0) { ?>
-  <div class="empty"><?php _e('No updates has been found'); ?></div>
+  <div class="empty"><?php _e('No updates have been found'); ?></div>
 <?php } else { ?>
   <?php foreach($list as $u) { ?>
     <?php

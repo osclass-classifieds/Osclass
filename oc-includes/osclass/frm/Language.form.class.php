@@ -225,36 +225,36 @@ class LanguageForm extends Form {
         },
         messages: {
           s_name: {
-            required: "<?php _e('Name: this field is required'); ?>.",
-            minlength: "<?php _e('Name: this field is required'); ?>."
+            required: "<?php echo sprintf(__('%s is required'), __('Name')); ?>.",
+            minlength: "<?php echo sprintf(__('%s is required'), __('Name')); ?>."
           },
           s_short_name: {
-            required: "<?php _e('Short name: this field is required'); ?>.",
-            minlength: "<?php _e('Short name: this field is required'); ?>."
+            required: "<?php echo sprintf(__('%s is required'), __('Short name')); ?>.",
+            minlength: "<?php echo sprintf(__('%s is required'), __('Short name')); ?>."
           },
           s_description: {
-            required: "<?php _e('Description: this field is required'); ?>.",
-            minlength: "<?php _e('Description: this field is required'); ?>."
+            required: "<?php echo sprintf(__('%s is required'), __('Description')); ?>.",
+            minlength: "<?php echo sprintf(__('%s is required'), __('Description')); ?>."
           },
           s_currency_format: {
-            required: "<?php _e('Currency format: this field is required'); ?>.",
-            minlength: "<?php _e('Currency format: this field is required'); ?>."
+            required: "<?php echo sprintf(__('%s is required'), __('Currency format')); ?>.",
+            minlength: "<?php echo sprintf(__('%s is required'), __('Currency format')); ?>."
           },
           i_num_dec: {
-            required: "<?php _e('Number of decimals: this field is required'); ?>.",
+            required: "<?php echo sprintf(__('%s is required'), __('Number of decimals')); ?>.",
             digits: "<?php _e('Number of decimals: this field must only contain numeric characters'); ?>."
           },
           s_dec_point: {
-            required: "<?php _e('Decimal point: this field is required'); ?>.",
-            minlength: "<?php _e('Decimal point: this field is required'); ?>."
+            required: "<?php echo sprintf(__('%s is required'), __('Decimal point')); ?>.",
+            minlength: "<?php echo sprintf(__('%s is required'), __('Decimal point')); ?>."
           },
           s_thousand_sep: {
-            required: "<?php _e('Thousands separator: this field is required'); ?>.",
-            minlength: "<?php _e('Thousands separator: this field is required'); ?>."
+            required: "<?php echo sprintf(__('%s is required'), __('Thousands separator')); ?>.",
+            minlength: "<?php echo sprintf(__('%s is required'), __('Thousands separator')); ?>."
           },
           s_date_format: {
-            required: "<?php _e('Date format: this field is required'); ?>.",
-            minlength: "<?php _e('Date format: this field is required'); ?>."
+            required: "<?php echo sprintf(__('%s is required'), __('Date format')); ?>.",
+            minlength: "<?php echo sprintf(__('%s is required'), __('Date format')); ?>."
           }
         },
         wrapper: "li",

@@ -16,7 +16,7 @@
  */
 
 
-define('SIGMA_THEME_VERSION', '150');
+define('SIGMA_THEME_VERSION', '180');
 define('THEME_COMPATIBLE_WITH_OSCLASS_HOOKS', 830);     // Compatibility with new hooks up to version
 
 
@@ -591,7 +591,7 @@ function theme_sigma_actions_admin() {
 
       osc_set_preference('rtl', (Params::getParam('rtl') ? '1' : '0'), 'sigma');
 
-      osc_add_flash_ok_message(__('Theme settings updated correctly', 'sigma'), 'admin');
+      osc_add_flash_ok_message(__('Settings have been updated', 'sigma'), 'admin');
       osc_redirect_to(osc_admin_render_theme_url('oc-content/themes/sigma/admin/settings.php'));
     break;
     case('upload_logo'):
@@ -606,9 +606,9 @@ function theme_sigma_actions_admin() {
 
         osc_set_preference('logo', $logo_name, 'sigma');
 
-        osc_add_flash_ok_message(__('The logo image has been uploaded correctly', 'sigma'), 'admin');
+        osc_add_flash_ok_message(__('The logo image has been uploaded', 'sigma'), 'admin');
       } else {
-        osc_add_flash_error_message(__("An error has occurred, please try again", 'sigma'), 'admin');
+        osc_add_flash_error_message(__('An error occurred. Please try again', 'sigma'), 'admin');
       }
       osc_redirect_to(osc_admin_render_theme_url('oc-content/themes/sigma/admin/header.php'));
     break;

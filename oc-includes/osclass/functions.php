@@ -643,7 +643,6 @@ function osc_enhance_canonical_url($url, $no_override = false) {
 
   $params = Params::getParamsAsArray();
   $params_original = $params;
-  $custom_lang_code = '';
 
   // Search page enhancements
   if(osc_is_search_page()) {
@@ -657,16 +656,9 @@ function osc_enhance_canonical_url($url, $no_override = false) {
     unset($params['sParams']);
   }
 
-  // If language code enabled in URL, use default Osclass language as canonical
-  if(osc_rewrite_enabled() && osc_subdomain_type() != 'language' && osc_locale_to_base_url_enabled()) {
-    if(osc_current_user_locale() != osc_language()) {
-      $custom_lang_code = osc_language();
-    }
-  }
-
-  // Params has changed, recreate URL
+  // Params has changed, recreate URL in current user locale
   if($params != $params_original || $url == '') {
-    $url = osc_search_url($params, $custom_lang_code);
+    $url = osc_search_url($params);
   }
 
   // if(// osc_locale_to_base_url_type() == 'LONG' && !(preg_match('/\/[a-z]{2}_[a-zA-Z]{2}\//', osc_get_current_url()) || preg_match('/\/[a-z]{2}-[a-zA-Z]{2}\//', osc_get_current_url()))
@@ -693,37 +685,114 @@ osc_add_filter('canonical_url_page', 'osc_enhance_canonical_url', 7);
 osc_add_filter('osc_get_canonical', 'osc_enhance_canonical_url', 4);
 
 
+// Hreflang URL for one locale (item and search URLs are generated, not prefix-replaced)
+function osc_hreflang_alternate_url($locale_code) {
+  $locale_code = osc_locale_code_from_param($locale_code);
+  if($locale_code == '') {
+    return '';
+  }
+
+  $page = Params::getParam('page');
+  $action = Params::getParam('action');
+
+  if($page == 'item' && $action == '') {
+    $item = osc_item();
+    if(!is_array($item) || !isset($item['pk_i_id']) || (int)$item['pk_i_id'] <= 0) {
+      $item_id = (int)Params::getParam('id');
+      if($item_id > 0) {
+        $item = Item::newInstance()->findByPrimaryKey($item_id);
+      }
+    } else if(!isset($item['locale']) || !is_array($item['locale'])) {
+      $reloaded = Item::newInstance()->findByPrimaryKey((int)$item['pk_i_id']);
+      if(is_array($reloaded) && isset($reloaded['pk_i_id'])) {
+        $item = $reloaded;
+      }
+    }
+
+    if(is_array($item) && isset($item['pk_i_id']) && (int)$item['pk_i_id'] > 0) {
+      return osc_item_url_from_item($item, $locale_code);
+    }
+  }
+
+  if($page == 'search' || osc_is_search_page()) {
+    $params = Params::getParamsAsArray();
+    unset($params['lang']);
+    return osc_search_url($params, $locale_code);
+  }
+
+  if(osc_is_static_page()) {
+    $static_page = osc_static_page();
+    if(is_array($static_page)) {
+      if(isset($static_page['locale'][$locale_code]['s_title']) && $static_page['locale'][$locale_code]['s_title'] != '') {
+        $static_page['s_title'] = $static_page['locale'][$locale_code]['s_title'];
+      }
+      return osc_static_page_url_from_page($static_page, osc_base_url_locale_slug($locale_code));
+    }
+  }
+
+  $url = osc_get_current_url();
+  $current_code = osc_base_url_locale_slug(osc_current_user_locale());
+  $new_code = osc_base_url_locale_slug($locale_code);
+  if($current_code != '' && preg_match('/\/' . preg_quote($current_code, '/') . '\//', $url)) {
+    return preg_replace('/\/' . preg_quote($current_code, '/') . '\//', '/' . $new_code . '/', $url, 1);
+  }
+
+  return '';
+}
+
 // Generate hreflang versions
 function osc_generate_lang_tags() {
   if(osc_generate_hreflang_tags_enabled()) {
     $locales = osc_get_locales();
+    $default_url = '';
+    $default_code = osc_language();
 
     // Language code in base URL
     if(osc_locale_to_base_url_enabled() && osc_subdomain_type() != 'language') {
       foreach($locales as $locale) {
-        $url = osc_get_current_url();
-        $current_code = osc_base_url_locale_slug(osc_current_user_locale());
-        $new_code = osc_base_url_locale_slug($locale['pk_c_code']);
-
-        if(preg_match('/\/' . $current_code . '\//', $url)) {
-          $original_url = preg_replace('/\/' . $current_code . '\//', '/' . $new_code . '/', $url);
-
-          if($original_url != '') {
-            echo '<link rel="alternate" href="' . $original_url . '" hreflang="' . $new_code . '"/>' . PHP_EOL;
-          }
+        if(!isset($locale['pk_c_code'])) {
+          continue;
         }
+        $url = osc_hreflang_alternate_url($locale['pk_c_code']);
+        if($url == '') {
+          continue;
+        }
+
+        $new_code = osc_base_url_locale_slug($locale['pk_c_code']);
+        echo '<link rel="alternate" href="' . $url . '" hreflang="' . $new_code . '"/>' . PHP_EOL;
+        if($locale['pk_c_code'] == $default_code) {
+          $default_url = $url;
+        }
+      }
+
+      if($default_url != '') {
+        echo '<link rel="alternate" href="' . $default_url . '" hreflang="x-default"/>' . PHP_EOL;
       }
 
     // Language based subdomains
     } else if(!osc_locale_to_base_url_enabled() && osc_subdomain_type() == 'language') {
       $http_url = osc_is_ssl() ? "https://" : "http://";
       $pattern_url = $http_url . '{LOCALE_CODE}.' . osc_subdomain_host() . REL_WEB_URL;
-      $url_path = ltrim(isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '', '/');
 
       foreach($locales as $locale) {
+        if(!isset($locale['pk_c_code'])) {
+          continue;
+        }
         $used_code = osc_subdomain_locale_slug($locale['pk_c_code']);
-        $original_url = str_replace('{LOCALE_CODE}', $used_code, $pattern_url);
-        echo '<link rel="alternate" href="' . $original_url . $url_path . '" hreflang="' . $used_code . '"/>' . PHP_EOL;
+        $alternate_url = osc_hreflang_alternate_url($locale['pk_c_code']);
+        if($alternate_url != '') {
+          $parts = parse_url($alternate_url);
+          $original_url = $http_url . $used_code . '.' . osc_subdomain_host() . (isset($parts['path']) ? $parts['path'] : '/');
+          if(!empty($parts['query'])) {
+            $original_url .= '?' . $parts['query'];
+          }
+        } else if(Params::getParam('page') != 'item' && Params::getParam('page') != 'search' && !osc_is_search_page()) {
+          $url_path = ltrim(isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '', '/');
+          $original_url = str_replace('{LOCALE_CODE}', $used_code, $pattern_url) . $url_path;
+        } else {
+          continue;
+        }
+        echo '<link rel="alternate" href="' . $original_url . '" hreflang="' . $used_code . '"/>' . PHP_EOL;
       }
     }
   }
@@ -3053,10 +3122,18 @@ function osc_draw_admin_toolbar() {
  * Add webtitle with link to frontend
  */
 function osc_admin_toolbar_menu() {
+  $home_url = osc_base_url();
+  if(osc_locale_to_base_url_enabled() && osc_subdomain_type() != 'language') {
+    $default_locale = (string)osc_language();
+    if($default_locale != '') {
+      $home_url = osc_base_url(false, true, $default_locale);
+    }
+  }
+
   AdminToolbar::newInstance()->add_menu(array(
     'id' => 'home' ,
     'title' => '<span class="">' . __('Home') . '</span>' ,
-    'href' => osc_base_url() ,
+    'href' => $home_url ,
     'meta' => array ('class' => 'user-profile', 'title' => osc_esc_html(osc_page_title())) ,
     'target' => ''
  ));
@@ -3098,7 +3175,7 @@ function osc_admin_toolbar_edit_item() {
   if(osc_is_ad_page() && osc_item_id() > 0) {
     AdminToolbar::newInstance()->add_menu(array(
       'id' => 'edititem',
-      'title' => '<i class="fa fa-edit"></i> <span>' . __('Edit item') . '</span>',
+      'title' => '<i class="fa fa-edit"></i> <span>' . __('Edit listing') . '</span>',
       'href' => osc_admin_base_url(true) . '?page=items&action=item_edit&id=' . osc_item_id(),
       'meta' => array ('class' => '')
     ));
@@ -3175,6 +3252,15 @@ function osc_admin_toolbar_comments() {
       )
     );
   }
+}
+
+
+/**
+ * Legacy spam toolbar entry. Kept empty so old hooks/plugins do not fatal.
+ * Spam counts moved to Reports (see osc_admin_toolbar_reports).
+ */
+function osc_admin_toolbar_spam() {
+  return;
 }
 
 
