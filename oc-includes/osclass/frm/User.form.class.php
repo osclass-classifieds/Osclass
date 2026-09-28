@@ -838,7 +838,12 @@ class UserForm extends Form {
 
   // Pattern search
   static public function search_pattern_text($params = null) {
-    $selected = ((isset($params['sPattern'])) ? $params['sPattern'] : Params::getParam('sPattern'));
+    $selected = ((isset($params['sPattern'])) ? $params['sPattern'] : Params::getParam('sPattern', false, false));
+    if(is_array($selected)) {
+      $selected = '';
+    }
+    $selected = html_entity_decode(trim((string)$selected), ENT_QUOTES, 'UTF-8');
+    $selected = preg_replace('/<\/?[a-zA-Z][^>]*>/', '', $selected);
 
     parent::generic_input_text('sPattern', $selected, null, false, false, -1, 'text', __('ie. iPhone'));
   }

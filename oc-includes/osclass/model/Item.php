@@ -684,7 +684,7 @@ class Item extends DAO {
 
     // Pattern filter
     if(isset($options['pattern']) && trim((string)$options['pattern']) != '') {
-      $pattern = trim((string)$options['pattern']);
+      $pattern = $this->dao->escapeStr(trim((string)$options['pattern']));
 
       $this->dao->join(sprintf('%st_item_description as d', DB_TABLE_PREFIX), 'd.fk_i_item_id = i.pk_i_id', 'LEFT OUTER');
 
@@ -911,8 +911,14 @@ class Item extends DAO {
 
     if($count !== true) {
       // Sorting
+      $has_pattern = (isset($options['pattern']) && trim((string)$options['pattern']) != '');
       $order_column = (isset($options['order_column']) ? $options['order_column'] : 'dt_pub_date');
       $order_direction = (isset($options['order_direction']) ? $options['order_direction'] : 'DESC');
+      $allowed_columns = Search::getAllowedColumnsForSorting($has_pattern);
+
+      if(!in_array($order_column, $allowed_columns, true)) {
+        $order_column = 'dt_pub_date';
+      }
 
       if($order_column != '' && $order_column !== false) {
         $this->dao->orderBy($order_column, $order_direction);

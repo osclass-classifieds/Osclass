@@ -1856,6 +1856,15 @@ class ItemActions {
     $aItem['showPhone'] = Params::getParam('showPhone') ? 1 : 0;
     $aItem['title'] = Params::getParam('title');
     $aItem['description'] = (osc_tinymce_items_enabled() == '1' ? Params::getParam('description', false, false) : Params::getParam('description'));
+    if(osc_tinymce_items_enabled() == '1') {
+      if(is_array($aItem['description'])) {
+        foreach($aItem['description'] as $desc_locale => $desc_value) {
+          $aItem['description'][$desc_locale] = osc_sanitize_rich_text($desc_value);
+        }
+      } else {
+        $aItem['description'] = osc_sanitize_rich_text($aItem['description']);
+      }
+    }
     $aItem['photos'] = Params::getFiles('photos');
     $aItem['s_ip'] = osc_get_ip();
     $aItem['d_coord_lat'] = (Params::getParam('d_coord_lat') <> '' ? Params::getParam('d_coord_lat') : (Params::getParam('latitude') <> '' ? Params::getParam('latitude') : null));

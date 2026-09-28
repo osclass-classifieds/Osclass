@@ -1427,11 +1427,15 @@ function osc_custom_search_rule_params($rule) {
 function osc_search_param_value_to_slug($param, $value, $slug_strict = false, $with_id_canonical = false, $locale = '') {
   $value_original = $value;
 
-  switch($param) {
-    case 'sPattern':
-      // $value = str_replace(' ', '+', $value);
-      $value = urlencode($value);
+  // Search keywords are not slugs. Keep UTF-8 and only encode for the URL path.
+  if($param === 'sPattern') {
+    $value = rawurldecode((string)$value);
+    $value = str_replace(array('/', '\\'), ' ', $value);
+    $value = trim($value);
+    return osc_apply_filter('search_param_value_to_slug', rawurlencode($value), $param);
+  }
 
+  switch($param) {
     case 'sCategory':
       $slug = _aux_search_category_slug($value, $locale);
       $value = ($slug != '' ? $slug : $value);

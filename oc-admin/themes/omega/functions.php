@@ -270,7 +270,7 @@ function printLocaleTitle($locales = null, $item = null) {
     $title = osc_apply_filter('admin_item_title', $title, $item, $locale);
 
     $name = 'title'. '[' . $locale['pk_c_code'] . ']';
-    echo '<input id="' . $name . '" type="text" name="' . $name . '" value="' . osc_esc_html(htmlentities($title, ENT_COMPAT, "UTF-8")) . '"  />';
+    echo '<input id="' . $name . '" type="text" name="' . $name . '" value="' . osc_esc_html(html_entity_decode((string)$title, ENT_QUOTES, 'UTF-8')) . '"  />';
     echo '</div>';
   }
 }

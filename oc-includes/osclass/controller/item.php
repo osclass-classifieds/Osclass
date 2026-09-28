@@ -845,7 +845,7 @@ class CWebItem extends BaseModel {
           $item['locale'][$k]['s_title'] = osc_apply_filter('item_title', $v['s_title']);
 
           if(osc_tinymce_items_enabled() == '1') {
-            $item['locale'][$k]['s_description'] = osc_apply_filter('item_description', $v['s_description']);
+            $item['locale'][$k]['s_description'] = osc_sanitize_rich_text(osc_apply_filter('item_description', $v['s_description']));
           } else {
             $item['locale'][$k]['s_description'] = nl2br(osc_apply_filter('item_description', $v['s_description']));
           }

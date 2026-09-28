@@ -1,5 +1,9 @@
 Osclass 8.4.0
 ------------------------
+- Public profile listing search escapes the keyword and only allows known sort columns.
+- TinyMCE listing descriptions keep formatting tags and drop scripts and event handlers.
+- Search keywords with accents stay intact in friendly search URLs.
+- Keyword fields show &, quotes and angle brackets as typed.
 - IMPORTANT: Listing statistics now store daily measures on t_item_stats (views, premium views, and optional traffic, contact, commerce and lifecycle counters).
   Collection defaults to standard views, premium views, phone clicks, engaged views, logged-in views, minutes viewed, alert emails, contact forms and reports. Other measures are enabled in Statistics settings (and Listing settings) with Essential, Engagement, Commerce and Full presets.
   User summary and listing charts default to six measures. Statistics settings recommend 4 to 6 so the plot stays readable.

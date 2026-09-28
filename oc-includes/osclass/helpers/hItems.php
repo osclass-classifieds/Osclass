@@ -235,6 +235,10 @@ function osc_item_description($locale = "") {
       }
     }
   }
+  if(osc_tinymce_items_enabled() == '1') {
+    return osc_sanitize_rich_text((string)$desc);
+  }
+
   return (string) $desc;
 }
 

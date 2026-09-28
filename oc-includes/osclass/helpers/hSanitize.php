@@ -228,3 +228,25 @@ function osc_esc_js($str) {
 
   return $str;
 }
+
+
+// Keep TinyMCE listing HTML and drop scripts, event handlers and unsafe URLs.
+function osc_sanitize_rich_text($html) {
+  if($html === '' || $html === null) {
+    return '';
+  }
+  if(!is_string($html)) {
+    return '';
+  }
+
+  $config = HTMLPurifier_Config::createDefault();
+  $config->set('HTML.Allowed', 'p[style],br,strong,b,em,i,u,s,strike,sub,sup,h1[style],h2[style],h3[style],h4[style],h5[style],h6[style],ul,ol,li,blockquote,pre,code,hr,a[href|title|target|rel],img[src|alt|title|width|height],table[border|cellpadding|cellspacing|width|style],thead,tbody,tfoot,tr[style],th[colspan|rowspan|scope|width|style],td[colspan|rowspan|width|style],span[style],div[style],iframe[src|width|height|frameborder|allow|allowfullscreen|title]');
+  $config->set('HTML.SafeIframe', true);
+  $config->set('URI.SafeIframeRegexp', '%^(https?:)?//(www\.youtube(?:-nocookie)?\.com/embed/|player\.vimeo\.com/video/)%');
+  $config->set('URI.AllowedSchemes', array('http' => true, 'https' => true, 'mailto' => true, 'tel' => true));
+  $config->set('Attr.AllowedFrameTargets', array('_blank'));
+  $config->set('Cache.SerializerPath', osc_uploads_path());
+
+  $purifier = new HTMLPurifier($config);
+  return $purifier->purify($html);
+}

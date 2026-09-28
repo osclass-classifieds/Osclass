@@ -91,7 +91,7 @@ class Form {
       $type = 'text';
     }
 
-    echo '<input id="' . preg_replace('|([^_a-zA-Z0-9-]+)|', '', $name) . '" type="' . $type . '" name="' . $name . '" value="' . osc_esc_html(htmlentities($value, ENT_COMPAT, 'UTF-8')) . '" placeholder="' . osc_esc_html($placeholder) . '"';
+    echo '<input id="' . preg_replace('|([^_a-zA-Z0-9-]+)|', '', $name) . '" type="' . $type . '" name="' . $name . '" value="' . osc_esc_html(html_entity_decode((string)$value, ENT_QUOTES, 'UTF-8')) . '" placeholder="' . osc_esc_html($placeholder) . '"';
 
     if(isset($maxLength) && $maxLength > 0) {
       echo ' maxlength="' . osc_esc_html( $maxLength ) . '"';
@@ -121,7 +121,7 @@ class Form {
   */
   protected static function generic_password( $name , $value , $maxLength = null , $readOnly = false ) {
     $name = osc_esc_html($name);
-    echo '<input id="' . preg_replace('|([^_a-zA-Z0-9-]+)|', '', $name) . '" type="password" name="' . $name . '" value="' . osc_esc_html(htmlentities( $value, ENT_COMPAT, 'UTF-8' )) . '"';
+    echo '<input id="' . preg_replace('|([^_a-zA-Z0-9-]+)|', '', $name) . '" type="password" name="' . $name . '" value="' . osc_esc_html(html_entity_decode((string)$value, ENT_QUOTES, 'UTF-8')) . '"';
 
     if(isset($maxLength) && $maxLength > 0) {
       echo ' maxlength="' . osc_esc_html( $maxLength ) . '"';
@@ -140,7 +140,7 @@ class Form {
   */
   protected static function generic_input_hidden( $name , $value ) {
     $name = osc_esc_html($name);
-    echo '<input id="' . preg_replace('|([^_a-zA-Z0-9-]+)|', '', $name) . '" type="hidden" name="' . $name . '" value="' . osc_esc_html(htmlentities( $value, ENT_COMPAT, 'UTF-8' )) . '" />';
+    echo '<input id="' . preg_replace('|([^_a-zA-Z0-9-]+)|', '', $name) . '" type="hidden" name="' . $name . '" value="' . osc_esc_html(html_entity_decode((string)$value, ENT_QUOTES, 'UTF-8')) . '" />';
   }
 
   /**
@@ -150,7 +150,7 @@ class Form {
   */
   protected static function generic_input_checkbox( $name , $value , $checked = false ) {
     $name = osc_esc_html($name);
-    echo '<input id="' . preg_replace('|([^_a-zA-Z0-9-]+)|', '', $name) . '" type="checkbox" name="' . $name . '" value="' . osc_esc_html(htmlentities( $value, ENT_COMPAT, 'UTF-8' )) . '"';
+    echo '<input id="' . preg_replace('|([^_a-zA-Z0-9-]+)|', '', $name) . '" type="checkbox" name="' . $name . '" value="' . osc_esc_html(html_entity_decode((string)$value, ENT_QUOTES, 'UTF-8')) . '"';
 
     if($checked ) {
       echo ' checked="checked"';

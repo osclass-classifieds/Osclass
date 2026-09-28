@@ -368,8 +368,10 @@ class CWebSearch extends BaseModel {
     $p_sLocale = is_array($p_sLocale) ? $p_sLocale : ($p_sLocale == '' ? '' : explode(',', $p_sLocale));
 
 
-    $p_sPattern = Params::getParam('sPattern');
-    $p_sPattern = (is_array($p_sPattern) ? '' : trim(strip_tags((string)$p_sPattern)));
+    $p_sPattern = Params::getParam('sPattern', false, false);
+    $p_sPattern = (is_array($p_sPattern) ? '' : trim((string)$p_sPattern));
+    $p_sPattern = html_entity_decode($p_sPattern, ENT_QUOTES, 'UTF-8');
+    $p_sPattern = preg_replace('/<\/?[a-zA-Z][^>]*>/', '', $p_sPattern);
     $p_sPattern = osc_apply_filter('search_pattern', $p_sPattern);
 
     // ADD TO THE LIST OF LAST SEARCHES
