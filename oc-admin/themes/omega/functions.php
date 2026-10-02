@@ -21,7 +21,7 @@ if(!defined('ABS_PATH')) exit('ABS_PATH is not loaded. Direct access is not allo
 // INFORM ADMIN ABOUT MINIMUM PHP VERSION NOT MET
 function omg_warn_php_version() {
   // Defined in oc-includes/osclass/install.php
-  $php_min = (defined('PHP_MIN') ? PHP_MIN : '7.2');
+  $php_min = (defined('PHP_MIN') ? PHP_MIN : '7.4');
   $php_max = (defined('PHP_MAX') ? PHP_MAX : '');
 
 

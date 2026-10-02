@@ -1,5 +1,6 @@
 Osclass 8.4.0
 ------------------------
+- IMPORTANT: Minimum PHP version to run Osclass has changed from 7.2 to 7.4 (based on library dependencies).
 - Public profile listing search escapes the keyword and only allows known sort columns.
 - TinyMCE listing descriptions keep formatting tags and drop scripts and event handlers.
 - Search keywords with accents stay intact in friendly search URLs.

@@ -23,7 +23,7 @@ define('CONTENT_PATH', ABS_PATH . 'oc-content/');
 define('TRANSLATIONS_PATH', CONTENT_PATH . 'languages/');
 define('OSC_INSTALLING', 1);
 
-define('PHP_MIN', '7.2');
+define('PHP_MIN', '7.4');
 define('PHP_MAX', '');
 
 

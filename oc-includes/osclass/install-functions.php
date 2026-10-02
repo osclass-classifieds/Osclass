@@ -129,7 +129,7 @@ function get_relative_url() {
  */
 function get_requirements() {
   // Defined in oc-includes/osclass/install.php
-  $php_min = (defined('PHP_MIN') ? PHP_MIN : '7.2');
+  $php_min = (defined('PHP_MIN') ? PHP_MIN : '7.4');
   $php_max = (defined('PHP_MAX') ? PHP_MAX : '');
 
   $array = array();

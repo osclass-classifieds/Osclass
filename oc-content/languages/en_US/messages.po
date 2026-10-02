@@ -1,11 +1,11 @@
 # Copyright (C) 2017 {package-name}
 # This file is distributed under the same license as the {package-name} package.
-#: oc-includes/osclass/controller/ajax.php:176
+#: oc-includes/osclass/controller/ajax.php:165
 msgid ""
 msgstr ""
 "Project-Id-Version: Osclass by OsclassPoint.com\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-28 12:58+0200\n"
+"POT-Creation-Date: 2026-10-01 12:54+0200\n"
 "PO-Revision-Date: 2026-09-01 12:54+0200\n"
 "Last-Translator: Translations <translations@osclass>\n"
 "Language-Team: OsclassPoint\n"
@@ -31,7 +31,7 @@ msgstr ""
 #: oc-admin/ajax/ajax.php:726 oc-admin/appearance.php:37
 #: oc-admin/appearance.php:89 oc-admin/controller/settings/advanced.php:33
 #: oc-admin/controller/settings/mailserver.php:33
-#: oc-admin/controller/settings/media.php:258 oc-admin/languages.php:47
+#: oc-admin/controller/settings/media.php:256 oc-admin/languages.php:47
 #: oc-admin/locations.php:31 oc-admin/locations.php:79
 #: oc-admin/locations.php:163 oc-admin/locations.php:199
 #: oc-admin/locations.php:244 oc-admin/locations.php:315
@@ -42,9 +42,9 @@ msgstr ""
 #: oc-admin/tools.php:408 oc-admin/tools.php:460 oc-admin/tools.php:479
 #: oc-admin/tools.php:498 oc-admin/tools.php:517 oc-admin/tools.php:595
 #: oc-admin/tools.php:636 oc-admin/tools.php:689 oc-admin/tools.php:722
-#: oc-admin/tools.php:749 oc-admin/tools.php:786 oc-admin/translations.php:68
-#: oc-admin/translations.php:111 oc-admin/translations.php:305
-#: oc-admin/translations.php:552 oc-admin/translations.php:576
+#: oc-admin/tools.php:749 oc-admin/tools.php:786 oc-admin/translations.php:39
+#: oc-admin/translations.php:82 oc-admin/translations.php:278
+#: oc-admin/translations.php:525 oc-admin/translations.php:549
 #: oc-admin/upgrade.php:34
 msgid "This action cannot be done because it is a demo site"
 msgstr ""
@@ -190,11 +190,11 @@ msgstr ""
 #: oc-admin/controller/settings/latestsearches.php:71
 #: oc-admin/controller/settings/main.php:293
 #: oc-admin/controller/settings/main.php:295
-#: oc-admin/controller/settings/media.php:237
+#: oc-admin/controller/settings/media.php:235
 #: oc-admin/controller/settings/optimization.php:75
 #: oc-admin/controller/settings/optimization.php:112
 #: oc-admin/controller/settings/spamnbots.php:81 oc-admin/items.php:677
-#: oc-admin/main.php:84 oc-admin/plugins.php:487 oc-admin/reports.php:413
+#: oc-admin/main.php:84 oc-admin/plugins.php:486 oc-admin/reports.php:413
 #: oc-admin/stats.php:181 oc-admin/users.php:702
 msgid "Settings have been updated"
 msgstr ""
@@ -434,37 +434,37 @@ msgstr ""
 msgid "Number of recent listings displayed at home must be an integer"
 msgstr ""
 
-#: oc-admin/controller/settings/media.php:94
-#: oc-admin/controller/settings/media.php:102
+#: oc-admin/controller/settings/media.php:93
+#: oc-admin/controller/settings/media.php:101
 msgid "There was a problem uploading the watermark image"
 msgstr ""
 
-#: oc-admin/controller/settings/media.php:98
+#: oc-admin/controller/settings/media.php:97
 msgid "The watermark image has to be a .PNG file"
 msgstr ""
 
-#: oc-admin/controller/settings/media.php:159
+#: oc-admin/controller/settings/media.php:158
 #, php-format
 msgid ""
 "You cannot set a maximum file size higher than the one allowed in the PHP "
 "configuration: <b>%d KB</b>"
 msgstr ""
 
-#: oc-admin/controller/settings/media.php:168
+#: oc-admin/controller/settings/media.php:167
 msgid ""
 "Regenerate batch must be greater than 0. Default value 10 has been applied."
 msgstr ""
 
-#: oc-admin/controller/settings/media.php:177
+#: oc-admin/controller/settings/media.php:176
 msgid ""
 "Refresh batch must be greater than 0. Default value 10 has been applied."
 msgstr ""
 
-#: oc-admin/controller/settings/media.php:189
+#: oc-admin/controller/settings/media.php:188
 msgid "At least one image extension must be selected"
 msgstr ""
 
-#: oc-admin/controller/settings/media.php:202
+#: oc-admin/controller/settings/media.php:201
 #, php-format
 msgid ""
 "Some image extensions were removed because they are not supported by "
@@ -976,7 +976,7 @@ msgstr ""
 #: oc-includes/osclass/controller/item.php:598
 #: oc-includes/osclass/controller/login.php:294
 #: oc-includes/osclass/controller/report.php:88
-#: oc-includes/osclass/controller/user-non-secure.php:433
+#: oc-includes/osclass/controller/user-non-secure.php:439
 msgid "Recaptcha validation has failed"
 msgstr ""
 
@@ -1000,7 +1000,7 @@ msgstr ""
 #: oc-admin/login.php:221 oc-includes/osclass/controller/login.php:335
 #: oc-includes/osclass/controller/user.php:256
 #: oc-includes/osclass/UserActions.php:58
-#: oc-includes/osclass/UserActions.php:210
+#: oc-includes/osclass/UserActions.php:207
 msgid "The passwords do not match"
 msgstr ""
 
@@ -1177,22 +1177,22 @@ msgstr ""
 msgid "Plugin is already disabled"
 msgstr ""
 
-#: oc-admin/plugins.php:491 oc-admin/plugins.php:511
+#: oc-admin/plugins.php:490 oc-admin/plugins.php:510
 msgid "No plugin selected"
 msgstr ""
 
-#: oc-admin/plugins.php:504
+#: oc-admin/plugins.php:503
 msgid "The files were deleted"
 msgstr ""
 
-#: oc-admin/plugins.php:506
+#: oc-admin/plugins.php:505
 #, php-format
 msgid ""
 "There were an error deleting the files, please check the permissions of the "
 "files in %s"
 msgstr ""
 
-#: oc-admin/plugins.php:520
+#: oc-admin/plugins.php:518
 msgid "Invalid plugin file"
 msgstr ""
 
@@ -1422,88 +1422,84 @@ msgstr ""
 msgid "There was problem cleaning data (no data has been found)"
 msgstr ""
 
-#: oc-admin/translations.php:44 oc-admin/translations.php:60
-msgid "Invalid translation target."
-msgstr ""
-
-#: oc-admin/translations.php:228 oc-admin/translations.php:359
-#: oc-admin/translations.php:616
+#: oc-admin/translations.php:201 oc-admin/translations.php:332
+#: oc-admin/translations.php:589
 #, php-format
 msgid ""
 "Required and missing folder %s could not be created. Create it manually in "
 "your file system."
 msgstr ""
 
-#: oc-admin/translations.php:298
+#: oc-admin/translations.php:271
 msgid "Translations have been updated"
 msgstr ""
 
-#: oc-admin/translations.php:338
+#: oc-admin/translations.php:311
 msgid ""
 "Translation catalog could not be created, invalid language code for Gettext. "
 "Create catalog manually."
 msgstr ""
 
-#: oc-admin/translations.php:401
+#: oc-admin/translations.php:374
 msgid "Translations have been created from source code."
 msgstr ""
 
-#: oc-admin/translations.php:403
+#: oc-admin/translations.php:376
 msgid "Translations have been updated from source code."
 msgstr ""
 
-#: oc-admin/translations.php:415 oc-admin/translations.php:452
-#: oc-admin/translations.php:561
+#: oc-admin/translations.php:388 oc-admin/translations.php:425
+#: oc-admin/translations.php:534
 msgid "Translations does not exists."
 msgstr ""
 
-#: oc-admin/translations.php:426 oc-admin/translations.php:484
+#: oc-admin/translations.php:399 oc-admin/translations.php:457
 msgid "ZIP archive could not be created."
 msgstr ""
 
-#: oc-admin/translations.php:478
+#: oc-admin/translations.php:451
 #, php-format
 msgid ""
 "Translation does not contain all required files (Required: %s, Found: %s)."
 msgstr ""
 
-#: oc-admin/translations.php:528
+#: oc-admin/translations.php:501
 #, php-format
 msgid "There was problem sending translation (cURL issue): [%s] %s"
 msgstr ""
 
-#: oc-admin/translations.php:535
+#: oc-admin/translations.php:508
 #, php-format
 msgid "Translation was not accepted with following error: %s"
 msgstr ""
 
-#: oc-admin/translations.php:541
+#: oc-admin/translations.php:514
 msgid "Your server does not have cURL extension activated."
 msgstr ""
 
-#: oc-admin/translations.php:545
+#: oc-admin/translations.php:518
 msgid ""
 "Translation successfully sent to Osclass Team and is pending validation. "
 "Thanks for sharing and helping community!"
 msgstr ""
 
-#: oc-admin/translations.php:570
+#: oc-admin/translations.php:543
 msgid "The translation has been removed"
 msgstr ""
 
-#: oc-admin/translations.php:588
+#: oc-admin/translations.php:561
 msgid "Source translations catalog is same as target translations catalog."
 msgstr ""
 
-#: oc-admin/translations.php:595
+#: oc-admin/translations.php:568
 msgid "Source translations catalog does not exists."
 msgstr ""
 
-#: oc-admin/translations.php:602
+#: oc-admin/translations.php:575
 msgid "Target translations catalog does not exists."
 msgstr ""
 
-#: oc-admin/translations.php:628
+#: oc-admin/translations.php:601
 msgid ""
 "Target translations catalog has been merged with translations from source "
 "catalog"
@@ -1682,7 +1678,7 @@ msgstr ""
 msgid "%d alerts have been %s"
 msgstr ""
 
-#: oc-admin/users.php:710 oc-includes/osclass/controller/ajax.php:295
+#: oc-admin/users.php:710 oc-includes/osclass/controller/ajax.php:284
 #: oc-includes/osclass/controller/user.php:131
 #: oc-includes/osclass/controller/user.php:490
 #: oc-includes/osclass/controller/user.php:513
@@ -1728,68 +1724,68 @@ msgstr ""
 msgid "You have logged in as %s"
 msgstr ""
 
-#: oc-includes/osclass/controller/ajax.php:155
+#: oc-includes/osclass/controller/ajax.php:144
 msgid "The selected photo has been rotated"
 msgstr ""
 
-#: oc-includes/osclass/controller/ajax.php:198
-#: oc-includes/osclass/controller/ajax.php:269
+#: oc-includes/osclass/controller/ajax.php:187
+#: oc-includes/osclass/controller/ajax.php:258
 #: oc-includes/osclass/controller/item.php:471
 msgid "The selected photo has been deleted"
 msgstr ""
 
-#: oc-includes/osclass/controller/ajax.php:215
+#: oc-includes/osclass/controller/ajax.php:204
 #: oc-includes/osclass/controller/item.php:439
 msgid "The selected photo couldn't be deleted, the url doesn't exist"
 msgstr ""
 
-#: oc-includes/osclass/controller/ajax.php:228
+#: oc-includes/osclass/controller/ajax.php:217
 #: oc-includes/osclass/controller/item.php:446
 msgid "The listing doesn't exist"
 msgstr ""
 
-#: oc-includes/osclass/controller/ajax.php:237
-#: oc-includes/osclass/controller/ajax.php:245
+#: oc-includes/osclass/controller/ajax.php:226
+#: oc-includes/osclass/controller/ajax.php:234
 #: oc-includes/osclass/controller/item.php:452
 #: oc-includes/osclass/controller/item.php:457
 msgid "The listing doesn't belong to you"
 msgstr ""
 
-#: oc-includes/osclass/controller/ajax.php:272
+#: oc-includes/osclass/controller/ajax.php:261
 #: oc-includes/osclass/controller/item.php:473
 msgid "The selected photo does not belong to you"
 msgstr ""
 
-#: oc-includes/osclass/controller/ajax.php:276
+#: oc-includes/osclass/controller/ajax.php:265
 #: oc-includes/osclass/controller/item.php:476
 msgid "The selected photo couldn't be deleted"
 msgstr ""
 
-#: oc-includes/osclass/controller/ajax.php:327
+#: oc-includes/osclass/controller/ajax.php:316
 msgid "Alert integrity check failed"
 msgstr ""
 
-#: oc-includes/osclass/controller/ajax.php:350
+#: oc-includes/osclass/controller/ajax.php:339
 msgid "Missing email or alert"
 msgstr ""
 
-#: oc-includes/osclass/controller/ajax.php:360
+#: oc-includes/osclass/controller/ajax.php:349
 msgid "Email is invalid"
 msgstr ""
 
-#: oc-includes/osclass/controller/ajax.php:384
+#: oc-includes/osclass/controller/ajax.php:373
 msgid "Alert already exists"
 msgstr ""
 
-#: oc-includes/osclass/controller/ajax.php:397
+#: oc-includes/osclass/controller/ajax.php:386
 msgid "Alert created"
 msgstr ""
 
-#: oc-includes/osclass/controller/ajax.php:406
+#: oc-includes/osclass/controller/ajax.php:395
 msgid "Alert was created but cannot be activated for this user"
 msgstr ""
 
-#: oc-includes/osclass/controller/ajax.php:418
+#: oc-includes/osclass/controller/ajax.php:407
 msgid "Alert created. Please confirm it via email"
 msgstr ""
 
@@ -1806,7 +1802,7 @@ msgstr ""
 #: oc-includes/osclass/controller/item.php:610
 #: oc-includes/osclass/controller/login.php:151
 #: oc-includes/osclass/controller/register.php:64
-#: oc-includes/osclass/controller/user-non-secure.php:446
+#: oc-includes/osclass/controller/user-non-secure.php:452
 msgid "Your current email is not allowed"
 msgstr ""
 
@@ -1815,7 +1811,7 @@ msgstr ""
 #: oc-includes/osclass/controller/item.php:613
 #: oc-includes/osclass/controller/login.php:155
 #: oc-includes/osclass/controller/register.php:67
-#: oc-includes/osclass/controller/user-non-secure.php:450
+#: oc-includes/osclass/controller/user-non-secure.php:456
 msgid "Your current IP is not allowed"
 msgstr ""
 
@@ -2338,7 +2334,7 @@ msgstr ""
 msgid "Your email has been changed"
 msgstr ""
 
-#: oc-includes/osclass/controller/user-non-secure.php:455
+#: oc-includes/osclass/controller/user-non-secure.php:461
 msgid "Your email has been sent"
 msgstr ""
 
@@ -2542,7 +2538,7 @@ msgid ""
 "Your rating has been removed as you already rated this listing %d time(s)"
 msgstr ""
 
-#: oc-includes/osclass/upgrade-funcs.php:1009
+#: oc-includes/osclass/upgrade-funcs.php:1008
 msgid ""
 "Osclass has been updated successfully. <a href=\"https://"
 "forums.osclasspoint.com\">Need more help?</a>"
@@ -2553,7 +2549,7 @@ msgid "The password cannot be empty"
 msgstr ""
 
 #: oc-includes/osclass/UserActions.php:65
-#: oc-includes/osclass/UserActions.php:204
+#: oc-includes/osclass/UserActions.php:201
 msgid "The name cannot be empty"
 msgstr ""
 
@@ -2561,11 +2557,11 @@ msgstr ""
 msgid "Username is already taken"
 msgstr ""
 
-#: oc-includes/osclass/UserActions.php:198
+#: oc-includes/osclass/UserActions.php:195
 #, php-format
 msgid "This email is already used by %s"
 msgstr ""
 
-#: oc-includes/osclass/utils.php:1577
+#: oc-includes/osclass/utils.php:1576
 msgid "Empty server response"
 msgstr ""

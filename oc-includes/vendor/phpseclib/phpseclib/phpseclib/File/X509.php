@@ -57,37 +57,37 @@ class X509
     /**
      * Return internal array representation
      *
-     * @see \phpseclib3\File\X509::getDN()
+     * @see X509::getDN()
      */
     const DN_ARRAY = 0;
     /**
      * Return string
      *
-     * @see \phpseclib3\File\X509::getDN()
+     * @see X509::getDN()
      */
     const DN_STRING = 1;
     /**
      * Return ASN.1 name string
      *
-     * @see \phpseclib3\File\X509::getDN()
+     * @see X509::getDN()
      */
     const DN_ASN1 = 2;
     /**
      * Return OpenSSL compatible array
      *
-     * @see \phpseclib3\File\X509::getDN()
+     * @see X509::getDN()
      */
     const DN_OPENSSL = 3;
     /**
      * Return canonical ASN.1 RDNs string
      *
-     * @see \phpseclib3\File\X509::getDN()
+     * @see X509::getDN()
      */
     const DN_CANON = 4;
     /**
      * Return name hash for file indexing
      *
-     * @see \phpseclib3\File\X509::getDN()
+     * @see X509::getDN()
      */
     const DN_HASH = 5;
 
@@ -96,25 +96,25 @@ class X509
      *
      * ie. a base64-encoded PEM with a header and a footer
      *
-     * @see \phpseclib3\File\X509::saveX509()
-     * @see \phpseclib3\File\X509::saveCSR()
-     * @see \phpseclib3\File\X509::saveCRL()
+     * @see X509::saveX509()
+     * @see X509::saveCSR()
+     * @see X509::saveCRL()
      */
     const FORMAT_PEM = 0;
     /**
      * Save as DER
      *
-     * @see \phpseclib3\File\X509::saveX509()
-     * @see \phpseclib3\File\X509::saveCSR()
-     * @see \phpseclib3\File\X509::saveCRL()
+     * @see X509::saveX509()
+     * @see X509::saveCSR()
+     * @see X509::saveCRL()
      */
     const FORMAT_DER = 1;
     /**
      * Save as a SPKAC
      *
-     * @see \phpseclib3\File\X509::saveX509()
-     * @see \phpseclib3\File\X509::saveCSR()
-     * @see \phpseclib3\File\X509::saveCRL()
+     * @see X509::saveX509()
+     * @see X509::saveCSR()
+     * @see X509::saveCRL()
      *
      * Only works on CSRs. Not currently supported.
      */
@@ -124,9 +124,9 @@ class X509
      *
      * Used only by the load*() functions
      *
-     * @see \phpseclib3\File\X509::saveX509()
-     * @see \phpseclib3\File\X509::saveCSR()
-     * @see \phpseclib3\File\X509::saveCRL()
+     * @see X509::saveX509()
+     * @see X509::saveCSR()
+     * @see X509::saveCRL()
      */
     const FORMAT_AUTO_DETECT = 3;
 
@@ -423,7 +423,7 @@ class X509
                 // for Certificate Signing Requests
                 // see http://tools.ietf.org/html/rfc2985
                 'pkcs-9-at-unstructuredName' => '1.2.840.113549.1.9.2', // PKCS #9 unstructured name
-                'pkcs-9-at-challengePassword' => '1.2.840.113549.1.9.7', // Challenge pw for certificate revocations HashiCorpIgnore
+                'pkcs-9-at-challengePassword' => '1.2.840.113549.1.9.7', // Challenge password for certificate revocations
                 'pkcs-9-at-extensionRequest' => '1.2.840.113549.1.9.14' // Certificate extension request
             ]);
         }

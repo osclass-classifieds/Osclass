@@ -425,7 +425,13 @@ class CWebUserNonSecure extends BaseModel {
       */
         
       case 'contact_post':
-        $user = osc_get_user(Params::getParam('id'));
+        $user = osc_get_user_row(osc_esc_html(Params::getParam('id')));
+
+        if($user === false || !isset($user['pk_i_id']) || $user['b_enabled'] == 0 || $user['b_active'] == 0 || osc_user_public_profile_is_enabled($user) === false) {
+          $this->do404();
+          return;
+        }
+
         View::newInstance()->_exportVariableToView('user', $user);
         
         if (osc_recaptcha_enabled() && osc_recaptcha_private_key() != '') {
