@@ -1,4 +1,8 @@
 # LF for all text files in the repo and working tree.
+# Keep this file on main/develop only. Do not copy it to release/* branches.
+# Excluded from GitHub source zip/tar archives (export-ignore).
+.gitattributes export-ignore
+
 * text=auto eol=lf
 
 *.php text eol=lf
