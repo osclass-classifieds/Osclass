@@ -16,8 +16,8 @@ if(!defined('ABS_PATH')) exit('ABS_PATH is not loaded. Direct access is not allo
  * warranties or conditions of any kind, either express or implied. Do not remove
  * this NOTICE section as it contains license information and copyrights.
  */
- 
- 
+
+
 /**
  * Enqueued dependiences class.
  *
@@ -83,7 +83,7 @@ class Dependencies {
         $this->error[$queue] = $queue;
       }
     }
-    
+
     if(!empty($this->error)) {
       echo sprintf(__('ERROR: Some dependencies could not be loaded (%s)'), implode(', ' , $this->error));
     }
@@ -129,7 +129,7 @@ class Dependencies {
           }
         }
       }
-      
+
       if(!$error) {
         $this->resolved[$node['key']] = $node['key'];
         unset($this->unresolved[$node['key']]);

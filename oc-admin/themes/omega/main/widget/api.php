@@ -16,7 +16,7 @@ if(!defined('ABS_PATH')) exit('ABS_PATH is not loaded. Direct access is not allo
  * this NOTICE section as it contains license information and copyrights.
  */
 
-$api_key = osc_get_preference('osclasspoint_api_key', 'osclass'); 
+$api_key = osc_get_preference('osclasspoint_api_key', 'osclass');
 $data = osc_get_preference('widget_data_api', 'osclass');
 $prepare = json_decode($data, true);
 
@@ -32,7 +32,7 @@ if($api_key != '') {
   }
 }
 ?>
-  
+
 <?php if($api_key == '') { ?>
   <div class="row"><?php _e('API key has not been defined'); ?></div>
   <div class="row"><?php echo sprintf(__('In order to be able to download data from OsclassPoint, you must define your API key in %s section'), '<a href="' . osc_admin_base_url(true) . '?page=settings">' . __('Settings > General > Software updates') . '</a>'); ?>.</div>
@@ -42,4 +42,4 @@ if($api_key != '') {
   <?php } else { ?>
     <div class="row"><i class="fa fa-check-circle-o"></i> <?php _e('API key is valid, automatic updates & market functions are available'); ?>.</div>
   <?php } ?>
-<?php } ?>
+<?php }

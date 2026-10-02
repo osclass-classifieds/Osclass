@@ -30,13 +30,13 @@ class CommentForm extends Form
   public static function primary_input_hidden( $comment = null )
   {
     $commentId = null;
-    if( isset($comment['pk_i_id']) ) {
+    if(isset($comment['pk_i_id']) ) {
       $commentId = $comment['pk_i_id'];
     }
     if(Session::newInstance()->_getForm('commentId') > 0) {
       $commentId = Session::newInstance()->_getForm('commentId');
     }
-    if ( null !== $commentId ) {
+    if(null !== $commentId ) {
       parent::generic_input_hidden( 'id' , $commentId);
     }
   }
@@ -47,7 +47,7 @@ class CommentForm extends Form
   public static function title_input_text( $comment = null )
   {
     $commentTitle = '';
-    if( isset($comment['s_title']) ) {
+    if(isset($comment['s_title']) ) {
       $commentTitle = $comment['s_title'];
     }
     if(Session::newInstance()->_getForm('commentTitle') != '') {
@@ -62,7 +62,7 @@ class CommentForm extends Form
   public static function author_input_text( $comment = null )
   {
     $commentAuthorName = '';
-    if( isset($comment['s_author_name']) ) {
+    if(isset($comment['s_author_name']) ) {
       $commentAuthorName = $comment['s_author_name'];
     }
     if(Session::newInstance()->_getForm('commentAuthorName') != '') {
@@ -77,7 +77,7 @@ class CommentForm extends Form
   public static function email_input_text( $comment = null )
   {
     $commentAuthorEmail = '';
-    if( isset($comment['s_author_email']) ) {
+    if(isset($comment['s_author_email']) ) {
       $commentAuthorEmail = $comment['s_author_email'];
     }
     if(Session::newInstance()->_getForm('commentAuthorEmail') != '') {
@@ -92,7 +92,7 @@ class CommentForm extends Form
   public static function rating_input_text( $comment = null )
   {
     $commentRating = '';
-    if( isset($comment['i_rating']) ) {
+    if(isset($comment['i_rating']) ) {
       $commentRating = $comment['i_rating'];
     }
     if(Session::newInstance()->_getForm('commentRating') != '') {
@@ -107,7 +107,7 @@ class CommentForm extends Form
   public static function reply_input_text( $comment = null )
   {
     $commentReplyId = '';
-    if( isset($comment['fk_i_reply_id']) && $comment['fk_i_reply_id'] !== null ) {
+    if(isset($comment['fk_i_reply_id']) && $comment['fk_i_reply_id'] !== null ) {
       $commentReplyId = $comment['fk_i_reply_id'];
     }
     if(Session::newInstance()->_getForm('commentReplyId') != '') {
@@ -115,14 +115,14 @@ class CommentForm extends Form
     }
     parent::generic_input_text( 'replyId' , $commentReplyId);
   }
-  
+
   /**
   * @param null $comment
   */
   public static function body_input_textarea( $comment = null )
   {
     $commentBody = '';
-    if( isset($comment['s_body']) ) {
+    if(isset($comment['s_body']) ) {
       $commentBody = $comment['s_body'];
     }
     if(Session::newInstance()->_getForm('commentBody') != '') {
@@ -152,12 +152,12 @@ class CommentForm extends Form
         },
         messages: {
           authorEmail: {
-            required: "<?php _e( 'Email: this field is required' ); ?>.",
-            email: "<?php _e( 'Invalid email address' ); ?>."
+            required: "<?php echo sprintf(__('%s is required'), __('Email')); ?>.",
+            email: "<?php _e( 'The email is not valid' ); ?>."
           },
           body: {
-            required: "<?php _e( 'Comment: this field is required' ); ?>.",
-            minlength: "<?php _e( 'Comment: this field is required' ); ?>."
+            required: "<?php echo sprintf(__('%s is required'), __('Comment')); ?>.",
+            minlength: "<?php echo sprintf(__('%s is required'), __('Comment')); ?>."
           }
         },
         wrapper: "li",

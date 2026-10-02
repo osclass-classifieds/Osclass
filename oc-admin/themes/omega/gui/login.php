@@ -1,13 +1,13 @@
 <?php
 $demo['name'] = '';
-$demo['password'] = '';    
+$demo['password'] = '';
 
 if((defined('DEMO_PLUGINS') && DEMO_PLUGINS === true) || (defined('DEMO_THEMES') && DEMO_THEMES === true) || (defined('DEMO') && DEMO === true)) {
   $demo_admin = Admin::newInstance()->findByUserName('demo');
-  
+
   if($demo_admin !== false) {
     $demo['name'] = 'demo';
-    $demo['password'] = 'demo123';    
+    $demo['password'] = 'demo123';
   }
 }
 ?>
@@ -70,7 +70,7 @@ if((defined('DEMO_PLUGINS') && DEMO_PLUGINS === true) || (defined('DEMO_THEMES')
       <?php } ?>
 
       <div class="log-hooks"><?php osc_run_hook('login_admin_form'); ?></div>
-      
+
       <p class="">
         <button type="submit" name="submit" id="submit" class="btn btn-submit"><?php _e('Log in'); ?></button>
       </p>
@@ -102,7 +102,7 @@ if((defined('DEMO_PLUGINS') && DEMO_PLUGINS === true) || (defined('DEMO_THEMES')
 
         $(this).find('i').toggleClass("fa-eye fa-eye-slash");
         var input = $('input[name="password"]');
-        if (input.attr("type") == "password") {
+        if(input.attr("type") == "password") {
           input.prop("type", "text");
         } else {
           input.prop("type", "password");
@@ -110,7 +110,7 @@ if((defined('DEMO_PLUGINS') && DEMO_PLUGINS === true) || (defined('DEMO_THEMES')
       });
     });
   </script>
-  
+
   <?php osc_run_hook('admin_login_footer'); ?>
 </body>
 </html>

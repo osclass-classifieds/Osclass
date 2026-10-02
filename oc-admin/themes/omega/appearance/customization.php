@@ -17,13 +17,13 @@ if(!defined('ABS_PATH')) exit('ABS_PATH is not loaded. Direct access is not allo
  */
 
 function addHelp() {
-  echo '<p>' . __('Enter your custom CSS code to modify design of your theme. Code will not be affected by theme or osclass updates. Code will be inserted into footer between &lt;style&gt;&lt;/style&gt; tags.') . '</p>';
+  echo '<p>' . __('Enter custom CSS to adjust your active theme design. This code is stored separately and is not overwritten by theme or Osclass updates. It is output in the footer inside &lt;style&gt; tags.') . '</p>';
 }
 
 osc_add_hook('help_box','addHelp');
 
 
-function customPageHeader(){ 
+function customPageHeader(){
   ?>
   <h1><?php _e('Appearance'); ?>
     <a href="#" class="btn ico ico-32 ico-help float-right"></a>
@@ -35,19 +35,19 @@ osc_add_hook('admin_page_header','customPageHeader');
 
 
 function customPageTitle($string) {
-  return sprintf(__('Customization - %s'), $string);
+  return sprintf(__('%s - %s'), __('Theme customization'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');
 
 
-osc_current_admin_theme_path('parts/header.php'); 
+osc_current_admin_theme_path('parts/header.php');
 ?>
 
 <div id="customization-setting">
   <!-- settings form -->
   <div id="customization-settings" class="form-horizontal">
-    <h2 class="render-title"><?php _e('Theme Customization'); ?></h2>
+    <h2 class="render-title"><?php _e('Theme customization'); ?></h2>
     <ul id="error_list"></ul>
     <form name="settings_form" action="<?php echo osc_admin_base_url(true); ?>" method="post">
       <input type="hidden" name="page" value="appearance" />
@@ -73,13 +73,13 @@ osc_current_admin_theme_path('parts/header.php');
               <option value="AFTER_HTML" <?php if(osc_get_preference('custom_css_hook') == 'AFTER_HTML') { ?>selected="selected"<?php } ?>><?php _e('After HTML'); ?></option>
               <option value="NO_HOOK" <?php if(osc_get_preference('custom_css_hook') == 'NO_HOOK') { ?>selected="selected"<?php } ?>><?php _e('Do not hook'); ?></option>
             </select>
-            
+
             <span class="help-box"><?php _e('Select in which part of page body is CSS included to your site.'); ?></span>
           </div>
         </div>
-        
+
         <hr/>
-          
+
         <div class="form-horizontal">
           <div class="form-row">
             <div class="form-label"><?php _e('Your Custom HTML code'); ?></div>
@@ -100,11 +100,11 @@ osc_current_admin_theme_path('parts/header.php');
               <option value="AFTER_HTML" <?php if(osc_get_preference('custom_html_hook') == 'AFTER_HTML') { ?>selected="selected"<?php } ?>><?php _e('After HTML'); ?></option>
               <option value="NO_HOOK" <?php if(osc_get_preference('custom_html_hook') == 'NO_HOOK') { ?>selected="selected"<?php } ?>><?php _e('Do not hook'); ?></option>
             </select>
-            
+
             <span class="help-box"><?php _e('Select in which part of page body is HTML included to your site.'); ?></span>
           </div>
         </div>
-        
+
         <hr/>
 
         <div class="form-horizontal">
@@ -127,14 +127,14 @@ osc_current_admin_theme_path('parts/header.php');
               <option value="AFTER_HTML" <?php if(osc_get_preference('custom_js_hook') == 'AFTER_HTML') { ?>selected="selected"<?php } ?>><?php _e('After HTML'); ?></option>
               <option value="NO_HOOK" <?php if(osc_get_preference('custom_js_hook') == 'NO_HOOK') { ?>selected="selected"<?php } ?>><?php _e('Do not hook'); ?></option>
             </select>
-            
+
             <span class="help-box"><?php _e('Select in which part of page body is JS included to your site.'); ?></span>
           </div>
         </div>
       </fieldset>
 
       <div class="clear"></div>
-      
+
       <div class="form-actions">
         <input type="submit" id="save_changes" value="<?php echo osc_esc_html( __('Save changes') ); ?>" class="btn btn-submit" />
       </div>
@@ -142,4 +142,4 @@ osc_current_admin_theme_path('parts/header.php');
   </div>
 </div>
 
-<?php osc_current_admin_theme_path( 'parts/footer.php' ); ?>
+<?php osc_current_admin_theme_path( 'parts/footer.php' );

@@ -14,7 +14,7 @@
  * warranties or conditions of any kind, either express or implied. Do not remove
  * this NOTICE section as it contains license information and copyrights.
  */
- 
+
 define('ABS_PATH', dirname(dirname(dirname(dirname(__FILE__)))) . '/');
 require_once ABS_PATH . 'oc-load.php';
 
@@ -42,11 +42,11 @@ $type = Params::getParam('dataType');
 
 if($type == '' || $type == 'page') {
   $image_folder_path = osc_uploads_path() . 'page-images/';
-} else if ($type == 'item') {
+} elseif($type == 'item') {
   $image_folder_path = osc_uploads_path() . 'item-images/';
-} else if ($type == 'widget') {
+} elseif($type == 'widget') {
   $image_folder_path = osc_uploads_path() . 'widget-images/';
-} else if ($type == 'custom') {
+} elseif($type == 'custom') {
   $image_folder_path = osc_uploads_path() . 'custom-images/';
 }
 
@@ -71,7 +71,7 @@ if(is_uploaded_file($temp['tmp_name'])){
   if(isset($_SERVER['HTTP_ORIGIN'])) {
     if(in_array($_SERVER['HTTP_ORIGIN'] . '/', $accepted_origins)) {
       header('Access-Control-Allow-Origin: ' . $_SERVER['HTTP_ORIGIN']);
-      
+
     } else {
       header("HTTP/1.1 403 Origin Denied");
       exit;
@@ -98,17 +98,17 @@ if(is_uploaded_file($temp['tmp_name'])){
   $file_name = osc_apply_filter('tinymce_file_name', $file_name);
 
   $filetowrite = $image_folder_path . $file_name;
-  
+
   move_uploaded_file($temp['tmp_name'], $filetowrite);
 
   // Respond to the successful upload with JSON.
   // Use a location key to specify the path to the saved image resource.
   echo json_encode(array('location' => $image_folder_url . $file_name));
   exit;
-  
+
 } else {
   // Notify editor that the upload failed
   header("HTTP/1.1 500 Server Error");
   exit;
 }
-?>
+

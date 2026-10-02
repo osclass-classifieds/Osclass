@@ -73,7 +73,7 @@ class Object_Cache_memcache implements iObject_Cache {
 
     $expire = ($expire == 0) ? $this->default_expiration : $expire;
     $result = $this->_memcache->add($key, array($store_data, time(), $expire), 0, $expire);
-    
+
     if(false !== $result) {
       $this->cache[$key] = $data;
     }
@@ -90,11 +90,11 @@ class Object_Cache_memcache implements iObject_Cache {
    */
   public function delete($key) {
     $result = $this->_memcache->delete($key);
-    
+
     if(false !== $result) {
       unset($this->cache[$key]);
     }
-    
+
     return $result;
   }
 
@@ -123,31 +123,31 @@ class Object_Cache_memcache implements iObject_Cache {
 
     if(isset($this->cache[$key])) {
       $found = true;
-      
+
       if(is_object($this->cache[$key])) {
         $value = clone $this->cache[$key];
       } else {
         $value = $this->cache[$key];
       }
-      
+
       ++ $this->cache_hits;
       $return = $value;
-      
+
     } else {
       $found = true;
       $value = $this->_memcache->get($key);
-      
+
       if(is_object($value) && 'ArrayObject' === get_class($value)) {
         $value = $value->getArrayCopy();
       }
-      
+
       if(NULL === $value) {
         $found = false;
         $value = false;
       }
 
       $this->cache[$key] = is_object($value) ? clone $value : $value;
-      
+
       if($found) {
         ++ $this->cache_hits;
         $return = $this->cache[$key];
@@ -156,7 +156,7 @@ class Object_Cache_memcache implements iObject_Cache {
         $return = false;
       }
     }
-    
+
     return $return;
   }
 
@@ -196,19 +196,19 @@ class Object_Cache_memcache implements iObject_Cache {
     echo '<fieldset id="osc-cache-logs" class="osc-cache-memcache" style="border:1px solid #000;line-height:1.4;padding:8px 10px 10px 10px;margin: 12px;width:calc(100% - 24px);background-color:#fff;">' . PHP_EOL;
     echo '<legend style="font-size:14px;font-weight:600;padding:4px 8px;border:1px solid #000;background:#fff;">' . ucwords($this->_get_cache()) . ' stats (Cache hits: ' . $this->cache_hits .' - Cache misses: ' . $this->cache_misses . ')</legend>' . PHP_EOL;
     echo '<table style="border-collapse: collapse;width:100%;font-size:13px;padding:0;border-spacing:0;font-family:monospace;line-height:1.4;">' . PHP_EOL;
-    if (count($this->cache) == 0) {
+    if(count($this->cache) == 0) {
       echo '<tr><td>No cache entries</td></tr>' . PHP_EOL;
     } else {
-      foreach ($this->cache as $key => $data) {
+      foreach($this->cache as $key => $data) {
         $row_style = '';
-        if (1==2) {
+        if(1==2) {
           $row_style = 'style="background-color: #FFC2C2;"';
         }
         echo '<tr ' . $row_style . '>' . PHP_EOL;
         echo '<td style="padding:6px 8px;text-align:left;vertical-align:top;border: 1px solid #ccc;min-width:100px;">' . $key . '</td>' . PHP_EOL;
         echo '<td style="padding:6px 8px;text-align:left;vertical-align:top;border: 1px solid #ccc;">';
-        
-        if (1==2) {
+
+        if(1==2) {
           echo '<strong>Error number:</strong> ' . 'error_code' . '<br/>';
           echo '<strong>Error description:</strong> ' . 'error_desc' . '<br/><br/>';
         }
@@ -244,13 +244,13 @@ class Object_Cache_memcache implements iObject_Cache {
   public function __construct() {
     $cache_server = array();
     global $_cache_config;
-    
+
     if(!isset($_cache_config) && !is_array($_cache_config)) {
       $_t['hostname'] = $this->_memcache_conf['default']['default_host'];
       $_t['port'] = $this->_memcache_conf['default']['default_port'];
       $_t['weight'] = $this->_memcache_conf['default']['default_weight'];
       $cache_server[] = $_t;
-      
+
     } else {
       foreach($_cache_config as $_server) {
         $_array = array(
@@ -258,7 +258,7 @@ class Object_Cache_memcache implements iObject_Cache {
           'port' => $_server['default_port'],
           'weight' => $_server['default_weight']
         );
-        
+
         $cache_server[] = $_array;
       }
     }
@@ -279,7 +279,7 @@ class Object_Cache_memcache implements iObject_Cache {
       error_log('The Memcache Extension must be loaded to use Memcache Cache.');
       return false;
     }
-    
+
     return true;
   }
 
@@ -290,7 +290,7 @@ class Object_Cache_memcache implements iObject_Cache {
     if(defined('OSC_DEBUG_CACHE') && OSC_DEBUG_CACHE === true && osc_is_admin_user_logged_in()) {
       $this->stats();
     }
-    
+
     return true;
   }
 

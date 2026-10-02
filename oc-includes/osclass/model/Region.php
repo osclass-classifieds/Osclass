@@ -76,10 +76,10 @@ class Region extends DAO
    * @return array
    */
   public function findByCountry($countryId) {
-    if(trim((string)$countryId) == '') { 
+    if(trim((string)$countryId) == '') {
       return array();
     }
-    
+
     $this->dao->select();
     $this->dao->from($this->getTableName());
     $this->dao->where('fk_c_country_code', $countryId);
@@ -103,10 +103,10 @@ class Region extends DAO
    * @return array
    */
   public function findByName($name, $country = null) {
-    if(trim((string)$name) == '') { 
+    if(trim((string)$name) == '') {
       return array();
     }
-    
+
     $this->dao->select();
     $this->dao->from($this->getTableName());
     $this->dao->where(sprintf('(s_name="%s" OR s_name_native="%s")', $name, $name));
@@ -177,7 +177,7 @@ class Region extends DAO
 
     return $output;
   }
-  
+
   /**
    * Get all the rows from the table t_region
    *
@@ -201,11 +201,11 @@ class Region extends DAO
       } else {
         $data = $result->result();
       }
-      
+
       osc_cache_set($key, $data, OSC_CACHE_TTL);
       return $data;
     }
-    
+
     return $cache;
   }
 
@@ -220,11 +220,11 @@ class Region extends DAO
     if($user_id <= 0) {
       return array();
     }
-    
+
     $key = md5(osc_base_url().'Region::listUser' . (string)$user_id);
     $found = null;
     $cache = osc_cache_get($key, $found);
-    
+
     if(OC_ADMIN || $cache_enabled === false || $cache === false) {
       $this->dao->select('t.*');
       $this->dao->from($this->getTableName() . ' as t');
@@ -237,14 +237,14 @@ class Region extends DAO
       } else {
         $data = $result->result();
       }
-      
+
       osc_cache_set($key, $data, OSC_CACHE_TTL);
       return $data;
     }
-    
+
     return $cache;
   }
-  
+
   /**
    * Count all the rows from the table t_region
    *
@@ -256,17 +256,17 @@ class Region extends DAO
     $key = md5(osc_base_url().'Region::count');
     $found = null;
     $cache = osc_cache_get($key, $found);
-    
+
     if(OC_ADMIN || $cache === false) {
       $count = 0;
-      
+
       $this->dao->select('count(*) as i_count');
       $this->dao->from($this->getTableName());
       $result = $this->dao->get();
 
       if($result !== false) {
         $data = $result->row();
-        
+
         if(is_array($data) && isset($data['i_count'])) {
           $count = (int)$data['i_count'];
         }
@@ -275,10 +275,10 @@ class Region extends DAO
       osc_cache_set($key, $count, OSC_CACHE_TTL);
       return $count;
     }
-    
+
     return $cache;
   }
-  
+
   /**
    *  Delete a region with its cities and city areas
    *
@@ -315,10 +315,10 @@ class Region extends DAO
    * @return array
    */
   public function findBySlug($slug) {
-    if(trim((string)$slug) == '') { 
+    if(trim((string)$slug) == '') {
       return array();
     }
-    
+
     $this->dao->select();
     $this->dao->from($this->getTableName());
     $this->dao->where('s_slug', $slug);
@@ -377,7 +377,7 @@ class Region extends DAO
     if(isset($data['s_name']) && $data['s_name'] != '') {
       return $data['s_name'];
     }
-    
+
     return false;
   }
 

@@ -20,7 +20,7 @@ if(!defined('ABS_PATH')) exit('ABS_PATH is not loaded. Direct access is not allo
 
 /**
  * EmailVariables class
- * 
+ *
  * @since 3.0
  * @package Osclass
  * @subpackage classes
@@ -42,7 +42,7 @@ class EmailVariables {
     if(!self::$instance instanceof self) {
       self::$instance = new self;
     }
-    
+
     return self::$instance;
   }
 
@@ -58,6 +58,14 @@ class EmailVariables {
       '{ADS}' => __('List of listings, used when send alerts'),
       '{UNSUB_LINK}' => __('Unsubscribe link.'),
       '{SEARCH_LINK}' => __('Alert search page link.'),
+      '{USER_ALERTS_LINK}' => __('User alerts page link.'),
+      '{ALERT_INTRO}' => __('Alert intro sentence based on frequency.'),
+      '{ALERT_ID}' => __('Alert id'),
+      '{ALERT_NAME}' => __('Alert name'),
+      '{ALERT_FREQUENCY}' => __('Alert frequency label.'),
+      '{ALERT_DATE}' => __('Alert created date'),
+      '{ALERT_EXPIRE_DATE}' => __('Alert expiration date'),
+      '{ALERT_TRIGGERS}' => __('Number of alert emails sent'),
       '{WEB_URL}' => __('Site home page url.'),
       '{WEB_LINK}' => __('Site home page link.'),
       '{WEB_TITLE}' => __('Title of your site'),
@@ -71,8 +79,8 @@ class EmailVariables {
       '{COMMENT_TITLE}' => __('Comment title'),
       '{COMMENT_TEXT}' => __('Comment text content'),
       '{COMMENT_BODY}' => __('Comment body'),
-      '{ITEM_URL}' => __('Listing url'),
-      '{ITEM_EXPIRATION_DATE}' => __('Item expiration date'),
+      '{ITEM_URL}' => __('Listing URL'),
+      '{ITEM_EXPIRATION_DATE}' => __('Listing expiration date'),
       '{ITEM_LINK}' => __('Listing link'),
       '{ITEM_TITLE}' => __('Listing title'),
       '{ITEM_IMAGE}' => __('Listing image URL'),
@@ -92,9 +100,9 @@ class EmailVariables {
       '{USER_PHONE}' => __('User phone number'),
       '{ITEM_DESCRIPTION}'=> __('Listing description'),
       '{ITEM_DESCRIPTION_ALL_LANGUAGES}' => __('Listing description in all languages'),
-      '{ITEM_PRICE}' => __('Listing price'), 
-      '{ITEM_COUNTRY}' => __('Listing country'), 
-      '{ITEM_REGION}' => __('Listing region'), 
+      '{ITEM_PRICE}' => __('Listing price'),
+      '{ITEM_COUNTRY}' => __('Listing country'),
+      '{ITEM_REGION}' => __('Listing region'),
       '{ITEM_CITY}' => __('Listing city'),
       '{SELLER_NAME}' => __('Seller name'),
       '{SELLER_EMAIL}' => __('Seller email'),
@@ -102,7 +110,22 @@ class EmailVariables {
       '{ADMIN_NAME}' => __('Admin name'),
       '{USERNAME}' => __('Username'),
       '{PASSWORD}' => __('Password'),
-      '{WEB_ADMIN_LINK}' => __('Oc-Admin URL')
+      '{WEB_ADMIN_LINK}' => __('Oc-admin URL'),
+      '{REPORT_ID}' => __('Report id'),
+      '{REPORT_TYPE}' => __('Report type'),
+      '{REPORT_REASON}' => __('Report reason'),
+      '{REPORT_STATUS}' => __('Report status'),
+      '{REPORT_COMMENT}' => __('Report comment'),
+      '{REPORT_EVENT}' => __('Report event (subject text)'),
+      '{REPORT_MESSAGE}' => __('Report message'),
+      '{REPORTER_NAME}' => __('Name of reporting user'),
+      '{REPORTED_USER_NAME}' => __('Name of reported user'),
+      '{REPORTED_TITLE}' => __('Title of reported listing or user'),
+      '{REPORT_URL}' => __('Report page url'),
+      '{REPORT_LINK}' => __('Report page link'),
+      '{REPORT_ADMIN_URL}' => __('Report backoffice url'),
+      '{REPORT_ADMIN_LINK}' => __('Report backoffice link'),
+      '{REPORT_REPLY}' => __('Latest reply block (author + text), empty when there is no reply')
     ));
   }
 
@@ -110,15 +133,15 @@ class EmailVariables {
    * Add new email variable and description
    *
    * @param $key
-   * @param $description 
+   * @param $description
    */
   public function add($key, $description) {
     $this->variables[$key] = $description;
   }
 
   /**
-   * Remove email variable from the array 
-   * 
+   * Remove email variable from the array
+   *
    * @param $key
    */
   public function remove($key) {
@@ -145,7 +168,15 @@ class EmailVariables {
         '{ADS}',
         '{UNSUB_LINK}',
         '{SEARCH_LINK}',
-        '{ITEMS_COUNT}'
+        '{ITEMS_COUNT}',
+        '{USER_ALERTS_LINK}',
+        '{ALERT_INTRO}',
+        '{ALERT_ID}',
+        '{ALERT_NAME}',
+        '{ALERT_FREQUENCY}',
+        '{ALERT_DATE}',
+        '{ALERT_EXPIRE_DATE}',
+        '{ALERT_TRIGGERS}'
       ),
       'alert_email_daily' => array(
         '{USER_NAME}',
@@ -153,7 +184,15 @@ class EmailVariables {
         '{ADS}',
         '{UNSUB_LINK}',
         '{SEARCH_LINK}',
-        '{ITEMS_COUNT}'
+        '{ITEMS_COUNT}',
+        '{USER_ALERTS_LINK}',
+        '{ALERT_INTRO}',
+        '{ALERT_ID}',
+        '{ALERT_NAME}',
+        '{ALERT_FREQUENCY}',
+        '{ALERT_DATE}',
+        '{ALERT_EXPIRE_DATE}',
+        '{ALERT_TRIGGERS}'
       ),
       'alert_email_weekly' => array(
         '{USER_NAME}',
@@ -161,7 +200,15 @@ class EmailVariables {
         '{ADS}',
         '{UNSUB_LINK}',
         '{SEARCH_LINK}',
-        '{ITEMS_COUNT}'
+        '{ITEMS_COUNT}',
+        '{USER_ALERTS_LINK}',
+        '{ALERT_INTRO}',
+        '{ALERT_ID}',
+        '{ALERT_NAME}',
+        '{ALERT_FREQUENCY}',
+        '{ALERT_DATE}',
+        '{ALERT_EXPIRE_DATE}',
+        '{ALERT_TRIGGERS}'
       ),
       'alert_email_instant' => array(
         '{USER_NAME}',
@@ -169,7 +216,15 @@ class EmailVariables {
         '{ADS}',
         '{UNSUB_LINK}',
         '{SEARCH_LINK}',
-        '{ITEMS_COUNT}'
+        '{ITEMS_COUNT}',
+        '{USER_ALERTS_LINK}',
+        '{ALERT_INTRO}',
+        '{ALERT_ID}',
+        '{ALERT_NAME}',
+        '{ALERT_FREQUENCY}',
+        '{ALERT_DATE}',
+        '{ALERT_EXPIRE_DATE}',
+        '{ALERT_TRIGGERS}'
       ),
       'email_comment_validated' => array(
         '{COMMENT_AUTHOR}',
@@ -339,6 +394,41 @@ class EmailVariables {
         '{SELLER_EMAIL}',
         '{CONTACT_NAME}',
         '{CONTACT_EMAIL}'
+      ),
+      'email_report_admin' => array(
+        '{REPORT_EVENT}',
+        '{REPORT_MESSAGE}',
+        '{REPORT_ID}',
+        '{REPORT_TYPE}',
+        '{REPORT_REASON}',
+        '{REPORT_STATUS}',
+        '{REPORT_COMMENT}',
+        '{REPORTER_NAME}',
+        '{REPORTED_USER_NAME}',
+        '{REPORTED_TITLE}',
+        '{REPORT_ADMIN_URL}',
+        '{REPORT_ADMIN_LINK}',
+        '{COMMENT}',
+        '{COMMENT_AUTHOR}',
+        '{REPORT_REPLY}'
+      ),
+      'email_report_user' => array(
+        '{USER_NAME}',
+        '{REPORT_EVENT}',
+        '{REPORT_MESSAGE}',
+        '{REPORT_ID}',
+        '{REPORT_TYPE}',
+        '{REPORT_REASON}',
+        '{REPORT_STATUS}',
+        '{REPORT_COMMENT}',
+        '{REPORTER_NAME}',
+        '{REPORTED_USER_NAME}',
+        '{REPORTED_TITLE}',
+        '{REPORT_URL}',
+        '{REPORT_LINK}',
+        '{COMMENT}',
+        '{COMMENT_AUTHOR}',
+        '{REPORT_REPLY}'
       )
     );
 
@@ -351,8 +441,8 @@ class EmailVariables {
         }
       }
     }
-    
-    
+
+
     // ADD GLOBAL VARIABLES INTO LIST OF KEYWORDS
     // These variables are added in osc_emailBeauty function
     $global_vars = array('{WEB_URL}', '{WEB_TITLE}', '{WEB_LINK}', '{CURRENT_DATE}', '{HOUR}', '{IP_ADDRESS}', '{LOCALE_CODE}', '{LOCALE_SHORT_CODE}');
@@ -369,7 +459,7 @@ class EmailVariables {
 
     return osc_apply_filter('email_legend_words', $array, @$email['s_internal_name'], $email);
   }
-  
+
   /*
    * Empty the variables array
    */

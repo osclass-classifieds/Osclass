@@ -85,7 +85,7 @@ class SiteInfo extends DAO
    * @return string
    */
   public function get($key) {
-    if (!isset($this->siteInfo[$key])) {
+    if(!isset($this->siteInfo[$key])) {
       return '';
     }
 

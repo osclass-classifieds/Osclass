@@ -19,7 +19,7 @@ if(!defined('ABS_PATH')) exit('ABS_PATH is not loaded. Direct access is not allo
 
 osc_enqueue_script('tiny_mce');
 
-function customPageHeader(){ 
+function customPageHeader(){
   ?>
   <h1><?php _e('Settings'); ?></h1>
   <?php
@@ -29,7 +29,7 @@ osc_add_hook('admin_page_header','customPageHeader');
 
 
 //customize Head
-function customHead() { 
+function customHead() {
   ?>
   <script type="text/javascript">
     tinyMCE.init({
@@ -39,7 +39,7 @@ function customHead() {
       language: 'en',
       theme_advanced_toolbar_align : "left",
       theme_advanced_toolbar_location : "top",
-      
+
       content_style: "body {font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen-Sans,Ubuntu,Cantarell,'Helvetica Neue',sans-serif;}",
       contextmenu: 'link linkchecker image editimage table spellchecker configurepermanentpen',
       plugins: 'paste print preview importcss searchreplace autolink autosave save directionality visualblocks visualchars fullscreen image link media code codesample table charmap emoticons hr pagebreak nonbreaking toc insertdatetime advlist lists wordcount imagetools textpattern noneditable help charmap quickbars',
@@ -49,7 +49,7 @@ function customHead() {
       image_caption: true,
       quickbars_selection_toolbar: 'bold italic underline strikethrough | quicklink h2 h3 h4 | blockquote quickimage quicktable',
       toolbar_mode: 'wrap',
-      
+
       // plugins : [
         // "advlist autolink lists link image charmap preview anchor",
         // "searchreplace visualblocks code fullscreen",
@@ -77,7 +77,7 @@ function customHead() {
         modal: true,
         width: 360,
         minHeight: 42,
-        title: '<?php echo osc_esc_js( __('Send email') ); ?>'
+        title: '<?php echo osc_esc_js( __('Test email template') ); ?>'
       });
       $('#btn-display-test-it').click(function(){
         $('#dialog-test-it').dialog('open');
@@ -112,7 +112,7 @@ function customHead() {
 osc_add_hook('admin_header','customHead', 10);
 
 function customPageTitle($string) {
-  return sprintf(__('Edit email template - %s'), $string);
+  return sprintf(__('%s - %s'), __('Edit email template'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');
@@ -123,7 +123,7 @@ $aEmailVars = EmailVariables::newInstance()->getVariables( $email );
 
 $locales = OSCLocale::newInstance()->listAllEnabled();
 
-osc_current_admin_theme_path('parts/header.php'); 
+osc_current_admin_theme_path('parts/header.php');
 ?>
 
 <div class="grid-row no-bottom-margin">
@@ -154,7 +154,7 @@ osc_current_admin_theme_path('parts/header.php');
                 <?php printLocaleDescriptionPage($locales, $email); ?>
               </div>
             </div>
-            
+
             <div id="right-side" class="legend">
               <div class="well ui-rounded-corners">
                 <h3 style="margin: 0;margin-bottom: 10px;text-align: center; color: #616161;"><?php _e('Legend'); ?></h3>
@@ -167,7 +167,8 @@ osc_current_admin_theme_path('parts/header.php');
             <div class="clear"></div>
             <div class="form-actions form-inline">
               <input type="submit" value="<?php echo osc_esc_html(__('Save changes')); ?>" class="btn btn-submit" />
-              <a id="btn-display-test-it" class="btn btn-submit"><?php _e('Test it'); ?></a>
+              <a id="btn-display-test-it" class="btn btn-submit"><?php _e('Test - Send email'); ?></a>
+              <a href="javascript:history.go(-1)" class="btn"><?php _e('Cancel'); ?></a>
             </div>
           </form>
         </div>
@@ -180,6 +181,6 @@ osc_current_admin_theme_path('parts/header.php');
 
 <div id="dialog-test-it" class="hide">
   <input type="text" name="test_email" class="input-actions" value="<?php echo osc_esc_html(osc_contact_email()); ?>"/>
-  <input type="submit" id="btn-test-it" href="#" class="btn btn-blue submit-right" value="<?php _e('Send email'); ?>"/>
+  <input type="submit" id="btn-test-it" href="#" class="btn btn-green submit-right" value="<?php _e('Send email'); ?>"/>
 </div>
-<?php osc_current_admin_theme_path('parts/footer.php'); ?>
+<?php osc_current_admin_theme_path('parts/footer.php');

@@ -50,7 +50,7 @@ class Cache {
    */
   public function check() {
     $path = $this->preparePath();
-    if ( ! file_exists( $path ) ) {
+    if(! file_exists( $path ) ) {
     return false;
     }
 

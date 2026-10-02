@@ -22,7 +22,7 @@ function render_offset(){
 }
 
 
-function customPageHeader(){ 
+function customPageHeader(){
   ?>
   <h1><?php _e('Tools'); ?></h1>
   <?php
@@ -32,12 +32,12 @@ osc_add_hook('admin_page_header','customPageHeader');
 
 
 function customPageTitle($string) {
-  return sprintf(__('Category stats - %s'), $string);
+  return sprintf(__('%s - %s'), __('Category stats'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');
 
-osc_current_admin_theme_path( 'parts/header.php' ); 
+osc_current_admin_theme_path( 'parts/header.php' );
 ?>
 
 <div id="backup-setting">
@@ -59,4 +59,4 @@ osc_current_admin_theme_path( 'parts/header.php' );
   </div>
   <!-- /settings form -->
 </div>
-<?php osc_current_admin_theme_path( 'parts/footer.php' ); ?>
+<?php osc_current_admin_theme_path( 'parts/footer.php' );

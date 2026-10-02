@@ -46,7 +46,7 @@ class City extends DAO
    * @return City
    */
   public static function newInstance() {
-    if( !self::$instance instanceof self ) {
+    if(!self::$instance instanceof self ) {
       self::$instance = new self;
     }
     return self::$instance;
@@ -77,8 +77,8 @@ class City extends DAO
     $this->dao->join(Region::newInstance()->getTableName().' as aux', 'aux.pk_i_id = a.fk_i_region_id', 'LEFT');
     $this->dao->like('a.s_name', $query, 'after');
     $this->dao->orLike('a.s_name_native', $query, 'after');
-    if( $regionId != null ) {
-      if (is_numeric($regionId)) {
+    if($regionId != null ) {
+      if(is_numeric($regionId)) {
         $this->dao->where('a.fk_i_region_id', $regionId);
       } else {
         $this->dao->where('aux.s_name', $regionId);
@@ -86,8 +86,8 @@ class City extends DAO
     }
 
     $result = $this->dao->get();
-    
-    if( $result == false ) {
+
+    if($result == false ) {
       return array();
     }
 
@@ -143,10 +143,10 @@ class City extends DAO
    * @return array If there's an error or 0 results, it returns an empty array
    */
   public function findByRegion($regionId) {
-    if($regionId <= 0) { 
+    if($regionId <= 0) {
       return array();
     }
-    
+
     $this->dao->select($this->getFields());
     $this->dao->from($this->getTableName());
     $this->dao->where('fk_i_region_id', $regionId);
@@ -154,7 +154,7 @@ class City extends DAO
 
     $result = $this->dao->get();
 
-    if( $result == false ) {
+    if($result == false ) {
       return array();
     }
 
@@ -173,21 +173,21 @@ class City extends DAO
    * @return array
    */
   public function findByName($cityName, $regionId = null) {
-    if(trim((string)$cityName) == '') { 
+    if(trim((string)$cityName) == '') {
       return array();
     }
-    
+
     $this->dao->select($this->getFields());
     $this->dao->from($this->getTableName());
     $this->dao->where(sprintf('(s_name="%s" OR s_name_native="%s")', $cityName, $cityName));
     $this->dao->limit(1);
-    if( $regionId != null ) {
+    if($regionId != null ) {
       $this->dao->where('fk_i_region_id', $regionId);
     }
 
     $result = $this->dao->get();
 
-    if( $result == false ) {
+    if($result == false ) {
       return array();
     }
 
@@ -205,15 +205,15 @@ class City extends DAO
     $key = md5(osc_base_url().'City::listAll'.(string)$limit);
     $found = null;
     $cache = osc_cache_get($key, $found);
-    
+
     if(OC_ADMIN || $cache_enabled === false || $cache === false) {
       $this->dao->select($this->getFields());
       $this->dao->from($this->getTableName());
-      
+
       if((int)$limit > 0) {
         $this->dao->limit($limit);
       }
-      
+
       $this->dao->orderBy('s_name', 'ASC');
       $result = $this->dao->get();
 
@@ -222,14 +222,14 @@ class City extends DAO
       } else {
         $data = $result->result();
       }
-      
+
       osc_cache_set($key, $data, OSC_CACHE_TTL);
       return $data;
     }
-    
+
     return $cache;
   }
-  
+
   /**
    * Get all the rows from the table t_city where user has listings
    *
@@ -241,11 +241,11 @@ class City extends DAO
     if($user_id <= 0) {
       return array();
     }
-    
+
     $key = md5(osc_base_url().'City::listUser' . (string)$user_id);
     $found = null;
     $cache = osc_cache_get($key, $found);
-    
+
     if(OC_ADMIN || $cache_enabled === false || $cache === false) {
       $this->dao->select('t.*');
       $this->dao->from($this->getTableName() . ' as t');
@@ -258,11 +258,11 @@ class City extends DAO
       } else {
         $data = $result->result();
       }
-      
+
       osc_cache_set($key, $data, OSC_CACHE_TTL);
       return $data;
     }
-    
+
     return $cache;
   }
 
@@ -278,17 +278,17 @@ class City extends DAO
     $key = md5(osc_base_url().'City::count');
     $found = null;
     $cache = osc_cache_get($key, $found);
-    
+
     if(OC_ADMIN || $cache === false) {
       $count = 0;
-      
+
       $this->dao->select('count(*) as i_count');
       $this->dao->from($this->getTableName());
       $result = $this->dao->get();
 
       if($result !== false) {
         $data = $result->row();
-        
+
         if(is_array($data) && isset($data['i_count'])) {
           $count = (int)$data['i_count'];
         }
@@ -297,7 +297,7 @@ class City extends DAO
       osc_cache_set($key, $count, OSC_CACHE_TTL);
       return $count;
     }
-    
+
     return $cache;
   }
 
@@ -337,10 +337,10 @@ class City extends DAO
    * @return array
    */
   public function findBySlug($slug) {
-    if(trim((string)$slug) == '') { 
+    if(trim((string)$slug) == '') {
       return array();
     }
-    
+
     $this->dao->select();
     $this->dao->from($this->getTableName());
     $this->dao->where('s_slug', $slug);
@@ -398,7 +398,7 @@ class City extends DAO
     if(isset($data['s_name']) && $data['s_name'] != '') {
       return $data['s_name'];
     }
-    
+
     return false;
   }
 }

@@ -1,402 +1,286 @@
 <?php
 if(!defined('ABS_PATH')) exit('ABS_PATH is not loaded. Direct access is not allowed.');
-/*
- * Copyright 2014 Osclass
- * Copyright 2026 Osclass by OsclassPoint.com
- *
- * Osclass maintained & developed by OsclassPoint.com
- * You may not use this file except in compliance with the License.
- * You may download copy of Osclass at
- *
- *     https://osclass-classifieds.com/download
- *
- * Do not edit or add to this file if you wish to upgrade Osclass to newer
- * versions in the future. Software is distributed on an "AS IS" basis, without
- * warranties or conditions of any kind, either express or implied. Do not remove
- * this NOTICE section as it contains license information and copyrights.
- */
-
-
-osc_enqueue_script('tabber');
-osc_enqueue_script('jquery-nested');
-
-$categories = __get('categories');
-
 
 function addHelp() {
-  echo '<p>' . __('Add, edit or delete the categories or subcategories in which users can post listings. Reorder sections by dragging and dropping, or nest a subcategory in an expanded category. <strong>Be careful</strong>: If you delete a category, all listings associated will also be deleted!') . '</p>';
+  echo '<p>' . __('Manage categories and subcategories. Use Quick management for drag-and-drop nesting.') . '</p>';
 }
 osc_add_hook('help_box','addHelp');
 
-function customPageHeader() { 
+function customPageHeader() {
+  $addUrl = osc_categories_admin_list_url(array('action' => 'add'));
   ?>
   <h1><?php _e('Categories'); ?>
     <a href="#" class="btn ico ico-32 ico-help float-right"></a>
-    <a href="<?php echo osc_admin_base_url(true); ?>?page=categories&amp;action=add_post_default&<?php echo osc_csrf_token_url(); ?>" class="btn btn-green ico ico-add-white float-right"><?php _e('Add'); ?></a>
+    <a href="<?php echo osc_esc_html($addUrl); ?>" class="btn btn-green ico ico-add-white float-right"><?php _e('Add category'); ?></a>
+    <a href="<?php echo osc_esc_html(osc_admin_base_url(true) . '?page=categories&amp;action=reorder'); ?>" class="btn btn-white float-right"><?php _e('Quick management'); ?></a>
   </h1>
   <?php
 }
-
 osc_add_hook('admin_page_header','customPageHeader');
 
-
 function customPageTitle($string) {
-  return sprintf(__('Categories - %s'), $string);
+  return sprintf(__('%s - %s'), __('Categories'), $string);
 }
-
 osc_add_filter('admin_title', 'customPageTitle');
 
-//customize Head
-function customHead() { 
-  $max_levels = intval(osc_num_category_levels() > 0 ? osc_num_category_levels() : 4);
-
+function customHead() {
   ?>
-  <style>
-    .tabber{display:none;}
-    .placeholder {background-color: #cfcfcf;}
-    .footest .category_div {opacity: 0.8;}
-    .list-categories li {opacity: 1 !important;}
-    .category_div {background: #ffffff;}
-    .alert-custom {background-color: #FDF5D9;border-bottom: 1px solid #EEDC94;color: #404040;}
-    .ui-widget.ui-widget-content {border:none;}
-    .cat-hover, .cat-hover .category_row{background-color:#fffccc !important;background:#fffccc !important;}
-    .list-categories > .ui-sortable > <?php for($k=1; $k<$max_levels; $k++) { ?>li > ul > <?php } ?>.category_row {padding-left:49px}
-    .list-categories > .ui-sortable > <?php for($k=1; $k<$max_levels; $k++) { ?>li > ul > <?php } ?>.subcategory .toggle {display:none}
-    .list-categories > .ui-sortable > <?php for($k=1; $k<$max_levels; $k++) { ?>li > ul > <?php } ?>.subcategory .toggle {display:none}
-    .list-categories <?php for($k=1; $k<$max_levels; $k++) { ?>.subcategory <?php } ?>.ico-childrens {display:none}
-  </style>
-  
   <script type="text/javascript">
-    $(function() {
-      $('.category_div').on('mouseenter',function(){
-        $(this).addClass('cat-hover');
-      }).on('mouseleave',function(){
-        $(this).removeClass('cat-hover');
-      });
-      var list_original = '';
+    function categoriesReloadAfterReorder(id) {
+      var url = window.location.href.split('#')[0];
+      url = url.replace(/([?&])reorderId=\d+/g, '$1').replace(/[?&]$/, '');
+      var sep = (url.indexOf('?') >= 0 ? '&' : '?');
+      window.location.href = url + sep + 'reorderId=' + parseInt(id, 10);
+    }
 
-      $('.sortable').nestedSortable({
-        disableNesting: 'no-nest',
-        forcePlaceholderSize: true,
-        handle: '.handle',
-        helper: 'clone',
-        listType: 'ul',
-        items: 'li',
-        maxLevels: <?php echo $max_levels; ?>,
-        opacity: .6,
-        placeholder: 'placeholder',
-        revert: 250,
-        tabSize: 25,
-        tolerance: 'pointer',
-        toleranceElement: '> div',
-        create: function(event, ui) {
+    function order_up(id) {
+      $('#datatables_list_processing').show();
+      $.ajax({
+        url: "<?php echo osc_admin_base_url(true); ?>?page=ajax&action=order_category&id="+id+"&order=up&<?php echo osc_csrf_token_url(); ?>",
+        success: function(res) {
+          categoriesReloadAfterReorder(id);
         },
-        start: function(event, ui) {
-          list_original = $('.sortable').nestedSortable('serialize');
-          $(ui.helper).addClass('footest');
-          $(ui.helper).prepend('<div style="opacity: 1 !important; padding:5px;" class="alert-custom"><?php echo osc_esc_js(__('Note: You must expand the category in order to make it a subcategory.')); ?></div>');
-        },
-        stop: function(event, ui) {
-
-          $(".jsMessage").fadeIn("fast");
-          $(".jsMessage p").attr('class', '');
-          $(".jsMessage p").html('<img height="16" width="16" src="<?php echo osc_current_admin_theme_url('images/loading.gif');?>"> <?php echo osc_esc_js(__('This action could take a while.')); ?>');
-
-          var list = '';
-          list = $('.sortable').nestedSortable('serialize');
-          var array_list = $('.sortable').nestedSortable('toArray');
-          var l = array_list.length;
-
-          for(var k = 0; k < l; k++ ) {
-            if( array_list[k].item_id == $(ui.item).find('div').attr('category_id') ) {
-              if( array_list[k].parent_id == 'root' ) {
-                $(ui.item).closest('.toggle').show();
-              }
-              break;
-            }
-          }
-          if( !$(ui.item).parent().hasClass('sortable') ) {
-            $(ui.item).parent().addClass('subcategory');
-          }
-          if(list_original != list) {
-            var plist = array_list.reduce(function ( total, current, index ) {
-              total[index] = {'c' : current.item_id, 'p' : current.parent_id};
-              return total;
-            }, {});
-            $.ajax({
-              type: 'POST',
-              url: "<?php echo osc_admin_base_url(true) . "?page=ajax&action=categories_order&" . osc_csrf_token_url(); ?>",
-              data: {'list' : JSON.stringify(plist)},
-              context: document.body,
-              success: function(res){
-                var ret = eval( "(" + res + ")");
-                var message = "";
-                if( ret.error ) {
-                  $(".jsMessage p").attr('class', 'error');
-                  message += ret.error;
-                }
-                if( ret.ok ){
-                  $(".jsMessage p").attr('class', 'ok');
-                  message += ret.ok;
-                }
-
-                $(".jsMessage").show();
-                $(".jsMessage p").html(message);
-              },
-              error: function(){
-                $(".jsMessage").fadeIn("fast");
-                $(".jsMessage p").attr('class', '');
-                $(".jsMessage p").html('<?php echo osc_esc_js(__('Ajax error, please try again.')); ?>');
-              }
-            });
-
-            list_original = list;
-          }
+        error: function(){
+          $('#datatables_list_processing').hide();
         }
       });
+    }
 
-      $(".toggle").bind("click", function(e) {
-        var list = $(this).parents('li').first().find('ul');
-        var lili = $(this).closest('li').find('ul').find('li').find('ul');
-        var li   = $(this).closest('li').first();
-        if( $(this).hasClass('status-collapsed') ) {
-          $(li).removeClass('no-nest');
-          $(list).show();
-          $(lili).hide();
-          $(this).removeClass('status-collapsed').addClass('status-expanded');
-          $(this).html('-');
-        } else {
-          $(li).addClass('no-nest');
-          $(list).hide();
-          $(this).removeClass('status-expanded').addClass('status-collapsed');
-          $(this).html('+');
+    function order_down(id) {
+      $('#datatables_list_processing').show();
+      $.ajax({
+        url: "<?php echo osc_admin_base_url(true); ?>?page=ajax&action=order_category&id="+id+"&order=down&<?php echo osc_csrf_token_url(); ?>",
+        success: function(res) {
+          categoriesReloadAfterReorder(id);
+        },
+        error: function(){
+          $('#datatables_list_processing').hide();
         }
       });
+    }
 
-      // dialog delete
-      $("#dialog-delete-category").dialog({
-        autoOpen: false,
-        modal: true
-      });
-      $("#category-delete-submit").click(function() {
-        var id  = $("#dialog-delete-category").attr('data-category-id');
-        var url  = '<?php echo osc_admin_base_url(true); ?>?page=ajax&action=delete_category&<?php echo osc_csrf_token_url(); ?>&id=' + id;
-
-        $.ajax({
-          url: url,
-          context: document.body,
-          success: function(res) {
-            var ret = eval( "(" + res + ")");
-            var message = "";
-            if( ret.error ) {
-              message += ret.error;
-              $(".jsMessage p").attr('class', 'error');
-            }
-            if( ret.ok ) {
-              message += ret.ok;
-              $(".jsMessage p").attr('class', 'ok');
-
-              $('#list_'+id).fadeOut("slow");
-              $('#list_'+id).remove();
-            }
-
-            $(".jsMessage").show();
-            $(".jsMessage p").html(message);
-          },
-          error: function() {
-            $(".jsMessage").show();
-            $(".jsMessage p").attr('class', '');
-            $(".jsMessage p").html("<?php echo osc_esc_js(__('Ajax error, try again.')); ?>");
+    $(document).ready(function(){
+      var $reorderedRow = $('.table tr.row-reordered');
+      if($reorderedRow.length) {
+        setTimeout(function() {
+          $reorderedRow.removeClass('row-reordered');
+          var url = window.location.href.split('#')[0];
+          url = url.replace(/([?&])reorderId=\d+/g, '$1').replace(/[?&]$/, '');
+          if(window.history && window.history.replaceState) {
+            window.history.replaceState({}, document.title, url);
           }
+        }, 3000);
+      }
+
+      $("#check_all").change(function(){
+        var isChecked = $(this).prop("checked");
+        $('.col-bulkactions input').each(function() {
+          this.checked = (isChecked == 1);
         });
-        $('#dialog-delete-category').dialog('close');
-        $('body,html').animate({
-          scrollTop: 0
-        }, 500);
+      });
+
+      $("#dialog-category-delete").dialog({ autoOpen: false, modal: true });
+      $("#dialog-bulk-actions").dialog({ autoOpen: false, modal: true });
+      $("#bulk-actions-submit").click(function() { $("#datatablesForm").submit(); });
+      $("#bulk-actions-cancel").click(function() {
+        $("#datatablesForm").attr('data-dialog-open', 'false');
+        $('#dialog-bulk-actions').dialog('close');
+      });
+      $("#datatablesForm").submit(function() {
+        if($("#bulk_actions option:selected").val() == "") {
+          return false;
+        }
+        if($("#datatablesForm").attr('data-dialog-open') == "true") {
+          return true;
+        }
+        $("#dialog-bulk-actions .form-row").html($("#bulk_actions option:selected").attr('data-dialog-content'));
+        $("#bulk-actions-submit").html($("#bulk_actions option:selected").text());
+        $("#datatablesForm").attr('data-dialog-open', 'true');
+        $("#dialog-bulk-actions").dialog('open');
         return false;
       });
     });
 
-    list_original = $('.sortable').nestedSortable('serialize');
-
-    function show_iframe(class_name, id) {
-      if($('.content_list_'+id+' .iframe-category').length == 0){
-        $('.iframe-category').remove();
-        var name = 'frame_'+ id;
-        var id_  = 'frame_'+ id;
-        var url  = '<?php echo osc_admin_base_url(true); ?>?page=ajax&action=category_edit_iframe&id=' + id;
-        $.ajax({
-          url: url,
-          context: document.body,
-          success: function(res){
-            $('div.' + class_name).html(res);
-            $('div.' + class_name).fadeIn("fast");
-          }
-        });
-      } else {
-        $('.iframe-category').remove();
-      }
+    function delete_dialog(id) {
+      $("#dialog-category-delete input[name='id']").val(id);
+      $("#dialog-category-delete").dialog('open');
       return false;
-    }
-
-    function delete_category(id) {
-      $("#dialog-delete-category").attr('data-category-id', id);
-      $("#dialog-delete-category").dialog('open');
-      return false;
-    }
-
-    function enable_cat(id) {
-      var enabled;
-
-      $(".jsMessage").fadeIn("fast");
-      $(".jsMessage p").attr('class', '');
-      $(".jsMessage p").html('<img height="16" width="16" src="<?php echo osc_current_admin_theme_url('images/loading.gif');?>"> <?php echo osc_esc_js(__('This action could take a while.')); ?>');
-
-      if( $('div[category_id=' + id + ']').hasClass('disabled') ) {
-        enabled = 1;
-      } else {
-        enabled = 0;
-      }
-
-      var url  = '<?php echo osc_admin_base_url(true); ?>?page=ajax&action=enable_category&<?php echo osc_csrf_token_url(); ?>&id=' + id + '&enabled=' + enabled;
-      $.ajax({
-        url: url,
-        context: document.body,
-        success: function(res) {
-          var ret = eval( "(" + res + ")");
-          var message = "";
-          if(ret.error) {
-            message += ret.error;
-            $(".jsMessage p").attr('class', 'error');
-          }
-          if(ret.ok) {
-            if( enabled == 0 ) {
-              $('div[category_id=' + id + ']').addClass('disabled');
-              $('div[category_id=' + id + ']').removeClass('enabled');
-              $('div[category_id=' + id + ']').find('a.enable').text('<?php _e('Enable'); ?>');
-              for(var i = 0; i < ret.affectedIds.length; i++) {
-                id =  ret.affectedIds[i].id;
-                $('div[category_id=' + id + ']').addClass('disabled');
-                $('div[category_id=' + id + ']').removeClass('enabled');
-                $('div[category_id=' + id + ']').find('a.enable').text('<?php _e('Enable'); ?>');
-              }
-            } else {
-              $('div[category_id=' + id + ']').removeClass('disabled');
-              $('div[category_id=' + id + ']').addClass('enabled');
-              $('div[category_id=' + id + ']').find('a.enable').text('<?php _e('Disable'); ?>');
-
-              for(var i = 0; i < ret.affectedIds.length; i++) {
-                id =  ret.affectedIds[i].id;
-                $('div[category_id=' + id + ']').removeClass('disabled');
-                $('div[category_id=' + id + ']').addClass('enabled');
-                $('div[category_id=' + id + ']').find('a.enable').text('<?php _e('Disable'); ?>');
-              }
-            }
-
-            message += ret.ok;
-            $(".jsMessage p").attr('class', 'ok');
-          }
-
-          $(".jsMessage").show();
-          $(".jsMessage p").html(message);
-        },
-        error: function(){
-          $(".jsMessage").show();
-          $(".jsMessage p").attr('class', '');
-          $(".jsMessage p").html("<?php echo osc_esc_js(__('Ajax error, try again.')); ?>");
-        }
-      });
     }
   </script>
   <?php
 }
-
 osc_add_hook('admin_header','customHead', 10);
 
-
-function drawCategory($category){
-  if( count($category['categories']) > 0 ) { $has_subcategories = true; } else { $has_subcategories = false; }
+$aData = __get('aData');
+$aRawRows = __get('aRawRows');
+$parent = (int)__get('parent');
+$breadcrumb = __get('breadcrumb');
+$listUrl = __get('list_url');
+if($listUrl == '') {
+  $listUrl = osc_categories_admin_list_url();
+}
+$sort = Params::getParam('sort');
+$direction = Params::getParam('direction');
+$reorderId = (int)Params::getParam('reorderId');
+$columns = $aData['aColumns'];
+$columnSources = (isset($aData['aColumnSources']) ? $aData['aColumnSources'] : array());
+$sortableColumns = (isset($aData['aSortableColumns']) ? $aData['aSortableColumns'] : array());
+$rows = $aData['aRows'];
+$withFilters = __get('withFilters');
+$resetUrl = osc_categories_admin_list_url(array('sSearch' => '', 'iPage' => 1));
 ?>
 
-<li id="list_<?php echo $category['pk_i_id']; ?>" class="category_li <?php echo ( $category['b_enabled'] == 1 ? 'enabled' : 'disabled' ); ?> " >
-  <div class="category_div <?php echo ( $category['b_enabled'] == 1 ? 'enabled' : 'disabled' ); ?>" category_id="<?php echo $category['pk_i_id']; ?>" >
-    <div class="category_row">
-      <div class="handle ico ico-32 ico-droppable"></div>
-      <div class="ico-childrens">
-        <?php
-        if( $has_subcategories ) {
-          echo '<span class="toggle status-collapsed">+</span>';
-        } else {
-          echo '<span class="toggle status-expanded">-</span>';
-        }
-      ?>
-      </div>
-      <div class="name-cat" id="<?php echo 'quick_edit_' . $category['pk_i_id']; ?>">
-        <?php echo '<span class="name" title="' . osc_esc_html(sprintf(__('Category ID: %s'), $category['pk_i_id'])) . '">' . $category['s_name'] . '</span>'; ?>
-      </div>
-      <div class="actions-cat">
-        <a onclick="show_iframe('content_list_<?php echo $category['pk_i_id'];?>','<?php echo $category['pk_i_id']; ?>');"><?php _e('Edit'); ?></a>
-        &middot;
-        <a class="enable" onclick="enable_cat('<?php echo $category['pk_i_id']; ?>')"><?php $category['b_enabled'] == 1 ? _e('Disable') : _e('Enable'); ?></a>
-        &middot;
-        <a onclick="delete_category(<?php echo $category['pk_i_id']; ?>)"><?php _e('Delete'); ?></a>
-      </div>
-    </div>
-    <div class="edit content_list_<?php echo $category['pk_i_id']; ?>"></div>
-  </div>
-  <?php if($has_subcategories) { ?>
-    <ul class="subcategory subcategories-<?php echo $category['pk_i_id']; ?> " style="display: none;">
-      <?php foreach($category['categories'] as $subcategory) {
-        drawCategory($subcategory);
-      } ?>
-    </ul>
-  <?php } ?>
-</li>
-<?php
-} //End drawCategory
-?>
+<?php osc_current_admin_theme_path('parts/header.php'); ?>
 
-<?php osc_current_admin_theme_path( 'parts/header.php' ); ?>
+<h2 class="render-title">
+  <?php
+  $crumbs = array();
+  $crumbs[] = '<a href="' . osc_esc_html(osc_categories_admin_list_url(array('parent' => '', 'iPage' => 1))) . '">' . __('All categories') . '</a>';
+  if(is_array($breadcrumb) && count($breadcrumb) > 0) {
+    $last = count($breadcrumb) - 1;
+    foreach($breadcrumb as $i => $cat) {
+      $name = osc_category_row_name($cat);
+      if($i < $last) {
+        $crumbs[] = '<a href="' . osc_esc_html(osc_categories_admin_list_url(array('parent' => (int)$cat['pk_i_id'], 'iPage' => 1))) . '">' . osc_esc_html($name) . '</a>';
+      } else {
+        $crumbs[] = osc_esc_html($name);
+      }
+    }
+  }
+  echo implode(' &gt; ', $crumbs);
+  ?>
+</h2>
 
-<!-- right container -->
-<div class="right">
-  <!-- categories form -->
-  <div class="categories">
-    <div class="flashmessage flashmessage-info">
-      <p class="info"><?php _e('Drag&drop the categories to reorder them the way you like. Click on edit link to edit the category'); ?></p>
+<div class="relative">
+  <div id="categories-toolbar" class="table-toolbar">
+    <div class="float-right">
+      <form method="get" action="<?php echo osc_admin_base_url(true); ?>" class="inline nocsrf">
+        <?php foreach(Params::getParamsAsArray('get') as $key => $value) { ?>
+        <?php if($key != 'iDisplayLength') { ?>
+        <input type="hidden" name="<?php echo osc_esc_html(strip_tags($key)); ?>" value="<?php echo osc_esc_html(strip_tags($value)); ?>" />
+        <?php } } ?>
+        <select name="iDisplayLength" class="select-box-extra select-box-medium float-left" onchange="this.form.submit();">
+          <option value="10" <?php if(Params::getParam('iDisplayLength') == 10) echo 'selected'; ?>><?php printf(__('%d categories'), 10); ?></option>
+          <option value="25" <?php if(Params::getParam('iDisplayLength') == 25) echo 'selected'; ?>><?php printf(__('%d categories'), 25); ?></option>
+          <option value="50" <?php if(Params::getParam('iDisplayLength') == 50) echo 'selected'; ?>><?php printf(__('%d categories'), 50); ?></option>
+          <option value="100" <?php if(Params::getParam('iDisplayLength') == 100) echo 'selected'; ?>><?php printf(__('%d categories'), 100); ?></option>
+        </select>
+      </form>
+      <form method="get" action="<?php echo osc_admin_base_url(true); ?>" id="shortcut-filters" class="inline nocsrf">
+        <input type="hidden" name="page" value="categories" />
+        <?php if($parent > 0) { ?><input type="hidden" name="parent" value="<?php echo $parent; ?>" /><?php } ?>
+        <?php foreach(Params::getParamsAsArray('get') as $key => $value) { ?>
+        <?php if(!in_array($key, array('page', 'sSearch', 'action'), true)) { ?>
+        <input type="hidden" name="<?php echo osc_esc_html(strip_tags($key)); ?>" value="<?php echo osc_esc_html(strip_tags($value)); ?>" />
+        <?php } } ?>
+        <?php if($withFilters) { ?>
+        <a id="btn-hide-filters" href="<?php echo osc_esc_html($resetUrl); ?>" class="btn btn-hide-filters"><?php _e('Reset search'); ?></a>
+        <?php } ?>
+        <input name="sSearch" type="text" class="input-text input-actions" value="<?php echo osc_esc_html(Params::getParam('sSearch')); ?>" placeholder="<?php echo osc_esc_html(__('Search categories')); ?>" />
+        <input type="submit" class="btn submit-right" value="<?php echo osc_esc_html(__('Find')); ?>">
+      </form>
     </div>
-    
-    <?php if(!osc_selectable_parent_categories()) { ?>
-      <div class="flashmessage flashmessage-warning">
-        <p class="info"><?php echo sprintf(__('Parent category cannot be selected when publishing a new listing. Each category that has at least 1 child category is considered as parent. You can change this setting in %s, "Parent categories" section.'), '<a href="' . osc_admin_base_url(true) . '?page=settings">' . __('Settings > General') . '</a>'); ?></p>
-      </div>
-    <?php } ?>
-    
-    <div class="list-categories">
-      <ul class="sortable">
-      <?php foreach($categories as $category) {
-        if( count($category['categories']) > 0 ) { $has_subcategories = true; } else { $has_subcategories = false; }
-        drawCategory($category);
-      } ?>
-      </ul>
-    </div>
-    <div class="clear"></div>
   </div>
-  <!-- /categories form -->
+
+  <form id="datatablesForm" action="<?php echo osc_admin_base_url(true); ?>" method="post">
+    <?php echo osc_csrf_token_form(); ?>
+    <input type="hidden" name="page" value="categories" />
+    <?php if($parent > 0) { ?><input type="hidden" name="parent" value="<?php echo $parent; ?>" /><?php } ?>
+    <?php if(Params::getParam('iDisplayLength') != '') { ?><input type="hidden" name="iDisplayLength" value="<?php echo (int)Params::getParam('iDisplayLength'); ?>" /><?php } ?>
+    <?php if(Params::getParam('sort') != '') { ?><input type="hidden" name="sort" value="<?php echo osc_esc_html(Params::getParam('sort')); ?>" /><?php } ?>
+    <?php if(Params::getParam('direction') != '') { ?><input type="hidden" name="direction" value="<?php echo osc_esc_html(Params::getParam('direction')); ?>" /><?php } ?>
+    <?php if(Params::getParam('iPage') != '') { ?><input type="hidden" name="iPage" value="<?php echo (int)Params::getParam('iPage'); ?>" /><?php } ?>
+    <?php if(Params::getParam('sSearch') != '') { ?><input type="hidden" name="sSearch" value="<?php echo osc_esc_html(Params::getParam('sSearch')); ?>" /><?php } ?>
+
+    <div id="bulk-actions">
+      <label>
+        <?php osc_print_bulk_actions('bulk_actions', 'action', __get('bulk_options'), 'select-box-extra'); ?>
+        <input type="submit" id="bulk_apply" class="btn" value="<?php echo osc_esc_html(__('Apply')); ?>" />
+      </label>
+    </div>
+
+    <div class="table-contains-actions">
+      <table class="table" cellpadding="0" cellspacing="0">
+        <thead>
+          <tr>
+            <?php foreach($columns as $k => $v) {
+              $sourceCol = (isset($columnSources[$k]) ? $columnSources[$k] : '');
+              $isSortable = ((in_array($k, $sortableColumns, true) || strpos((string)$v, 'sort=') !== false) ? 'is-sortable' : '');
+              echo '<th class="col-'.$k.' '.$isSortable.' '.($sort==$k?($direction=='desc'?'sort-desc':'sort-asc'):'').'" data-source-col="' . osc_esc_html($sourceCol) . '">' . $v . '</th>';
+            } ?>
+          </tr>
+        </thead>
+        <tbody>
+        <?php if(count($rows) > 0) { ?>
+          <?php foreach($rows as $key => $row) {
+            $rowId = (isset($aRawRows[$key]['pk_i_id']) ? (int)$aRawRows[$key]['pk_i_id'] : 0);
+            $rowClass = osc_apply_filter('datatable_categories_class', array(), isset($aRawRows[$key]) ? $aRawRows[$key] : array(), $row);
+            if($reorderId > 0 && $rowId === $reorderId) {
+              $rowClass[] = 'row-reordered';
+            }
+            $rowClassAttr = trim(implode(' ', $rowClass));
+          ?>
+            <tr<?php if($rowClassAttr != '') { echo ' class="' . osc_esc_html($rowClassAttr) . '"'; } ?> data-row-id="<?php echo $rowId; ?>">
+              <?php foreach($row as $k => $v) { ?>
+                <td class="col-<?php echo $k; ?>"><?php echo $v; ?></td>
+              <?php } ?>
+            </tr>
+          <?php } ?>
+        <?php } else { ?>
+          <tr>
+            <td colspan="<?php echo max(1, count($columns)); ?>" class="text-center"><p><?php _e('No data available in table'); ?></p></td>
+          </tr>
+        <?php } ?>
+        </tbody>
+      </table>
+      <div id="table-row-actions"></div>
+    </div>
+  </form>
 </div>
-<!-- /right container -->
-<div id="dialog-delete-category" title="<?php echo osc_esc_html(__('Delete category')); ?>" class="has-form-actions hide" data-category-id="">
-  <div class="form-horizontal">
-    <div class="form-row">
-      <?php _e('<strong>WARNING</strong>: This will also delete the listings under that category. This action cannot be undone. Are you sure you want to continue?'); ?>
+
+<?php
+function showingResults(){
+  $aData = __get('aData');
+  echo '<ul class="showing-results"><li><span>'.osc_pagination_showing((Params::getParam('iPage')-1)*$aData['iDisplayLength']+1, ((Params::getParam('iPage')-1)*$aData['iDisplayLength'])+count($aData['aRows']), $aData['iTotalDisplayRecords'], $aData['iTotalRecords']).'</span></li></ul>';
+}
+osc_add_hook('before_show_pagination_admin','showingResults');
+osc_show_pagination_admin($aData);
+?>
+
+<div id="dialog-category-delete" class="has-form-actions hide" title="<?php echo osc_esc_html(__('Delete category')); ?>">
+  <form method="get" action="<?php echo osc_admin_base_url(true); ?>">
+    <input type="hidden" name="page" value="categories" />
+    <input type="hidden" name="action" value="delete" />
+    <input type="hidden" name="id" value="" />
+    <?php echo osc_csrf_token_form(); ?>
+    <?php if($parent > 0) { ?><input type="hidden" name="parent" value="<?php echo $parent; ?>" /><?php } ?>
+    <?php if(Params::getParam('iDisplayLength') != '') { ?><input type="hidden" name="iDisplayLength" value="<?php echo (int)Params::getParam('iDisplayLength'); ?>" /><?php } ?>
+    <?php if(Params::getParam('sort') != '') { ?><input type="hidden" name="sort" value="<?php echo osc_esc_html(Params::getParam('sort')); ?>" /><?php } ?>
+    <?php if(Params::getParam('direction') != '') { ?><input type="hidden" name="direction" value="<?php echo osc_esc_html(Params::getParam('direction')); ?>" /><?php } ?>
+    <?php if(Params::getParam('iPage') != '') { ?><input type="hidden" name="iPage" value="<?php echo (int)Params::getParam('iPage'); ?>" /><?php } ?>
+    <?php if(Params::getParam('sSearch') != '') { ?><input type="hidden" name="sSearch" value="<?php echo osc_esc_html(Params::getParam('sSearch')); ?>" /><?php } ?>
+    <div class="form-horizontal">
+      <div class="form-row"><?php _e('<strong>WARNING</strong>: This will also delete the listings under that category. This action cannot be undone. Are you sure you want to continue?'); ?></div>
+      <div class="form-actions">
+        <div class="wrapper">
+          <input type="submit" class="btn btn-red" value="<?php echo osc_esc_html(__('Delete')); ?>" />
+          <a class="btn" href="javascript:void(0);" onclick="$('#dialog-category-delete').dialog('close');"><?php _e('Cancel'); ?></a>
+        </div>
+      </div>
     </div>
+  </form>
+</div>
+
+<div id="dialog-bulk-actions" title="<?php _e('Bulk actions'); ?>" class="has-form-actions hide">
+  <div class="form-horizontal">
+    <div class="form-row"></div>
     <div class="form-actions">
       <div class="wrapper">
-        <a id="category-delete-submit" href="javascript:void(0);" class="btn btn-submit" ><?php echo osc_esc_html( __('Delete') ); ?></a>
-        <a class="btn" href="javascript:void(0);" onclick="$('#dialog-delete-category').dialog('close');"><?php _e('Cancel'); ?></a>
-        <div class="clear"></div>
+        <a id="bulk-actions-submit" href="javascript:void(0);" class="btn btn-submit"><?php echo osc_esc_html(__('Apply')); ?></a>
+        <a id="bulk-actions-cancel" class="btn" href="javascript:void(0);"><?php _e('Cancel'); ?></a>
       </div>
     </div>
   </div>
 </div>
-<?php osc_current_admin_theme_path('parts/footer.php'); ?>
+
+<?php osc_current_admin_theme_path('parts/footer.php');

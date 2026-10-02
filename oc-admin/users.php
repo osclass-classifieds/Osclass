@@ -34,7 +34,7 @@ class CAdminUsers extends AdminSecBaseModel {
     parent::doModel();
 
     //specific things for this class
-    switch ($this->action) {
+    switch($this->action) {
       case('create'):     // calling create view
         $aRegions = array();
         $aCities = array();
@@ -65,15 +65,15 @@ class CAdminUsers extends AdminSecBaseModel {
         $success = $userActions->add();
 
         switch($success) {
-          case 1: 
-            osc_add_flash_ok_message(_m("The user has been created. We've sent an activation e-mail"), 'admin');
+          case 1:
+            osc_add_flash_ok_message(_m("The user has been created. An activation email has been sent"), 'admin');
             break;
 
-          case 2: 
-            osc_add_flash_ok_message(_m('The user has been created successfully'), 'admin');
+          case 2:
+            osc_add_flash_ok_message(_m('The user has been created'), 'admin');
             break;
 
-          default: 
+          default:
             osc_add_flash_error_message($success, 'admin');
             break;
         }
@@ -85,15 +85,15 @@ class CAdminUsers extends AdminSecBaseModel {
         $aUser = $this->userManager->findByPrimaryKey(Params::getParam("id"));
         $aCountries = Country::newInstance()->listAll();
         $aRegions = array();
-        
+
         if($aUser['fk_c_country_code'] != '') {
           $aRegions = Region::newInstance()->findByCountry($aUser['fk_c_country_code']);
         } else if(count($aCountries) > 0) {
           $aRegions = Region::newInstance()->findByCountry($aCountries[0]['pk_c_code']);
         }
-        
+
         $aCities = array();
-        
+
         if($aUser['fk_i_region_id'] != '') {
           $aCities = City::newInstance()->findByRegion($aUser['fk_i_region_id']);
         } else if(count($aRegions) > 0) {
@@ -103,11 +103,17 @@ class CAdminUsers extends AdminSecBaseModel {
         $csrf_token = osc_csrf_token_url();
 
         if($aUser['b_active'] && $aUser['b_enabled']) {
-          $actions[] = '<a class="btn float-left" href="'.osc_user_public_profile_url($aUser['pk_i_id'], $aUser).'">'.__('Public profile') .'</a>';
+          $publicProfileUrl = trim((string)osc_user_public_profile_url($aUser['pk_i_id'], $aUser));
+          if($publicProfileUrl != '' && $publicProfileUrl != '#') {
+            $actions[] = '<a class="btn float-left" href="' . $publicProfileUrl . '">' . __('Public profile') . '</a>';
+          }
           $actions[] = '<a class="btn float-left" href="' . osc_admin_base_url(true) . '?page=users&action=login&amp;id=' . $aUser['pk_i_id'] . '&amp;' . $csrf_token . '" target="_blank">' . sprintf(__('Log in as %s'), osc_highlight($aUser['s_name'], 20)) . '</a>';
         }
-        
-        $actions[] = '<a class="btn float-left" href="'.osc_admin_base_url(true).'?page=items&user='.$aUser['s_username'].'&userId='.$aUser['pk_i_id'].'">'.__('Show user listings') .'</a>';
+
+        $actions[] = '<a class="btn float-left" href="'.osc_admin_base_url(true).'?page=items&user='.$aUser['s_username'].'&userId='.$aUser['pk_i_id'].'">'.__('View listings') .'</a>';
+        if(osc_alerts_enabled()) {
+          $actions[] = '<a class="btn float-left" href="'.osc_admin_base_url(true).'?page=users&action=alerts&alertUserId='.$aUser['pk_i_id'].'">'.__('View alerts') .'</a>';
+        }
 
 
         if($aUser['b_active']) {
@@ -115,7 +121,7 @@ class CAdminUsers extends AdminSecBaseModel {
           } else {
           $actions[] = '<a class="btn btn-red float-left" href="'.osc_admin_base_url(true).'?page=users&action=activate&id[]='.$aUser['pk_i_id'].'&'.$csrf_token.'&value=ACTIVE">'.__('Activate') .'</a>';
         }
-        
+
         if($aUser['b_enabled']) {
           $actions[] = '<a class="btn float-left" href="'.osc_admin_base_url(true).'?page=users&action=disable&id[]='.$aUser['pk_i_id'].'&'.$csrf_token.'&value=DISABLE">'.__('Block') .'</a>';
           } else {
@@ -126,7 +132,7 @@ class CAdminUsers extends AdminSecBaseModel {
 
         $aLocale = $aUser['locale'];
         if(is_array($aLocale) && count($aLocale) > 0) {
-          foreach ($aLocale as $locale => $aInfo) {
+          foreach($aLocale as $locale => $aInfo) {
           $aUser['locale'][$locale]['s_info'] = osc_apply_filter('admin_user_profile_info', $aInfo['s_info'], $aUser['pk_i_id'], $aInfo['fk_c_locale_code']);
           }
         }
@@ -157,8 +163,143 @@ class CAdminUsers extends AdminSecBaseModel {
           osc_add_flash_error_message($success);
           $this->redirectTo(osc_admin_base_url(true) . '?page=users&action=edit&id='.Params::getParam('id'));
         }
-        
+
         $this->redirectTo(osc_admin_base_url(true) . '?page=users');
+        break;
+
+      case('message_user_post'):
+        osc_csrf_check();
+
+        $userId = (int)Params::getParam('id');
+        $aUser = $this->userManager->findByPrimaryKey($userId);
+
+        if(!isset($aUser['pk_i_id']) || (int)$aUser['pk_i_id'] <= 0) {
+          osc_add_flash_error_message(_m("User doesn't exist"), 'admin');
+          $this->redirectTo(osc_admin_base_url(true) . '?page=users');
+        }
+
+        $subject = trim((string)Params::getParam('message_subject'));
+        $bodyRaw = trim((string)Params::getParam('message_body'));
+
+        if($subject == '' || $bodyRaw == '') {
+          osc_add_flash_error_message(_m('Email title and body are required'), 'admin');
+          $this->redirectTo(osc_admin_base_url(true) . '?page=users&action=edit&id=' . $userId . '&open_message=1');
+        }
+
+        $words = array();
+        $words[] = array(
+          '{USER_NAME}',
+          '{USER_EMAIL}',
+          '{ADMIN_NAME}',
+          '{ADMIN_EMAIL}'
+        );
+
+        $words[] = array(
+          trim((string)$aUser['s_name']) != '' ? (string)$aUser['s_name'] : (string)$aUser['s_email'],
+          (string)$aUser['s_email'],
+          osc_logged_admin_name(),
+          osc_logged_admin_email()
+        );
+
+        $subjectPrepared = osc_mailBeauty($subject, $words);
+        $bodyPrepared = osc_mailBeauty($bodyRaw, $words);
+        $bodyHtml = nl2br($bodyPrepared);
+
+        $attachmentTmpPath = null;
+        $attachmentName = '';
+        $attachmentUploaded = false;
+        $attachment = Params::getFiles('attachment');
+
+        if(!empty($attachment) && isset($attachment['error']) && (int)$attachment['error'] == UPLOAD_ERR_OK) {
+          $tmpName = $attachment['tmp_name'];
+          $resourceName = basename((string)$attachment['name']);
+          $resourceType = (isset($attachment['type']) ? $attachment['type'] : '');
+
+          if(function_exists('mime_content_type')) {
+            $resourceType = mime_content_type($tmpName);
+          }
+
+          if(function_exists('finfo_open')) {
+            $finfo = finfo_open(FILEINFO_MIME);
+            $output = finfo_file($finfo, $tmpName);
+            finfo_close($finfo);
+            $output = explode('; ', $output);
+
+            if(is_array($output)) {
+              $output = $output[0];
+            }
+
+            $resourceType = $output;
+          }
+
+          if(!in_array($resourceType, osc_allowed_mime_types())) {
+            osc_add_flash_warning_message(_m('Attachment had incorrect extension or mime type and has not been attached to message'), 'admin');
+          } else if(!is_writable(osc_uploads_path())) {
+            osc_add_flash_warning_message(_m('Uploads folder is not writable, attachment has not been attached to message'), 'admin');
+          } else {
+            $attachmentTmpPath = osc_uploads_path() . 'tmp_admin_message_' . time() . '_' . mt_rand(1000, 9999) . '_' . $resourceName;
+
+            if(!@move_uploaded_file($tmpName, $attachmentTmpPath)) {
+              $attachmentTmpPath = null;
+              osc_add_flash_warning_message(_m('Attachment could not be moved to uploads folder and has not been attached to message'), 'admin');
+            } else {
+              $attachmentUploaded = true;
+              $attachmentName = $resourceName;
+            }
+          }
+        }
+
+        $from = trim((string)osc_mailserver_mail_from()) != '' ? (string)osc_mailserver_mail_from() : (string)osc_contact_email();
+        $fromName = trim((string)osc_mailserver_name_from()) != '' ? (string)osc_mailserver_name_from() : (string)osc_page_title();
+
+        $emailParams = array(
+          'from' => $from,
+          'from_name' => $fromName,
+          'to' => (string)$aUser['s_email'],
+          'to_name' => (trim((string)$aUser['s_name']) != '' ? (string)$aUser['s_name'] : (string)$aUser['s_email']),
+          'reply_to' => osc_logged_admin_email(),
+          'subject' => $subjectPrepared,
+          'body' => $bodyHtml,
+          'alt_body' => $bodyPrepared
+        );
+
+        if($attachmentUploaded === true && $attachmentTmpPath !== null) {
+          $emailParams['attachment'] = array(
+            'path' => $attachmentTmpPath,
+            'name' => $attachmentName
+          );
+        }
+
+        $sent = osc_sendMail($emailParams, 'admin_message_user');
+
+        if($attachmentTmpPath !== null) {
+          @unlink($attachmentTmpPath);
+        }
+
+        Log::newInstance()->insertLog(
+          'user',
+          'message',
+          $userId,
+          (string)$aUser['s_email'],
+          'admin',
+          osc_logged_admin_id(),
+          $subjectPrepared,
+          array(
+            'result' => ($sent ? 'sent' : 'failed'),
+            'attachment' => ($attachmentUploaded ? $attachmentName : ''),
+            'recipient_name' => (string)$aUser['s_name'],
+            'title' => $subjectPrepared,
+            'body' => $bodyPrepared
+          )
+        );
+
+        if($sent) {
+          osc_add_flash_ok_message(_m('Message has been sent to user'), 'admin');
+          $this->redirectTo(osc_admin_base_url(true) . '?page=users&action=edit&id=' . $userId);
+        } else {
+          osc_add_flash_error_message(_m('Unable to send message to user'), 'admin');
+          $this->redirectTo(osc_admin_base_url(true) . '?page=users&action=edit&id=' . $userId . '&open_message=1');
+        }
         break;
 
       case('resend_activation'):
@@ -167,7 +308,7 @@ class CAdminUsers extends AdminSecBaseModel {
         require_once LIB_PATH . 'osclass/UserActions.php';
         $iUpdated = 0;
         $userId = Params::getParam('id');
-        
+
         if(!is_array($userId)) {
           osc_add_flash_error_message(_m("User id isn't in the correct format"), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=users');
@@ -292,10 +433,10 @@ class CAdminUsers extends AdminSecBaseModel {
         osc_csrf_check();
         require_once LIB_PATH . 'osclass/UserActions.php';
         require_once LIB_PATH . 'osclass/ItemActions.php';
-        
+
         $iUpdated = 0;
         $userId = Params::getParam('id');
-        
+
         if(!is_array($userId)) {
           osc_add_flash_error_message(_m("User id isn't in the correct format"), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=users');
@@ -304,7 +445,7 @@ class CAdminUsers extends AdminSecBaseModel {
         $itemActions = new ItemActions(true);
         foreach($userId as $id) {
           $items = Item::newInstance()->findByUserID($id);
-          
+
           if(is_array($items) && count($items) > 0) {
             foreach($items as $item) {
               if($item['b_enabled'] == 0) {
@@ -323,15 +464,15 @@ class CAdminUsers extends AdminSecBaseModel {
         osc_add_flash_ok_message($msg, 'admin');
         $this->redirectTo(Params::getServerParam('HTTP_REFERER', false, false));
         break;
-        
+
       case('disable_items'):
         osc_csrf_check();
         require_once LIB_PATH . 'osclass/UserActions.php';
         require_once LIB_PATH . 'osclass/ItemActions.php';
-        
+
         $iUpdated = 0;
         $userId = Params::getParam('id');
-        
+
         if(!is_array($userId)) {
           osc_add_flash_error_message(_m("User id isn't in the correct format"), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=users');
@@ -340,7 +481,7 @@ class CAdminUsers extends AdminSecBaseModel {
         $itemActions = new ItemActions(true);
         foreach($userId as $id) {
           $items = Item::newInstance()->findByUserID($id);
-          
+
           if(is_array($items) && count($items) > 0) {
             foreach($items as $item) {
               if($item['b_enabled'] == 1) {
@@ -359,7 +500,7 @@ class CAdminUsers extends AdminSecBaseModel {
         osc_add_flash_ok_message($msg, 'admin');
         $this->redirectTo(Params::getServerParam('HTTP_REFERER', false, false));
         break;
-        
+
       case('delete'):     //delete
         osc_csrf_check();
         $iDeleted = 0;
@@ -389,6 +530,7 @@ class CAdminUsers extends AdminSecBaseModel {
         break;
 
       case('delete_alerts'):     //delete
+        osc_csrf_check();
         $iDeleted = 0;
         $alertId = Params::getParam('alert_id');
         if(!is_array($alertId)) {
@@ -421,12 +563,12 @@ class CAdminUsers extends AdminSecBaseModel {
         break;
 
       case('status_alerts'):     // bulk alert update
-        // $status = Params::getParam('status');
+        osc_csrf_check();
         $iUpdated = 0;
         $alertId = Params::getParam('alert_id');
-        $alert_action = Params::getParam('alert_action');     // activate, deactivate, delete
+        $alert_action = Params::getParam('alert_action');
         $alert_action_text = '';
-        
+
 
         if(!is_array($alertId)) {
           osc_add_flash_error_message(_m("Alert id isn't in the correct format"), 'admin');
@@ -442,26 +584,46 @@ class CAdminUsers extends AdminSecBaseModel {
           if($alert_action == 'activate') {
             $alert_action_text = __('activated');
             $iUpdated += $mAlerts->activate($id);
-            
+
           } else if($alert_action == 'deactivate') {
             $alert_action_text = __('deactivated');
             $iUpdated += $mAlerts->deactivate($id);
-            
+
           } else if($alert_action == 'delete') {
             $alert_action_text = __('deleted');
             Log::newInstance()->insertLog('user', 'delete_alerts', $id, $id, 'admin', osc_logged_admin_id());
             $iUpdated += $mAlerts->delete(array('pk_i_id' => $id));
+
+          } else if($alert_action == 'renew') {
+            $alert = $mAlerts->findByPrimaryKey($id);
+            if(isset($alert['pk_i_id'])) {
+              $months = ((int)$alert['fk_i_user_id'] > 0 ? (int)osc_alerts_expiration_months_user() : (int)osc_alerts_expiration_months_guest());
+              if($months <= 0) {
+                $months = 3;
+              }
+
+              $new_expire = date('Y-m-d H:i:s', strtotime('+' . $months . ' month'));
+              $iUpdated += $mAlerts->update(array('dt_expire_date' => $new_expire), array('pk_i_id' => $id));
+              $alert_action_text = __('renewed');
+            }
+
+          } else if($alert_action == 'expire') {
+            $new_expire = date('Y-m-d H:i:s', strtotime('-1 minute'));
+            $iUpdated += $mAlerts->update(array('dt_expire_date' => $new_expire), array('pk_i_id' => $id));
+            $alert_action_text = __('expired');
           }
         }
 
         if($iUpdated == 0) {
           $msg = sprintf(_m('No alerts have been %s'), $alert_action_text);
+        } else if($iUpdated == 1) {
+          $msg = sprintf(_m('One alert has been %s'), $alert_action_text);
         } else {
-          $msg = sprintf(_m('%s alerts have been %s', $iUpdated), $iUpdated, $alert_action_text);
+          $msg = sprintf(_m('%d alerts have been %s'), $iUpdated, $alert_action_text);
         }
 
         osc_add_flash_ok_message($msg, 'admin');
-        
+
         if(Params::getParam('user_id') == '') {
           $this->redirectTo(osc_admin_base_url(true) . '?page=users&action=alerts');
         } else {
@@ -497,11 +659,22 @@ class CAdminUsers extends AdminSecBaseModel {
         $userPublicProfileMinItems = ($userPublicProfileMinItems > 0 ? $userPublicProfileMinItems : 0);
         $usernameGenerator = Params::getParam('username_generator');
         $usernameBlacklistTmp = explode(",", Params::getParam('username_blacklist'));
-        
+        $alertsEnabled = Params::getParam('alerts_enabled');
+        $alertsEnabled = (($alertsEnabled != '') ? true : false);
+        $alertsExpireMonthsUser = max(0, (int)Params::getParam('alerts_expiration_months_user'));
+        $alertsExpireMonthsGuest = max(0, (int)Params::getParam('alerts_expiration_months_guest'));
+        $alertsAllowNonExpiring = Params::getParam('alerts_allow_non_expiring');
+        $alertsAllowNonExpiring = (($alertsAllowNonExpiring != '') ? true : false);
+        $alertsAllowUserExpirationChange = Params::getParam('alerts_allow_user_expiration_change');
+        $alertsAllowUserExpirationChange = (($alertsAllowUserExpirationChange != '') ? 1 : 0);
+        $alertsDefaultNonExpiring = Params::getParam('alerts_default_non_expiring');
+        $alertsDefaultNonExpiring = (($alertsDefaultNonExpiring != '') ? true : false);
+        $alertsUnsubInactiveMonths = max(0, (int)Params::getParam('alerts_unsub_inactive_months'));
+
         foreach($usernameBlacklistTmp as $k => $v) {
           $usernameBlacklistTmp[$k] = strtolower(trim($v));
         }
-        
+
         $usernameBlacklist = implode(',', $usernameBlacklistTmp);
 
         $iUpdated += osc_set_preference('enabled_user_validation', $enabledUserValidation);
@@ -511,28 +684,40 @@ class CAdminUsers extends AdminSecBaseModel {
         $iUpdated += osc_set_preference('notify_new_user', $notifyNewUser);
         $iUpdated += osc_set_preference('username_generator', $usernameGenerator);
         $iUpdated += osc_set_preference('username_blacklist', $usernameBlacklist);
+        $iUpdated += osc_set_preference('alerts_enabled', $alertsEnabled, 'osclass', 'BOOLEAN');
+        $iUpdated += osc_set_preference('alerts_expiration_months_user', $alertsExpireMonthsUser, 'osclass', 'INTEGER');
+        $iUpdated += osc_set_preference('alerts_expiration_months_guest', $alertsExpireMonthsGuest, 'osclass', 'INTEGER');
+        $iUpdated += osc_set_preference('alerts_allow_non_expiring', $alertsAllowNonExpiring, 'osclass', 'BOOLEAN');
+        $iUpdated += osc_set_preference('alerts_allow_user_expiration_change', $alertsAllowUserExpirationChange, 'osclass', 'BOOLEAN');
+        $iUpdated += osc_set_preference('alerts_default_non_expiring', $alertsDefaultNonExpiring, 'osclass', 'BOOLEAN');
+        $iUpdated += osc_set_preference('alerts_unsub_inactive_months', $alertsUnsubInactiveMonths, 'osclass', 'INTEGER');
         $iUpdated += osc_set_preference('user_public_profile_enabled', $userPublicProfileEnabled);
         $iUpdated += osc_set_preference('user_public_profile_min_items', $userPublicProfileMinItems);
         $iUpdated += osc_set_preference('enabled_tinymce_users', $enableTinyMCE);
         $iUpdated += osc_set_preference('admin_toolbar_front', $adminToolbarFront);
         $iUpdated += osc_set_preference('enable_profile_img', $enableProfileImg);
         $iUpdated += osc_set_preference('dimProfileImg', $dimProfileImg);
-         
+
         if($iUpdated > 0) {
-          osc_add_flash_ok_message(_m("User settings have been updated"), 'admin');
+          osc_add_flash_ok_message(_m("Settings have been updated"), 'admin');
         }
-        
+
         $this->redirectTo(osc_admin_base_url(true) . '?page=users&action=settings');
         break;
 
       case('alerts'):        // manage alerts view
+        if(!osc_alerts_enabled()) {
+          osc_add_flash_warning_message(_m('Alerts are disabled'), 'admin');
+          $this->redirectTo(osc_admin_base_url(true) . '?page=users&action=settings');
+        }
+
         require_once osc_lib_path()."osclass/classes/datatables/AlertsDataTable.php";
 
         // set default iDisplayLength
         if(Params::getParam('iDisplayLength') != '') {
           Cookie::newInstance()->push('listing_iDisplayLength', Params::getParam('iDisplayLength'));
           Cookie::newInstance()->set();
-          
+
         } else {
           // set a default value if it's set in the cookie
           if(Cookie::newInstance()->get_value('listing_iDisplayLength') != '') {
@@ -545,15 +730,15 @@ class CAdminUsers extends AdminSecBaseModel {
 
         // Table header order by related
         if(Params::getParam('sort') == '') {
-          Params::setParam('sort', 'date');
+          Params::setParam('sort', 'create_date');
         }
-        
+
         if(Params::getParam('direction') == '') {
           Params::setParam('direction', 'desc');
         }
 
         $page = (int)Params::getParam('iPage');
-        if($page==0) { $page = 1; };
+        if($page==0) { $page = 1; }
         Params::setParam('iPage', $page);
 
         $params = Params::getParamsAsArray();
@@ -608,7 +793,7 @@ class CAdminUsers extends AdminSecBaseModel {
 
         // Table header order by related
         if(Params::getParam('sort') == '') {
-          Params::setParam('sort', 'date');
+          Params::setParam('sort', 'cdate');
         }
 
         if(Params::getParam('direction') == '') {
@@ -616,7 +801,7 @@ class CAdminUsers extends AdminSecBaseModel {
         }
 
         $page = (int)Params::getParam('iPage');
-        if($page==0) { $page = 1; };
+        if($page==0) { $page = 1; }
         Params::setParam('iPage', $page);
 
         $params = Params::getParamsAsArray();
@@ -664,21 +849,21 @@ class CAdminUsers extends AdminSecBaseModel {
 
       case('edit_ban_rule_post'):
         osc_csrf_check();
-        
+
         if(Params::getParam('s_ip') == '' && Params::getParam('s_email') == '') {
-          osc_add_flash_warning_message(_m("Both rules can not be empty"), 'admin');
+          osc_add_flash_warning_message(_m("Both rules cannot be empty"), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=users&action=ban');
         }
 
         BanRule::newInstance()->update(array(
-          's_name' => Params::getParam('s_name'), 
-          's_ip' => Params::getParam('s_ip'), 
-          's_email' => strtolower(Params::getParam('s_email')), 
+          's_name' => Params::getParam('s_name'),
+          's_ip' => Params::getParam('s_ip'),
+          's_email' => strtolower(Params::getParam('s_email')),
           'dt_expire_date' => Params::getParam('dt_expire_date'),
           'dt_date' => date('Y-m-d H:i:s')
         ), array('pk_i_id' => Params::getParam('id')));
-        
-        osc_add_flash_ok_message(_m('Rule updated correctly'), 'admin');
+
+        osc_add_flash_ok_message(_m('The rule has been updated'), 'admin');
         $this->redirectTo(osc_admin_base_url(true) . '?page=users&action=ban');
         break;
 
@@ -690,19 +875,19 @@ class CAdminUsers extends AdminSecBaseModel {
       case('create_ban_rule_post'):
         osc_csrf_check();
         if(Params::getParam('s_ip') == '' && Params::getParam('s_email') == '') {
-          osc_add_flash_warning_message(_m("Both rules can not be empty"), 'admin');
+          osc_add_flash_warning_message(_m("Both rules cannot be empty"), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=users&action=ban');
         }
 
         BanRule::newInstance()->insert(array(
-          's_name' => Params::getParam('s_name'), 
-          's_ip' => Params::getParam('s_ip'), 
-          's_email' => strtolower(Params::getParam('s_email')), 
+          's_name' => Params::getParam('s_name'),
+          's_ip' => Params::getParam('s_ip'),
+          's_email' => strtolower(Params::getParam('s_email')),
           'dt_expire_date' => Params::getParam('dt_expire_date'),
           'dt_date' => date('Y-m-d H:i:s')
         ));
 
-        osc_add_flash_ok_message(_m('Rule saved correctly'), 'admin');
+        osc_add_flash_ok_message(_m('The rule has been saved'), 'admin');
         $this->redirectTo(osc_admin_base_url(true) . '?page=users&action=ban');
         break;
 
@@ -732,7 +917,7 @@ class CAdminUsers extends AdminSecBaseModel {
         osc_add_flash_ok_message($msg, 'admin');
         $this->redirectTo(osc_admin_base_url(true) . '?page=users&action=ban');
         break;
-        
+
       case('login'):      // login as admin
         osc_csrf_check();
         $userId = Params::getParam('id');
@@ -741,7 +926,7 @@ class CAdminUsers extends AdminSecBaseModel {
         if(!$user) {
           osc_add_flash_error_message(_m("The user doesn't exist"));
           $this->redirectTo(osc_admin_base_url(true) . '?page=users');
-        } else if ($user['b_enabled'] == 0 || $user['b_active'] == 0) {
+        } elseif($user['b_enabled'] == 0 || $user['b_active'] == 0) {
           osc_add_flash_warning_message(_m('The user is blocked or not activated'));
         }
 
@@ -751,7 +936,7 @@ class CAdminUsers extends AdminSecBaseModel {
         Session::newInstance()->_set('userPhone', $user['s_phone_mobile'] ? $user['s_phone_mobile'] : $user['s_phone_land']);
 
         osc_run_hook('after_login', $user, osc_user_dashboard_url());
-        osc_add_flash_ok_message(sprintf(_m('You have successfully logged in as %s'), '<strong>' . $user['s_name'] . '</strong>'));
+        osc_add_flash_ok_message(sprintf(_m('You have logged in as %s'), '<strong>' . $user['s_name'] . '</strong>'));
         $this->redirectTo(osc_apply_filter('correct_login_url_redirect', osc_user_dashboard_url()));
 
       default:        // manage users view
@@ -777,14 +962,14 @@ class CAdminUsers extends AdminSecBaseModel {
 
         // Table header order by related
         if(Params::getParam('sort') == '') {
-          Params::setParam('sort', 'date');
+          Params::setParam('sort', 'update_date');
         }
         if(Params::getParam('direction') == '') {
           Params::setParam('direction', 'desc');
         }
 
         $page = (int)Params::getParam('iPage');
-        if($page==0) { $page = 1; };
+        if($page==0) { $page = 1; }
         Params::setParam('iPage', $page);
 
         $params = Params::getParamsAsArray();
@@ -823,7 +1008,7 @@ class CAdminUsers extends AdminSecBaseModel {
           array('value' => 'disable', 'data-dialog-content' => sprintf(__('Are you sure you want to %s the selected users?'), strtolower(__('Block'))), 'label' => __('Block')),
           array('value' => 'delete', 'data-dialog-content' => sprintf(__('Are you sure you want to %s the selected users?'), strtolower(__('Delete'))), 'label' => __('Delete'))
         );
-        
+
         if(osc_user_validation_enabled()) {
           $bulk_options[] = array('value' => 'resend_activation', 'data-dialog-content' => sprintf(__('Are you sure you want to %s the selected users?'), strtolower(__('Resend the activation to'))), 'label' => __('Resend activation'));
         }

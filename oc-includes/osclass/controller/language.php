@@ -30,7 +30,7 @@ class CWebLanguage extends BaseModel {
   // When user change language, it is reflected here
   public function doModel() {
     $changed = false;
-    $locale = str_replace('-', '_', Params::getParam('locale'));
+    $locale = str_replace('-', '_', (string)Params::getParam('locale'));
     $locale_strict = strtolower(substr($locale, 0, 2)) . '_' . strtoupper(substr($locale, 3, 2));   // os810
 
     //if(preg_match('/.{2}_.{2}/', $locale)) {
@@ -41,14 +41,14 @@ class CWebLanguage extends BaseModel {
     //} else if(preg_match('/.{2}/', $locale)) {
     } else if(preg_match('/[a-z]{2}/', $locale)) {
       $find_lang = OSCLocale::newInstance()->findByShortCode($locale);
-      
+
       if($find_lang !== false && isset($find_lang['pk_c_code']) && $find_lang['pk_c_code'] != '') {
         Session::newInstance()->_set('userLocale', $find_lang['pk_c_code']);
         osc_run_hook('user_locale_changed', $find_lang['pk_c_code']);
         $changed = true;
       }
     }
-    
+
     $redirect_url = '';
     if(Params::getServerParam('HTTP_REFERER', false, false) != '') {
       $redirect_url = Params::getServerParam('HTTP_REFERER', false, false);
@@ -59,8 +59,8 @@ class CWebLanguage extends BaseModel {
     // URL contains language in format .../en/...
     if(preg_match('/\/[a-z]{2}\//', $redirect_url) && $changed) {
       $redirect_url = preg_replace('/\/[a-z]{2}\//', '/' . substr($locale, 0, 2) . '/', $redirect_url);
-      
-    // URL contains language in format .../en-US/... 
+
+    // URL contains language in format .../en-US/...
     // This might only support /en-us/ in future!
     } else if(preg_match('/\/[a-z]{2}-[a-zA-Z]{2}\//', $redirect_url) && $changed) {
       $redirect_url = preg_replace('/\/[a-z]{2}-[a-zA-Z]{2}\//', '/' . str_replace('_', '-', $locale) . '/', $redirect_url);

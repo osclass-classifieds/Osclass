@@ -29,7 +29,7 @@ function addHelp() {
 }
 osc_add_hook('help_box','addHelp');
 
-function customPageHeader2(){ 
+function customPageHeader2(){
   ?>
   <h1>
     <?php echo sprintf(__('%s on market'), __('Plugins')); ?>
@@ -61,7 +61,7 @@ $plugins_all = Plugins::listAll();
 $plugins_enabled = Plugins::listEnabled();
 $plugins_installed = Plugins::listInstalled();  // but disabled
 
-osc_current_admin_theme_path( 'market/header.php' ); 
+osc_current_admin_theme_path( 'market/header.php' );
 ?>
 
 <div id="market-block" class="<?php echo osc_esc_html($action); ?>">
@@ -78,14 +78,14 @@ osc_current_admin_theme_path( 'market/header.php' );
         <input type="hidden" name="product" value="<?php echo osc_esc_html($product); ?>" />
 
         <input type="text" name="pattern" class="input-text" value="<?php echo Params::getParam('pattern'); ?>" placeholder="<?php echo osc_esc_html(__('Search plugin...')); ?>"/>
-    
+
         <select name="type" class="select-box-extra select-box-medium float-left" onchange="this.form.submit();">
-          <option value="" <?php if( Params::getParam('type') == '' ) echo 'selected="selected"'; ?> ><?php _e('Type of product'); ?></option>
-          <option value="premium" <?php if( Params::getParam('type') == 'premium' ) echo 'selected="selected"'; ?> ><?php _e('Premium'); ?></option>
-          <option value="free" <?php if( Params::getParam('type') == 'free' ) echo 'selected="selected"'; ?> ><?php _e('Free'); ?></option>
-          <option value="purchased" <?php if( Params::getParam('type') == 'purchased' ) echo 'selected="selected"'; ?> ><?php _e('Purchased'); ?></option>
-          <option value="expired" <?php if( Params::getParam('type') == 'expired' ) echo 'selected="selected"'; ?> ><?php _e('Expired'); ?></option>
-          <option value="notpurchased" <?php if( Params::getParam('type') == 'notpurchased' ) echo 'selected="selected"'; ?> ><?php _e('Not purchased'); ?></option>
+          <option value="" <?php if(Params::getParam('type') == '' ) echo 'selected="selected"'; ?> ><?php _e('Type of product'); ?></option>
+          <option value="premium" <?php if(Params::getParam('type') == 'premium' ) echo 'selected="selected"'; ?> ><?php _e('Premium'); ?></option>
+          <option value="free" <?php if(Params::getParam('type') == 'free' ) echo 'selected="selected"'; ?> ><?php _e('Free'); ?></option>
+          <option value="purchased" <?php if(Params::getParam('type') == 'purchased' ) echo 'selected="selected"'; ?> ><?php _e('Purchased'); ?></option>
+          <option value="expired" <?php if(Params::getParam('type') == 'expired' ) echo 'selected="selected"'; ?> ><?php _e('Expired'); ?></option>
+          <option value="notpurchased" <?php if(Params::getParam('type') == 'notpurchased' ) echo 'selected="selected"'; ?> ><?php _e('Not purchased'); ?></option>
         </select>
 
         <button type="submit" class="btn btn-submit"><?php _e('Filter'); ?></button>
@@ -133,14 +133,14 @@ osc_current_admin_theme_path( 'market/header.php' );
 
           if($vfrom != '' && $vfrom != null && $vfrom != 'null') {
             $check_from = version_compare2($vfrom, osc_version());
-            if ($check_from == 1) {    // A > B
+            if($check_from == 1) {    // A > B
               $compatible_from = false;
             }
           }
 
           if($vto != '' && $vto != null && $vto != 'null') {
             $check_to = version_compare2(osc_version(), $vto);
-            if ($check_to == 1) {    // A > B
+            if($check_to == 1) {    // A > B
               $compatible_to = false;
             }
           }
@@ -148,21 +148,21 @@ osc_current_admin_theme_path( 'market/header.php' );
           $need_update = false;
           if($info['version'] <> '') {
             $check_update = version_compare2($p['i_version'], $info['version']);
-            if ($check_update == 1) {    // A > B
+            if($check_update == 1) {    // A > B
               $need_update = true;
             }
           }
-          
+
           // Get class for box
           $box_class = '';
-          
+
           if($p['b_purchased'] == 1) {
             $box_class = 'purchased';
-            
-          } else if ($p['b_expired'] == 1) {
+
+          } elseif($p['b_expired'] == 1) {
             $box_class = 'expired';
-            
-          } else if ($p['i_price'] <= 0) {
+
+          } elseif($p['i_price'] <= 0) {
             $box_class = 'free';
           }
         ?>
@@ -179,33 +179,33 @@ osc_current_admin_theme_path( 'market/header.php' );
               <?php
                 if($p['i_price'] <= 0) {
                   $price_label = __('Free');
-                  
-                } else if ($p['b_expired'] == 1) {
+
+                } elseif($p['b_expired'] == 1) {
                   $price_label = $p['i_price_extend'] . '&euro;';
-                  
+
                 } else {
                   $price_label = $p['i_price'] . '&euro;';
                 }
               ?>
-              
+
               <span><?php echo $price_label; ?></span>
 
-              <?php if ($p['b_purchased'] == 1) { ?>
+              <?php if($p['b_purchased'] == 1) { ?>
                 <em> (<?php _e('Purchased'); ?>)</em>
-                
-              <?php } else if ($p['b_expired'] == 1) { ?>
+
+              <?php } elseif($p['b_expired'] == 1) { ?>
                 <span class="full-price"><?php echo $p['i_price'] . '&euro;'; ?></span>
                 <em> (<?php _e('Expired'); ?>)</em>
-              <?php } ?>    
+              <?php } ?>
             </div>
-            
+
             <div class="actions">
               <?php if($api_valid) { ?>
-                <?php if ($pstat != 'NOT' && $need_update && ($p['b_purchased'] == 1 || $p['i_price'] <= 0) && $compatible_from && $compatible_to) { ?>
+                <?php if($pstat != 'NOT' && $need_update && ($p['b_purchased'] == 1 || $p['i_price'] <= 0) && $compatible_from && $compatible_to) { ?>
                   <a class="mkt-update btn btn-gray is-update" href="<?php echo $p['s_download_url']; ?>" data-product-key="<?php echo osc_esc_html($p['s_product_key']); ?>"><i class="fa fa-refresh"></i> <?php _e('Update'); ?></a>
 
-                <?php } else if ($pstat != 'NOT' && $need_update && ($p['b_purchased'] == 1 || $p['i_price'] <= 0)) { ?>
-                  <a href="#" onclick="return false;" class="btn btn-gray" title="<?php echo osc_esc_html(__('No compatible with your osclass version')); ?>"><i class="fa fa-exclamation-circle"></i> <?php _e('Can\'t update'); ?></a>
+                <?php } elseif($pstat != 'NOT' && $need_update && ($p['b_purchased'] == 1 || $p['i_price'] <= 0)) { ?>
+                  <a href="#" onclick="return false;" class="btn btn-gray" title="<?php echo osc_esc_html(__('Not compatible with your Osclass version')); ?>"><i class="fa fa-exclamation-circle"></i> <?php _e('Cannot update'); ?></a>
 
                 <?php } else if(($p['b_purchased'] == 1 || $p['i_price'] <= 0) && $pstat == 'NOT') { ?>
                   <a class="mkt-update btn btn-gray" href="<?php echo $p['s_download_url']; ?>" data-product-key="<?php echo osc_esc_html($p['s_product_key']); ?>"><i class="fa fa-download"></i> <?php _e('Download'); ?></a>
@@ -221,7 +221,7 @@ osc_current_admin_theme_path( 'market/header.php' );
 
                 <?php } else { ?>
                   <a href="<?php echo $p['s_purchase_url']; ?>" class="btn btn-gray" target="_blank">
-                    <i class="fa fa-external-link"></i> 
+                    <i class="fa fa-external-link"></i>
                     <?php echo ($p['b_expired'] == 1 ? __('Extend support') : __('Purchase')); ?>
                   </a>
 
@@ -229,14 +229,14 @@ osc_current_admin_theme_path( 'market/header.php' );
               <?php } else { ?>
                 <?php if($p['i_price'] > 0) { ?>
                   <a href="<?php echo $p['s_purchase_url']; ?>" class="btn btn-gray" target="_blank">
-                    <i class="fa fa-external-link"></i> 
+                    <i class="fa fa-external-link"></i>
                     <?php echo ($p['b_expired'] == 1 ? __('Extend support') : __('Purchase')); ?>
                   </a>
                 <?php } else { ?>
                   <a href="<?php echo $p['s_url']; ?>" class="btn btn-gray" target="_blank"><i class="fa fa-download"></i> <?php _e('Download'); ?></a>
                 <?php } ?>
               <?php } ?>
-          
+
               <a href="<?php echo osc_admin_base_url(true); ?>?page=market&action=overview&productId=<?php echo $p['pk_i_id']; ?>" class="mkt-more-details" data-product-id="<?php echo $p['pk_i_id']; ?>"><?php _e('More details'); ?></a>
             </div>
           </div>
@@ -259,7 +259,7 @@ osc_current_admin_theme_path( 'market/header.php' );
               </div>
 
               <div class="downloads">
-                <?php 
+                <?php
                   if(Params::getParam('sort') == 'bestseller') {
                     echo sprintf(__('%s orders'), $p['i_order']);
                   } else {
@@ -375,11 +375,11 @@ osc_current_admin_theme_path( 'market/header.php' );
           content += oscEscapeHTML(data.message);
 
           if(elem.hasClass('is-update')) {
-            content += '<h3><?php echo osc_esc_js(__('Plugin has been updated correctly.')); ?></h3>';
+            content += '<h3><?php echo osc_esc_js(__('The package has been updated')); ?></h3>';
           } else {
-            content += '<h3><?php echo osc_esc_js(__('Plugin has been downloaded correctly.')); ?></h3>';
+            content += '<h3><?php echo osc_esc_js(__('The package has been downloaded')); ?></h3>';
           }
-          
+
           content += "<p>";
           content += '<a class="btn btn-mini btn-green" href="<?php echo osc_admin_base_url(true); ?>?page=plugins&marketError='+data.error+'&message='+oscEscapeHTML(data.message)+'&slug='+oscEscapeHTML(data.data['download'])+'"><?php echo osc_esc_js(__('Go to plugins page')); ?></a>';
           content += '<a class="btn btn-mini" href="javascript:location.reload(true)"><?php echo osc_esc_js(__('Close')); ?></a>';
@@ -433,11 +433,11 @@ osc_current_admin_theme_path( 'market/header.php' );
     }
 
     var dialogWidth = 485;
-    
+
     if($(window).width() < 525) {
       dialogWidth = $(window).width() - 40;
     }
-    
+
     $('#market_installer').dialog({
       modal: true,
       title: modalTitle,
@@ -455,12 +455,12 @@ osc_current_admin_theme_path( 'market/header.php' );
 
     var dialogWidth = 780;
     var dialogHeight = 620;
-    
+
     if($(window).width() < 820) {
       dialogWidth = $(window).width() - 40;
       dialogHeight = $(window).height() - 20;
     }
-    
+
     $('.mkt-info-loading').height(dialogHeight);
 
     $('#market_product').dialog({
@@ -484,4 +484,4 @@ osc_current_admin_theme_path( 'market/header.php' );
   });
 </script>
 
-<?php osc_current_admin_theme_path( 'parts/footer.php' ); ?>
+<?php osc_current_admin_theme_path( 'parts/footer.php' );

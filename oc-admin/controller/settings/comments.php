@@ -26,7 +26,7 @@ class CAdminSettingsComments extends AdminSecBaseModel {
         //calling the comments settings view
         $this->doView('settings/comments.php');
         break;
-        
+
       case('comments_post'):
         // updating comment
         osc_csrf_check();
@@ -59,16 +59,16 @@ class CAdminSettingsComments extends AdminSecBaseModel {
 
         $commentReplyUserType  = Params::getParam('comment_reply_user_type');
 
-        
+
         $msg = '';
         if(!osc_validate_int(Params::getParam("num_moderate_comments"))) {
           $msg .= _m("Number of moderate comments must only contain numeric characters")."<br/>";
         }
-        
+
         if(!osc_validate_int(Params::getParam("comments_per_page"))) {
           $msg .= _m("Comments per page must only contain numeric characters")."<br/>";
         }
-        
+
         if($msg!='') {
           osc_add_flash_error_message( $msg, 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=settings&action=comments');
@@ -76,13 +76,13 @@ class CAdminSettingsComments extends AdminSecBaseModel {
 
         $iUpdated += osc_set_preference('enabled_comments', $enabledComments);
         $iUpdated += osc_set_preference('enable_comment_rating', $enabledRating);
-        
+
         if($moderateComments) {
           $iUpdated += osc_set_preference('moderate_comments', $numModerateComments);
         } else {
           $iUpdated += osc_set_preference('moderate_comments', '-1');
         }
-        
+
         $iUpdated += osc_set_preference('notify_new_comment', $notifyNewComment);
         $iUpdated += osc_set_preference('notify_new_comment_user', $notifyNewCommentUser);
         $iUpdated += osc_set_preference('comments_per_page', $commentsPerPage);
@@ -96,9 +96,9 @@ class CAdminSettingsComments extends AdminSecBaseModel {
 
 
         if($iUpdated > 0) {
-          osc_add_flash_ok_message( _m("Comment settings have been updated"), 'admin');
+          osc_add_flash_ok_message( _m("Settings have been updated"), 'admin');
         }
-        
+
         $this->redirectTo(osc_admin_base_url(true) . '?page=settings&action=comments');
         break;
     }

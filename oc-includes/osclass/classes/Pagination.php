@@ -111,16 +111,16 @@ class Pagination {
       if($pages['first'] == $pages['pages'][0]) {
         unset($pages['first']);
       }
-      
+
       if($pages['last'] == $pages['pages'][count($pages['pages']) - 1]) {
         unset($pages['last']);
       }
     }
-    
+
     if($pages['prev'] === '') {
       unset($pages['prev']);
     }
-    
+
     if($pages['next'] === '') {
       unset($pages['next']);
     }
@@ -152,14 +152,14 @@ class Pagination {
       $attrs['href'] = str_replace(array(urlencode('{PAGE}'), '{PAGE}'),'', $this->firstUrl);
       $links[] = $this->createATag($this->text_first, $attrs);
     }
-    
+
     // Prev link
     if(isset($pages['prev'])) {
       if(!$isFirst){
         $this->class_prev .= ' list-first';
         $isFirst++;
       }
-      
+
       $attrs['class'] = $this->class_prev;
       $attrs['rel'] = 'prev';
 
@@ -168,10 +168,10 @@ class Pagination {
       } else {
         $attrs['href'] = str_replace(array(urlencode('{PAGE}'), '{PAGE}'), array ($pages['prev'], $pages['prev']), $this->url);
       }
-      
+
       $links[] = $this->createATag($this->text_prev, $attrs);
     }
-    
+
     // Numbered pages
     foreach($pages['pages'] as $p) {
       $isLast++;
@@ -181,23 +181,23 @@ class Pagination {
         $classfirst_selected = $this->class_selected . ' list-last';
         $classfirst_non_selected =$this->class_non_selected . ' list-last';
       }
-      
+
       if(!$isFirst){
         $classfirst_selected = $this->class_selected .' list-first';
         $classfirst_non_selected = $this->class_non_selected .' list-first';
         $isFirst++;
-        
+
       } else {
         $classfirst_selected = $this->class_selected;
         $classfirst_non_selected = $this->class_non_selected;
       }
-      
+
       if($p == 1) {
         $attrs['href'] = str_replace(array(urlencode('{PAGE}'), '{PAGE}'), '', $this->firstUrl);
       } else {
         $attrs['href'] = str_replace(array(urlencode('{PAGE}'), '{PAGE}'), array($p, $p), $this->url);
       }
-      
+
       if($p == $this->selected) {
         $links[] = $this->createSpanTag($p, array('class' => $classfirst_selected));
       } else {
@@ -205,19 +205,19 @@ class Pagination {
         $links[] = $this->createATag($p, $attrs);
       }
     }
-    
+
     // Next link
     if(isset($pages['next'])) {
       if(!isset($pages['last'])) {
         $this->class_next .= ' list-last';
       }
-      
+
       $attrs['rel'] = 'next';
       $attrs['class'] = $this->class_next;
       $attrs['href'] = str_replace(array(urlencode('{PAGE}'), '{PAGE}'), array ($pages['next'], $pages['next']), $this->url);
       $links[] = $this->createATag($this->text_next, $attrs);
     }
-    
+
     if(isset($pages['last'])) {
       unset($attrs['rel']);
       $this->class_last .= ' list-last';
@@ -235,13 +235,13 @@ class Pagination {
   public function doPagination() {
     if($this->total > 1) {
       $links = $this->get_links();
-      
+
       if($this->listClass !== false) {
         return '<ul class="' . $this->listClass . '">' . implode($this->delimiter, $links) . '</ul>';
       } else {
         return '<ul>' . implode($this->delimiter, $links) . '</ul>';
       }
-      
+
     } else {
       return '';
     }
@@ -255,11 +255,11 @@ class Pagination {
    */
   protected function createATag($text, $attrs) {
     $att = array();
-    
+
     foreach($attrs as $k => $v) {
       $att[] = $k . '="' . osc_esc_html($v) . '"';
     }
-    
+
     return '<li><a ' . implode(' ', $att) . '>' . $text . '</a></li>';
   }
 
@@ -271,11 +271,11 @@ class Pagination {
    */
   protected function createSpanTag($text, $attrs) {
     $att = array();
-    
+
     foreach($attrs as $k => $v) {
       $att[] = $k . '="' . osc_esc_html($v) . '"';
     }
-    
+
     return '<li><span ' . implode(' ', $att) . '>' . $text . '</span></li>';
   }
 }

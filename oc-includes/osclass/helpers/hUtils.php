@@ -16,7 +16,6 @@
  */
 
 
-
 // Get param value
 function osc_get_param($key, $htmlencode = false, $xss_check = true, $quotes_encode = true) {
   return Params::getParam($key, $htmlencode, $xss_check, $quotes_encode);
@@ -125,7 +124,7 @@ function osc_field($item, $field, $locale) {
       }
     }
   }
-  
+
   return '';
 }
 
@@ -133,13 +132,11 @@ function osc_field($item, $field, $locale) {
 /**
  * Show widget content
  *
- * @param string $location
+ * @param array $widget
  * @return void
  */
 function osc_show_widget_content($widget) {
-  if(is_array($widget) && isset($widget['s_content']) && trim((string)$widget['s_content']) != '') {
-    echo osc_apply_filter('widget_content', $widget['s_content'], $widget);
-  }
+  osc_show_widget($widget);
 }
 
 
@@ -150,47 +147,38 @@ function osc_show_widget_content($widget) {
  * @return void
  */
 function osc_show_widgets($location) {
-  // Just list all and save few queries
-  // $widgets = Widget::newInstance()->findByLocation($location);
-  $widgets = Widget::newInstance()->listAll();
+  osc_run_hook('before_show_widgets', $location);
 
-  
-  
-  foreach($widgets as $widget) {
-    if($widget['s_location'] == $location) {
-      osc_show_widget_content($widget);
-    }
+  $widgets = Widget::newInstance()->findByLocation($location);
+  foreach($widgets as $w) {
+    osc_show_widget_content($w);
   }
+
+  osc_run_hook('after_show_widgets', $location);
 }
 
 /**
- * Print all widgets named $description
+ * Show all widgets named $description
  *
  * @param string $description
- * @return void
  */
 function osc_show_widgets_by_description($description) {
   $widgets = Widget::newInstance()->findByDescription($description);
-  
-  foreach($widgets as $widget) {
-    osc_show_widget_content($widget);
+  foreach($widgets as $w) {
+    osc_show_widget_content($w);
   }
 }
 
 
 /**
- * Print all widgets named $description
+ * Show all widgets for a hook/location
  *
- * @param string $description
- * @return void
+ * @param string $hook
  */
 function osc_show_widgets_by_hook($hook) {
   $widgets = Widget::newInstance()->findByHook($hook);
-  
   foreach($widgets as $w) {
-    if(trim((string)$w['s_content']) != '') {
-      echo osc_apply_filter('widget_content', $w['s_content'], $w);
-    }
+    osc_show_widget_content($w);
   }
 }
 
@@ -233,6 +221,27 @@ function _osc_recaptcha_get_html($siteKey, $lang) {
  * @param string $date
  * @return string
  */
+// Format datetime as date-only using site date format
+function osc_format_date_only($date) {
+  $date = trim((string)$date);
+  if($date == '' || $date == '0000-00-00 00:00:00') {
+    return '-';
+  }
+
+  $time = strtotime($date);
+  if($time === false) {
+    return '-';
+  }
+
+  $format = osc_date_format();
+  $format = trim(preg_replace('/([,\s]*[HhGiSs]+[,\s]*)+/', ' ', $format));
+  if($format == '') {
+    $format = 'Y-m-d';
+  }
+
+  return osc_format_date(date('Y-m-d', $time), $format);
+}
+
 function osc_format_date($date, $dateformat = null) {
   if($dateformat==null) {
     $dateformat = osc_date_format();
@@ -281,7 +290,9 @@ function osc_private_user_menu($options = null) {
     $options[] = array('name' => __('Public Profile'), 'url' => osc_user_public_profile_url(osc_logged_user_id()), 'class' => 'opt_publicprofile');
     $options[] = array('name' => __('Dashboard'), 'url' => osc_user_dashboard_url(), 'class' => 'opt_dashboard');
     $options[] = array('name' => __('Manage your listings'), 'url' => osc_user_list_items_url(), 'class' => 'opt_items');
-    $options[] = array('name' => __('Manage your alerts'), 'url' => osc_user_alerts_url(), 'class' => 'opt_alerts');
+    if(osc_alerts_enabled()) {
+      $options[] = array('name' => __('Manage your alerts'), 'url' => osc_user_alerts_url(), 'class' => 'opt_alerts');
+    }
     $options[] = array('name' => __('My profile'), 'url' => osc_user_profile_url(), 'class' => 'opt_account');
     $options[] = array('name' => __('Logout'), 'url' => osc_user_logout_url(), 'class' => 'opt_logout');
   }
@@ -292,21 +303,21 @@ function osc_private_user_menu($options = null) {
   echo '$(".user_menu > :first-child").addClass("first");';
   echo '$(".user_menu > :last-child").addClass("last");';
   echo '</script>';
-  
+
   osc_run_hook('user_menu_before');
 
   echo '<ul class="user_menu">';
-  
+
   osc_run_hook('user_menu_top');
 
   $var_l = count($options);
   for($var_o = 0; $var_o < ($var_l-1); $var_o++) {
     $attr = '';
-    
+
     if(isset($options[$var_o]['attr'])) {
       $attr = $options[$var_o]['attr'];
     }
-    
+
     echo '<li class="' . $options[$var_o]['class'] . '" ' . $attr . '><a href="' . $options[$var_o]['url'] . '" >' . $options[$var_o]['name'] . '</a></li>';
   }
 
@@ -315,10 +326,38 @@ function osc_private_user_menu($options = null) {
   echo '<li class="' . $options[$var_l-1]['class'] . '"><a href="' . $options[$var_l-1]['url'] . '" >' . $options[$var_l-1]['name'] . '</a></li>';
 
   osc_run_hook('user_menu_bottom');
-  
+
   echo '</ul>';
-  
+
   osc_run_hook('user_menu_after');
+}
+
+// String length using mbstring when available
+if(!function_exists('osc_strlen')) {
+  function osc_strlen($str, $encoding = 'UTF-8') {
+    return (extension_loaded('mbstring') ? mb_strlen((string)$str, $encoding) : strlen((string)$str));
+  }
+}
+
+// Substring using mbstring when available
+if(!function_exists('osc_substr')) {
+  function osc_substr($str, $start, $length = null, $encoding = 'UTF-8') {
+    $str = (string)$str;
+    if(extension_loaded('mbstring')) {
+      if($length === null) {
+        return mb_substr($str, $start, mb_strlen($str, $encoding), $encoding);
+      }
+      return mb_substr($str, $start, $length, $encoding);
+    }
+    return ($length === null ? substr($str, $start) : substr($str, $start, $length));
+  }
+}
+
+// Lowercase using mbstring when available
+if(!function_exists('osc_strtolower')) {
+  function osc_strtolower($str, $encoding = 'UTF-8') {
+    return (extension_loaded('mbstring') ? mb_strtolower((string)$str, $encoding) : strtolower((string)$str));
+  }
 }
 
 /**
@@ -337,8 +376,8 @@ function osc_highlight($txt, $len = 300, $start_tag = '<strong>', $end_tag = '</
   $txt = str_replace(array("\n\r","\r\n","\n","\r","\t"), ' ', $txt);
   $txt = trim($txt);
   $txt = preg_replace('/\s+/', ' ', $txt);
-  if( mb_strlen($txt, 'UTF-8') > $len ) {
-    $txt = mb_substr($txt, 0, $len, 'UTF-8') . "...";
+  if(osc_strlen($txt) > $len) {
+    $txt = osc_substr($txt, 0, $len) . "...";
   }
   $query = osc_search_pattern();
   $query = str_replace(array('(',')','+','-','~','>','<'), array('','','','','','',''), $query);
@@ -375,16 +414,16 @@ function osc_get_http_referer() {
   if(Rewrite::newInstance()->get_http_referer() != '') {
     return Rewrite::newInstance()->get_http_referer();
 
-  } else if (Cookie::newInstance()->_getTrueReferer() != '') {
+  } elseif(Cookie::newInstance()->_getTrueReferer() != '') {
     return Cookie::newInstance()->_getTrueReferer();
-    
+
   } else if(Session::newInstance()->_getReferer() != '') {
     return Session::newInstance()->_getReferer();
 
   } else if(Params::existServerParam('HTTP_REFERER') && filter_var(Params::getServerParam('HTTP_REFERER', false, false), FILTER_VALIDATE_URL)){
     return Params::getServerParam('HTTP_REFERER', false, false);
   }
-  
+
   return '';
 }
 
@@ -399,28 +438,28 @@ function osc_add_route($id, $regexp, $url, $file, $user_menu = false, $location 
  */
 function osc_get_subdomain_params() {
   $options = array();
-  
+
   if(osc_subdomain_slug() != '') {
     if(osc_subdomain_type() == 'country' && Params::getParam('sCountry') != '') {
       $options['sCountry'] = Params::getParam('sCountry');
-      
+
     } else if(osc_subdomain_type() == 'region' && Params::getParam('sRegion') != '') {
       $options['sRegion'] = Params::getParam('sRegion');
-      
+
     } else if(osc_subdomain_type() == 'city' && Params::getParam('sCity') != '') {
       $options['sCity'] = Params::getParam('sCity');
-      
+
     } else if(osc_subdomain_type() == 'category' && Params::getParam('sCategory') != '') {
       $options['sCategory'] = Params::getParam('sCategory');
-      
+
     } else if(osc_subdomain_type() == 'user' && Params::getParam('sUser') != '') {
       $options['sUser'] = Params::getParam('sUser');
-      
+
     } else if(osc_subdomain_type() == 'language' && Params::getParam('sLanguage') != '') {
       $options['sLanguage'] = Params::getParam('sLanguage');
     }
   }
-  
+
   return $options;
 }
 
@@ -428,11 +467,11 @@ function osc_get_subdomain_params() {
 /**
  * Generate different versions of filter conditions for SQL based on subdomains
  *
- * USAGE: 
+ * USAGE:
  * $data = osc_subdomains_filter_conditions('oc_t_item');
- * 
+ *
  * if($data['usable'] === true) {
- * 
+ *
  *   A) $mSearch->addItemConditions('oc_t_item.pk_i_id IN (' . $data['sql_in'] . ')');   -- gives list of item ids matching criteria
  *
  *   B1) $mSearch->addItemConditions($data['where']);
@@ -442,16 +481,16 @@ function osc_get_subdomain_params() {
  *   C2) $this->dao->join($data['table'], $data['table_join'], 'INNER');
  *
  * }
- * 
- * 
- 
+ *
+ *
+
  * @return array
  */
 function osc_subdomains_filter_conditions($item_table = '') {
   if($item_table == '') {
     $item_table = DB_TABLE_PREFIX.'t_item';
   }
-  
+
   $output = array(
     'enabled' => osc_subdomain_enabled(),
     'is_subdomain' => osc_is_subdomain(),
@@ -467,7 +506,7 @@ function osc_subdomains_filter_conditions($item_table = '') {
     'table_join' => '',                           // Where statement required to join table
     'where' => '',                                // Where statement to filter data
     'usable' => false
-  ); 
+  );
 
   $id = osc_subdomain_id();
   $type = osc_subdomain_type();
@@ -477,7 +516,7 @@ function osc_subdomains_filter_conditions($item_table = '') {
   $table = '';
   $table_key = '';
   $table_join = '';
-  
+
   if(osc_subdomain_enabled() && osc_is_subdomain() && $type != 'language') {
     // create list that can be place as: column in ( .. function .. )
     // create where statement in format t_table.column = "val"
@@ -498,7 +537,7 @@ function osc_subdomains_filter_conditions($item_table = '') {
       $table_key = $table . '.fk_i_item_id';
       $table_join = $item_table . '.pk_i_id = ' . $table . '.fk_i_item_id';
       $where = sprintf('%st_item_location.fk_i_region_id = %d', DB_TABLE_PREFIX, osc_esc_html($id));
-      
+
     } else if($type == 'city' && $id > 0) {
       $in_list = osc_esc_html($id);
       $sql_in = sprintf('SELECT fk_i_item_id FROM %st_item_location WHERE fk_i_city_id = %d', DB_TABLE_PREFIX, osc_esc_html($id));
@@ -512,11 +551,11 @@ function osc_subdomains_filter_conditions($item_table = '') {
       // we need to prepare tree with cat ID and all it's subcategories
       $tree_details = Category::newInstance()->toSubTree(1);
       $tree = array();
-      
+
       if(is_array($tree_details) && count($tree_details) > 0) {
         $tree = array_column($tree_details, 'pk_i_id');
       }
-      
+
       $tree[] = osc_esc_html($id);
       $tree_in = implode(',', $tree);
 
@@ -527,7 +566,7 @@ function osc_subdomains_filter_conditions($item_table = '') {
       $table_key = '';
       $table_join = '';
       $where = sprintf('%s.fk_i_category_id in (%s)', $item_table, osc_esc_html($tree_in));
-      
+
     } else if($type == 'user' && $id > 0) {
       $in_list = osc_esc_html($id);
       $sql_in = sprintf('SELECT pk_i_id FROM %st_item WHERE fk_i_user_id = %d', DB_TABLE_PREFIX, osc_esc_html($id));
@@ -544,7 +583,7 @@ function osc_subdomains_filter_conditions($item_table = '') {
     $output['table_key'] = $table_key;
     $output['table_join'] = $table_join;
     $output['where'] = $where;
-    
+
     // Make sure all is good and ready to use
     if(osc_subdomain_enabled() && osc_is_subdomain() && osc_subdomain_type() != '' && osc_subdomain_id() != '') {
       if($where != '' && $sql_in != '') {
@@ -552,7 +591,7 @@ function osc_subdomains_filter_conditions($item_table = '') {
       }
     }
   }
-  
+
   return $output;
 }
 
@@ -563,15 +602,15 @@ function osc_subdomains_filter_conditions($item_table = '') {
  */
 function osc_subdomains_filter_to_search($mSearch, $item_table = '') {
   $data = osc_subdomains_filter_conditions($item_table);
-  
+
   if($data['usable'] === true) {
     $mSearch->addItemConditions($data['where']);
-    
+
     if($data['table'] != '' && $data['table_join'] != '') {
       $mSearch->addJoinTable($data['table_key'], $data['table'], $data['table_join'], 'INNER');
     }
   }
-  
+
   return $mSearch;
 }
 
@@ -585,15 +624,14 @@ function osc_subdomains_filter_to_dao($object, $item_table = '') {
 
   if($data['usable'] === true) {
     $object->dao->where($data['where']);
-    
+
     if($data['table'] != '' && $data['table_join'] != '') {
       $object->dao->join($data['table'], $data['table_join'], 'INNER');
     }
   }
-  
+
   return $object;
 }
-
 
 
 /**
@@ -646,7 +684,7 @@ function osc_get_theme_hook_compatibility() {
   if(defined('THEME_COMPATIBLE_WITH_OSCLASS_HOOKS') && THEME_COMPATIBLE_WITH_OSCLASS_HOOKS > 810) {
     return THEME_COMPATIBLE_WITH_OSCLASS_HOOKS;
   }
-  
+
   return 810;   // support hooks up to Osclass version 8.1.0
 }
 

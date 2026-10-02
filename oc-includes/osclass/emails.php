@@ -25,7 +25,7 @@ if(!defined('ABS_PATH')) exit('ABS_PATH is not loaded. Direct access is not allo
  */
 function fn_email_alert_validation($alert, $email, $secret) {
   if(!isset($alert['pk_i_id']) || $email == '') { return false; }
-  
+
   $name = $email; // user is not registered on our site so we do not know it's name. Could be also "Anonymous"
 
   // send alert validation email
@@ -45,7 +45,7 @@ function fn_email_alert_validation($alert, $email, $secret) {
     '{USER_EMAIL}',
     '{VALIDATION_LINK}'
   );
-  
+
   $words[] = array(
     $name,
     $email,
@@ -70,6 +70,83 @@ function fn_email_alert_validation($alert, $email, $secret) {
 osc_add_hook('hook_email_alert_validation', 'fn_email_alert_validation');
 
 
+// Build placeholder replacements for alert notification emails
+function osc_alert_email_words($user, $ads, $alert, $totalItems) {
+  $email = $user['s_email'] ?? '';
+  $name = $user['s_name'] ?? $email;
+  $alert_id = (int)($alert['pk_i_id'] ?? 0);
+  $alert_secret = $alert['s_secret'] ?? '';
+  $alert_name = trim((string)($alert['s_name'] ?? ''));
+  if($alert_name == '') {
+    $alert_name = sprintf(__('Alert #%d'), $alert_id);
+  }
+  $alert_type = strtoupper(trim((string)($alert['e_type'] ?? '')));
+  $totalItems = (int)$totalItems;
+
+  switch($alert_type) {
+    case 'HOURLY':
+      $intro = __('New listings have been published in the last hour. Take a look at them:');
+      break;
+    case 'DAILY':
+      $intro = __('New listings have been published in the last day. Take a look at them:');
+      break;
+    case 'WEEKLY':
+      $intro = __('New listings have been published in the last week. Take a look at them:');
+      break;
+    case 'INSTANT':
+      if($totalItems == 1) {
+        $intro = __('A new listing has been published, check it out!');
+      } else {
+        $intro = sprintf(__('%d new listings have been published. Take a look at them:'), $totalItems);
+      }
+      break;
+    default:
+      $intro = __('New listings have been published in the last day. Take a look at them:');
+      break;
+  }
+
+  $unsub_link = '<a href="' . osc_user_unsubscribe_alert_url($alert_id, $email, $alert_secret) . '">' . __('unsubscribe alert') . '</a>';
+  $search_link = '<a href="' . osc_search_alert_url($alert_id, $alert_secret) . '">' . __('open alert in search') . '</a>';
+  $alerts_link = '<a href="' . osc_user_alerts_url() . '">' . __('My Account > Alerts') . '</a>';
+
+  $words = array();
+  $words[] = array(
+    '{USER_NAME}',
+    '{USER_EMAIL}',
+    '{ADS}',
+    '{UNSUB_LINK}',
+    '{SEARCH_LINK}',
+    '{ITEMS_COUNT}',
+    '{USER_ALERTS_LINK}',
+    '{ALERT_INTRO}',
+    '{ALERT_ID}',
+    '{ALERT_NAME}',
+    '{ALERT_FREQUENCY}',
+    '{ALERT_DATE}',
+    '{ALERT_EXPIRE_DATE}',
+    '{ALERT_TRIGGERS}'
+  );
+  $words[] = array(
+    $name,
+    $email,
+    $ads,
+    $unsub_link,
+    $search_link,
+    $totalItems,
+    $alerts_link,
+    $intro,
+    $alert_id,
+    $alert_name,
+    osc_alert_type_label($alert_type),
+    osc_format_date_only($alert['dt_date'] ?? ''),
+    osc_format_date_only($alert['dt_expire_date'] ?? ''),
+    (int)($alert['i_num_trigger'] ?? 0)
+  );
+
+  return $words;
+}
+
+
 /**
  * @param $user
  * @param $ads
@@ -79,11 +156,11 @@ osc_add_hook('hook_email_alert_validation', 'fn_email_alert_validation');
  */
 function fn_alert_email_hourly($user, $ads, $s_search, $items, $totalItems) {
   if(!isset($user['s_email']) || $user['s_email'] == '') { return false; }    // Can be unregistered user as well
-  
+
   $user_id = $user['pk_i_id'] ?? 0;
   $email = $user['s_email'] ?? '';
   $name = $user['s_name'] ?? $email;
-  
+
   $prefLocale = (osc_user_def_locale_code($user_id, $email) <> '' ? osc_user_def_locale_code($user_id, $email) : osc_language());
   $page = Page::newInstance()->findByInternalName('alert_email_hourly');
   $page_description = $page['locale'];
@@ -91,30 +168,7 @@ function fn_alert_email_hourly($user, $ads, $s_search, $items, $totalItems) {
   $_title = osc_apply_filter('email_title',osc_apply_filter('alert_email_hourly_title', $page_description[$prefLocale]['s_title'], $user, $ads, $s_search, $items, $totalItems));
   $_body = osc_apply_filter('email_description', osc_apply_filter('alert_email_hourly_description', $page_description[$prefLocale]['s_text'], $user, $ads, $s_search, $items, $totalItems));
 
-  $unsub_link = osc_user_unsubscribe_alert_url($s_search['pk_i_id'], $user['s_email'], $s_search['s_secret']);
-  $unsub_link = '<a href="' . $unsub_link . '">' . __('unsubscribe alert') . '</a>';
-
-  $search_link = osc_search_alert_url($s_search['pk_i_id'], $s_search['s_secret']);
-  $search_link = '<a href="' . $search_link . '">' . __('open alert in search') . '</a>';
-  
-  $words = array();
-  $words[] = array(
-    '{USER_NAME}',
-    '{USER_EMAIL}',
-    '{ADS}',
-    '{UNSUB_LINK}',
-    '{SEARCH_LINK}',
-    '{ITEMS_COUNT}'
-  );
-  
-  $words[] = array(
-    $name,
-    $email,
-    $ads,
-    $unsub_link,
-    $search_link,
-    $totalItems
-  );
+  $words = osc_alert_email_words($user, $ads, $s_search, $totalItems);
 
   $title = osc_apply_filter('alert_email_hourly_title_after', osc_mailBeauty($_title, $words), $user, $ads, $s_search, $items, $totalItems);
   $body = osc_apply_filter('alert_email_hourly_description_after', osc_mailBeauty($_body, $words), $user, $ads, $s_search, $items, $totalItems);
@@ -143,7 +197,7 @@ osc_add_hook('hook_alert_email_hourly', 'fn_alert_email_hourly');
  */
 function fn_alert_email_daily($user, $ads, $s_search, $items, $totalItems) {
   if(!isset($user['s_email']) || $user['s_email'] == '') { return false; }    // Can be unregistered user as well
-  
+
   $user_id = $user['pk_i_id'] ?? 0;
   $email = $user['s_email'] ?? '';
   $name = $user['s_name'] ?? $email;
@@ -155,30 +209,7 @@ function fn_alert_email_daily($user, $ads, $s_search, $items, $totalItems) {
   $_title = osc_apply_filter('email_title', osc_apply_filter('alert_email_daily_title', $page_description[$prefLocale]['s_title'], $user, $ads, $s_search, $items, $totalItems));
   $_body = osc_apply_filter('email_description', osc_apply_filter('alert_email_daily_description', $page_description[$prefLocale]['s_text'], $user, $ads, $s_search, $items, $totalItems));
 
-  $unsub_link = osc_user_unsubscribe_alert_url($s_search['pk_i_id'], $user['s_email'], $s_search['s_secret']);
-  $unsub_link = '<a href="' . $unsub_link . '">' . __('unsubscribe alert') . '</a>';
-
-  $search_link = osc_search_alert_url($s_search['pk_i_id'], $s_search['s_secret']);
-  $search_link = '<a href="' . $search_link . '">' . __('open alert in search') . '</a>';
-  
-  $words = array();
-  $words[] = array(
-    '{USER_NAME}',
-    '{USER_EMAIL}',
-    '{ADS}',
-    '{UNSUB_LINK}',
-    '{SEARCH_LINK}',
-    '{ITEMS_COUNT}'
-  );
-  
-  $words[] = array(
-    $name,
-    $email,
-    $ads,
-    $unsub_link,
-    $search_link,
-    $totalItems
-  );
+  $words = osc_alert_email_words($user, $ads, $s_search, $totalItems);
 
   $title = osc_apply_filter('alert_email_daily_title_after', osc_mailBeauty($_title, $words), $user, $ads, $s_search, $items, $totalItems);
   $body = osc_apply_filter('alert_email_daily_description_after', osc_mailBeauty($_body, $words), $user, $ads, $s_search, $items, $totalItems);
@@ -219,30 +250,7 @@ function fn_alert_email_weekly($user, $ads, $s_search, $items, $totalItems) {
   $_title = osc_apply_filter('email_title', osc_apply_filter('alert_email_weekly_title', $page_description[$prefLocale]['s_title'], $user, $ads, $s_search, $items, $totalItems));
   $_body = osc_apply_filter('email_description', osc_apply_filter('alert_email_weekly_description', $page_description[$prefLocale]['s_text'], $user, $ads, $s_search, $items, $totalItems));
 
-  $unsub_link = osc_user_unsubscribe_alert_url($s_search['pk_i_id'], $user['s_email'], $s_search['s_secret']);
-  $unsub_link = '<a href="' . $unsub_link . '">' . __('unsubscribe alert') . '</a>';
-
-  $search_link = osc_search_alert_url($s_search['pk_i_id'], $s_search['s_secret']);
-  $search_link = '<a href="' . $search_link . '">' . __('open alert in search') . '</a>';
-  
-  $words = array();
-  $words[] = array(
-    '{USER_NAME}',
-    '{USER_EMAIL}',
-    '{ADS}',
-    '{UNSUB_LINK}',
-    '{SEARCH_LINK}',
-    '{ITEMS_COUNT}'
-  );
-  
-  $words[] = array(
-    $name,
-    $email,
-    $ads,
-    $unsub_link,
-    $search_link,
-    $totalItems
-  );
+  $words = osc_alert_email_words($user, $ads, $s_search, $totalItems);
 
   $title = osc_apply_filter('alert_email_weekly_title_after', osc_mailBeauty($_title, $words), $user, $ads, $s_search, $items, $totalItems);
   $body = osc_apply_filter('alert_email_weekly_description_after', osc_mailBeauty($_body, $words), $user, $ads, $s_search, $items, $totalItems);
@@ -283,31 +291,7 @@ function fn_alert_email_instant($user, $ads, $s_search, $items, $totalItems) {
   $_title = osc_apply_filter('email_title', osc_apply_filter('alert_email_instant_title', $page_description[$prefLocale]['s_title'], $user, $ads, $s_search, $items, $totalItems, $items, $totalItems));
   $_body = osc_apply_filter('email_description', osc_apply_filter('alert_email_instant_description', $page_description[$prefLocale]['s_text'], $user, $ads, $s_search, $items, $totalItems, $items, $totalItems));
 
-
-  $unsub_link = osc_user_unsubscribe_alert_url($s_search['pk_i_id'], $user['s_email'], $s_search['s_secret']);
-  $unsub_link = '<a href="' . $unsub_link . '">' . __('unsubscribe alert') . '</a>';
-  
-  $search_link = osc_search_alert_url($s_search['pk_i_id'], $s_search['s_secret']);
-  $search_link = '<a href="' . $search_link . '">' . __('open alert in search') . '</a>';
-
-  $words = array();
-  $words[] = array(
-    '{USER_NAME}',
-    '{USER_EMAIL}',
-    '{ADS}',
-    '{UNSUB_LINK}',
-    '{SEARCH_LINK}',
-    '{ITEMS_COUNT}'
-  );
-  
-  $words[] = array(
-    $name,
-    $email,
-    $ads,
-    $unsub_link,
-    $search_link,
-    $totalItems
-  );
+  $words = osc_alert_email_words($user, $ads, $s_search, $totalItems);
 
   $title = osc_apply_filter('alert_email_instant_title_after', osc_mailBeauty($_title, $words), $user, $ads, $s_search, $items, $totalItems);
   $body = osc_apply_filter('alert_email_instant_description_after', osc_mailBeauty($_body, $words), $user, $ads, $s_search, $items, $totalItems);
@@ -334,11 +318,11 @@ osc_add_hook('hook_alert_email_instant', 'fn_alert_email_instant');
  */
 function fn_email_comment_validated($aComment) {
   if(!isset($aComment['s_author_email'])) { return false; }
-  
+
   $mPages = new Page();
   $email = $aComment['s_author_email'];
   $locale = (osc_user_def_locale_code(0, $email) <> '' ? osc_user_def_locale_code(0, $email) : osc_current_user_locale());
-  
+
   $aPage = $mPages->findByInternalName('email_comment_validated');
 
   if(isset($aPage['locale'][$locale]['s_title'])) {
@@ -358,11 +342,11 @@ function fn_email_comment_validated($aComment) {
       '{ITEM_LINK}',
       '{ITEM_TITLE}'
     );
-    
+
     $words[] = array(
-      $aComment['s_author_name'], 
-      $aComment['s_author_email'], 
-      $aComment['s_title'], 
+      $aComment['s_author_name'],
+      $aComment['s_author_email'],
+      $aComment['s_title'],
       $aComment['s_body'],
       osc_item_url(),
       '<a href="' . osc_item_url() . '">' . osc_item_url() . '</a>',
@@ -380,7 +364,7 @@ function fn_email_comment_validated($aComment) {
       'body' => $body,
       'alt_body' => $body
     );
-    
+
     osc_sendMail($emailParams, 'comment_validated');
   }
 }
@@ -395,7 +379,7 @@ osc_add_hook('hook_email_comment_validated', 'fn_email_comment_validated');
  */
 function fn_email_new_item_non_register_user($item) {
   if(!isset($item['pk_i_id'])) { return false; }
-  
+
   $mPages = new Page();
   $aPage = $mPages->findByInternalName('email_new_item_non_register_user');
   $locale = osc_current_user_locale();
@@ -461,7 +445,7 @@ osc_add_hook('hook_email_new_item_non_register_user', 'fn_email_new_item_non_reg
  */
 function fn_email_user_forgot_password($user, $password_url) {
   if(!isset($user['pk_i_id'])) { return false; }
-  
+
   $aPage = Page::newInstance()->findByInternalName('email_user_forgot_password');
   $locale = osc_current_user_locale();
 
@@ -510,7 +494,7 @@ osc_add_hook('hook_email_user_forgot_password', 'fn_email_user_forgot_password')
  */
 function fn_email_user_registration($user) {
   if(!isset($user['pk_i_id'])) { return false; }
-  
+
   $pageManager = new Page();
   $locale = osc_current_user_locale();
   $aPage = $pageManager->findByInternalName('email_user_registration');
@@ -527,7 +511,7 @@ function fn_email_user_registration($user) {
       '{USER_NAME}',
       '{USER_EMAIL}'
     );
-    
+
     $words[] = array(
       $user['s_name'], $user['s_email']
     );
@@ -557,7 +541,7 @@ osc_add_hook('hook_email_user_registration', 'fn_email_user_registration');
  */
 function fn_email_new_email($new_email, $validation_url) {
   if($new_email == '') { return false; }
-  
+
   $locale = osc_current_user_locale();
   $aPage = Page::newInstance()->findByInternalName('email_new_email');
 
@@ -593,13 +577,13 @@ function fn_email_new_email($new_email, $validation_url) {
       'body' => $body,
       'alt_body' => $body
     );
-    
+
     osc_sendMail($emailParams, 'new_email');
-    
-    osc_add_flash_ok_message(_m("We've sent you an e-mail. Follow its instructions to validate the changes"));
-    
+
+    osc_add_flash_ok_message(_m("We have sent you an email. Follow its instructions to validate the changes"));
+
   } else {
-    osc_add_flash_error_message(_m('We tried to sent you an e-mail, but it failed. Please, contact an administrator'));
+    osc_add_flash_error_message(_m('We could not send the email. Please contact an administrator.'));
   }
 }
 
@@ -612,7 +596,7 @@ osc_add_hook('hook_email_new_email', 'fn_email_new_email');
  */
 function fn_email_user_validation($user, $input) {
   if(!isset($user['pk_i_id'])) { return false; }
-  
+
   $mPages = new Page();
   $locale = osc_current_user_locale();
   $aPage = $mPages->findByInternalName('email_user_validation');
@@ -632,11 +616,11 @@ function fn_email_user_validation($user, $input) {
       '{VALIDATION_LINK}',
       '{VALIDATION_URL}'
     );
-    
+
     $words[] = array(
-      $user['s_name'], 
+      $user['s_name'],
       $user['s_email'],
-      '<a href="' . $validation_url . '" >' . $validation_url . '</a>', 
+      '<a href="' . $validation_url . '" >' . $validation_url . '</a>',
       $validation_url
     );
 
@@ -666,7 +650,7 @@ osc_add_hook('hook_email_user_validation', 'fn_email_user_validation');
  */
 function fn_email_send_friend($aItem) {
   if(!isset($aItem['friendEmail'])) { return false; }
-  
+
   $mPages = new Page();
   $aPage = $mPages->findByInternalName('email_send_friend');
   $locale = osc_current_user_locale();
@@ -691,7 +675,7 @@ function fn_email_send_friend($aItem) {
     '{ITEM_URL}',
     '{ITEM_LINK}'
   );
-  
+
   $words[] = array(
     $aItem['friendName'], $aItem['yourName'], $aItem['yourEmail'], $aItem['friendEmail'], $aItem['s_title'], $aItem['message'],
     osc_item_url(), $item_url
@@ -713,7 +697,7 @@ function fn_email_send_friend($aItem) {
   if(osc_notify_contact_friends()) {
     $admins = Admin::newInstance()->listAll();
     $adminEmails = array();
-    foreach ($admins as $admin) {
+    foreach($admins as $admin) {
       if(!empty($admin['s_email'])) {
         $adminEmails[] = $admin['s_email'];
       }
@@ -734,7 +718,7 @@ osc_add_hook('hook_email_send_friend', 'fn_email_send_friend');
  */
 function fn_email_item_inquiry($aItem) {
   if(!isset($aItem['id'])) { return false; }
-  
+
   $id = $aItem['id'];
   $yourEmail = $aItem['yourEmail'];
   $yourName = $aItem['yourName'];
@@ -791,12 +775,12 @@ function fn_email_item_inquiry($aItem) {
   if(osc_notify_contact_item()) {
     $admins = Admin::newInstance()->listAll();
     $adminEmails = array();
-    foreach ($admins as $admin) {
+    foreach($admins as $admin) {
       if(!empty($admin['s_email'])) {
         $adminEmails[] = $admin['s_email'];
       }
     }
-    
+
     $emailParams['add_bcc'] = $adminEmails;
   }
 
@@ -804,7 +788,7 @@ function fn_email_item_inquiry($aItem) {
 
   if(osc_item_attachment()) {
     $attachment = Params::getFiles('attachment');
-    
+
     if(!empty($attachment) && isset($attachment['error']) && $attachment['error'] == UPLOAD_ERR_OK) {
       $resourceName = $attachment['name'];
       $tmpName = $attachment['tmp_name'];
@@ -821,32 +805,32 @@ function fn_email_item_inquiry($aItem) {
         finfo_close($finfo);
 
         $output = explode('; ', $output);
-        
+
         if(is_array($output)) {
           $output = $output[0];
         }
-        
+
         $resourceType = $output;
       }
-    
+
       // Check mime file - make sure it's not executable
       if(!in_array($resourceType, osc_allowed_mime_types())) {
         osc_add_flash_warning_message(_m('Attachment had incorrect extension or mime type and has not been attached to message'));
 
       } else if(!is_writable(osc_uploads_path())) {
-        osc_add_flash_warning_message(_m('Uploads folder is not writtable, attachment has not been attached to message'));
-        
+        osc_add_flash_warning_message(_m('Uploads folder is not writable, attachment has not been attached to message'));
+
       } else if(!move_uploaded_file($tmpName, $path)) {
         unset($path);
         osc_add_flash_warning_message(_m('Attachment could not be moved to uploads folder and has not been attached to message'));
-        
+
       } else {
         // Everything was fine!
         $attachment_ok = true;
       }
     }
   }
-  
+
   if($attachment_ok === true && isset($path)) {
     $emailParams['attachment'] = $path;
   }
@@ -870,7 +854,7 @@ osc_add_hook('hook_email_item_inquiry', 'fn_email_item_inquiry');
  */
 function fn_email_new_comment_admin($aItem) {
   if(!isset($aItem['id'])) { return false; }
-  
+
   $authorName = trim(osc_esc_html(strip_tags($aItem['authorName'])));
   $authorEmail = trim(osc_esc_html(strip_tags($aItem['authorEmail'])));
   $body = trim($aItem['body']);
@@ -905,7 +889,7 @@ function fn_email_new_comment_admin($aItem) {
     '{ITEM_URL}',
     '{ITEM_LINK}'
   );
-  
+
   $words[] = array(
     $authorName, $authorEmail, $title, $body, $item['s_title'], $itemId,
     osc_item_url(), $itemURL
@@ -915,7 +899,7 @@ function fn_email_new_comment_admin($aItem) {
   $body_email = osc_apply_filter('email_new_comment_admin_description_after', osc_mailBeauty(osc_apply_filter('email_description', osc_apply_filter('email_new_comment_admin_description', $content['s_text'], $aItem)), $words), $aItem);
 
   $admins = Admin::newInstance()->listAll();
-  foreach ($admins as $admin) {
+  foreach($admins as $admin) {
     if(!empty($admin['s_email'])) {
       $emailParams = array(
         'from' => _osc_from_email_aux(),
@@ -925,7 +909,7 @@ function fn_email_new_comment_admin($aItem) {
         'body' => $body_email,
         'alt_body' => $body_email
       );
-      
+
       osc_sendMail($emailParams, 'new_comment_admin');
     }
   }
@@ -942,7 +926,7 @@ osc_add_hook('hook_email_new_comment_reply_admin', 'fn_email_new_comment_admin')
  */
 function fn_email_item_validation($item) {
   if(!isset($item['pk_i_id'])) { return false; }
-  
+
   View::newInstance()->_exportVariableToView('item', $item);
   $contactEmail = $item['s_contact_email'];
   $contactName = $item['s_contact_name'];
@@ -962,7 +946,7 @@ function fn_email_item_validation($item) {
   $all = '';
 
   if(isset($item['locale'])) {
-    foreach ($item['locale'] as $locale => $data) {
+    foreach($item['locale'] as $locale => $data) {
       $locale_name = OSCLocale::newInstance()->findByCode($locale);
       $all     .= '<br/>';
       if(isset($locale_name[0]) && isset($locale_name[0]['s_name'])) {
@@ -1016,7 +1000,7 @@ function fn_email_item_validation($item) {
     'body' => $body,
     'alt_body' => $body
   );
-  
+
   osc_sendMail($emailParams, 'item_validation');
 }
 
@@ -1030,7 +1014,7 @@ osc_add_hook('hook_email_item_validation', 'fn_email_item_validation');
  */
 function fn_email_admin_new_item($item) {
   if(!isset($item['pk_i_id'])) { return false; }
-  
+
   View::newInstance()->_exportVariableToView('item', $item);
   $title = osc_item_title();
   $mPages = new Page();
@@ -1050,7 +1034,7 @@ function fn_email_admin_new_item($item) {
   $all = '';
 
   if(isset($item['locale'])) {
-    foreach ($item['locale'] as $locale => $data) {
+    foreach($item['locale'] as $locale => $data) {
       $locale_name = OSCLocale::newInstance()->findByCode($locale);
       $all     .= '<br/>';
       if(isset($locale_name[0]) && isset($locale_name[0]['s_name'])) {
@@ -1092,7 +1076,7 @@ function fn_email_admin_new_item($item) {
     '{VALIDATION_LINK}',
     '{VALIDATION_URL}'
   );
-  
+
   $words[] = array(
     '<a href="' . $admin_edit_url . '" >' . $admin_edit_url . '</a>', $admin_edit_url, $all, $item['s_description'], $item['s_country'],
     osc_format_price($item['i_price']), $item['s_region'], $item['s_city'], $item['pk_i_id'], $item['s_contact_name'], $item['s_contact_email'], $item['s_title'], $item_url, $item_link,
@@ -1103,7 +1087,7 @@ function fn_email_admin_new_item($item) {
   $body = osc_apply_filter('email_admin_new_item_description_after', osc_mailBeauty(osc_apply_filter('email_description', osc_apply_filter('email_admin_new_item_description', $content['s_text'], $item)), $words), $item);
 
   $admins = Admin::newInstance()->listAll();
-  foreach ($admins as $admin) {
+  foreach($admins as $admin) {
     if(!empty($admin['s_email'])) {
       $emailParams = array(
         'from' => _osc_from_email_aux(),
@@ -1113,7 +1097,7 @@ function fn_email_admin_new_item($item) {
         'body' => $body,
         'alt_body' => $body
       );
-      
+
       osc_sendMail($emailParams, 'admin_new_item');
     }
   }
@@ -1129,7 +1113,7 @@ osc_add_hook('hook_email_admin_new_item', 'fn_email_admin_new_item');
  */
 function fn_email_item_validation_non_register_user($item) {
   if(!isset($item['pk_i_id'])) { return false; }
-  
+
   View::newInstance()->_exportVariableToView('item', $item);
 
   $mPages = new Page();
@@ -1150,7 +1134,7 @@ function fn_email_item_validation_non_register_user($item) {
   $all = '';
 
   if(isset($item['locale'])) {
-    foreach ($item['locale'] as $locale => $data) {
+    foreach($item['locale'] as $locale => $data) {
       $locale_name = OSCLocale::newInstance()->findByCode($locale);
       $all     .= '<br/>';
       if(isset($locale_name[0]) && isset($locale_name[0]['s_name'])) {
@@ -1158,7 +1142,7 @@ function fn_email_item_validation_non_register_user($item) {
       } else {
         $all .= __('Language') . ': ' . $locale . '<br/>';
       }
-      
+
       $all .= __('Title') . ': ' . $data['s_title'] . '<br/>';
       $all .= __('Description') . ': ' . $data['s_description'] . '<br/>';
       $all .= '<br/>';
@@ -1192,7 +1176,7 @@ function fn_email_item_validation_non_register_user($item) {
     '{DELETE_LINK}',
     '{DELETE_URL}'
   );
-  
+
   $words[] = array(
     $all, $item['s_description'], $item['s_country'],
     osc_format_price($item['i_price']), $item['s_region'], $item['s_city'], $item['pk_i_id'], $item['s_contact_name'], $item['s_contact_email'], $item['s_title'], $item_url, $item_link,
@@ -1224,7 +1208,7 @@ osc_add_hook('hook_email_item_validation_non_register_user', 'fn_email_item_vali
  */
 function fn_email_admin_new_user($user) {
   if(!isset($user['pk_i_id'])) { return false; }
-  
+
   $pageManager = new Page();
   //$locale = osc_current_user_locale();
   $locale = osc_language();
@@ -1242,7 +1226,7 @@ function fn_email_admin_new_user($user) {
       '{USER_NAME}',
       '{USER_EMAIL}'
     );
-    
+
     $words[] = array(
       $user['s_name'], $user['s_email']
     );
@@ -1261,7 +1245,7 @@ function fn_email_admin_new_user($user) {
           'body' => $body,
           'alt_body' => $body,
         );
-        
+
         osc_sendMail($emailParams, 'admin_new_user');
       }
     }
@@ -1280,9 +1264,9 @@ osc_add_hook('hook_email_admin_new_user', 'fn_email_admin_new_user');
  */
 function fn_email_contact_user($id, $yourEmail, $yourName, $phoneNumber, $message) {
   if($yourEmail == '') { return false; }
-  
+
   $email = $yourEmail;
-  
+
   $mPages = new Page();
   $aPage = $mPages->findByInternalName('email_contact_user');
   $locale = (osc_user_def_locale_code(0, $email) <> '' ? osc_user_def_locale_code(0, $email) : osc_current_user_locale());
@@ -1301,7 +1285,7 @@ function fn_email_contact_user($id, $yourEmail, $yourName, $phoneNumber, $messag
     '{USER_PHONE}',
     '{COMMENT}'
   );
-  
+
   $words[] = array(osc_user_name(), $yourName, $yourEmail, $phoneNumber, $message);
 
   $title = osc_apply_filter('email_item_inquiry_title_after', osc_mailBeauty(osc_apply_filter('email_title', osc_apply_filter('email_item_inquiry_title', $content['s_title'], $id, $yourEmail, $yourName, $phoneNumber, $message)), $words), $id, $yourEmail, $yourName, $phoneNumber, $message);
@@ -1320,7 +1304,7 @@ function fn_email_contact_user($id, $yourEmail, $yourName, $phoneNumber, $messag
   if(osc_notify_contact_item()) {
     $admins = Admin::newInstance()->listAll();
     $adminEmails = array();
-    foreach ($admins as $admin) {
+    foreach($admins as $admin) {
       if(!empty($admin['s_email'])) {
         $adminEmails[] = $admin['s_email'];
       }
@@ -1341,7 +1325,7 @@ osc_add_hook('hook_email_contact_user', 'fn_email_contact_user');
  */
 function fn_email_new_comment_user($aItem) {
   if(!isset($aItem['id'])) { return false; }
-  
+
   $authorName = trim(strip_tags($aItem['authorName']));
   $authorEmail = trim(strip_tags($aItem['authorEmail']));
   $body = trim(strip_tags($aItem['body']));
@@ -1354,10 +1338,10 @@ function fn_email_new_comment_user($aItem) {
   View::newInstance()->_exportVariableToView('item', $item);
   $itemURL = osc_item_url();
   $itemURL = '<a href="' . $itemURL . '" >' . $itemURL . '</a>';
-  
+
   $name = $item['s_contact_name'];
   $email = $item['s_contact_email'];
-  
+
   // In case this comment is reply to other comment, sent "new comment" email notification to comment row that is this one replying
   // Only when comment author email != reply author email
   if(!empty($reply) && isset($reply['pk_i_id'])) {
@@ -1390,7 +1374,7 @@ function fn_email_new_comment_user($aItem) {
     '{SELLER_NAME}',
     '{SELLER_EMAIL}'
   );
-  
+
   $words[] = array($authorName, $authorEmail, $title, $body, $item['s_title'], $itemId, osc_item_url(), $itemURL, $name, $email);
 
   $title_email = osc_apply_filter('email_new_comment_user_title_after', osc_mailBeauty(osc_apply_filter('email_title', osc_apply_filter('email_new_comment_user_title', $content['s_title'], $aItem)), $words), $aItem);
@@ -1417,7 +1401,7 @@ osc_add_hook('hook_email_new_comment_reply_user', 'fn_email_new_comment_user');
  */
 function fn_email_new_admin($data) {
   if(!isset($data['s_email'])) { return false; }
-  
+
   $name = trim(strip_tags($data['s_name']));
   $username = trim(strip_tags($data['s_username']));
 
@@ -1439,7 +1423,7 @@ function fn_email_new_admin($data) {
     '{PASSWORD}',
     '{WEB_ADMIN_LINK}'
   );
-  
+
   $words[] = array(
     $name, $username, $data['s_password'],
     '<a href="' . osc_admin_base_url() . '">' . osc_page_title() . '</a>',
@@ -1456,7 +1440,7 @@ function fn_email_new_admin($data) {
     'body' => $body_email,
     'alt_body' => $body_email
   );
-  
+
   osc_sendMail($emailParams, 'new_admin');
 }
 
@@ -1470,7 +1454,7 @@ osc_add_hook('hook_email_new_admin', 'fn_email_new_admin');
  */
 function fn_email_warn_expiration($aItem) {
   if(!isset($aItem['pk_i_id'])) { return false; }
-  
+
   $itemId = $aItem['pk_i_id'];
   $email = $aItem['s_contact_email'];
 
@@ -1502,12 +1486,12 @@ function fn_email_warn_expiration($aItem) {
     '{CONTACT_NAME}',
     '{CONTACT_EMAIL}'
   );
-  
+
   $words[] = array(
     $aItem['s_contact_name'], $aItem['s_title'], $itemId, $aItem['dt_expiration'],
     osc_item_url(), $itemURL, $aItem['s_contact_name'], $aItem['s_contact_email'], $aItem['s_contact_name'], $aItem['s_contact_email']
   );
-  
+
   $title_email = osc_apply_filter('email_warn_expiration_title_after', osc_mailBeauty(osc_apply_filter('email_title', osc_apply_filter('email_warn_expiration_title', $content['s_title'], $aItem)), $words), $aItem);
   $body_email = osc_apply_filter('email_warn_expiration_description_after', osc_mailBeauty(osc_apply_filter('email_description', osc_apply_filter('email_warn_expiration_description', $content['s_text'], $aItem)), $words), $aItem);
 
@@ -1519,7 +1503,7 @@ function fn_email_warn_expiration($aItem) {
     'body' => $body_email,
     'alt_body' => $body_email
   );
-  
+
   osc_sendMail($emailParams, 'warn_expiration');
 }
 
@@ -1531,11 +1515,11 @@ osc_add_hook('hook_email_warn_expiration', 'fn_email_warn_expiration');
  */
 function fn_email_auto_upgrade($result) {
   $body = __('<p>Dear {WEB_TITLE} admin,</p>');
-  
+
   if($result['error'] == 0 || $result['error'] == 6) {
     $title = __('{WEB_TITLE} - Your site has upgraded to Osclass {VERSION}');
     $body  .= __('<p>Your site at {WEB_LINK} has been updated automatically to Osclass {VERSION}</p>');
-    
+
     if($result['error'] == 6) {
       $body .= sprintf(__('<p>There were some minor errors removing temporary files. Please manually remove the "%s/downloads/oc-temp" folder</p>'), OC_CONTENT_FOLDER);
     }
@@ -1543,7 +1527,7 @@ function fn_email_auto_upgrade($result) {
     $title = __('{WEB_TITLE} - We failed trying to upgrade your site to Osclass {VERSION}');
     $body  .= '<p>We failed trying to upgrade your site to Osclass {VERSION}. Heres is the error message: {MESSAGE}</p>';
   }
-  
+
   $body .= '<p>If you experience any issues or need support, we will be happy to help you at the Osclass support forums</p>';
   $body .= '<p><a href="https://forums.osclasspoint.com/">https://forums.osclasspoint.com/</a></p>';
   $body .= '<p>The Osclass team</p>';
@@ -1553,7 +1537,7 @@ function fn_email_auto_upgrade($result) {
     '{MESSAGE}',
     '{VERSION}'
   );
-  
+
   $words[] = array(
     $result['message'], $result['version']
   );
@@ -1562,7 +1546,7 @@ function fn_email_auto_upgrade($result) {
   $body = osc_apply_filter('email_after_auto_upgrade_description_after', osc_mailBeauty(osc_apply_filter('email_description', osc_apply_filter('email_after_auto_upgrade_description', $body, $result)), $words), $result);
 
   $admins = Admin::newInstance()->listAll();
-  
+
   foreach($admins as $admin) {
     if(!empty($admin['s_email']) && ($admin['b_moderator'] == 0)) {
       $emailParams = array(
@@ -1573,13 +1557,374 @@ function fn_email_auto_upgrade($result) {
         'body' => $body,
         'alt_body' => $body,
       );
-      
+
       osc_sendMail($emailParams, 'auto_upgrade');
     }
   }
 }
 
 osc_add_hook('after_auto_upgrade', 'fn_email_auto_upgrade', 10);
+
+
+/**
+ * Prepare placeholder words shared by all report emails
+ *
+ * @param array $report
+ * @param array $comment
+ * @param array $extra
+ * @return array
+ */
+function fn_email_report_words($report, $comment = null, $extra = array()) {
+  $reporter = User::newInstance()->findByPrimaryKey($report['fk_i_reporter_user_id']);
+  $reported_user = ($report['fk_i_user_id'] > 0 ? User::newInstance()->findByPrimaryKey($report['fk_i_user_id']) : false);
+
+  $reported_title = '';
+  if($report['s_type'] == 'item' && $report['fk_i_item_id'] > 0) {
+    $item = Item::newInstance()->findByPrimaryKey($report['fk_i_item_id']);
+    $reported_title = ($item ? $item['s_title'] : '');
+    if(!$reported_user && $item && !empty($item['s_contact_name'])) {
+      $reported_user = array('s_name' => $item['s_contact_name'], 's_email' => (string)@$item['s_contact_email']);
+    }
+  } else if($report['s_type'] == 'user' && $reported_user) {
+    $reported_title = $reported_user['s_name'];
+  } else if($report['s_type'] == 'webcontact') {
+    $reported_title = osc_report_type_label('webcontact');
+  } else if($report['i_reported_id'] > 0) {
+    $reported_title = osc_report_type_label($report['s_type']) . ' #' . $report['i_reported_id'];
+  }
+
+  $report_url = '';
+  $report_link = '';
+  if(empty($extra['HIDE_REPORT_URL'])) {
+    $report_url = osc_report_view_url($report['pk_i_id']);
+    $report_link = '<a href="' . osc_esc_html($report_url) . '">' . osc_esc_html($report_url) . '</a>';
+  }
+
+  $report_admin_url = osc_admin_base_url(true) . '?page=reports&action=edit&id=' . (int)$report['pk_i_id'];
+  $report_admin_link = '<a href="' . osc_esc_html($report_admin_url) . '">' . osc_esc_html($report_admin_url) . '</a>';
+
+  $comment_author = '';
+  $comment_text = '';
+  $report_reply = '';
+  if($comment !== null) {
+    if($comment['fk_i_admin_id'] > 0) {
+      $comment_author = __('Admin');
+    } else if(!empty($extra['ANONYMIZE_USERS'])) {
+      $comment_author = __('Participant');
+    } else {
+      $commenter = User::newInstance()->findByPrimaryKey($comment['fk_i_user_id']);
+      $comment_author = ($commenter ? $commenter['s_name'] : '');
+    }
+    $comment_text = nl2br(osc_esc_html((string)$comment['s_comment']));
+    if($comment_text != '') {
+      $report_reply = '<hr /><p><b>' . osc_esc_html($comment_author) . '</b><br />' . $comment_text . '</p>';
+    }
+  }
+
+  $words = array();
+  $words[] = array(
+    '{REPORT_ID}',
+    '{REPORT_TYPE}',
+    '{REPORT_REASON}',
+    '{REPORT_STATUS}',
+    '{REPORT_COMMENT}',
+    '{REPORTER_NAME}',
+    '{REPORTED_USER_NAME}',
+    '{REPORTED_TITLE}',
+    '{REPORT_URL}',
+    '{REPORT_LINK}',
+    '{REPORT_ADMIN_URL}',
+    '{REPORT_ADMIN_LINK}',
+    '{COMMENT}',
+    '{COMMENT_AUTHOR}',
+    '{REPORT_REPLY}',
+    '{USER_NAME}',
+    '{REPORT_EVENT}',
+    '{REPORT_MESSAGE}'
+  );
+
+  $words[] = array(
+    (int)$report['pk_i_id'],
+    osc_esc_html(osc_report_type_label($report['s_type'])),
+    osc_esc_html(osc_report_reason_label($report['s_reason'])),
+    osc_esc_html(osc_report_status_label($report['s_status'])),
+    nl2br(osc_esc_html((string)$report['s_comment'])),
+    (!empty($extra['HIDE_REPORTER_NAME']) ? '' : ($reporter ? osc_esc_html($reporter['s_name']) : '')),
+    ($reported_user ? osc_esc_html($reported_user['s_name']) : ''),
+    osc_esc_html($reported_title),
+    $report_url,
+    $report_link,
+    $report_admin_url,
+    $report_admin_link,
+    $comment_text,
+    osc_esc_html($comment_author),
+    $report_reply,
+    (isset($extra['USER_NAME']) ? osc_esc_html($extra['USER_NAME']) : ''),
+    (isset($extra['REPORT_EVENT']) ? $extra['REPORT_EVENT'] : ''),
+    (isset($extra['REPORT_MESSAGE']) ? $extra['REPORT_MESSAGE'] : '')
+  );
+
+  return osc_apply_filter('email_report_words', $words, $report, $comment, $extra);
+}
+
+
+/**
+ * Get email template content of given internal name for report locale
+ *
+ * @param string $internal_name
+ * @param array $report
+ * @return array|bool
+ */
+function fn_email_report_content($internal_name, $report) {
+  $aPage = Page::newInstance()->findByInternalName($internal_name);
+
+  if(!isset($aPage['locale'])) {
+    return false;
+  }
+
+  $locale = (!empty($report['fk_c_locale_code']) ? $report['fk_c_locale_code'] : osc_language());
+
+  if(isset($aPage['locale'][$locale]['s_title'])) {
+    return $aPage['locale'][$locale];
+  }
+
+  return current($aPage['locale']);
+}
+
+
+/**
+ * Send report email to all admins
+ *
+ * @param array $report
+ * @param array $extra
+ * @param array $comment
+ * @param string $mailType
+ */
+function fn_email_report_send_admin($report, $extra = array(), $comment = null, $mailType = 'report_admin') {
+  $content = fn_email_report_content('email_report_admin', $report);
+  if(!$content) { return false; }
+
+  $words = fn_email_report_words($report, $comment, $extra);
+  $title = osc_apply_filter('email_report_admin_title', osc_mailBeauty($content['s_title'], $words), $report);
+  $body = osc_apply_filter('email_report_admin_description', osc_mailBeauty($content['s_text'], $words), $report);
+
+  $admins = Admin::newInstance()->listAll();
+  foreach($admins as $admin) {
+    if(!empty($admin['s_email'])) {
+      $emailParams = array(
+        'from' => _osc_from_email_aux(),
+        'to' => $admin['s_email'],
+        'to_name' => __('Admin'),
+        'subject' => $title,
+        'body' => $body,
+        'alt_body' => $body
+      );
+
+      $emailParams = osc_apply_filter('email_report_admin_params', $emailParams, $report, $comment, $extra);
+      osc_sendMail($emailParams, $mailType);
+    }
+  }
+}
+
+
+/**
+ * Send report email to given user
+ *
+ * @param string $internal_name
+ * @param array $report
+ * @param int $userId
+ * @param array $extra
+ * @param array $comment
+ * @param string $mailType
+ */
+function fn_email_report_send_user($internal_name, $report, $userId, $extra = array(), $comment = null, $mailType = 'report_user') {
+  $to = '';
+  $to_name = '';
+
+  if($userId > 0) {
+    $user = User::newInstance()->findByPrimaryKey($userId);
+    if($user && !empty($user['s_email'])) {
+      $to = $user['s_email'];
+      $to_name = $user['s_name'];
+    }
+  }
+
+  // Guest listing owner: notify via item contact email only when targeting the owner (no user id)
+  if($to == '' && !($userId > 0) && is_array($report) && $report['s_type'] == 'item' && $report['fk_i_item_id'] > 0) {
+    $item = Item::newInstance()->findByPrimaryKey($report['fk_i_item_id']);
+    if($item && !empty($item['s_contact_email'])) {
+      $to = $item['s_contact_email'];
+      $to_name = (!empty($item['s_contact_name']) ? $item['s_contact_name'] : $item['s_contact_email']);
+      $extra['HIDE_REPORT_URL'] = true;
+    }
+  }
+
+  if($to == '') {
+    return false;
+  }
+
+  $content = fn_email_report_content($internal_name, $report);
+  if(!$content) { return false; }
+
+  $extra['USER_NAME'] = (isset($extra['USER_NAME']) && $extra['USER_NAME'] != '' ? $extra['USER_NAME'] : $to_name);
+  $words = fn_email_report_words($report, $comment, $extra);
+  $title = osc_apply_filter('email_' . $internal_name . '_title', osc_mailBeauty($content['s_title'], $words), $report);
+  $body = osc_apply_filter('email_' . $internal_name . '_description', osc_mailBeauty($content['s_text'], $words), $report);
+
+  $emailParams = array(
+    'from' => _osc_from_email_aux(),
+    'to' => $to,
+    'to_name' => $to_name,
+    'subject' => $title,
+    'body' => $body,
+    'alt_body' => $body
+  );
+
+  $emailParams = osc_apply_filter('email_report_user_params', $emailParams, $report, array('s_email' => $to, 's_name' => $to_name), $comment, $extra);
+  osc_sendMail($emailParams, $mailType);
+}
+
+
+/**
+ * Notify admins about new report
+ *
+ * @param array $report
+ */
+function fn_email_report_admin($report) {
+  fn_email_report_send_admin($report, array(
+    'REPORT_EVENT' => sprintf(__('New report #%d has been submitted'), $report['pk_i_id']),
+    'REPORT_MESSAGE' => __('A new report has been submitted and is waiting for review.')
+  ), null, 'report_admin');
+}
+
+osc_add_hook('hook_email_report_admin', 'fn_email_report_admin');
+
+
+/**
+ * Notify reporter that report has been received
+ *
+ * @param array $report
+ */
+function fn_email_report_reporter_created($report) {
+  fn_email_report_send_user('email_report_user', $report, $report['fk_i_reporter_user_id'], array(
+    'REPORT_EVENT' => sprintf(__('Your report #%d has been received'), $report['pk_i_id']),
+    'REPORT_MESSAGE' => __('Thank you for your report. Our team will review it.'),
+    'HIDE_REPORT_URL' => true
+  ), null, 'report_reporter_created');
+}
+
+osc_add_hook('hook_email_report_reporter_created', 'fn_email_report_reporter_created');
+
+
+/**
+ * Notify reporter that report has been resolved/closed
+ *
+ * @param array $report
+ */
+function fn_email_report_reporter_resolved($report) {
+  fn_email_report_send_user('email_report_user', $report, $report['fk_i_reporter_user_id'], array(
+    'REPORT_EVENT' => sprintf(__('Your report #%d has been closed'), $report['pk_i_id']),
+    'REPORT_MESSAGE' => __('Your report has been closed. Thank you for helping us keep the site safe.'),
+    'HIDE_REPORT_URL' => true
+  ), null, 'report_reporter_resolved');
+}
+
+osc_add_hook('hook_email_report_reporter_resolved', 'fn_email_report_reporter_resolved');
+
+
+/**
+ * Notify reported user that report regarding his content has been created
+ *
+ * @param array $report
+ */
+function fn_email_report_owner_created($report) {
+  fn_email_report_send_user('email_report_user', $report, $report['fk_i_user_id'], array(
+    'REPORT_EVENT' => sprintf(__('Report #%d has been submitted regarding your content'), $report['pk_i_id']),
+    'REPORT_MESSAGE' => __('A report regarding your content has been submitted. Our team will review it. No action is required from you at this moment.'),
+    'HIDE_REPORTER_NAME' => true,
+    'ANONYMIZE_USERS' => true
+  ), null, 'report_owner_created');
+}
+
+osc_add_hook('hook_email_report_owner_created', 'fn_email_report_owner_created');
+
+
+/**
+ * Notify reported user that report regarding his content has been resolved/closed
+ *
+ * @param array $report
+ */
+function fn_email_report_owner_resolved($report) {
+  fn_email_report_send_user('email_report_user', $report, $report['fk_i_user_id'], array(
+    'REPORT_EVENT' => sprintf(__('Report #%d regarding your content has been closed'), $report['pk_i_id']),
+    'REPORT_MESSAGE' => __('The report regarding your content has been closed.'),
+    'HIDE_REPORTER_NAME' => true,
+    'ANONYMIZE_USERS' => true
+  ), null, 'report_owner_resolved');
+}
+
+osc_add_hook('hook_email_report_owner_resolved', 'fn_email_report_owner_resolved');
+
+
+/**
+ * Request feedback from reported user
+ *
+ * @param array $report
+ */
+function fn_email_report_feedback_request($report) {
+  fn_email_report_send_user('email_report_user', $report, $report['fk_i_user_id'], array(
+    'REPORT_EVENT' => sprintf(__('Your feedback is requested on report #%d'), $report['pk_i_id']),
+    'REPORT_MESSAGE' => __('A report regarding your content is waiting for your feedback. If no feedback is provided, the report may be closed automatically.'),
+    'HIDE_REPORTER_NAME' => true,
+    'ANONYMIZE_USERS' => true
+  ), null, 'report_feedback_request');
+}
+
+osc_add_hook('hook_email_report_feedback_request', 'fn_email_report_feedback_request');
+
+
+/**
+ * Notify admins about new reply on report
+ *
+ * @param array $report
+ * @param array $comment
+ */
+function fn_email_report_new_comment($report, $comment) {
+  fn_email_report_send_admin($report, array(
+    'REPORT_EVENT' => sprintf(__('Report #%d has a new reply'), $report['pk_i_id']),
+    'REPORT_MESSAGE' => __('A new reply has been added to the report.')
+  ), $comment, 'report_new_comment');
+}
+
+osc_add_hook('hook_email_report_new_comment', 'fn_email_report_new_comment');
+
+
+/**
+ * Notify given user about new reply on report
+ *
+ * @param array $report
+ * @param array $comment
+ * @param int $userId
+ */
+function fn_email_report_new_comment_user($report, $comment, $userId) {
+  $extra = array(
+    'REPORT_EVENT' => sprintf(__('Report #%d has a new reply'), $report['pk_i_id']),
+    'REPORT_MESSAGE' => __('A new reply has been added to the report.')
+  );
+
+  // Reporter / guest owner cannot open FO conversation; registered reported user can
+  if((int)$userId <= 0 || (int)$userId === (int)$report['fk_i_reporter_user_id']) {
+    $extra['HIDE_REPORT_URL'] = true;
+  }
+  if((int)$userId <= 0 || (int)$userId === (int)$report['fk_i_user_id']) {
+    $extra['HIDE_REPORTER_NAME'] = true;
+    $extra['ANONYMIZE_USERS'] = true;
+  }
+
+  fn_email_report_send_user('email_report_user', $report, $userId, $extra, $comment, 'report_new_comment_user');
+}
+
+osc_add_hook('hook_email_report_new_comment_user', 'fn_email_report_new_comment_user');
 
 
 /**

@@ -1,5 +1,5 @@
 <?php
-if (!defined('OC_ADMIN')) exit('Direct access is not allowed.');
+if(!defined('OC_ADMIN')) exit('Direct access is not allowed.');
 /*
  * Copyright 2014 Osclass
  * Copyright 2026 Osclass by OsclassPoint.com
@@ -20,7 +20,7 @@ if (!defined('OC_ADMIN')) exit('Direct access is not allowed.');
 osc_enqueue_script('jquery-validate');
 
 $current_host = parse_url(Params::getServerParam('HTTP_HOST'), PHP_URL_HOST);
-if ($current_host === null) {
+if($current_host === null) {
   $current_host = Params::getServerParam('HTTP_HOST');
 }
 
@@ -52,7 +52,7 @@ function customPageHeader() {
 $ip_service = osc_ipdata_service_map('ALL', osc_get_ip());
 
 function customPageTitle($string) {
-  return sprintf(__('Advanced Settings - %s'), $string);
+  return sprintf(__('%s - %s'), __('Advanced settings'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');
@@ -64,24 +64,24 @@ osc_current_admin_theme_path('parts/header.php');
 $(document).ready(function() {
   $('body').on('change', 'select#e_type', function() {
     if($(this).val() != 'country') {
-      $('div.sd-country').slideUp(200); 
+      $('div.sd-country').slideUp(200);
     } else {
-      $('div.sd-country').slideDown(200); 
+      $('div.sd-country').slideDown(200);
     }
-    
+
     if($(this).val() != 'language') {
-      $('div.sd-language').slideUp(200); 
+      $('div.sd-language').slideUp(200);
     } else {
-      $('div.sd-language').slideDown(200); 
+      $('div.sd-language').slideDown(200);
     }
   });
 });
 </script>
 
 <style>
-<?php if(osc_subdomain_type() != 'country') { ?> 
+<?php if(osc_subdomain_type() != 'country') { ?>
 div.sd-country, .form-row.sd-country {display:none;}
-<?php } else if(osc_subdomain_type() != 'language') { ?> 
+<?php } else if(osc_subdomain_type() != 'language') { ?>
 div.sd-language, .form-row.sd-language {display:none;}
 <?php } ?>
 </style>
@@ -91,8 +91,8 @@ div.sd-language, .form-row.sd-language {display:none;}
   <div id="general-settings">
     <?php
       $cache_type = Object_Cache_Factory::newInstance()->_get_cache();
-      if( $cache_type != 'default' ) { ?>
-      
+      if($cache_type != 'default' ) { ?>
+
       <!--  Cache flush  -->
       <h2 class="render-title"><?php _e('Flush cache'); ?></h2>
       <form id="cache_flush" name="cache_flush" action="<?php echo osc_admin_base_url(true); ?>" method="post">
@@ -110,33 +110,33 @@ div.sd-language, .form-row.sd-language {display:none;}
         </fieldset>
       </form>
     <?php } ?>
-    
-    
-    <h2 class="render-title"><?php _e('Subdomains Settings'); ?></h2>
+
+
+    <h2 class="render-title"><?php _e('Subdomains settings'); ?></h2>
     <ul id="error_list"></ul>
     <form name="settings_form" action="<?php echo osc_admin_base_url(true); ?>" method="post">
       <input type="hidden" name="page" value="settings" />
       <input type="hidden" name="action" value="advanced_post" />
-      
+
       <fieldset>
         <div class="form-horizontal">
           <div class="form-row">
             <div class="form-label"><?php _e('Subdomain type'); ?></div>
             <div class="form-controls">
               <select name="e_type" id="e_type">
-                <option value="" <?php if (osc_subdomain_type() == '') { ?>selected="selected"<?php } ?>><?php _e('No subdomains'); ?></option>
-                <option value="category" <?php if (osc_subdomain_type() == 'category') { ?>selected="selected"<?php } ?>><?php _e('Category based'); ?></option>
-                <option value="country" <?php if (osc_subdomain_type() == 'country') { ?>selected="selected"<?php } ?>><?php _e('Country based'); ?></option>
-                <option value="region" <?php if (osc_subdomain_type() == 'region') { ?>selected="selected"<?php } ?>><?php _e('Region based'); ?></option>
-                <option value="city" <?php if (osc_subdomain_type() == 'city') { ?>selected="selected"<?php } ?>><?php _e('City based'); ?></option>
-                <option value="user" <?php if (osc_subdomain_type() == 'user') { ?>selected="selected"<?php } ?>><?php _e('User based'); ?></option>
-                <option value="language" <?php if (osc_subdomain_type() == 'language') { ?>selected="selected"<?php } ?>><?php _e('Language based'); ?></option>
+                <option value="" <?php if(osc_subdomain_type() == '') { ?>selected="selected"<?php } ?>><?php _e('No subdomains'); ?></option>
+                <option value="category" <?php if(osc_subdomain_type() == 'category') { ?>selected="selected"<?php } ?>><?php _e('Category based'); ?></option>
+                <option value="country" <?php if(osc_subdomain_type() == 'country') { ?>selected="selected"<?php } ?>><?php _e('Country based'); ?></option>
+                <option value="region" <?php if(osc_subdomain_type() == 'region') { ?>selected="selected"<?php } ?>><?php _e('Region based'); ?></option>
+                <option value="city" <?php if(osc_subdomain_type() == 'city') { ?>selected="selected"<?php } ?>><?php _e('City based'); ?></option>
+                <option value="user" <?php if(osc_subdomain_type() == 'user') { ?>selected="selected"<?php } ?>><?php _e('User based'); ?></option>
+                <option value="language" <?php if(osc_subdomain_type() == 'language') { ?>selected="selected"<?php } ?>><?php _e('Language based'); ?></option>
               </select>
 
               <div class="help-box"><?php _e('Subdomains for those does not exists related entry in database (based on slug) will return 404 page.'); ?></div>
             </div>
           </div>
-          
+
           <div class="form-row">
             <div class="form-label"><?php _e('Base host'); ?></div>
             <div class="form-controls"><input type="text" class="xlarge" name="s_host" value="<?php echo osc_esc_html(osc_subdomain_host()); ?>" />
@@ -165,14 +165,14 @@ div.sd-language, .form-row.sd-language {display:none;}
             <div class="form-label"><?php _e('Language slug type'); ?></div>
             <div class="form-controls">
               <select name="s_language_slug_type" id="s_language_slug_type">
-                <option value="" <?php if (osc_subdomain_language_slug_type() == '') { ?>selected="selected"<?php } ?>><?php _e('Short format (xx)'); ?></option>
-                <option value="LONG" <?php if (osc_subdomain_language_slug_type() == 'LONG') { ?>selected="selected"<?php } ?>><?php _e('Long format (xx-yy)'); ?></option>
+                <option value="" <?php if(osc_subdomain_language_slug_type() == '') { ?>selected="selected"<?php } ?>><?php _e('Short format (xx)'); ?></option>
+                <option value="LONG" <?php if(osc_subdomain_language_slug_type() == 'LONG') { ?>selected="selected"<?php } ?>><?php _e('Long format (xx-yy)'); ?></option>
               </select>
 
               <div class="help-box"><?php _e('If short type selected, make sure you do not have 2 languages starting with same code (ie. en_US & en_GB).'); ?></div>
             </div>
           </div>
-          
+
           <div class="form-row sd-country">
             <div class="form-label"><?php _e('Automatic redirect'); ?></div>
             <div class="form-controls">
@@ -189,7 +189,7 @@ div.sd-language, .form-row.sd-language {display:none;}
               </div>
             </div>
           </div>
-          
+
           <div class="form-row sd-country">
             <div class="form-label"><?php _e('Restricted countries'); ?></div>
             <div class="form-controls">
@@ -213,7 +213,7 @@ div.sd-language, .form-row.sd-language {display:none;}
               </div>
             </div>
           <?php } else { ?>
-          
+
             <div class="form-row">
               <div class="form-label"><?php _e('Your Geo service response:'); ?></div>
               <div class="form-controls" style="width:100%;">
@@ -222,9 +222,9 @@ div.sd-language, .form-row.sd-language {display:none;}
               </div>
             </div>
           <?php } ?>
-          
+
           <div class="clear"></div>
-          
+
           <div class="form-actions">
             <input type="submit" id="save_changes" value="<?php echo osc_esc_html(__('Save changes')); ?>" class="btn btn-submit" />
           </div>
@@ -234,4 +234,4 @@ div.sd-language, .form-row.sd-language {display:none;}
   </div>
   <!-- /settings form -->
 </div>
-<?php osc_current_admin_theme_path('parts/footer.php'); ?>
+<?php osc_current_admin_theme_path('parts/footer.php');

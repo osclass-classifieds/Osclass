@@ -52,7 +52,7 @@ function addHelp() {
 osc_add_hook('help_box','addHelp');
 
 osc_add_hook('admin_page_header','customPageHeader');
-function customPageHeader() { 
+function customPageHeader() {
   ?>
   <h1>
     <?php _e('Appearance'); ?>
@@ -63,7 +63,7 @@ function customPageHeader() {
 }
 
 function customPageTitle($string) {
-  return sprintf(__('Appearance - %s'), $string);
+  return sprintf(__('%s - %s'), __('Appearance'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');
@@ -117,60 +117,60 @@ if(is_array($aThemesToUpdate) && count($aThemesToUpdate) > 0) {
         <h2 class="render-title"><?php _e('Current theme'); ?> <a href="<?php echo osc_admin_base_url(true); ?>?page=appearance&amp;action=add" class="btn btn-mini"><?php _e('Add new'); ?></a></h2>
         <div class="current-theme">
           <div class="theme">
-            <?php 
+            <?php
               if(file_exists(osc_base_path() . '/' . OC_CONTENT_FOLDER . '/themes/' . osc_theme() . '/screenshot.png')) {
                 $theme_logo = osc_base_url() . '/' . OC_CONTENT_FOLDER . '/themes/' . osc_theme() . '/screenshot.png';
-              } else if (strpos(osc_theme(), 'child') !== false && file_exists(osc_base_path() . '/' . OC_CONTENT_FOLDER . '/themes/' . str_replace('_child', '', osc_theme()) . '/screenshot.png')) {
+              } elseif(strpos(osc_theme(), 'child') !== false && file_exists(osc_base_path() . '/' . OC_CONTENT_FOLDER . '/themes/' . str_replace('_child', '', osc_theme()) . '/screenshot.png')) {
                 $theme_logo = osc_base_url() . '/' . OC_CONTENT_FOLDER . '/themes/' . str_replace('_child', '', osc_theme()) . '/screenshot.png';
               } else {
                 $theme_logo = false;
               }
             ?>
-            
+
             <?php if($theme_logo !== false) { ?>
               <img src="<?php echo $theme_logo; ?>" title="<?php echo $info['name']; ?>" alt="<?php echo $info['name']; ?>" />
             <?php } ?>
-            
+
             <div>
               <div class="theme-info">
                 <h3><?php echo $info['name']; ?> <?php echo $info['version']; ?> <?php _e('by'); ?> <a target="_blank" href="<?php echo $info['author_url']; ?>"><?php echo $info['author_name']; ?></a></h3>
               </div>
-              
+
               <div class="theme-description">
                 <?php echo $info['description']; ?>
               </div>
-              
+
               <div class="theme-actions">
                 <?php
-                  if($bThemesToUpdate) { 
+                  if($bThemesToUpdate) {
                     if(in_array(osc_theme(),$aThemesToUpdate)){
                       ?>
                       <a href='#<?php echo htmlentities(@$info['product_key']); ?>' class="btn btn-mini btn-black market-popup"><?php _e("Update"); ?></a>
-                      <?php 
+                      <?php
                     }
-                  } 
+                  }
                 ?>
-                
+
                 <?php if(file_exists(osc_base_path() . '/' . OC_CONTENT_FOLDER . '/themes/' . osc_theme() . '/admin/settings.php')) { ?>
                   <a class="btn btn-mini" href="<?php echo osc_admin_base_url(true) . '?page=appearance&action=render&file=' . OC_CONTENT_FOLDER . '/themes/' . osc_theme() . '/admin/settings.php'; ?>"><?php _e('Configure'); ?></a>
                 <?php } else if(file_exists(osc_base_path() . '/' . OC_CONTENT_FOLDER . '/themes/' . osc_theme() . '/admin/configure.php')) { ?>
                   <a class="btn btn-mini" href="<?php echo osc_admin_base_url(true) . '?page=appearance&action=render&file=' . OC_CONTENT_FOLDER . '/themes/' . osc_theme() . '/admin/configure.php'; ?>"><?php _e('Configure'); ?></a>
                 <?php } ?>
-                
+
                 <?php if(file_exists(osc_base_path() . '/' . OC_CONTENT_FOLDER . '/themes/' . osc_theme() . '/admin/logo.php')) { ?>
                   <a class="btn btn-mini" href="<?php echo osc_admin_base_url(true) . '?page=appearance&action=render&file=' . OC_CONTENT_FOLDER . '/themes/' . osc_theme() . '/admin/logo.php'; ?>"><?php _e('Logo'); ?></a>
                 <?php } else if(file_exists(osc_base_path() . '/' . OC_CONTENT_FOLDER . '/themes/' . osc_theme() . '/admin/header.php')) { ?>
                   <a class="btn btn-mini" href="<?php echo osc_admin_base_url(true) . '?page=appearance&action=render&file=' . OC_CONTENT_FOLDER . '/themes/' . osc_theme() . '/admin/header.php'; ?>"><?php _e('Logo'); ?></a>
                 <?php } ?>
-                
+
                 <?php if(file_exists(osc_base_path() . '/' . OC_CONTENT_FOLDER . '/themes/' . osc_theme() . '/admin/category.php')) { ?>
                   <a class="btn btn-mini" href="<?php echo osc_admin_base_url(true) . '?page=appearance&action=render&file=' . OC_CONTENT_FOLDER . '/themes/' . osc_theme() . '/admin/category.php'; ?>"><?php _e('Icons'); ?></a>
                 <?php } ?>
-                
+
                 <?php if(file_exists(osc_base_path() . '/' . OC_CONTENT_FOLDER . '/themes/' . osc_theme() . '/admin/banner.php')) { ?>
                   <a class="btn btn-mini" href="<?php echo osc_admin_base_url(true) . '?page=appearance&action=render&file=' . OC_CONTENT_FOLDER . '/themes/' . osc_theme() . '/admin/banner.php'; ?>"><?php _e('Advertisement'); ?></a>
                 <?php } ?>
-                
+
                 <?php if(file_exists(osc_base_path() . '/' . OC_CONTENT_FOLDER . '/themes/' . osc_theme() . '/admin/plugins.php')) { ?>
                   <a class="btn btn-mini" href="<?php echo osc_admin_base_url(true) . '?page=appearance&action=render&file=' . OC_CONTENT_FOLDER . '/themes/' . osc_theme() . '/admin/plugins.php'; ?>"><?php _e('Plugins'); ?></a>
                 <?php } ?>
@@ -179,24 +179,24 @@ if(is_array($aThemesToUpdate) && count($aThemesToUpdate) > 0) {
             <div class="clear"></div>
           </div>
         </div>
-        
+
         <h2 class="render-title"><?php _e('Available themes'); ?></h2>
         <div class="available-theme">
-          <?php 
+          <?php
           $csrf_token = osc_csrf_token_url();
 
           $counter = 0;
           foreach($themes as $theme) { ?>
             <?php
-              if( $theme == osc_theme() ) {
+              if($theme == osc_theme() ) {
                 continue;
               }
               $counter++;
               $info = WebThemes::newInstance()->loadThemeInfo($theme);
-              
+
               if(file_exists(osc_base_path() . '/' . OC_CONTENT_FOLDER . '/themes/' . $theme . '/screenshot.png')) {
                 $theme_logo = osc_base_url() . '/' . OC_CONTENT_FOLDER . '/themes/' . $theme . '/screenshot.png';
-              } else if (strpos($theme, 'child') !== false && file_exists(osc_base_path() . '/' . OC_CONTENT_FOLDER . '/themes/' . str_replace('_child', '', $theme) . '/screenshot.png')) {
+              } elseif(strpos($theme, 'child') !== false && file_exists(osc_base_path() . '/' . OC_CONTENT_FOLDER . '/themes/' . str_replace('_child', '', $theme) . '/screenshot.png')) {
                 $theme_logo = osc_base_url() . '/' . OC_CONTENT_FOLDER . '/themes/' . str_replace('_child', '', $theme) . '/screenshot.png';
               } else {
                 $theme_logo = false;
@@ -219,9 +219,9 @@ if(is_array($aThemesToUpdate) && count($aThemesToUpdate) > 0) {
                     if(in_array($theme,$aThemesToUpdate)){
                       ?>
                       <a href='#<?php echo htmlentities(@$info['product_key']); ?>' class="btn btn-mini btn-gray market-popup"><?php _e("Update"); ?></a>
-                      <?php 
+                      <?php
                     }
-                  } 
+                  }
                 ?>
               </div>
               <div class="theme-info">
@@ -292,7 +292,7 @@ if(is_array($aThemesToUpdate) && count($aThemesToUpdate) > 0) {
   <input type="hidden" name="webtheme" value="" />
   <div class="form-horizontal">
     <div class="form-row">
-      <?php _e('This action can not be undone. Are you sure you want to delete the theme?'); ?>
+      <?php _e('This action cannot be undone. Are you sure you want to delete the theme?'); ?>
     </div>
     <div class="form-actions">
       <div class="wrapper">
@@ -324,7 +324,7 @@ if(is_array($aThemesToUpdate) && count($aThemesToUpdate) > 0) {
 
         if(data.error == 0) { // no errors
           content += oscEscapeHTML(data.message);
-          content += '<h3><?php echo osc_esc_js(__('Theme has been downloaded correctly.')); ?></h3>';
+          content += '<h3><?php echo osc_esc_js(__('The package has been downloaded')); ?></h3>';
           content += "<p>";
           content += '<a class="btn btn-mini btn-green" href="<?php echo osc_admin_base_url(true); ?>?page=appearance&marketError='+data.error+'&message='+oscEscapeHTML(data.message)+'&slug='+oscEscapeHTML(data.data['download'])+'"><?php echo osc_esc_js(__('Ok')); ?></a>';
           content += '<a class="btn btn-mini" href="javascript:location.reload(true)"><?php echo osc_esc_js(__('Close')); ?></a>';
@@ -356,11 +356,11 @@ if(is_array($aThemesToUpdate) && count($aThemesToUpdate) > 0) {
 
 
           var dialogWidth = 485;
-          
+
           if($(window).width() < 525) {
             dialogWidth = $(window).width() - 40;
           }
-    
+
           $('#market_installer').dialog({
             modal:true,
             title: '<?php echo osc_esc_js( __('Update theme from OsclassPoint') ); ?>',
@@ -373,4 +373,4 @@ if(is_array($aThemesToUpdate) && count($aThemesToUpdate) > 0) {
     return false;
   });
 </script>
-<?php osc_current_admin_theme_path( 'parts/footer.php' ); ?>
+<?php osc_current_admin_theme_path( 'parts/footer.php' );

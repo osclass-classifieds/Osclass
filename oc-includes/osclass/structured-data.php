@@ -14,7 +14,7 @@
  * warranties or conditions of any kind, either express or implied. Do not remove
  * this NOTICE section as it contains license information and copyrights.
  */
- 
+
 function osc_structured_data_title() {
   $text = meta_title();
   return osc_apply_filter('structured_data_title_filter', $text);
@@ -32,14 +32,14 @@ function osc_structured_data_image() {
   if($logo != '' && file_exists(osc_uploads_path() . $logo)) {
     $path = str_replace(ABS_PATH, '', osc_uploads_path());
     $logo_url = osc_base_url() . $path . $logo;
-  } else if (file_exists(osc_base_path() . OC_CONTENT_FOLDER . '/themes/' . osc_current_web_theme() . '/images/logo.jpg')) {
+  } elseif(file_exists(osc_base_path() . OC_CONTENT_FOLDER . '/themes/' . osc_current_web_theme() . '/images/logo.jpg')) {
     $logo_url = osc_base_url() . OC_CONTENT_FOLDER . '/themes/' . osc_current_web_theme() . '/images/logo.jpg';
-  } else if (file_exists(osc_base_path() . OC_CONTENT_FOLDER . '/themes/' . osc_current_web_theme() . '/images/logo.png')) {
+  } elseif(file_exists(osc_base_path() . OC_CONTENT_FOLDER . '/themes/' . osc_current_web_theme() . '/images/logo.png')) {
     $logo_url = osc_base_url() . OC_CONTENT_FOLDER . '/themes/' . osc_current_web_theme() . '/images/logo.png';
-  } else if (file_exists(osc_base_path() . OC_CONTENT_FOLDER . '/themes/' . osc_current_web_theme() . '/images/logo.gif')) {
+  } elseif(file_exists(osc_base_path() . OC_CONTENT_FOLDER . '/themes/' . osc_current_web_theme() . '/images/logo.gif')) {
     $logo_url = osc_base_url() . OC_CONTENT_FOLDER . '/themes/' . osc_current_web_theme() . '/images/logo.gif';
   }
-  
+
   $url = $logo_url;
 
   if(osc_is_ad_page()) {
@@ -54,7 +54,7 @@ function osc_structured_data_image() {
 
 function osc_structured_data_footer() {
   $show_default_structured_data = osc_apply_filter('structured_data_show_footer_filter', true);
-  
+
   if(osc_structured_data_enabled() && $show_default_structured_data) {
     $url = osc_get_current_url();
     $image_url = osc_structured_data_image();
@@ -64,15 +64,15 @@ function osc_structured_data_footer() {
       $location = array(osc_item_country(), osc_item_region(), osc_item_city(), osc_item_address());
       $location = implode(', ', array_filter($location));
     }
-    
+
     $url = osc_apply_filter('structured_data_url_filter', $url);
 
     if(osc_is_ad_page()) {
 ?>
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org/", 
-  "@type": "<?php echo osc_esc_html(osc_apply_filter('structured_data_type_filter', 'Product')); ?>", 
+  "@context": "https://schema.org/",
+  "@type": "<?php echo osc_esc_html(osc_apply_filter('structured_data_type_filter', 'Product')); ?>",
   "name": "<?php echo osc_esc_html(osc_structured_data_title()); ?>",
   <?php if($image_url <> '') { ?>"image": "<?php echo osc_esc_html($image_url); ?>",<?php echo PHP_EOL; } ?>
   "description": "<?php echo osc_esc_html(osc_highlight(osc_structured_data_description(), 200)); ?>",
@@ -109,10 +109,10 @@ function osc_structured_data_footer() {
   <?php osc_run_hook('structured_data_footer'); ?>
 }
 </script>
-  <?php 
+  <?php
     }
-  } 
-} 
+  }
+}
 
 osc_add_hook('footer', 'osc_structured_data_footer');
 
@@ -154,10 +154,10 @@ function osc_structured_data_header() {
 <meta name="twitter:image" content="<?php echo osc_esc_html($image_url); ?>" />
 
 <?php osc_run_hook('structured_data_header'); ?>
-<?php 
-  } 
+<?php
+  }
 }
 
 osc_add_hook('header', 'osc_structured_data_header');
 
-?>
+

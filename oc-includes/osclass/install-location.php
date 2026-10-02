@@ -130,13 +130,13 @@ function basic_info() {
 
   $from_email = '';
   $sitename = strtolower(Params::getServerParam('SERVER_NAME'));
-  
+
   if(0 === strpos($sitename, 'www.')) {
     $sitename = substr($sitename, 4);
   }
-  
+
   $from_email = 'osclass@' . $sitename;
-  
+
   if(!filter_var($from_email, FILTER_VALIDATE_EMAIL)) {
     $from_email = 'osclass@example.com';
   }
@@ -154,22 +154,22 @@ function basic_info() {
   try {
     $mail->send();
     return array (
-      'email_status' => '', 
+      'email_status' => '',
       's_password' => $password
-    ); 
-    
-  } catch (phpmailerException $e) {
+    );
+
+  } catch(phpmailerException $e) {
     return array (
       'email_status' => Params::getParam('email') . '<br>' . $e->errorMessage(),
       's_password' => $password
     );
-    
-  } catch (Exception $e) {
+
+  } catch(Exception $e) {
     return array (
       'email_status' => Params::getParam('email') . '<br>' . $e->getMessage(),
       's_password' => $password
     );
-    
+
   }
 }
 
@@ -181,12 +181,12 @@ function install_locations() {
   $location = Params::getParam('locationsql');
   if($location != '') {
     $sql = osc_file_get_contents(osc_get_locations_sql_url($location));
-    
+
     if($sql != '') {
       $conn = DBConnectionClass::newInstance();
       $c_db = $conn->getOsclassDb();
       $comm = new DBCommandClass($c_db);
-      
+
       $comm->query('SET FOREIGN_KEY_CHECKS = 0');
       $imported = $comm->importSQL($sql);
       $comm->query('SET FOREIGN_KEY_CHECKS = 1');

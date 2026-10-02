@@ -17,9 +17,9 @@ if(!defined('ABS_PATH')) exit('ABS_PATH is not loaded. Direct access is not allo
  */
 
 
-function customPageHeader(){ 
+function customPageHeader(){
   ?>
-  <h1><?php _e('Settings'); ?></h1>
+  <h1><?php _e('International'); ?></h1>
   <?php
 }
 
@@ -27,19 +27,19 @@ osc_add_hook('admin_page_header','customPageHeader');
 
 
 function customPageTitle($string) {
-  return sprintf(__('Add language - %s'), $string);
+  return sprintf(__('%s - %s'), __('Add language'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');
 
-osc_current_admin_theme_path('parts/header.php'); 
+osc_current_admin_theme_path('parts/header.php');
 ?>
 
 <div class="appearance">
   <h2 class="render-title"><?php _e('Add language'); ?></h2>
   <div id="upload-language">
     <div class="form-horizontal">
-    <?php if( is_writable( osc_translations_path() ) ) { ?>
+    <?php if(is_writable( osc_translations_path() ) ) { ?>
       <div class="flashmessage flashmessage-info flashmessage-inline" style="display:block;">
         <p class="info"><?php printf( __('You can import new languages and translations directly in %s section.'), '<a href="' . osc_admin_base_url(true) . '?page=market&action=languages" target="_blank">' . __('Market > Languages') . '</a>'); ?></p>
       </div>
@@ -60,10 +60,10 @@ osc_current_admin_theme_path('parts/header.php');
     <?php } else { ?>
       <div class="flashmessage flashmessage-error">
         <a class="btn ico btn-mini ico-close" href="#">×</a>
-        <p><?php _e("Can't install a new language"); ?></p>
+        <p><?php _e("Cannot install this package"); ?></p>
       </div>
       <p class="text">
-        <?php _e("The translations folder is not writable on your server so you can't upload translations from the administration panel. Please make the translation folder writable and try again."); ?>
+        <?php _e('The translations folder is not writable on your server so you cannot upload translations from the administration panel. Please make the translation folder writable and try again.'); ?>
       </p>
       <p class="text">
         <?php _e('To make the directory writable under UNIX execute this command from the shell:'); ?>
@@ -73,4 +73,4 @@ osc_current_admin_theme_path('parts/header.php');
     </div>
   </div>
 </div>
-<?php osc_current_admin_theme_path('parts/footer.php'); ?>
+<?php osc_current_admin_theme_path('parts/footer.php');

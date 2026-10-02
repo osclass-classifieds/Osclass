@@ -27,43 +27,76 @@ class CAdminSettingsLatestSearches extends AdminSecBaseModel
       case('latestsearches'):
         $this->doView('settings/searches.php');
         break;
-        
+
       case('latestsearches_post'):
         osc_csrf_check();
-        
+
         $iUpdated = 0;
         $saveLatestSearches = Params::getParam('save_latest_searches');
         $saveLatestSearches = ($saveLatestSearches != '' ? true : false);
         $latestSearchesRestriction = Params::getParam('latest_searches_restriction');
-        $latestSearchesWords = explode(',', strtolower(Params::getParam('latest_searches_words')));
+        $latestSearchesRestriction = (is_array($latestSearchesRestriction) ? 0 : (int)$latestSearchesRestriction);
+        $latestSearchesWords = Params::getParam('latest_searches_words');
+        $latestSearchesWords = (!is_array($latestSearchesWords) ? strtolower((string)$latestSearchesWords) : '');
+        $latestSearchesWords = explode(',', $latestSearchesWords);
         $latestSearchesWords = array_filter(array_unique(array_map('strtolower', $latestSearchesWords)));
         $latestSearchesWords = implode(',', $latestSearchesWords);
+        $latestSearchesMinLength = Params::getParam('latest_searches_min_length');
+        $latestSearchesMinLength = (is_array($latestSearchesMinLength) ? 0 : (int)$latestSearchesMinLength);
+        $latestSearchesMinLength = ($latestSearchesMinLength > 0 ? $latestSearchesMinLength : 3);
+        $latestSearchesMaxLength = Params::getParam('latest_searches_max_length');
+        $latestSearchesMaxLength = (is_array($latestSearchesMaxLength) ? 0 : (int)$latestSearchesMaxLength);
+        $latestSearchesMaxLength = ($latestSearchesMaxLength > 0 ? $latestSearchesMaxLength : 15);
+        $latestSearchesMaxLength = ($latestSearchesMaxLength < $latestSearchesMinLength ? $latestSearchesMinLength : $latestSearchesMaxLength);
+        $customPurge = Params::getParam('customPurge');
+        $customPurge = (is_array($customPurge) ? '' : trim((string)$customPurge));
 
         $iUpdated += osc_set_preference('save_latest_searches', $saveLatestSearches);
         $iUpdated += osc_set_preference('latest_searches_restriction', $latestSearchesRestriction);
         $iUpdated += osc_set_preference('latest_searches_words', $latestSearchesWords);
+        $iUpdated += osc_set_preference('latest_searches_min_length', $latestSearchesMinLength);
+        $iUpdated += osc_set_preference('latest_searches_max_length', $latestSearchesMaxLength);
 
 
-        if(Params::getParam('customPurge') == '') {
+        if($customPurge == '') {
           osc_add_flash_error_message(_m('Custom number could not be left empty'), 'admin');
+          $this->redirectTo(osc_admin_base_url(true) . '?page=settings&action=latestsearches');
+        } else if(!in_array($customPurge, array('hour', 'day', 'week', 'month', 'year', 'forever')) && (!ctype_digit($customPurge) || (int)$customPurge <= 0)) {
+          osc_add_flash_error_message(_m('Invalid latest searches cleanup value'), 'admin');
+          $this->redirectTo(osc_admin_base_url(true) . '?page=settings&action=latestsearches');
         } else {
-          $iUpdated += osc_set_preference('purge_latest_searches', Params::getParam('customPurge'));
+          $iUpdated += osc_set_preference('purge_latest_searches', $customPurge);
 
           if($iUpdated > 0) {
-            osc_add_flash_ok_message( _m('Latest searches settings have been updated'), 'admin');
+            osc_add_flash_ok_message( _m('Settings have been updated'), 'admin');
           }
-          
+
           $this->redirectTo(osc_admin_base_url(true) . '?page=settings&action=latestsearches');
         }
         break;
-        
+
       case('latestsearches_clean'):
         osc_csrf_check();
 
-        LatestSearches::newInstance()->purgeAll();
-        osc_add_flash_ok_message( _m('Latest searches has been cleaned'), 'admin');
+        $purge = trim((string)osc_purge_latest_searches());
+
+        if(in_array($purge, array('hour', 'day', 'week', 'month', 'year'))) {
+          LatestSearches::newInstance()->purgeDate(date('Y-m-d H:i:s', strtotime("-1 $purge")));
+          osc_add_flash_ok_message( _m('Latest searches cleanup has been executed using current retention settings'), 'admin');
+
+        } else if(ctype_digit($purge) && (int)$purge > 0) {
+          LatestSearches::newInstance()->purgeNumber((int)$purge);
+          osc_add_flash_ok_message( _m('Latest searches cleanup has been executed using current retention settings'), 'admin');
+
+        } else if($purge == 'forever') {
+          osc_add_flash_warning_message( _m('Latest searches cleanup is disabled because queries are stored forever'), 'admin');
+
+        } else {
+          osc_add_flash_warning_message( _m('Latest searches cleanup could not be executed because cleanup setting is invalid'), 'admin');
+        }
+
         $this->redirectTo(osc_admin_base_url(true) . '?page=settings&action=latestsearches');
-        
+
         break;
     }
   }

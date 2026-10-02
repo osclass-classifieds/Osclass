@@ -31,23 +31,23 @@ class CAdminLanguages extends AdminSecBaseModel {
 
   //Business Layer...
   public function doModel() {
-    switch ($this->action) {
+    switch($this->action) {
       case('sync'):   // Synchronize - recheck added languages (lang folder)
         osc_checkLocales(true);
         osc_add_flash_ok_message(_m('Languages synchronized'), 'admin');
         $this->redirectTo(osc_admin_base_url(true) . '?page=languages');
         break;
-        
+
       case('add'):        // caliing add view
         $this->doView('languages/add.php');
         break;
-        
+
       case('add_post'):       // adding a new language
         if(defined('DEMO')) {
-          osc_add_flash_warning_message(_m("This action can't be done because it's a demo site"), 'admin');
+          osc_add_flash_warning_message(_m("This action cannot be done because it is a demo site"), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=languages');
         }
-        
+
         osc_csrf_check();
         $filePackage = Params::getFiles('package');
 
@@ -59,43 +59,43 @@ class CAdminLanguages extends AdminSecBaseModel {
           $status = 3;
         }
 
-        switch ($status) {
+        switch($status) {
           case(0):
             $msg = _m('The translation folder is not writable');
             osc_add_flash_error_message($msg, 'admin');
             break;
-            
+
           case(1):
             if(osc_checkLocales()) {
-              $msg = _m('The language has been installed correctly');
+              $msg = _m('The language has been installed');
               osc_add_flash_ok_message($msg, 'admin');
             } else {
               $msg = _m('File uploaded but unable to activate the language');
               osc_add_flash_error_message($msg, 'admin');
             }
             break;
-            
+
           case(2):
             $msg = _m('The zip file is not valid');
             osc_add_flash_error_message($msg, 'admin');
             break;
-            
+
           case(3):
-            $msg = _m('No file was uploaded');
+            $msg = _m('No files were uploaded');
             osc_add_flash_warning_message($msg, 'admin');
             $this->redirectTo(osc_admin_base_url(true) . '?page=languages&action=add');
             break;
-            
+
           case(-1):
           default:
-            $msg = _m('There was a problem adding the language');
+            $msg = _m('There was a problem adding this package');
             osc_add_flash_error_message($msg, 'admin');
             break;
         }
 
         $this->redirectTo(osc_admin_base_url(true) . '?page=languages');
         break;
-        
+
       case('edit'):         // editing a language
         $sLocale = Params::getParam('id');
         if(!preg_match('/.{2}_.{2}/', $sLocale)) {
@@ -113,7 +113,7 @@ class CAdminLanguages extends AdminSecBaseModel {
         $this->_exportVariableToView('aLocale', $aLocale);
         $this->doView('languages/frm.php');
         break;
-        
+
       case('edit_post'):      // edit language post
         osc_csrf_check();
         $iUpdated = 0;
@@ -139,7 +139,7 @@ class CAdminLanguages extends AdminSecBaseModel {
           osc_add_flash_error_message(_m('Language id isn\'t in the correct format'), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=languages');
         }
-        
+
         $enabledWebstie = ($enabledWebstie != '');
         $enabledBackoffice = ($enabledBackoffice != '');
         $enabledLocationsNative = ($enabledLocationsNative != '');
@@ -154,16 +154,16 @@ class CAdminLanguages extends AdminSecBaseModel {
 
         $msg = '';
         if(!osc_validate_text($languageName)) {
-          $msg .= _m('Language name field is required') . '<br/>';
+          $msg .= sprintf(_m('%s is required'), __('Language name')) . '<br/>';
         }
         if(!osc_validate_text($languageShortName)) {
-          $msg .= _m('Language short name field is required') . '<br/>';
+          $msg .= sprintf(_m('%s is required'), __('Language short name')) . '<br/>';
         }
         if(!osc_validate_text($languageDescription)) {
-          $msg .= _m('Language description field is required') . '<br/>';
+          $msg .= sprintf(_m('%s is required'), __('Language description')) . '<br/>';
         }
         if(!osc_validate_text($languageCurrencyFormat)) {
-          $msg .= _m('Currency format field is required') . '<br/>';
+          $msg .= sprintf(_m('%s is required'), __('Currency format')) . '<br/>';
         }
         if(!osc_validate_int($languageNumDec)) {
           $msg .= _m('Number of decimals must only contain numeric characters') . '<br/>';
@@ -190,17 +190,23 @@ class CAdminLanguages extends AdminSecBaseModel {
           'fk_c_currency_code' => $currency
         );
 
+        $setDefault = (Params::getParam('b_set_default_language') == '1');
+
         $iUpdated = $this->localeManager->update($array, array('pk_c_code' => $languageCode));
-        
-        if($iUpdated > 0) {
+        if($setDefault) {
+          osc_set_preference('language', $languageCode);
+        }
+        osc_cache_delete(md5(osc_base_url() . 'OSCLocale::listAllRaw'));
+
+        if($iUpdated > 0 || $setDefault) {
           osc_add_flash_ok_message(sprintf(_m('%s has been updated'), $languageShortName), 'admin');
         }
-        
+
         //$this->redirectTo(osc_admin_base_url(true) . '?page=languages');
         $this->redirectTo(osc_admin_base_url(true) . '?page=languages&action=edit&id=' . $languageCode);
 
         break;
-        
+
       case('enable_selected'):
         osc_csrf_check();
         $msg = _m('Selected languages have been enabled for the website');
@@ -225,7 +231,7 @@ class CAdminLanguages extends AdminSecBaseModel {
 
         $this->redirectTo(osc_admin_base_url(true) . '?page=languages');
         break;
-        
+
       case('disable_selected'):
         osc_csrf_check();
         $msg = _m('Selected languages have been disabled for the website');
@@ -242,10 +248,10 @@ class CAdminLanguages extends AdminSecBaseModel {
 
         foreach($id as $i) {
           if(osc_language() == $i) {
-            $msg_warning = sprintf(_m("%s can't be disabled because it's the default language"), osc_language());
+            $msg_warning = sprintf(_m("%s cannot be disabled because it is the default language"), osc_language());
             continue;
           }
-          
+
           $iUpdated += $this->localeManager->update($aValues, array('pk_c_code' => $i));
         }
 
@@ -261,7 +267,7 @@ class CAdminLanguages extends AdminSecBaseModel {
 
         $this->redirectTo(osc_admin_base_url(true) . '?page=languages');
         break;
-        
+
       case('enable_bo_selected'):
         osc_csrf_check();
         $msg = _m('Selected languages have been enabled for the backoffice (oc-admin)');
@@ -286,7 +292,7 @@ class CAdminLanguages extends AdminSecBaseModel {
 
         $this->redirectTo(osc_admin_base_url(true) . '?page=languages');
         break;
-        
+
       case('disable_bo_selected'):
         osc_csrf_check();
         $msg = _m('Selected languages have been disabled for the backoffice (oc-admin)');
@@ -303,10 +309,10 @@ class CAdminLanguages extends AdminSecBaseModel {
 
         foreach($id as $i) {
           if(osc_language() == $i) {
-            $msg_warning = sprintf(_m("%s can't be disabled because it's the default language"), osc_language());
+            $msg_warning = sprintf(_m("%s cannot be disabled because it is the default language"), osc_language());
             continue;
           }
-          
+
           $iUpdated += $this->localeManager->update($aValues, array('pk_c_code' => $i));
         }
 
@@ -322,7 +328,7 @@ class CAdminLanguages extends AdminSecBaseModel {
 
         $this->redirectTo(osc_admin_base_url(true) . '?page=languages');
         break;
-        
+
       case('delete'):
         osc_csrf_check();
         if(is_array(Params::getParam('id'))) {
@@ -334,12 +340,12 @@ class CAdminLanguages extends AdminSecBaseModel {
                   osc_add_flash_error_message(sprintf(_m("Directory '%s' couldn't be removed"), $code), 'admin');
                 } else {
                   osc_add_flash_ok_message(
-                    sprintf(_m('Directory "%s" has been successfully removed'), $code),
+                    sprintf(_m('Directory "%s" has been removed'), $code),
                     'admin'
                   );
                 }
               } else {
-                osc_add_flash_error_message(sprintf(_m("Directory '%s' couldn't be removed;)"), $code), 'admin');
+                osc_add_flash_error_message(sprintf(_m("Directory '%s' couldn't be removed"), $code), 'admin');
               }
             } else {
               osc_add_flash_error_message(
@@ -355,15 +361,15 @@ class CAdminLanguages extends AdminSecBaseModel {
             }
           }
         }
-        
+
         $this->redirectTo(osc_admin_base_url(true) . '?page=languages');
         break;
-        
+
       default:
         if(Params::getParam('marketError') > 0) {
           osc_add_flash_warning_message(sprintf(__('There was problem with update: [%s] %s. You may download update manually at: %s'), Params::getParam('marketError'), Params::getParam('message'), Params::getParam('slug')), 'admin');
         }
-        
+
         if(Params::getParam('checkUpdated') != '') {
           osc_admin_toolbar_update_languages(true);
         }
@@ -372,121 +378,55 @@ class CAdminLanguages extends AdminSecBaseModel {
           osc_run_hook('language_bulk_' . Params::getParam('action'), Params::getParam('id'));
         }
 
-        if(Params::getParam('iDisplayLength') == '') {
-          Params::setParam('iDisplayLength', 25);
+        require_once osc_lib_path() . 'osclass/classes/datatables/LanguagesDataTable.php';
+
+        if(Params::getParam('iDisplayLength') != '') {
+          Cookie::newInstance()->push('listing_iDisplayLength', Params::getParam('iDisplayLength'));
+          Cookie::newInstance()->set();
+        } else {
+          if(Cookie::newInstance()->get_value('listing_iDisplayLength') != '') {
+            Params::setParam('iDisplayLength', Cookie::newInstance()->get_value('listing_iDisplayLength'));
+          } else {
+            Params::setParam('iDisplayLength', 25);
+          }
         }
-        
         $this->_exportVariableToView('iDisplayLength', Params::getParam('iDisplayLength'));
 
-        $p_iPage = 1;
-        if(is_numeric(Params::getParam('iPage')) && Params::getParam('iPage') >= 1) {
-          $p_iPage = Params::getParam('iPage');
+        if(Params::getParam('sort') == '') {
+          Params::setParam('sort', 'name');
         }
-        
-        Params::setParam('iPage', $p_iPage);
-
-        $aLanguages = OSCLocale::newInstance()->listAll();
-
-        // pagination
-        $start = ($p_iPage - 1) * Params::getParam('iDisplayLength');
-        $limit = Params::getParam('iDisplayLength');
-        $count = count($aLanguages);
-
-        $displayRecords = $limit;
-        if(($start + $limit) > $count) {
-          $displayRecords = ($start + $limit) - $count;
+        if(Params::getParam('direction') == '') {
+          Params::setParam('direction', 'asc');
         }
-        
-        $aLanguagesToUpdate = json_decode(osc_get_preference('languages_to_update'));
-        $bLanguagesToUpdate = is_array($aLanguagesToUpdate) ? true : false;
-        
-        $aData = array();
-        $max = ($start + $limit);
-        
-        if($max > $count) {
-          $max = $count;
-        }
-        
-        for ($i = $start; $i < $max; $i++) {
-          $l = $aLanguages[$i];
-          $row = array();
-          
-          $status = ($l['b_enabled'] ? 'F' : '') . ($l['b_enabled_bo'] ? 'B' : '');
-
-          $row['status-border'] = '';
-
-          if($status == 'F') {
-            $row['status'] = __('Enabled in FO');
-            $row['class'] = 'status-active';
-          } else if($status == 'FB') {
-            $row['status'] = __('Enabled in FO');
-            $row['class'] = 'status-active';
-          } else if($status == 'B') {
-            $row['status'] = __('Enabled in BO');
-            $row['class'] = 'status-warning';
-          } else if($status == '') {
-            $row['status'] = __('Disabled');
-            $row['class'] = 'status-inactive';
-          }  
-          
-          $row['bulkactions'] = '<input type="checkbox" name="id[]" value="' . $l['pk_c_code'] . '" />';
-
-          $options = array();
-          $options[] = '<a href="' . osc_admin_base_url(true) . '?page=languages&amp;action=edit&amp;id=' . $l['pk_c_code'] . '">' . __('Edit') . '</a>';
-          $options[] = '<a href="' . osc_admin_base_url(true) . '?page=languages&amp;action=' . ($l['b_enabled'] == 1 ? 'disable_selected' : 'enable_selected') . '&amp;id[]=' . $l['pk_c_code'] . '&amp;' . osc_csrf_token_url() . '">' . ($l['b_enabled'] == 1 ? __('Disable in Front-office') : __('Enable in Front-office')) . '</a> ';
-          $options[] = '<a href="' . osc_admin_base_url(true) . '?page=languages&amp;action=' . ($l['b_enabled_bo'] == 1 ? 'disable_bo_selected' : 'enable_bo_selected') . '&amp;id[]=' . $l['pk_c_code'] . '&amp;' . osc_csrf_token_url() . '">' . ($l['b_enabled_bo'] == 1 ? __('Disable in Back-office') : __('Enable in Back-office')) . '</a>';
-          $options[] = '<a onclick="return delete_dialog(\'' . $l['pk_c_code'] . '\');"  href="' . osc_admin_base_url(true) . '?page=languages&amp;action=delete&amp;id[]=' . $l['pk_c_code'] . '&amp;' . osc_csrf_token_url() . '">' . __('Delete') . '</a>';
-
-          $auxOptions = '<ul>' . PHP_EOL;
-          
-          foreach($options as $actual) {
-            $auxOptions .= '<li>' . $actual . '</li>' . PHP_EOL;
-          }
-          
-          $actions = '<div class="actions">' . $auxOptions . '</div>' . PHP_EOL;
-
-          $sUpdate = '';
-          // get languages to update from t_preference
-          if($bLanguagesToUpdate && in_array($l['pk_c_code'], $aLanguagesToUpdate)) {
-            $sUpdate = '<a class="btn-market-update btn-market-popup btn-lang-update btn" href="#' . htmlentities($l['pk_c_code']) . '">' . __("Update") . '</a>';
-          }
-          
-          $row['name'] = $l['s_name'] . $sUpdate . $actions;
-          $row['short_name'] = $l['s_short_name'];
-          $row['description'] = $l['s_description'];
-          $row['enabled_fo'] = ($l['b_enabled'] ? __('Enabled') : __('Disabled'));
-          $row['enabled_bo'] = ($l['b_enabled_bo'] ? __('Enabled') : __('Disabled'));
-          $row['locations_native'] = ($l['b_locations_native'] ? __('Enabled') : __('Disabled'));
-          $row['rtl'] = ($l['b_rtl'] ? __('RTL') : __('LTR'));
-
-          $aData[] = $row;
-        }
-        
-        $array['iTotalRecords'] = $displayRecords;
-        $array['iTotalDisplayRecords'] = count($aLanguages);
-        $array['iDisplayLength'] = $limit;
-        $array['aaData'] = $aData;
 
         $page = (int)Params::getParam('iPage');
-        
-        if(is_array($array['aaData']) && count($array['aaData']) == 0 && $page != 1) {
-          $total = $array['iTotalDisplayRecords'];
-          $maxPage = ceil($total / (int)$array['iDisplayLength']);
+        if($page == 0) {
+          $page = 1;
+        }
+        Params::setParam('iPage', $page);
 
+        $params = Params::getParamsAsArray();
+        $languagesDataTable = new LanguagesDataTable();
+        $languagesDataTable->table($params);
+        $aData = $languagesDataTable->getData();
+
+        if(count($aData['aRows']) == 0 && $page != 1) {
+          $total = (int)$aData['iTotalDisplayRecords'];
+          $maxPage = (int)ceil($total / (int)$aData['iDisplayLength']);
           $url = osc_admin_base_url(true) . '?' . Params::getServerParam('QUERY_STRING', false, false);
-
           if($maxPage == 0) {
             $url = preg_replace('/&iPage=(\d)+/', '&iPage=1', $url);
             $this->redirectTo($url);
           }
-
           if($page > 1) {
             $url = preg_replace('/&iPage=(\d)+/', '&iPage=' . $maxPage, $url);
             $this->redirectTo($url);
           }
         }
 
-        $this->_exportVariableToView('aLanguages', $array);
+        $this->_exportVariableToView('aData', $aData);
+        $this->_exportVariableToView('aRawRows', $languagesDataTable->rawRows());
+        $this->_exportVariableToView('withFilters', $languagesDataTable->withFilters());
 
         $bulk_options = array(
           array('value' => '', 'data-dialog-content' => '', 'label' => __('Bulk actions')),
@@ -516,7 +456,7 @@ class CAdminLanguages extends AdminSecBaseModel {
             'label' => __('Delete')
           )
         );
-        
+
         $bulk_options = osc_apply_filter('language_bulk_filter', $bulk_options);
         $this->_exportVariableToView('bulk_options', $bulk_options);
 

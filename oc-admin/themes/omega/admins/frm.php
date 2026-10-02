@@ -24,7 +24,7 @@ $admin['b_moderator'] = (isset($admin['b_moderator']) ? $admin['b_moderator'] : 
 function customFrmText() {
   $admin = __get("admin");
   $return = array();
-  if( isset($admin['pk_i_id']) ) {
+  if(isset($admin['pk_i_id']) ) {
     $return['admin_edit'] = true;
     $return['title']    = __('Edit admin');
     $return['action_frm'] = 'edit_post';
@@ -39,7 +39,7 @@ function customFrmText() {
 }
 
 
-function customPageHeader(){ 
+function customPageHeader(){
   ?>
   <h1><?php _e('Admins'); ?></h1>
   <?php
@@ -57,7 +57,7 @@ function customPageTitle($string) {
 
 osc_add_filter('admin_title', 'customPageTitle');
 
-osc_current_admin_theme_path('parts/header.php'); 
+osc_current_admin_theme_path('parts/header.php');
 ?>
 
 <h2 class="render-title"><?php echo $aux['title']; ?></h2>
@@ -65,43 +65,43 @@ osc_current_admin_theme_path('parts/header.php');
 <!-- add/edit admin form -->
 <div class="settings-user">
   <ul id="error_list"></ul>
-  
+
   <form name="admin_form" action="<?php echo osc_admin_base_url(true); ?>" method="post">
     <input type="hidden" name="action" value="<?php echo $aux['action_frm']; ?>" />
     <input type="hidden" name="page" value="admins" />
-    
+
     <?php AdminForm::primary_input_hidden($admin); ?>
     <?php AdminForm::js_validation(); ?>
-    
+
     <fieldset>
       <div class="form-horizontal">
         <div class="form-row">
-          <div class="form-label"><?php _e('Name <em>(required)</em>'); ?></div>
+          <div class="form-label"><?php _e('Name'); ?> *</div>
           <div class="form-controls">
             <?php AdminForm::name_text($admin); ?>
           </div>
         </div>
-        
+
         <div class="form-row">
-          <div class="form-label"><?php _e('Username <em>(required)</em>'); ?></div>
+          <div class="form-label"><?php _e('Username'); ?> *</div>
           <div class="form-controls"><?php AdminForm::username_text($admin); ?></div>
         </div>
-        
+
         <div class="form-row">
-          <div class="form-label"><?php _e('E-mail <em>(required)</em>'); ?></div>
+          <div class="form-label"><?php _e('Email'); ?> *</div>
           <div class="form-controls"><?php AdminForm::email_text($admin); ?></div>
         </div>
-        
+
         <?php if(!$aux['admin_edit'] || ($aux['admin_edit'] && Params::getParam('id')!= osc_logged_admin_id() && Params::getParam('id')!='')) { ?>
           <div class="form-row">
-            <div class="form-label"><?php _e('Admin type <em>(required)</em>'); ?></div>
+            <div class="form-label"><?php _e('Admin type'); ?> *</div>
             <div class="form-controls">
               <?php AdminForm::type_select($admin); ?>
               <p class="help-inline"><em><?php _e('Administrators have total control over all aspects of your installation, while moderators are only allowed to moderate listings, comments and media files'); ?></em></p>
             </div>
           </div>
         <?php } ?>
-        
+
         <?php if(!$aux['admin_edit'] || ($aux['admin_edit'] && Params::getParam('id')!= osc_logged_admin_id() && Params::getParam('id')!='')) { ?>
           <div class="form-row mod-access" <?php echo ($admin['b_moderator'] <> 1 ? 'style="display:none;"' : ''); ?>>
             <div class="form-label"><?php _e('Moderator extra access'); ?></div>
@@ -117,7 +117,7 @@ osc_current_admin_theme_path('parts/header.php');
             </div>
           </div>
         <?php } ?>
-        
+
         <div class="form-row">
           <div class="form-label"><?php _e('New password'); ?></div>
           <div class="form-controls">
@@ -136,7 +136,7 @@ osc_current_admin_theme_path('parts/header.php');
         </div>
 
         <hr/>
-        
+
         <div class="form-row">
           <div class="form-label"><?php _e('Your current password'); ?></div>
           <div class="form-controls">
@@ -147,11 +147,11 @@ osc_current_admin_theme_path('parts/header.php');
 
 
         <?php osc_run_hook('admin_profile_form', $admin); ?>
-        
+
         <div class="clear"></div>
-        
+
         <div class="form-actions">
-          <?php if( $aux['admin_edit'] ) { ?>
+          <?php if($aux['admin_edit'] ) { ?>
           <a href="javascript:history.go(-1)" class="btn"><?php _e('Cancel'); ?></a>
           <?php } ?>
           <input type="submit" value="<?php echo osc_esc_html($aux['btn_text']); ?>" class="btn btn-submit" />
@@ -169,9 +169,9 @@ $(document).ready(function() {
       $('textarea[name="s_moderator_access"]').val('');
     } else {
       $('.form-row.mod-access').slideDown(200);
-    }    
-  });  
+    }
+  });
 });
 </script>
 <!-- /add user form -->
-<?php osc_current_admin_theme_path('parts/footer.php'); ?>
+<?php osc_current_admin_theme_path('parts/footer.php');

@@ -30,21 +30,21 @@
 
       <?php
         osc_reset_static_pages();
-        while( osc_has_static_pages() ) { 
+        while(osc_has_static_pages() ) {
       ?>
         <a href="<?php echo osc_static_page_url(); ?>"><?php echo osc_static_page_title(); ?></a>
       <?php } ?>
 
       <div class="clear"></div>
 
-      <?php if( (!defined('MULTISITE') || MULTISITE==0) && osc_get_preference('footer_link', 'sigma') !== '0') {
+      <?php if((!defined('MULTISITE') || MULTISITE==0) && osc_get_preference('footer_link', 'sigma') !== '0') {
         echo '<div class="copy">' . sprintf(__('Powered by <a title="Osclass classifieds script" href="%s">best classifieds scripts</a> osclass'), 'https://osclass-classifieds.com') . '</div>';
       } ?>
 
-      <?php if ( osc_count_web_enabled_locales() > 1) { ?>
+      <?php if(osc_count_web_enabled_locales() > 1) { ?>
         <div class="language">
           <?php osc_goto_first_locale(); ?>
-          <?php while ( osc_has_web_enabled_locales() ) { ?>
+          <?php while(osc_has_web_enabled_locales() ) { ?>
             <a id="<?php echo osc_locale_code(); ?>" href="<?php echo osc_change_language_url ( osc_locale_code() ); ?>" class="<?php if(osc_locale_code() == osc_current_user_locale()) { ?>active<?php } ?>"><?php echo osc_locale_name(); ?></a>
           <?php } ?>
         </div>

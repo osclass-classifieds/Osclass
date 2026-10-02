@@ -24,7 +24,7 @@ function addHelp() {
 osc_add_hook('help_box','addHelp');
 
 
-function customPageHeader(){ 
+function customPageHeader(){
   ?>
   <h1><?php _e('Plugins'); ?>
     <a href="#" class="btn ico ico-32 ico-help float-right"></a>
@@ -36,28 +36,28 @@ osc_add_hook('admin_page_header','customPageHeader');
 
 
 function customPageTitle($string) {
-  return sprintf(__('Add plugin - %s'), $string);
+  return sprintf(__('%s - %s'), __('Add plugin'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');
 
 
-osc_current_admin_theme_path('parts/header.php'); 
+osc_current_admin_theme_path('parts/header.php');
 ?>
 
 <div class="appearance">
   <h2 class="render-title"><?php _e('Add plugin'); ?></h2>
   <div id="upload-plugins">
     <div class="form-horizontal">
-    <?php if( is_writable( osc_plugins_path() ) ) { ?>
+    <?php if(is_writable( osc_plugins_path() ) ) { ?>
       <div class="flashmessage flashmessage-info flashmessage-inline" style="display:block;">
         <p class="info">
           <?php printf( __('You can download and install new plugins directly in %s section.'), '<a href="' . osc_admin_base_url(true) . '?page=market&action=plugins" target="_blank">' . __('Market > Plugins') . '</a>'); ?><br/>
           <?php echo sprintf(__('If you want to upload more plugins quicker, extract plugin archives directly into <b>%s/plugins</b> folder using your file manager, cPanel or FTP client.'), OC_CONTENT_FOLDER); ?>
-            
+
         </p>
       </div>
-      
+
       <form class="" action="<?php echo osc_admin_base_url(true); ?>" method="post" enctype="multipart/form-data">
         <input type="hidden" name="action" value="add_post" />
         <input type="hidden" name="page" value="plugins" />
@@ -75,7 +75,7 @@ osc_current_admin_theme_path('parts/header.php');
     <?php } else { ?>
       <div class="flashmessage flashmessage-error">
         <a class="btn ico btn-mini ico-close" href="#">×</a>
-        <p><?php _e('Cannot install new plugin'); ?></p>
+        <p><?php _e('Cannot install this package'); ?></p>
       </div>
       <p class="text">
         <?php _e('The plugin folder is not writable on your server so you cannot upload plugins from the administration panel. Please make the folder writable and try again.'); ?>
@@ -124,4 +124,4 @@ osc_current_admin_theme_path('parts/header.php');
     </form>
   </div>
 </div>
-<?php osc_current_admin_theme_path('parts/footer.php'); ?>
+<?php osc_current_admin_theme_path('parts/footer.php');

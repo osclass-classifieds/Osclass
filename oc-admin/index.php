@@ -28,7 +28,7 @@ if(file_exists(ABS_PATH . '.maintenance')) {
 }
 
 // Identify jquery version
-$jquery_version = (trim(osc_get_preference('jquery_version')) == '' ? '1' : trim(osc_get_preference('jquery_version'))); 
+$jquery_version = (trim(osc_get_preference('jquery_version')) == '' ? '1' : trim(osc_get_preference('jquery_version')));
 
 if(!defined('JQUERY_VERSION')) {
   define('JQUERY_VERSION', $jquery_version);   // can be '1' or '3'
@@ -41,7 +41,7 @@ if(!in_array(osc_get_preference('admin_theme'), array('modern', 'omega'))) {
     osc_changeVersionTo('400');
     osc_delete_preference('osclass_evo_installed');
   }
-  
+
   osc_set_preference('admin_theme', 'omega');
   osc_redirect_to(osc_admin_base_url());
 }
@@ -92,7 +92,7 @@ if(defined('DEMO_PLUGINS') && DEMO_PLUGINS === true) {
 if(defined('DEMO_THEMES') && DEMO_THEMES === true) {
   if(strpos(osc_logged_admin_username(), 'demo') !== false) {   // admin user name is demo, demo1, mydemo etc.
     if(!(
-      Params::getParam('page') == 'appearance' && trim(Params::getParam('theme_action')) == '' && trim(Params::getParam('action_specific')) == '' && !in_array(Params::getParam('action'), array('add','activate','delete','add_widget','edit_widget','delete_widget','customization'))
+      Params::getParam('page') == 'appearance' && trim(Params::getParam('theme_action')) == '' && trim(Params::getParam('action_specific')) == '' && !in_array(Params::getParam('action'), array('add','activate','delete','add_widget','edit_widget','delete_widget','add_widget_post','edit_widget_post','widgets_settings','customization'))
       || Params::getParam('action') == 'logout'
     )) {
       osc_add_flash_warning_message( __('Themes demo site mode enabled, you cannot access this section. You can access only oc-admin > Appearance section. Action buttons may be restricted.'), 'admin');
@@ -115,55 +115,61 @@ switch(Params::getParam('page')) {
     $do = new CAdminItems();
     $do->doModel();
     break;
-    
+
   case('comments'):
     require_once(osc_admin_base_path() . 'comments.php');
     $do = new CAdminItemComments();
     $do->doModel();
     break;
-    
+
+  case('reports'):
+    require_once(osc_admin_base_path() . 'reports.php');
+    $do = new CAdminReports();
+    $do->doModel();
+    break;
+
   case('media'):
     require_once(osc_admin_base_path() . 'media.php');
     $do = new CAdminMedia();
     $do->doModel();
     break;
-    
+
   case ('login'):
     require_once(osc_admin_base_path() . 'login.php');
     $do = new CAdminLogin();
     $do->doModel();
     break;
-    
+
   case('categories'):
     require_once(osc_admin_base_path() . 'categories.php');
     $do = new CAdminCategories();
     $do->doModel();
     break;
-    
+
   case('emails'):
     require_once(osc_admin_base_path() . 'emails.php');
     $do = new CAdminEmails();
     $do->doModel();
     break;
-    
+
   case('pages'):
     require_once(osc_admin_base_path() . 'pages.php');
     $do = new CAdminPages();
     $do->doModel();
     break;
-    
+
   case('settings'):
     require_once(osc_admin_base_path() . 'settings.php');
     $do = new CAdminSettings();
     $do->doModel();
     break;
-    
+
   case('plugins'):
     require_once(osc_admin_base_path() . 'plugins.php');
     $do = new CAdminPlugins();
     $do->doModel();
     break;
-    
+
   case('languages'):
     require_once(osc_admin_base_path() . 'languages.php');
     $do = new CAdminLanguages();
@@ -175,74 +181,74 @@ switch(Params::getParam('page')) {
     $do = new CAdminLocations();
     $do->doModel();
     break;
-    
+
   case('translations'):
     require_once(osc_admin_base_path() . 'translations.php');
     $do = new CAdminTranslations();
     $do->doModel();
     break;
-    
+
   case('currencies'):
     require_once(osc_admin_base_path() . 'currencies.php');
     $do = new CAdminCurrencies();
     $do->doModel();
     break;
-    
+
   case('admins'):
     require_once(osc_admin_base_path() . 'admins.php');
     $do = new CAdminAdmins();
     $do->doModel();
     break;
-    
+
   case('users'):
     require_once(osc_admin_base_path() . 'users.php');
     $do = new CAdminUsers();
     $do->doModel();
     break;
-    
+
   case('ajax'):
     header('Access-Control-Allow-Origin: *');
     require_once(osc_admin_base_path() . 'ajax/ajax.php');
     $do = new CAdminAjax();
     $do->doModel();
     break;
-    
+
   case('appearance'):
     require_once(osc_admin_base_path() . 'appearance.php');
     $do = new CAdminAppearance();
     $do->doModel();
     break;
-    
+
   case('tools'):
     require_once(osc_admin_base_path() . 'tools.php');
     $do = new CAdminTools();
     $do->doModel();
     break;
-    
+
   case('stats'):
     require_once(osc_admin_base_path() . 'stats.php');
     $do = new CAdminStats();
     $do->doModel();
     break;
-    
-  case('cfields'):
+
+  case('custom_fields'):
     require_once(osc_admin_base_path() . 'custom_fields.php');
     $do = new CAdminCFields();
     $do->doModel();
     break;
-    
+
   case('upgrade'):
     require_once(osc_admin_base_path() . 'upgrade.php');
     $do = new CAdminUpgrade();
     $do->doModel();
     break;
-    
+
   case('market'):
     require_once(osc_admin_base_path() . 'market.php');
     $do = new CAdminMarket();
     $do->doModel();
     break;
-    
+
   default:  //login of oc-admin
     header('Access-Control-Allow-Origin: *');
     require_once(osc_admin_base_path() . 'main.php');

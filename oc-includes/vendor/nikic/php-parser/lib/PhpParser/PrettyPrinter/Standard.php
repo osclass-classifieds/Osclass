@@ -37,6 +37,10 @@ class Standard extends PrettyPrinterAbstract {
         return '...';
     }
 
+    protected function pArgPlaceholder(Node\ArgPlaceholder $node): string {
+        return ($node->name ? $node->name->toString() . ': ' : '') . '?';
+    }
+
     protected function pConst(Node\Const_ $node): string {
         return $node->name . ' = ' . $this->p($node->value);
     }
@@ -500,7 +504,7 @@ class Standard extends PrettyPrinterAbstract {
     protected function pExpr_Cast_Double(Cast\Double $node, int $precedence, int $lhsPrecedence): string {
         $kind = $node->getAttribute('kind', Cast\Double::KIND_DOUBLE);
         if ($kind === Cast\Double::KIND_DOUBLE) {
-            $cast = '(float)';
+            $cast = '(double)';
         } elseif ($kind === Cast\Double::KIND_FLOAT) {
             $cast = '(float)';
         } else {

@@ -43,11 +43,11 @@ class CategoryForm extends Form
     if(isset($default_item)) {
       echo '<option value="">' . $default_item . '</option>';
     }
-    
+
     if(!is_array($category) || !isset($category['pk_i_id'])) {
       $category = array('pk_i_id' => null);
     }
-    
+
     if(is_array($categories) && count($categories) > 0) {
       foreach($categories as $c) {
         echo '<option value="' . $c['pk_i_id'] . '"' . ( ($category['pk_i_id'] == $c['pk_i_id']) ? 'selected="selected"' : '' ) . '>' . $c['s_name'] . '</option>';
@@ -69,17 +69,17 @@ class CategoryForm extends Form
   public static function subcategory_select( $categories , $category , $default_item = null , $deep = 0 )
   {
     $deep_string = '';
-    
+
     for($var = 0;$var<$deep;$var++) {
       $deep_string .= '&nbsp;&nbsp;';
     }
-    
+
     $deep++;
-    
+
     if(!is_array($category) || !isset($category['pk_i_id'])) {
       $category = array('pk_i_id' => null);
     }
-    
+
     if(is_array($categories) && count($categories) > 0) {
       foreach($categories as $c) {
         echo '<option value="' . $c['pk_i_id'] . '"' . ( ($category['pk_i_id'] == $c['pk_i_id']) ? 'selected="selected"' : '' ) . '>' . $deep_string.$c['s_name'] . '</option>';
@@ -98,7 +98,7 @@ class CategoryForm extends Form
   */
   public static function categories_tree( $categories = null , $selected = null , $depth = 0 )
   {
-    if( ( $categories != null ) && is_array($categories) ) {
+    if(( $categories != null ) && is_array($categories) ) {
       echo '<ul id="cat' . $categories[0]['fk_i_parent_id'] . '">';
 
       $d_string = '';
@@ -156,9 +156,36 @@ class CategoryForm extends Form
   */
   public static function apply_changes_to_subcategories( $category = null )
   {
-    if($category['fk_i_parent_id']==NULL) {
-      parent::generic_input_checkbox( 'apply_changes_to_subcategories' , '1' , true);
+    echo '<input id="apply_changes_to_subcategories" type="checkbox" name="apply_changes_to_subcategories" value="1" />';
+  }
+
+  // Render category icon for admin list cells
+  public static function admin_icon_display($icon) {
+    if($icon === null || trim((string)$icon) === '') {
+      return '-';
     }
+
+    $icon = trim((string)$icon);
+    $escaped = osc_esc_html($icon);
+
+    if(stripos($icon, '<svg') !== false) {
+      $svg = preg_replace('/<script\b[^>]*>.*?<\/script>/is', '', $icon);
+      $svg = preg_replace('/\s+on\w+\s*=\s*("[^"]*"|\'[^\']*\'|[^\s>]+)/i', '', $svg);
+      if(stripos($svg, '<svg') !== false && stripos($svg, 'style=') === false) {
+        $svg = preg_replace('/<svg/i', '<svg style="height:20px;width:auto;max-width:40px;"', $svg, 1);
+      }
+      return '<span class="category-icon-cell">' . $svg . '<span class="category-icon-value">' . $escaped . '</span></span>';
+    }
+
+    if(preg_match('/\bfa[srb]?\s+fa-|\bfa\s+fa-|\bfa-[a-z0-9-]+/i', $icon)) {
+      return '<span class="category-icon-cell"><i class="' . osc_esc_html($icon) . '"></i><span class="category-icon-value">' . $escaped . '</span></span>';
+    }
+
+    if(preg_match('/^https?:\/\//i', $icon) || preg_match('/\.(png|jpe?g|gif|svg|webp)(\?.*)?$/i', $icon)) {
+      return '<span class="category-icon-cell"><img src="' . osc_esc_html($icon) . '" height="20" alt="" /><span class="category-icon-value">' . $escaped . '</span></span>';
+    }
+
+    return '<span class="category-icon-value">' . $escaped . '</span>';
   }
 
   /**
@@ -167,6 +194,75 @@ class CategoryForm extends Form
   public static function price_enabled_for_category( $category = null )
   {
     parent::generic_input_checkbox( 'b_price_enabled' , '1' , ( isset( $category ) && isset( $category[ 'b_price_enabled' ] ) && $category[ 'b_price_enabled' ] == 1 ) );
+  }
+
+  // Price enabled/disabled select for admin forms
+  public static function price_enabled_select($category = null) {
+    $enabled = (isset($category) && isset($category['b_price_enabled']) && (int)$category['b_price_enabled'] === 1);
+    echo '<select name="b_price_enabled" id="b_price_enabled">';
+    echo '<option value="1"' . ($enabled ? ' selected="selected"' : '') . '>' . __('Enabled') . '</option>';
+    echo '<option value="0"' . (!$enabled ? ' selected="selected"' : '') . '>' . __('Disabled') . '</option>';
+    echo '</select>';
+  }
+
+  // Parent category select for admin edit
+  public static function parent_select_admin($categories, $category, $disabledIds = array()) {
+    if(!is_array($disabledIds)) {
+      $disabledIds = array();
+    }
+    $parentId = (isset($category['fk_i_parent_id']) && $category['fk_i_parent_id'] !== '' && $category['fk_i_parent_id'] !== null ? (int)$category['fk_i_parent_id'] : 0);
+    echo '<select name="fk_i_parent_id" id="fk_i_parent_id">';
+    echo '<option value=""' . ($parentId <= 0 ? ' selected="selected"' : '') . '>' . __('None') . '</option>';
+    self::parent_select_admin_options($categories, $parentId, $disabledIds, 0);
+    echo '</select>';
+  }
+
+  // Render parent select options recursively
+  private static function parent_select_admin_options($categories, $selectedId, $disabledIds, $depth) {
+    if(!is_array($categories) || count($categories) == 0) {
+      return;
+    }
+
+    $prefix = str_repeat('&nbsp;&nbsp;', $depth);
+    foreach($categories as $c) {
+      $id = (int)$c['pk_i_id'];
+      $disabled = in_array($id, $disabledIds, true) ? ' disabled="disabled"' : '';
+      $sel = ($selectedId === $id ? ' selected="selected"' : '');
+      echo '<option value="' . $id . '"' . $sel . $disabled . '>' . $prefix . osc_esc_html($c['s_name']) . '</option>';
+      if(isset($c['categories']) && is_array($c['categories'])) {
+        self::parent_select_admin_options($c['categories'], $selectedId, $disabledIds, $depth + 1);
+      }
+    }
+  }
+
+  // Localized category name fields (admin edit)
+  public static function printLocaleName($locales, $category = null) {
+    if(!is_array($locales)) {
+      return;
+    }
+    foreach($locales as $locale) {
+      $code = $locale['pk_c_code'];
+      $value = (isset($category['locale'][$code]['s_name']) ? $category['locale'][$code]['s_name'] : '');
+      $name = $code . '#s_name';
+      echo '<div class="input-has-placeholder locale-' . osc_esc_html($code) . '">';
+      echo '<input id="' . osc_esc_html($name) . '" type="text" name="' . osc_esc_html($name) . '" value="' . osc_esc_html(htmlentities($value, ENT_COMPAT, 'UTF-8')) . '" />';
+      echo '</div>';
+    }
+  }
+
+  // Localized category description fields (admin edit)
+  public static function printLocaleDescription($locales, $category = null) {
+    if(!is_array($locales)) {
+      return;
+    }
+    foreach($locales as $locale) {
+      $code = $locale['pk_c_code'];
+      $value = (isset($category['locale'][$code]['s_description']) ? $category['locale'][$code]['s_description'] : '');
+      $name = $code . '#s_description';
+      echo '<div class="input-has-placeholder locale-' . osc_esc_html($code) . '">';
+      echo '<textarea id="' . osc_esc_html($name) . '" name="' . osc_esc_html($name) . '" rows="8">' . osc_esc_html($value) . '</textarea>';
+      echo '</div>';
+    }
   }
 
   /**
@@ -191,7 +287,7 @@ class CategoryForm extends Form
         $tabs[] = '<li><a href="#'.$category['pk_i_id'].'-'.$locale['pk_c_code'].'">' . $locale['s_name'] . '</a></li>';
         $content[] = $contentTemp;
      }
-     
+
      echo '<div class="ui-osc-tabs osc-tab">';
      echo '<ul>' . implode( '', $tabs) . '</ul>';
      echo implode( '', $content);

@@ -1,4 +1,4 @@
-<?php 
+<?php
 if(!defined('ABS_PATH')) exit('ABS_PATH is not loaded. Direct access is not allowed.');
 
 set_time_limit(0);
@@ -20,8 +20,8 @@ $updated_version = '100';
 
 if(!defined('AUTO_UPGRADE') && UPGRADE_SKIP_DB === false) {
   $error_queries = array();
-  
-  if (file_exists(osc_lib_path() . 'osclass/installer/struct.sql')) {
+
+  if(file_exists(osc_lib_path() . 'osclass/installer/struct.sql')) {
     $sql = file_get_contents(osc_lib_path() . 'osclass/installer/struct.sql');
 
     $conn = DBConnectionClass::newInstance();
@@ -33,7 +33,7 @@ if(!defined('AUTO_UPGRADE') && UPGRADE_SKIP_DB === false) {
     $error_queries[0] = true;
   }
 
-  if (Params::getParam('skipdb') == '' && !$error_queries[0]) {
+  if(Params::getParam('skipdb') == '' && (int)Params::getParam('rerun') <= 0 && !$error_queries[0]) {
     $skip_db_link = osc_admin_base_url(true) . '?page=upgrade&action=upgrade-funcs&skipdb=true';
     $title  = __('Osclass has some errors');
     $message  = __("We've encountered some problems while updating the database structure. The following queries failed:");
@@ -53,6 +53,12 @@ $comm = new DBCommandClass($c_db);
 
 
 $current_version = (int)str_replace('.', '', getPreference('version'));   // osc_version()
+
+// Developer: re-run one version block, e.g. ?page=upgrade&action=upgrade-funcs&rerun=840
+$rerun = (int)Params::getParam('rerun');
+if($rerun > 800 && $rerun <= (int)str_replace('.', '', OSCLASS_VERSION) && osc_is_admin_user_logged_in() && defined('OSC_DEBUG') && OSC_DEBUG) {
+  $current_version = $rerun - 1;
+}
 
 // UPLOAD ONLY AVAILABLE FROM v3.0.0
 if($current_version < 300) {
@@ -89,7 +95,7 @@ if($current_version < 310) {
   if(!@mkdir(osc_uploads_path() . 'page-images') && ! is_dir(osc_uploads_path() . 'page-images')) {
     throw new \RuntimeException(sprintf('Directory "%s" was not created', osc_uploads_path() . 'page-images'));
   }
-  
+
   $updated_version = 310;
 }
 
@@ -126,12 +132,12 @@ if($current_version < 330) {
   if(!@mkdir(osc_content_path() . 'uploads/temp/') && ! is_dir(osc_content_path() . 'uploads/temp/')) {
     throw new \RuntimeException(sprintf('Directory "%s" was not created', osc_content_path() . 'uploads/temp/'));
   }
-  
+
   $concurrentDirectory = osc_content_path() . 'downloads/oc-temp/';
   if(!@mkdir($concurrentDirectory) && !is_dir($concurrentDirectory)) {
     throw new \RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
   }
-  
+
   unset($concurrentDirectory);
   @unlink(osc_lib_path() . 'osclass/classes/Watermark.php');
   osc_set_preference('title_character_length', '100', 'osclass', 'INTEGER');
@@ -148,8 +154,8 @@ if($current_version < 340) {
 if($current_version < 343) {
   $mAlerts = Alerts::newInstance();
   $aAlerts = $mAlerts->findByType('HOURLY');
-  
-  foreach ($aAlerts as $alert) {
+
+  foreach($aAlerts as $alert) {
     $s_search = base64_decode($alert['s_search']);
     if(stripos(strtolower($s_search), 'union select')!==false || stripos(strtolower($s_search), 't_admin')!==false) {
       $mAlerts->delete(array('pk_i_id' => $alert['pk_i_id']));
@@ -160,7 +166,7 @@ if($current_version < 343) {
   unset($aAlerts);
 
   $aAlerts = $mAlerts->findByType('DAILY');
-  foreach ($aAlerts as $alert) {
+  foreach($aAlerts as $alert) {
     $s_search = base64_decode($alert['s_search']);
     if(stripos(strtolower($s_search), 'union select')!==false || stripos(strtolower($s_search), 't_admin')!==false) {
       $mAlerts->delete(array('pk_i_id' => $alert['pk_i_id']));
@@ -171,7 +177,7 @@ if($current_version < 343) {
   unset($aAlerts);
 
   $aAlerts = $mAlerts->findByType('WEEKLY');
-  foreach ($aAlerts as $alert) {
+  foreach($aAlerts as $alert) {
     $s_search = base64_decode($alert['s_search']);
     if(stripos(strtolower($s_search), 'union select')!==false || stripos(strtolower($s_search), 't_admin')!==false) {
       $mAlerts->delete(array('pk_i_id' => $alert['pk_i_id']));
@@ -198,38 +204,38 @@ if($current_version < 372) {
 
 if($current_version < 374) {
   $admin = Admin::newInstance()->findByEmail('demo@demo.com');
-  
+
   if(isset($admin['pk_i_id'])) {
     Admin::newInstance()->deleteByPrimaryKey($admin['pk_i_id']);
   }
-  
+
   $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(ABS_PATH), RecursiveIteratorIterator::SELF_FIRST, RecursiveIteratorIterator::CATCH_GET_CHILD);
   $objects = iterator_to_array($iterator);
-  
-  foreach ($objects as $file => $object) {
+
+  foreach($objects as $file => $object) {
     try {
       $handle = @fopen($file, 'rb');
       if($handle!==false) {
         $exist = false;
         $text = array("htmlspecialchars(file_get_contents(\$_POST['path']))", '?option&path=$path', 'msdsaa' ,"shell_exec('cat /proc/cpuinfo');", 'PHPTerm', 'lzw_decompress');
 
-        while (($buffer = fgets($handle)) !== false) {
-          foreach ($text as $_t) {
+        while(($buffer = fgets($handle)) !== false) {
+          foreach($text as $_t) {
             if(strpos($buffer, $_t) !== false) {
               $exist = true;
               break;
             }
           }
         }
-        
+
         fclose($handle);
-        
+
         if($exist && strpos($file, __FILE__) === false) {
           error_log('remove ' . $file);
           @unlink($file);
         }
       }
-    } catch (Exception $e) {
+    } catch(Exception $e) {
       error_log($e);
     }
   }
@@ -288,18 +294,18 @@ if($current_version < 411) {
   $updated_version = 411;
 }
 
-if($current_version < 420) { 
+if($current_version < 420) {
   if(!@mkdir(osc_uploads_path() . 'user-images/') && !is_dir(osc_uploads_path() . 'user-images/')) {   // user profile pictures dir
     throw new \RuntimeException(sprintf('Directory "%s" was not created', osc_uploads_path() . 'user-images/'));
   }
-  
+
   if(!@mkdir(osc_uploads_path() . 'minify/') && !is_dir(osc_uploads_path() . 'minify/')) {   // user profile pictures dir
     throw new \RuntimeException(sprintf('Directory "%s" was not created', osc_uploads_path() . 'minify/'));
   }
-  
+
   if(file_exists(osc_lib_path() . 'phpmailer') && is_dir(osc_lib_path() . 'phpmailer')) {
-    $phpmailer_files = glob(osc_lib_path() . 'phpmailer/*');  
-   
+    $phpmailer_files = glob(osc_lib_path() . 'phpmailer/*');
+
     if(count($phpmailer_files) > 0) {
       foreach($phpmailer_files as $fl) {
         if(is_file($fl)) {
@@ -307,7 +313,7 @@ if($current_version < 420) {
         }
       }
     }
-    
+
     @rmdir(osc_lib_path() . 'phpmailer');
   }
 
@@ -340,7 +346,7 @@ if($current_version < 420) {
   $comm->query(sprintf('ALTER TABLE %st_item_comment ADD i_rating INT(3) NULL AFTER s_body', DB_TABLE_PREFIX));
   $comm->query(sprintf('ALTER TABLE %st_user ADD i_login_fails INT(3) NULL DEFAULT 0 AFTER s_access_ip', DB_TABLE_PREFIX));
   $comm->query(sprintf('ALTER TABLE %st_user ADD dt_login_fail_date DATETIME NULL AFTER i_login_fails', DB_TABLE_PREFIX));
-  $comm->query(sprintf('ALTER TABLE %st_user ADD s_profile_img VARCHAR(100) AFTER dt_login_fail_date', DB_TABLE_PREFIX)); 
+  $comm->query(sprintf('ALTER TABLE %st_user ADD s_profile_img VARCHAR(100) AFTER dt_login_fail_date', DB_TABLE_PREFIX));
   $comm->query(sprintf('ALTER TABLE %st_admin ADD s_moderator_access VARCHAR(1000) NULL AFTER b_moderator', DB_TABLE_PREFIX));
   $comm->query(sprintf('ALTER TABLE %st_admin ADD i_login_fails INT(3) NULL DEFAULT 0 AFTER s_moderator_access', DB_TABLE_PREFIX));
   $comm->query(sprintf('ALTER TABLE %st_admin ADD dt_login_fail_date DATETIME NULL AFTER i_login_fails', DB_TABLE_PREFIX));
@@ -348,7 +354,7 @@ if($current_version < 420) {
   $updated_version = 420;
 }
 
-if($current_version < 421) { 
+if($current_version < 421) {
   // change backoffice theme if upgrading from different branch
   if(file_exists(osc_base_path() . 'oc-admin/themes/evolution/') && is_dir(osc_base_path() . 'oc-admin/themes/evolution/')) {
     osc_deleteDir(osc_base_path() . 'oc-admin/themes/evolution/');
@@ -356,12 +362,12 @@ if($current_version < 421) {
   $updated_version = 421;
 }
 
-if($current_version < 430) { 
+if($current_version < 430) {
   $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'custom_css', '', 'STRING')", DB_TABLE_PREFIX));
   $updated_version = 430;
 }
 
-if($current_version < 440) { 
+if($current_version < 440) {
   $comm->query(sprintf("UPDATE %st_region SET s_name_native = null WHERE s_name_native = '' ", DB_TABLE_PREFIX));
   $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'custom_html', '', 'STRING')", DB_TABLE_PREFIX));
   $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'breadcrumbs_item_page_title', '1', 'BOOLEAN')", DB_TABLE_PREFIX));
@@ -382,14 +388,14 @@ if($current_version < 440) {
   $updated_version = 440;
 }
 
-if($current_version < 800) { 
+if($current_version < 800) {
   $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'widget_data_product_updates', '', 'STRING')", DB_TABLE_PREFIX));
   $comm->query(sprintf("ALTER TABLE %st_item_description ENGINE = InnoDB", DB_TABLE_PREFIX));
   $comm->query(sprintf("ALTER TABLE %st_meta_fields CHANGE e_type e_type ENUM('TEXT','NUMBER','TEL','EMAIL','COLOR','TEXTAREA','DROPDOWN','RADIO','CHECKBOX','URL','DATE','DATEINTERVAL') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'TEXT'", DB_TABLE_PREFIX));
   $updated_version = 800;
 }
 
-if($current_version < 801) { 
+if($current_version < 801) {
   $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'update_include_occontent', '0', 'BOOLEAN')", DB_TABLE_PREFIX));
   $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'item_contact_form_disabled', '0', 'BOOLEAN')", DB_TABLE_PREFIX));
   $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'web_contact_form_disabled', '0', 'BOOLEAN')", DB_TABLE_PREFIX));
@@ -401,7 +407,7 @@ if($current_version < 801) {
   $updated_version = 801;
 }
 
-if($current_version < 802) { 
+if($current_version < 802) {
   $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'canvas_background', 'white', 'STRING')", DB_TABLE_PREFIX));
   $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'hide_generator', '0', 'BOOLEAN')", DB_TABLE_PREFIX));
   $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'username_generator', 'ID', 'STRING')", DB_TABLE_PREFIX));
@@ -412,7 +418,7 @@ if($current_version < 802) {
   $updated_version = 802;
 }
 
-if($current_version < 810) { 
+if($current_version < 810) {
   $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'enable_comment_reply', '0', 'BOOLEAN')", DB_TABLE_PREFIX));
   $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'enable_comment_reply_rating', '0', 'BOOLEAN')", DB_TABLE_PREFIX));
   $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'comment_reply_user_type', '', 'STRING')", DB_TABLE_PREFIX));
@@ -443,23 +449,23 @@ if($current_version < 810) {
   if(file_exists(osc_base_path() . OC_ADMIN_FOLDER  . '/themes/omega/less/') && is_dir(osc_base_path() . OC_ADMIN_FOLDER  . '/themes/omega/less/')) {
     osc_deleteDir(osc_base_path() . OC_ADMIN_FOLDER  . '/themes/omega/less/');
   }
-  
+
   // Remove language folder of omega, as Core already contains it
   if(file_exists(osc_base_path() . OC_ADMIN_FOLDER  . '/themes/omega/languages/en_US/') && is_dir(osc_base_path() . OC_ADMIN_FOLDER  . '/themes/omega/languages/en_US/')) {
     osc_deleteDir(osc_base_path() . OC_ADMIN_FOLDER  . '/themes/omega/languages/en_US/');
   }
-  
+
   // Remove class related to metadata DB (multisite)
   @unlink(osc_base_path() . OC_INCLUDES_FOLDER . '/osclass/model/SiteInfo.php');
   $updated_version = 810;
 }
 
-if($current_version < 811) { 
+if($current_version < 811) {
   // No changes
   $updated_version = 811;
 }
 
-if($current_version < 812) { 
+if($current_version < 812) {
   osc_set_preference('css_banned_pages', 'item-item_add,item-item_edit');
   osc_set_preference('js_banned_pages', 'item-item_add,item-item_edit');
   osc_set_preference('css_banned_words', 'font,awesome,tiny,fineuploader');
@@ -471,7 +477,7 @@ if($current_version < 812) {
   $updated_version = 812;
 }
 
-if($current_version < 820) { 
+if($current_version < 820) {
   $comm->query(sprintf('ALTER TABLE %st_user ADD fk_c_locale_code CHAR(5) NULL', DB_TABLE_PREFIX));
   $comm->query(sprintf('ALTER TABLE %st_locale ADD fk_c_currency_code CHAR(3) NULL', DB_TABLE_PREFIX));
   $comm->query(sprintf('ALTER TABLE %st_item_resource ADD i_order INT(3) NOT NULL DEFAULT 0', DB_TABLE_PREFIX));
@@ -488,12 +494,12 @@ if($current_version < 820) {
   $updated_version = 820;
 }
 
-if($current_version < 821) { 
+if($current_version < 821) {
   // NO DB UPDATES
   $updated_version = 821;
 }
 
-if($current_version < 830) { 
+if($current_version < 830) {
   $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'search_pattern_locale', '1', 'BOOLEAN')", DB_TABLE_PREFIX));
   $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'item_stats_method', 'SESSION', 'STRING')", DB_TABLE_PREFIX));
   $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'user_public_profile_enabled', 'ALL', 'STRING')", DB_TABLE_PREFIX));
@@ -526,7 +532,7 @@ if($current_version < 830) {
   $comm->query(sprintf('ALTER TABLE %st_city_area ADD INDEX fk_c_country_code (fk_c_country_code);', DB_TABLE_PREFIX));
   $comm->query(sprintf('ALTER TABLE %st_city_area ADD INDEX idx_s_name_native (s_name_native);', DB_TABLE_PREFIX));
   $comm->query(sprintf('ALTER TABLE %st_city_area ADD INDEX idx_s_slug (s_slug);', DB_TABLE_PREFIX));
-  
+
   $comm->query(sprintf('ALTER TABLE %st_city ADD INDEX idx_s_name_native (s_name_native);', DB_TABLE_PREFIX));
   $comm->query(sprintf('ALTER TABLE %st_region ADD INDEX idx_s_name_native (s_name_native);', DB_TABLE_PREFIX));
   $comm->query(sprintf('ALTER TABLE %st_country ADD INDEX idx_s_name_native (s_name_native);', DB_TABLE_PREFIX));
@@ -574,23 +580,23 @@ if($current_version < 830) {
     //$comm->query(sprintf('ALTER TABLE %st_keywords CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci', DB_TABLE_PREFIX));
     $comm->query(sprintf('ALTER TABLE %st_log CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci', DB_TABLE_PREFIX));
   }
-  
+
   if(!@mkdir(osc_uploads_path() . 'item-images') && !is_dir(osc_uploads_path() . 'item-images')) {
     throw new \RuntimeException(sprintf('Directory "%s" was not created', osc_uploads_path() . 'item-images'));
   }
-  
+
   if(!@mkdir(osc_uploads_path() . 'widget-images') && !is_dir(osc_uploads_path() . 'widget-images')) {
     throw new \RuntimeException(sprintf('Directory "%s" was not created', osc_uploads_path() . 'widget-images'));
   }
-  
+
   if(!@mkdir(osc_uploads_path() . 'custom-images') && !is_dir(osc_uploads_path() . 'custom-images')) {
     throw new \RuntimeException(sprintf('Directory "%s" was not created', osc_uploads_path() . 'custom-images'));
   }
-  
+
   $updated_version = 830;
 }
 
-if($current_version < 831) { 
+if($current_version < 831) {
   // Update permalink rules to accept new user items urls (should be done in 830)
   $rules = osc_unserialize(osc_get_preference('rewrite_rules'));
 
@@ -698,6 +704,285 @@ if($current_version < 831) {
   $updated_version = 831;       // Version 8.3.1
 }
 
+if($current_version < 840) {
+  // Former 8.3.2 changes (no 8.3.2 release - shipped in 8.4.0)
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'cleanup_threshold_days', 14, 'INTEGER')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'cleanup_auto_types', '', 'STRING')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'item_stats_auto_cleanup_enabled', '0', 'BOOLEAN')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'item_stats_cleanup_months', 24, 'INTEGER')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'latest_searches_min_length', '3', 'INTEGER')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'latest_searches_max_length', '15', 'INTEGER')", DB_TABLE_PREFIX));
+  $comm->query(sprintf('ALTER TABLE %st_alerts ADD dt_expire_date DATETIME NULL DEFAULT NULL AFTER dt_date', DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'alerts_enabled', '1', 'BOOLEAN')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'alerts_expiration_months_user', 3, 'INTEGER')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'alerts_expiration_months_guest', 3, 'INTEGER')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'alerts_allow_non_expiring', '1', 'BOOLEAN')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'alerts_allow_user_expiration_change', '1', 'BOOLEAN')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'alerts_default_non_expiring', '0', 'BOOLEAN')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'alerts_unsub_inactive_months', 3, 'INTEGER')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'optimization_cleanup_frequency', 'weekly', 'STRING')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'database_optimization_frequency', 'none', 'STRING')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'database_optimization_operations', 'check,analyze,optimize', 'STRING')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'database_optimization_running', 0, 'INTEGER')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'location_stats_last_recalc', '', 'STRING')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'category_stats_last_recalc', '', 'STRING')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'user_stats_last_recalc', '', 'STRING')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'category_stats_recalc_running', '0', 'BOOLEAN')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'category_stats_recalc_done', 0, 'INTEGER')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'category_stats_recalc_offset', 0, 'INTEGER')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'category_stats_recalc_total', 0, 'INTEGER')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'user_stats_recalc_running', '0', 'BOOLEAN')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'user_stats_recalc_last_id', 0, 'INTEGER')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'user_stats_recalc_done', 0, 'INTEGER')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'user_stats_recalc_total', 0, 'INTEGER')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'media_regen_batch', 10, 'INTEGER')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'media_refresh_batch', 30, 'INTEGER')", DB_TABLE_PREFIX));
+
+  $widgets_hidden = trim((string)osc_get_preference('admindash_widgets_hidden'));
+  $widgets_hidden_arr = array_filter(array_unique(array_map('trim', explode(',', $widgets_hidden))));
+
+  if(!in_array('notes-my', $widgets_hidden_arr)) {
+    $widgets_hidden_arr[] = 'notes-my';
+  }
+  if(function_exists('osc_admin_dash_stats_opt_in_ids')) {
+    foreach(osc_admin_dash_stats_opt_in_ids() as $oid) {
+      if(!in_array($oid, $widgets_hidden_arr)) {
+        $widgets_hidden_arr[] = $oid;
+      }
+    }
+  }
+  $dash_show = array('chart-listing-views', 'chart-items', 'chart-comments', 'chart-reports', 'chart-users');
+  $widgets_hidden_keep = array();
+  foreach($widgets_hidden_arr as $hid) {
+    if(!in_array($hid, $dash_show, true)) {
+      $widgets_hidden_keep[] = $hid;
+    }
+  }
+  $widgets_hidden_arr = $widgets_hidden_keep;
+
+  osc_set_preference('admindash_widgets_hidden', implode(',', $widgets_hidden_arr));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'admindash_stats_opt_in_seeded', '5', 'BOOLEAN')", DB_TABLE_PREFIX));
+
+  $comm->query(sprintf('ALTER TABLE %st_currency ADD COLUMN d_exchange_rate DECIMAL(20,10) NULL DEFAULT 1.0000000000 AFTER s_description', DB_TABLE_PREFIX));
+  $comm->query(sprintf('UPDATE %st_currency SET d_exchange_rate = 1.0000000000 WHERE d_exchange_rate IS NULL', DB_TABLE_PREFIX));
+
+  // Reports feature - replacement of legacy "Mark as" feature
+  // No FOREIGN KEY: reports must survive removal of related user/item
+  $comm->query(sprintf("CREATE TABLE IF NOT EXISTS %st_report (
+  pk_i_id INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  fk_i_reporter_user_id INT(10) UNSIGNED NOT NULL,
+  fk_i_user_id INT(10) UNSIGNED NULL,
+  fk_i_item_id INT(10) UNSIGNED NULL,
+  i_reported_id INT(10) UNSIGNED NULL,
+  fk_c_locale_code CHAR(5) NULL,
+  s_type VARCHAR(20) NOT NULL DEFAULT 'item',
+  s_reason VARCHAR(30) NULL,
+  s_status VARCHAR(30) NOT NULL DEFAULT 'submitted',
+  s_source VARCHAR(30) NOT NULL DEFAULT 'osclass',
+  s_comment VARCHAR(2000) NULL,
+  s_admin_comment VARCHAR(2000) NULL,
+  s_file VARCHAR(80) NULL,
+  b_open TINYINT(1) NOT NULL DEFAULT 1,
+  dt_status_date DATETIME NULL,
+  dt_update_date DATETIME NULL,
+  dt_create_date DATETIME NOT NULL,
+  PRIMARY KEY (pk_i_id),
+  INDEX idx_s_status (s_status),
+  INDEX idx_s_type (s_type),
+  INDEX idx_b_open (b_open),
+  INDEX idx_reporter_date (fk_i_reporter_user_id, dt_create_date),
+  INDEX fk_i_user_id (fk_i_user_id),
+  INDEX fk_i_item_id (fk_i_item_id)
+) ENGINE=InnoDB DEFAULT CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_unicode_ci'", DB_TABLE_PREFIX));
+
+  $comm->query(sprintf("CREATE TABLE IF NOT EXISTS %st_report_comment (
+  pk_i_id INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  fk_i_report_id INT(10) UNSIGNED NOT NULL,
+  fk_i_user_id INT(10) UNSIGNED NULL,
+  fk_i_admin_id INT(10) UNSIGNED NULL,
+  s_comment VARCHAR(2000) NOT NULL,
+  b_admin_seen TINYINT(1) NOT NULL DEFAULT 0,
+  dt_date DATETIME NOT NULL,
+  PRIMARY KEY (pk_i_id),
+  INDEX fk_i_report_id (fk_i_report_id),
+  INDEX fk_i_user_id (fk_i_user_id),
+  INDEX idx_b_admin_seen (b_admin_seen)
+) ENGINE=InnoDB DEFAULT CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_unicode_ci'", DB_TABLE_PREFIX));
+
+  // Drop old report columns from item stats (one by one so a missing column does not block the rest)
+  foreach(array('i_num_spam', 'i_num_repeated', 'i_num_bad_classified', 'i_num_offensive', 'i_num_expired') as $col) {
+    $comm->query(sprintf('ALTER TABLE %st_item_stats DROP COLUMN %s', DB_TABLE_PREFIX, $col));
+  }
+
+  $item_stats_new_cols = array(
+    'i_num_views_engaged' => 'i_num_premium_views',
+    'i_num_views_search' => 'i_num_views_engaged',
+    'i_num_views_logged' => 'i_num_views_search',
+    'i_num_views_home' => 'i_num_views_logged',
+    'i_num_view_minutes' => 'i_num_views_home',
+    'i_num_phone_clicks' => 'i_num_view_minutes',
+    'i_num_contactother_clicks' => 'i_num_phone_clicks',
+    'i_num_favorites' => 'i_num_contactother_clicks',
+    'i_num_contactforms' => 'i_num_favorites',
+    'i_num_contacts' => 'i_num_contactforms',
+    'i_num_orders' => 'i_num_contacts',
+    'i_num_offers' => 'i_num_orders',
+    'i_num_promotions' => 'i_num_offers',
+    'i_num_reports' => 'i_num_promotions',
+    'i_num_tops' => 'i_num_reports',
+    'i_num_renews' => 'i_num_tops',
+    'i_num_repubs' => 'i_num_renews',
+    'i_num_alerts_sent' => 'i_num_repubs',
+    'i_num_shares' => 'i_num_alerts_sent',
+    'i_num_comments' => 'i_num_shares',
+    'i_num_rated_comments' => 'i_num_comments',
+    'i_num_custom1' => 'i_num_rated_comments',
+    'i_num_custom2' => 'i_num_custom1',
+    'i_num_custom3' => 'i_num_custom2'
+  );
+  foreach($item_stats_new_cols as $col => $after) {
+    $comm->query(sprintf('ALTER TABLE %st_item_stats ADD COLUMN %s INT(10) UNSIGNED NOT NULL DEFAULT 0 AFTER %s', DB_TABLE_PREFIX, $col, $after));
+  }
+
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'item_stats_logged_only', '0', 'BOOLEAN')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'item_stats_enabled', 'views,premium_views,views_engaged,views_logged,view_minutes,phone_clicks,contactforms,reports,alerts_sent', 'STRING')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'item_stats_chart_periods', '30d,90d,12m,all', 'STRING')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'item_stats_admin_default_period', '30d', 'STRING')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'item_stats_admin_default_measures', 'views,premium_views,views_engaged,views_logged,view_minutes,phone_clicks,contactforms,reports,alerts_sent', 'STRING')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'item_stats_user_chart_enabled', '1', 'BOOLEAN')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'item_stats_user_chart_measures', 'views,premium_views,views_engaged,phone_clicks,contactforms,reports', 'STRING')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'item_stats_user_chart_period', '30d', 'STRING')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'item_stats_user_chart_periods', '30d,90d,12m,all', 'STRING')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'item_stats_user_chart_type', 'line', 'STRING')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'item_stats_user_chart_kpis', 'views,premium_views,contactforms,favorites', 'STRING')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'item_stats_user_chart_hooks', 'user_items_top', 'STRING')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'item_stats_chart_audience', 'all', 'STRING')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'item_stats_item_chart_enabled', '0', 'BOOLEAN')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'item_stats_item_chart_admin', '1', 'BOOLEAN')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'item_stats_item_chart_measures', 'views,premium_views,views_engaged,phone_clicks,contactforms,reports', 'STRING')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'item_stats_item_chart_period', '30d', 'STRING')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'item_stats_item_chart_periods', '30d,90d,12m,all', 'STRING')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'item_stats_item_chart_type', 'line', 'STRING')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'item_stats_item_chart_hooks', 'item_top', 'STRING')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'item_stats_custom1_label', 'Custom 1', 'STRING')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'item_stats_custom2_label', 'Custom 2', 'STRING')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'item_stats_custom3_label', 'Custom 3', 'STRING')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'item_stats_engaged_seconds', '15', 'INTEGER')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("UPDATE %st_preference SET s_value = '15' WHERE s_name = 'item_stats_engaged_seconds' AND s_value = '60'", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'item_stats_phone_selectors', '.phone, div.phone, .show-phone, .show-mobile, a[href^=\"tel:\"]', 'STRING')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'item_stats_contactother_selectors', '.other, .contact-other, .show-other, [data-osc-stat=\"contactother_clicks\"]', 'STRING')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'item_stats_preset', 'essential', 'STRING')", DB_TABLE_PREFIX));
+
+  // Reports preferences
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'reports_enabled', '1', 'BOOLEAN')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'web_contact_create_report', '0', 'BOOLEAN')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'reports_per_day', 5, 'INTEGER')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'reports_allow_multiple', '0', 'BOOLEAN')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'reports_notify_admin', '1', 'BOOLEAN')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'reports_notify_reporter_created', '1', 'BOOLEAN')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'reports_notify_reporter_resolved', '1', 'BOOLEAN')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'reports_notify_owner_created', '1', 'BOOLEAN')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'reports_notify_owner_resolved', '1', 'BOOLEAN')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'reports_notify_comments', '1', 'BOOLEAN')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'reports_enable_feedback', '1', 'BOOLEAN')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'reports_auto_close_enabled', '1', 'BOOLEAN')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'reports_auto_close_days', 3, 'INTEGER')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'reports_retention_months', 24, 'INTEGER')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'reports_attachment_enabled', '0', 'BOOLEAN')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'reports_attachment_extensions', 'jpg,jpeg,png', 'STRING')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'reports_enabled_reasons', '', 'STRING')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'reports_enabled_statuses', '', 'STRING')", DB_TABLE_PREFIX));
+
+  // Reports permalinks
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'rewrite_report_item', 'report/item', 'STRING')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'rewrite_report_user', 'report/user', 'STRING')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'rewrite_report_view', 'report/view', 'STRING')", DB_TABLE_PREFIX));
+  osc_reset_preferences();
+
+  // Update permalink rules to accept new report urls; old mark urls keep routing so they can redirect
+  $rules = osc_unserialize(osc_get_preference('rewrite_rules'));
+  if(osc_rewrite_enabled() && is_array($rules) && !empty($rules)) {
+    $mark = osc_get_preference('rewrite_item_mark');
+    if($mark != '') {
+      $rules['^' . $mark . '/(.*?)/([0-9]+)/?$'] = 'index.php?page=item&action=mark&as=$1&id=$2';
+    }
+    $rules['^item/mark/(.*?)/([0-9]+)/?$'] = 'index.php?page=item&action=mark&as=$1&id=$2';
+
+    $report_item = osc_get_preference('rewrite_report_item');
+    $report_user = osc_get_preference('rewrite_report_user');
+    $report_view = osc_get_preference('rewrite_report_view');
+    if($report_item != '') {
+      $rules['^' . $report_item . '/([0-9]+)/?$'] = 'index.php?page=report&action=item&id=$1';
+    }
+    if($report_user != '') {
+      $rules['^' . $report_user . '/([0-9]+)/?$'] = 'index.php?page=report&action=user&id=$1';
+    }
+    if($report_view != '') {
+      $rules['^' . $report_view . '/([0-9]+)/?$'] = 'index.php?page=report&action=view&id=$1';
+    }
+
+    osc_set_preference('rewrite_rules', osc_serialize($rules));
+  }
+
+  // Remove legacy "Mark as" preferences and obsolete reported listings views
+  $comm->query(sprintf("DELETE FROM %st_preference WHERE s_section = 'osclass' AND s_name IN ('item_mark_disable', 'rewrite_item_mark')", DB_TABLE_PREFIX));
+
+  @unlink(osc_base_path() . OC_ADMIN_FOLDER . '/themes/omega/items/reported.php');
+  @unlink(osc_base_path() . OC_ADMIN_FOLDER . '/themes/modern/items/reported.php');
+
+  // Reports email templates (2 variable templates)
+  $email_report_admin_text = '<p>Hi admin,</p><p>{REPORT_MESSAGE}</p><p><b>Report #{REPORT_ID}</b><br /><b>Type:</b> {REPORT_TYPE}<br /><b>Reason:</b> {REPORT_REASON}<br /><b>Status:</b> {REPORT_STATUS}<br /><b>Reported:</b> {REPORTED_TITLE}<br /><b>Reporter:</b> {REPORTER_NAME}</p><p>{REPORT_COMMENT}</p>{REPORT_REPLY}<p>{REPORT_ADMIN_LINK}</p><p>Regards,</p><p>{WEB_LINK}</p>';
+  $email_report_user_text = '<p>Hi {USER_NAME},</p><p>{REPORT_MESSAGE}</p><p><b>Report #{REPORT_ID}</b><br /><b>Type:</b> {REPORT_TYPE}<br /><b>Reason:</b> {REPORT_REASON}<br /><b>Status:</b> {REPORT_STATUS}<br /><b>Reported:</b> {REPORTED_TITLE}</p><p>{REPORT_COMMENT}</p>{REPORT_REPLY}<p>{REPORT_LINK}</p><p>Regards,</p><p>{WEB_LINK}</p>';
+  osc_email_template_delete('email_report_admin');
+  osc_email_template_delete('email_report_user');
+  osc_email_template_create('email_report_admin', '{WEB_TITLE} - {REPORT_EVENT}', $email_report_admin_text);
+  osc_email_template_create('email_report_user', '{WEB_TITLE} - {REPORT_EVENT}', $email_report_user_text);
+
+  $comm->query(sprintf("CREATE TABLE IF NOT EXISTS %st_widget_description (
+  fk_i_widget_id INT(10) UNSIGNED NOT NULL,
+  fk_c_locale_code CHAR(5) NOT NULL,
+  s_content MEDIUMTEXT NULL,
+  PRIMARY KEY (fk_i_widget_id, fk_c_locale_code),
+  FOREIGN KEY (fk_i_widget_id) REFERENCES %st_widget (pk_i_id),
+  FOREIGN KEY (fk_c_locale_code) REFERENCES %st_locale (pk_c_code)
+) ENGINE=InnoDB DEFAULT CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_unicode_ci'", DB_TABLE_PREFIX, DB_TABLE_PREFIX, DB_TABLE_PREFIX));
+  $comm->query(sprintf("ALTER TABLE %st_widget ADD COLUMN s_code MEDIUMTEXT NULL AFTER e_kind", DB_TABLE_PREFIX));
+  $comm->query(sprintf("ALTER TABLE %st_widget ADD COLUMN s_internal_name VARCHAR(50) NULL AFTER s_description", DB_TABLE_PREFIX));
+  $comm->query(sprintf("ALTER TABLE %st_widget ADD COLUMN s_device_visibility VARCHAR(10) NOT NULL DEFAULT 'all' AFTER s_code", DB_TABLE_PREFIX));
+  $comm->query(sprintf("ALTER TABLE %st_widget ADD COLUMN s_css TEXT NULL AFTER s_device_visibility", DB_TABLE_PREFIX));
+  $comm->query(sprintf("ALTER TABLE %st_widget ADD COLUMN i_order INT(10) NOT NULL DEFAULT 0 AFTER s_css", DB_TABLE_PREFIX));
+  $comm->query(sprintf("ALTER TABLE %st_widget ADD COLUMN b_single_locale TINYINT(1) NOT NULL DEFAULT 0 AFTER i_order", DB_TABLE_PREFIX));
+  $comm->query(sprintf("ALTER TABLE %st_widget MODIFY s_location VARCHAR(64) NOT NULL", DB_TABLE_PREFIX));
+  $comm->query(sprintf("ALTER TABLE %st_widget ADD INDEX idx_s_location (s_location, i_order)", DB_TABLE_PREFIX));
+  $widget_locale = osc_language();
+  if($widget_locale == '') {
+    $widget_locale = 'en_US';
+  }
+  $comm->query(sprintf("INSERT INTO %st_widget_description (fk_i_widget_id, fk_c_locale_code, s_content) SELECT pk_i_id, '%s', s_content FROM %st_widget", DB_TABLE_PREFIX, addslashes($widget_locale), DB_TABLE_PREFIX));
+  $comm->query(sprintf("UPDATE %st_widget SET i_order = pk_i_id WHERE i_order = 0", DB_TABLE_PREFIX));
+  $comm->query(sprintf("UPDATE %st_widget SET s_internal_name = CONCAT('widget-', pk_i_id) WHERE s_internal_name IS NULL OR s_internal_name = ''", DB_TABLE_PREFIX));
+  $comm->query(sprintf("ALTER TABLE %st_widget MODIFY s_internal_name VARCHAR(50) NOT NULL", DB_TABLE_PREFIX));
+  $comm->query(sprintf("ALTER TABLE %st_widget ADD UNIQUE INDEX uk_s_internal_name (s_internal_name)", DB_TABLE_PREFIX));
+  $comm->query(sprintf("ALTER TABLE %st_widget DROP COLUMN s_content", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'widget_locale_strict', '0', 'BOOLEAN')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'widget_custom_sections', '', 'STRING')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'category_bulk_expiration_options', '14d,1m,3m', 'STRING')", DB_TABLE_PREFIX));
+
+  // Alert notification emails: replace unmodified en_US stock bodies, then append manage-alerts sentence if missing
+  $alert_email_new = '<p>Hi {USER_NAME},</p><p>{ALERT_INTRO}</p><p>{ADS}</p><p><hr/></p><p><b>{ALERT_NAME}</b><br />Frequency: {ALERT_FREQUENCY}<br />Created: {ALERT_DATE}<br />Expires: {ALERT_EXPIRE_DATE}</p><p>Open this alert in search: {SEARCH_LINK}</p><p>To unsubscribe from this alert, click on: {UNSUB_LINK}</p><p>You can manage your alerts in {USER_ALERTS_LINK}.</p><p>{WEB_LINK}</p>';
+  $alert_email_old = array(
+    'alert_email_hourly' => '<p>Hi {USER_NAME},</p><p>New listings have been published in the last hour. Take a look at them:</p><p>{ADS}</p><p><hr/></p><p>To unsubscribe from this alert, click on: {UNSUB_LINK}</p><p>{WEB_LINK}</p>',
+    'alert_email_daily' => '<p>Hi {USER_NAME},</p><p>New listings have been published in the last day. Take a look at them:</p><p>{ADS}</p><p><hr/></p><p>To unsubscribe from this alert, click on: {UNSUB_LINK}</p><p>{WEB_LINK}</p>',
+    'alert_email_weekly' => '<p>Hi {USER_NAME},</p><p>New listings have been published in the last week. Take a look at them:</p><p>{ADS}</p><p><hr/></p><p>To unsubscribe from this alert, click on: {UNSUB_LINK}</p><p>{WEB_LINK}</p>',
+    'alert_email_instant' => '<p>Hi {USER_NAME},</p><p>A new listing has been published, check it out!</p><p>{ADS}</p><p><hr/></p><p>To unsubscribe from this alert, click on: {UNSUB_LINK}</p><p>{WEB_LINK}</p>'
+  );
+  foreach($alert_email_old as $alert_email_name => $alert_email_text) {
+    $comm->query(sprintf("UPDATE %st_pages_description pd INNER JOIN %st_pages p ON p.pk_i_id = pd.fk_i_pages_id SET pd.s_text = '%s' WHERE p.s_internal_name = '%s' AND pd.fk_c_locale_code = 'en_US' AND pd.s_text = '%s'", DB_TABLE_PREFIX, DB_TABLE_PREFIX, addslashes($alert_email_new), addslashes($alert_email_name), addslashes($alert_email_text)));
+  }
+  $comm->query(sprintf("UPDATE %st_pages_description pd INNER JOIN %st_pages p ON p.pk_i_id = pd.fk_i_pages_id SET pd.s_text = CONCAT(pd.s_text, '%s') WHERE p.s_internal_name IN ('alert_email_hourly', 'alert_email_daily', 'alert_email_weekly', 'alert_email_instant') AND pd.s_text NOT LIKE '%%{USER_ALERTS_LINK}%%'", DB_TABLE_PREFIX, DB_TABLE_PREFIX, addslashes('<p>You can manage your alerts in {USER_ALERTS_LINK}.</p>')));
+
+  $updated_version = 840;       // Version 8.4.0
+}
 
 // Resolve current version
 // Critical for auto-upgrade, where constant OSCLASS_VERSION keeps current installation version, as new file is being downloaded
@@ -708,7 +993,7 @@ if(isset($updated_version) && $updated_version >= $known_version) {
 } else {
   $current_version = $known_version;
 }
-  
+
 osc_changeVersionTo($current_version);
 
 // Make sure Omega is selected as admin theme
@@ -724,9 +1009,9 @@ if(!defined('IS_AJAX') || !IS_AJAX) {
     echo '<script type="text/javascript"> window.location = "'.osc_admin_base_url(true).'?page=tools&action=version"; </script>';
   } else {
     echo '<div class="well ui-rounded-corners separate-top-medium">';
-    echo '<p>'.__('Osclass updated correctly').'</p>';
+    echo '<p>'.__('Osclass has been updated').'</p>';
     echo '<p>'.__('Osclass has been updated successfully. <a href="https://forums.osclasspoint.com">Need more help?</a>').'</p>';
-    foreach ($aMessages as $msg) {
+    foreach($aMessages as $msg) {
       echo '<p>' . $msg . '</p>';
     }
     echo '</div>';

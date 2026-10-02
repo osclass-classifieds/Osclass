@@ -29,7 +29,7 @@ function addHelp() {
 }
 osc_add_hook('help_box','addHelp');
 
-function customPageHeader2(){ 
+function customPageHeader2(){
   ?>
   <h1>
     <?php echo sprintf(__('%s on market'), __('Plugins translations')); ?>
@@ -59,11 +59,11 @@ $plugins_all = array();
 
 if(is_array($plugins_all_with_index) && count($plugins_all_with_index) > 0) {
   foreach($plugins_all_with_index as $plg) {
-    $plugins_all[] = str_replace('/index.php', '', $plg); 
+    $plugins_all[] = str_replace('/index.php', '', $plg);
   }
 }
 
-osc_current_admin_theme_path( 'market/header.php' ); 
+osc_current_admin_theme_path( 'market/header.php' );
 ?>
 
 <div id="market-block" class="<?php echo osc_esc_html($action); ?>">
@@ -79,9 +79,9 @@ osc_current_admin_theme_path( 'market/header.php' );
         <input type="text" name="pattern" class="input-text" value="<?php echo Params::getParam('pattern'); ?>" placeholder="<?php echo osc_esc_html(__('Search language...')); ?>"/>
 
         <select name="action" class="select-box-extra select-box-medium float-left" onchange="this.form.submit();">
-          <option value="languages" <?php if( Params::getParam('action') == 'languages' ) echo 'selected="selected"'; ?> ><?php _e('Osclass translations'); ?></option>
-          <option value="languages-themes" <?php if( Params::getParam('action') == 'languages-themes' ) echo 'selected="selected"'; ?> ><?php _e('Themes translations'); ?></option>
-          <option value="languages-plugins" <?php if( Params::getParam('action') == 'languages-plugins' ) echo 'selected="selected"'; ?> ><?php _e('Plugins translations'); ?></option>
+          <option value="languages" <?php if(Params::getParam('action') == 'languages' ) echo 'selected="selected"'; ?> ><?php _e('Osclass translations'); ?></option>
+          <option value="languages-themes" <?php if(Params::getParam('action') == 'languages-themes' ) echo 'selected="selected"'; ?> ><?php _e('Themes translations'); ?></option>
+          <option value="languages-plugins" <?php if(Params::getParam('action') == 'languages-plugins' ) echo 'selected="selected"'; ?> ><?php _e('Plugins translations'); ?></option>
         </select>
 
         <button type="submit" class="btn btn-submit"><?php _e('Filter'); ?></button>
@@ -94,7 +94,7 @@ osc_current_admin_theme_path( 'market/header.php' );
       <?php foreach($products as $p) { ?>
         <?php
           $code = $p['prod_name'];
-          
+
           if($code == '') { continue; }
 
           $info = osc_plugin_get_info($p['prod_name'] . '/index.php');
@@ -115,12 +115,12 @@ osc_current_admin_theme_path( 'market/header.php' );
           } else {
             $version_req = sprintf(__('%s or higher'), $p['s_version']);
           }
-          
+
           $compatible_from = true;
 
           if($vfrom != '' && $vfrom != null && $vfrom != 'null' && @$info['version'] <> '') {
             $check_from = version_compare2($vfrom, $info['version']);
-            if ($check_from == 1) {    // A > B
+            if($check_from == 1) {    // A > B
               $compatible_from = false;
             }
           }
@@ -139,7 +139,7 @@ osc_current_admin_theme_path( 'market/header.php' );
             <div class="desc">
               <div class="line"><strong><?php _e('File name'); ?>:</strong> <span><?php echo $p['full_name']; ?></span></div>
               <div class="line"><strong><?php _e('Updated on'); ?>:</strong> <span><?php echo date('Y-m-d', strtotime($p['date'])); ?></span></div>
-              <div class="line"><strong><?php _e('Size'); ?>:</strong> <span><?php echo $p['size']; ?></span></div> 
+              <div class="line"><strong><?php _e('Size'); ?>:</strong> <span><?php echo $p['size']; ?></span></div>
             </div>
 
             <div class="actions">
@@ -242,7 +242,7 @@ osc_current_admin_theme_path( 'market/header.php' );
     $('a.btn.enable, a.btn.install').on('click', function(e){
       e.preventDefault();
 
-      $(this).find('i').removeClass().addClass('fa').addClass('fa-spinner').addClass('fa-spin'); 
+      $(this).find('i').removeClass().addClass('fa').addClass('fa-spinner').addClass('fa-spin');
 
       $.ajax({
         url : $(this).attr('href'),
@@ -269,11 +269,11 @@ osc_current_admin_theme_path( 'market/header.php' );
           content += oscEscapeHTML(data.message);
 
           if(elem.hasClass('is-update')) {
-            content += '<h3><?php echo osc_esc_js(__('Product language has been updated correctly.')); ?></h3>';
+            content += '<h3><?php echo osc_esc_js(__('The package has been updated')); ?></h3>';
           } else {
-            content += '<h3><?php echo osc_esc_js(__('Product language has been downloaded correctly.')); ?></h3>';
+            content += '<h3><?php echo osc_esc_js(__('The package has been downloaded')); ?></h3>';
           }
-          
+
           content += "<p>";
           content += '<a class="btn btn-mini" href="javascript:location.reload(true)"><?php echo osc_esc_js(__('Close')); ?></a>';
           content += "</p>";
@@ -310,7 +310,7 @@ osc_current_admin_theme_path( 'market/header.php' );
     $("#market_prod_name").attr("value", products[key].prod_name);
     $("#market_filename").attr("value", products[key].full_name);
     $("#market_download").attr("value", products[key].url);
- 
+
     $("#market_name").text(products[key].prod_name_formatted);
     $("#market_lang").text(products[key].lang_name_long);
     $("#market_version").text(products[key].s_version);
@@ -328,11 +328,11 @@ osc_current_admin_theme_path( 'market/header.php' );
 
 
     var dialogWidth = 485;
-    
+
     if($(window).width() < 525) {
       dialogWidth = $(window).width() - 40;
     }
-    
+
     $('#market_installer').dialog({
       modal: true,
       title: modalTitle,
@@ -343,4 +343,4 @@ osc_current_admin_theme_path( 'market/header.php' );
   });
 </script>
 
-<?php osc_current_admin_theme_path( 'parts/footer.php' ); ?>
+<?php osc_current_admin_theme_path( 'parts/footer.php' );

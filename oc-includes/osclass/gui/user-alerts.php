@@ -38,9 +38,33 @@
     <?php
     $i = 1;
     while(osc_has_alerts()) { ?>
-        <div class="userItem" >
+        <div class="userItem user-alert" >
             <div class="title-has-actions">
-                <h3><?php _e('Alert', 'sigma'); ?> <?php echo $i; ?></h3> <a onclick="javascript:return confirm('<?php echo osc_esc_js(__('This action can\'t be undone. Are you sure you want to continue?', 'sigmaw')); ?>');" href="<?php echo osc_user_unsubscribe_alert_url(); ?>"><?php _e('Delete this alert', 'sigma'); ?></a><div class="clear"></div></div>
+                <h3>
+                  <?php
+                    if(osc_alert_name() != '') {
+                      echo osc_alert_name();
+                    } else {
+                      echo sprintf(__('Alert #%d', 'sigma'), osc_alert_id());
+                    }
+                  ?>
+                </h3>
+
+                <a onclick="javascript:return confirm('<?php echo osc_esc_js(__('This action cannot be undone. Are you sure you want to continue?', 'sigmaw')); ?>');" href="<?php echo osc_user_unsubscribe_alert_url(); ?>"><?php _e('Delete this alert', 'sigma'); ?></a>
+                <a href="<?php echo osc_search_alert_url(); ?>"><?php _e('Open in search', 'sigma'); ?></a>
+
+                <div class="clear">
+
+                <?php echo osc_alert_change_frequency(osc_alert()); ?>
+                <?php echo osc_alert_change_expiration(osc_alert()); ?>
+
+                <?php $alert_status_code = osc_alert_status(); ?>
+                <p class="alerts-meta alerts-status-row alerts-status-<?php echo osc_esc_html($alert_status_code); ?>">
+                  <span class="alerts-status-val alerts-status-<?php echo osc_esc_html($alert_status_code); ?>" title="<?php echo osc_esc_html(osc_alert_status_title($alert_status_code)); ?>"><?php echo osc_esc_html(osc_alert_status_label($alert_status_code)); ?></span>
+                  <span class="alerts-trigger-val"><?php echo osc_esc_html(osc_alert_triggers_label()); ?></span>
+                </p>
+                <div class="clear">
+                </div></div>
             <div>
             <?php osc_current_web_theme_path('loop.php'); ?>
             <?php if(osc_count_items() == 0) { ?>
@@ -55,4 +79,4 @@
     }
     ?>
 <?php  } ?>
-<?php osc_current_web_theme_path('footer.php') ; ?>
+<?php osc_current_web_theme_path('footer.php') ;

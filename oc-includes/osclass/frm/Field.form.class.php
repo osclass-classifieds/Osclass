@@ -53,7 +53,7 @@ class FieldForm extends Form {
    * @param string $type
    */
   public static function initDatePicker($id_field, $dateFormat, $value, $type = 'none') {
-    if ($value == '') {
+    if($value == '') {
       $value = 0;
     }
     $aux = <<<FB
@@ -151,20 +151,24 @@ FB;
   * @return bool
   */
   public static function type_select($field = null) {
+    $e_type = 'TEXT';
+    if(is_array($field) && isset($field['e_type']) && $field['e_type'] !== '') {
+      $e_type = $field['e_type'];
+    }
     ?>
     <select name="field_type" id="field_type">
-      <option value="TEXT" <?php if($field['e_type'] === 'TEXT') { echo 'selected="selected"';} ?>><?php _e('Text'); ?></option>
-      <option value="NUMBER" <?php if($field['e_type'] === 'NUMBER') { echo 'selected="selected"';} ?>><?php _e('Number'); ?></option>
-      <option value="EMAIL" <?php if($field['e_type'] === 'EMAIL') { echo 'selected="selected"';} ?>><?php _e('Email'); ?></option>
-      <option value="TEL" <?php if($field['e_type'] === 'TEL') { echo 'selected="selected"';} ?>><?php _e('Phone'); ?></option>
-      <option value="URL" <?php if($field['e_type'] === 'URL') { echo 'selected="selected"';} ?>><?php _e('URL'); ?></option>
-      <option value="COLOR" <?php if($field['e_type'] === 'COLOR') { echo 'selected="selected"';} ?>><?php _e('Color'); ?></option>
-      <option value="TEXTAREA" <?php if($field['e_type'] === 'TEXTAREA') { echo 'selected="selected"';} ?>><?php _e('Textarea'); ?></option>
-      <option value="DROPDOWN" <?php if($field['e_type'] === 'DROPDOWN') { echo 'selected="selected"';} ?>><?php _e('Select box'); ?></option>
-      <option value="CHECKBOX" <?php if($field['e_type'] === 'CHECKBOX') { echo 'selected="selected"';} ?>><?php _e('Check box'); ?></option>
-      <option value="RADIO" <?php if($field['e_type'] === 'RADIO') { echo 'selected="selected"';} ?>><?php _e('Radio button'); ?></option>
-      <option value="DATE" <?php if($field['e_type'] === 'DATE') { echo 'selected="selected"';} ?>><?php _e('Date'); ?></option>
-      <option value="DATEINTERVAL" <?php if($field['e_type'] === 'DATEINTERVAL') { echo 'selected="selected"';} ?>><?php _e('Date interval'); ?></option>
+      <option value="TEXT" <?php if($e_type === 'TEXT') { echo 'selected="selected"';} ?>><?php _e('Text'); ?></option>
+      <option value="NUMBER" <?php if($e_type === 'NUMBER') { echo 'selected="selected"';} ?>><?php _e('Number'); ?></option>
+      <option value="EMAIL" <?php if($e_type === 'EMAIL') { echo 'selected="selected"';} ?>><?php _e('Email'); ?></option>
+      <option value="TEL" <?php if($e_type === 'TEL') { echo 'selected="selected"';} ?>><?php _e('Phone'); ?></option>
+      <option value="URL" <?php if($e_type === 'URL') { echo 'selected="selected"';} ?>><?php _e('URL'); ?></option>
+      <option value="COLOR" <?php if($e_type === 'COLOR') { echo 'selected="selected"';} ?>><?php _e('Color'); ?></option>
+      <option value="TEXTAREA" <?php if($e_type === 'TEXTAREA') { echo 'selected="selected"';} ?>><?php _e('Textarea'); ?></option>
+      <option value="DROPDOWN" <?php if($e_type === 'DROPDOWN') { echo 'selected="selected"';} ?>><?php _e('Select box'); ?></option>
+      <option value="CHECKBOX" <?php if($e_type === 'CHECKBOX') { echo 'selected="selected"';} ?>><?php _e('Check box'); ?></option>
+      <option value="RADIO" <?php if($e_type === 'RADIO') { echo 'selected="selected"';} ?>><?php _e('Radio button'); ?></option>
+      <option value="DATE" <?php if($e_type === 'DATE') { echo 'selected="selected"';} ?>><?php _e('Date'); ?></option>
+      <option value="DATEINTERVAL" <?php if($e_type === 'DATEINTERVAL') { echo 'selected="selected"';} ?>><?php _e('Date interval'); ?></option>
     </select>
     <?php
     return true;
@@ -180,7 +184,7 @@ FB;
       if($field['b_required'] == 1) {
         $req_indicator = ' <sup class="req">*</sup>';
       }
-      
+
       // date interval
       if($field['e_type'] === 'DATEINTERVAL') {
         $field['s_value'] = array();
@@ -197,7 +201,7 @@ FB;
           }
         } else {
           $_meta = Params::getParam('meta');
-          
+
           if(is_array($_meta) && isset($_meta[$field['pk_i_id']]) && isset($_meta[$field['pk_i_id']]['from'])) {
             $temp['from'] = (int)$_meta[$field['pk_i_id']]['from'];
             $temp['to'] = (int)$_meta[$field['pk_i_id']]['to'];
@@ -205,7 +209,7 @@ FB;
             $temp['from'] = '';
             $temp['to'] = '';
           }
-          
+
           $field['s_value'] = $temp;
         }
       }
@@ -236,20 +240,20 @@ FB;
         } else {
           echo '<label for="meta_'.$field['s_slug'].'">'.$field['s_name'].$req_indicator.'</label>';
         }
-        
+
         if(isset($field) && isset($field['s_options'])) {
           $options = explode(',', $field['s_options']);
           if(count($options)>0) {
             echo '<select name="meta['.$field['pk_i_id'].']" id="meta_' . $field['s_slug'] . '">';
-            
+
             //if($search) {
             echo '<option value="">'. __('Select')." ". $field['s_name'].'</option>';
             //}
-            
+
             foreach($options as $option) {
               echo '<option value="'.osc_esc_html($option).'" '.($field['s_value']==$option?'selected="selected"':'').'>'.$option.'</option>';
             }
-            
+
             echo '</select>';
           }
         }
@@ -317,7 +321,7 @@ FB;
         } else {
           echo '<label for="meta_'.$field['s_slug'].'">'.$field['s_name'].$req_indicator.'</label>';
         }
-        
+
         // update 450 in type of input field
         echo '<input id="meta_'.$field['s_slug'].'" type="'.strtolower($field['e_type']).'" name="meta['.$field['pk_i_id'].']" value="' . osc_esc_html((isset($field) && isset($field['s_value'])) ? $field['s_value'] : '') . '" />';
       }
@@ -339,7 +343,7 @@ FB;
     // we check if the category is the same as our plugin
     foreach($catId as $id) {
       $aTemp = Field::newInstance()->findByCategory($id);
-      foreach ($aTemp as $field) {
+      foreach($aTemp as $field) {
         if($field['b_searchable']==1) {
           $aCustomFields[$field['pk_i_id']] = $field;
         }

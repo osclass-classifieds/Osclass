@@ -36,7 +36,7 @@ class CAdminSettingsPermalinks extends AdminSecBaseModel {
 
         $this->doView('settings/permalinks.php');
       break;
-      
+
       case('permalinks_post'):
         // updating permalinks option
         osc_csrf_check();
@@ -83,14 +83,14 @@ HTACCESS;
           } else {
             osc_set_preference('rewrite_item_url', $item_url);
           }
-          
+
           $page_url = substr(str_replace('//', '/', Params::getParam('rewrite_page_url').'/'), 0, -1);
           if(!osc_validate_text($page_url)) {
             $errors += 1;
           } else {
             osc_set_preference('rewrite_page_url', $page_url);
           }
-          
+
           $cat_url = substr(str_replace('//', '/', Params::getParam('rewrite_cat_url').'/'), 0, -1);
           // DEPRECATED: backward compatibility, remove in 3.4
           $cat_url = str_replace('{CATEGORY_SLUG}', '{CATEGORY_NAME}', $cat_url);
@@ -99,7 +99,7 @@ HTACCESS;
           } else {
             osc_set_preference('rewrite_cat_url', $cat_url);
           }
-          
+
           $search_url = substr(str_replace('//', '/', Params::getParam('rewrite_search_url').'/'), 0, -1);
           if(!osc_validate_text($search_url)) {
             $errors += 1;
@@ -112,37 +112,37 @@ HTACCESS;
           } else {
             osc_set_preference('rewrite_search_country', Params::getParam('rewrite_search_country'));
           }
-          
+
           if(!osc_validate_text(Params::getParam('rewrite_search_region'))) {
             $errors += 1;
           } else {
             osc_set_preference('rewrite_search_region', Params::getParam('rewrite_search_region'));
           }
-          
+
           if(!osc_validate_text(Params::getParam('rewrite_search_city'))) {
             $errors += 1;
           } else {
             osc_set_preference('rewrite_search_city', Params::getParam('rewrite_search_city'));
           }
-          
+
           if(!osc_validate_text(Params::getParam('rewrite_search_city_area'))) {
             $errors += 1;
           } else {
             osc_set_preference('rewrite_search_city_area', Params::getParam('rewrite_search_city_area'));
           }
-          
+
           if(!osc_validate_text(Params::getParam('rewrite_search_category'))) {
             $errors += 1;
           } else {
             osc_set_preference('rewrite_search_category', Params::getParam('rewrite_search_category'));
           }
-          
+
           if(!osc_validate_text(Params::getParam('rewrite_search_user'))) {
             $errors += 1;
           } else {
             osc_set_preference('rewrite_search_user', Params::getParam('rewrite_search_user'));
           }
-          
+
           if(!osc_validate_text(Params::getParam('rewrite_search_pattern'))) {
             $errors += 1;
           } else {
@@ -178,7 +178,7 @@ HTACCESS;
           } else {
             osc_set_preference('rewrite_search_order_by_relevance', Params::getParam('rewrite_search_order_by_relevance'));
           }
-          
+
           if(!osc_validate_text(Params::getParam('rewrite_search_order_by_expiration'))) {
             $errors += 1;
           } else {
@@ -214,7 +214,7 @@ HTACCESS;
           } else {
             osc_set_preference('rewrite_search_premium_only', Params::getParam('rewrite_search_premium_only'));
           }
-          
+
           if(!osc_validate_text(Params::getParam('rewrite_search_with_phone'))) {
             $errors += 1;
           } else {
@@ -232,8 +232,8 @@ HTACCESS;
           } else {
             osc_set_preference('rewrite_search_page_number', Params::getParam('rewrite_search_page_number'));
           }
-          
-          
+
+
           $rewriteSearchCustomRulesEnabled = Params::getParam('rewrite_search_custom_rules_enabled');
           $rewriteSearchCustomRulesEnabled  = (($rewriteSearchCustomRulesEnabled != '') ? true : false);
           osc_set_preference('rewrite_search_custom_rules_enabled', $rewriteSearchCustomRulesEnabled);
@@ -255,11 +255,11 @@ HTACCESS;
             if(strpos($rule_sanitize, '{') === false) {
               $rule_sanitize = '';
             }
-            
+
             osc_set_preference('rewrite_search_rule_' . $search_rule_id, $rule_sanitize);
           }
 
-          
+
           $rewrite_contact = substr(str_replace('//', '/', Params::getParam('rewrite_contact').'/'), 0, -1);
           if(!osc_validate_text($rewrite_contact)) {
             $errors += 1;
@@ -272,182 +272,196 @@ HTACCESS;
           } else {
             osc_set_preference('rewrite_feed', $rewrite_feed);
           }
-          
+
           $rewrite_language = substr(str_replace('//', '/', Params::getParam('rewrite_language').'/'), 0, -1);
           if(!osc_validate_text($rewrite_language)) {
             $errors += 1;
           } else {
             osc_set_preference('rewrite_language', $rewrite_language);
           }
-          
-          $rewrite_item_mark = substr(str_replace('//', '/', Params::getParam('rewrite_item_mark').'/'), 0, -1);
-          if(!osc_validate_text($rewrite_item_mark)) {
-            $errors += 1;
-          } else {
-            osc_set_preference('rewrite_item_mark', $rewrite_item_mark);
-          }
-          
+
           $rewrite_item_send_friend = substr(str_replace('//', '/', Params::getParam('rewrite_item_send_friend').'/'), 0, -1);
           if(!osc_validate_text($rewrite_item_send_friend)) {
             $errors += 1;
           } else {
             osc_set_preference('rewrite_item_send_friend', $rewrite_item_send_friend);
           }
-          
+
           $rewrite_item_contact = substr(str_replace('//', '/', Params::getParam('rewrite_item_contact').'/'), 0, -1);
           if(!osc_validate_text($rewrite_item_contact)) {
             $errors += 1;
           } else {
             osc_set_preference('rewrite_item_contact', $rewrite_item_contact);
           }
-          
+
+          $rewrite_report_item = substr(str_replace('//', '/', Params::getParam('rewrite_report_item').'/'), 0, -1);
+          if(!osc_validate_text($rewrite_report_item)) {
+            $errors += 1;
+          } else {
+            osc_set_preference('rewrite_report_item', $rewrite_report_item);
+          }
+
+          $rewrite_report_user = substr(str_replace('//', '/', Params::getParam('rewrite_report_user').'/'), 0, -1);
+          if(!osc_validate_text($rewrite_report_user)) {
+            $errors += 1;
+          } else {
+            osc_set_preference('rewrite_report_user', $rewrite_report_user);
+          }
+
+          $rewrite_report_view = substr(str_replace('//', '/', Params::getParam('rewrite_report_view').'/'), 0, -1);
+          if(!osc_validate_text($rewrite_report_view)) {
+            $errors += 1;
+          } else {
+            osc_set_preference('rewrite_report_view', $rewrite_report_view);
+          }
+
           $rewrite_item_new = substr(str_replace('//', '/', Params::getParam('rewrite_item_new').'/'), 0, -1);
           if(!osc_validate_text($rewrite_item_new)) {
             $errors += 1;
           } else {
             osc_set_preference('rewrite_item_new', $rewrite_item_new);
           }
-          
+
           $rewrite_item_activate = substr(str_replace('//', '/', Params::getParam('rewrite_item_activate').'/'), 0, -1);
           if(!osc_validate_text($rewrite_item_activate)) {
             $errors += 1;
           } else {
             osc_set_preference('rewrite_item_activate', $rewrite_item_activate);
           }
-          
+
           $rewrite_item_deactivate = substr(str_replace('//', '/', Params::getParam('rewrite_item_deactivate').'/'), 0, -1);
           if(!osc_validate_text($rewrite_item_deactivate)) {
             $errors += 1;
           } else {
             osc_set_preference('rewrite_item_deactivate', $rewrite_item_deactivate);
           }
-          
+
           $rewrite_item_renew = substr(str_replace('//', '/', Params::getParam('rewrite_item_renew').'/'), 0, -1);
           if(!osc_validate_text($rewrite_item_renew)) {
             $errors += 1;
           } else {
             osc_set_preference('rewrite_item_renew', $rewrite_item_renew);
           }
-          
+
           $rewrite_item_edit = substr(str_replace('//', '/', Params::getParam('rewrite_item_edit').'/'), 0, -1);
           if(!osc_validate_text($rewrite_item_edit)) {
             $errors += 1;
           } else {
             osc_set_preference('rewrite_item_edit', $rewrite_item_edit);
           }
-          
+
           $rewrite_item_delete = substr(str_replace('//', '/', Params::getParam('rewrite_item_delete').'/'), 0, -1);
           if(!osc_validate_text($rewrite_item_delete)) {
             $errors += 1;
           } else {
             osc_set_preference('rewrite_item_delete', $rewrite_item_delete);
           }
-          
+
           $rewrite_item_resource_delete = substr(str_replace('//', '/', Params::getParam('rewrite_item_resource_delete').'/'), 0, -1);
           if(!osc_validate_text($rewrite_item_resource_delete)) {
             $errors += 1;
           } else {
             osc_set_preference('rewrite_item_resource_delete', $rewrite_item_resource_delete);
           }
-          
+
           $rewrite_user_login = substr(str_replace('//', '/', Params::getParam('rewrite_user_login').'/'), 0, -1);
           if(!osc_validate_text($rewrite_user_login)) {
             $errors += 1;
           } else {
             osc_set_preference('rewrite_user_login', $rewrite_user_login);
           }
-          
+
           $rewrite_user_dashboard = substr(str_replace('//', '/', Params::getParam('rewrite_user_dashboard').'/'), 0, -1);
           if(!osc_validate_text($rewrite_user_dashboard)) {
             $errors += 1;
           } else {
             osc_set_preference('rewrite_user_dashboard', $rewrite_user_dashboard);
           }
-          
+
           $rewrite_user_logout = substr(str_replace('//', '/', Params::getParam('rewrite_user_logout').'/'), 0, -1);
           if(!osc_validate_text($rewrite_user_logout)) {
             $errors += 1;
           } else {
             osc_set_preference('rewrite_user_logout', $rewrite_user_logout);
           }
-          
+
           $rewrite_user_register = substr(str_replace('//', '/', Params::getParam('rewrite_user_register').'/'), 0, -1);
           if(!osc_validate_text($rewrite_user_register)) {
             $errors += 1;
           } else {
             osc_set_preference('rewrite_user_register', $rewrite_user_register);
           }
-          
+
           $rewrite_user_activate = substr(str_replace('//', '/', Params::getParam('rewrite_user_activate').'/'), 0, -1);
           if(!osc_validate_text($rewrite_user_activate)) {
             $errors += 1;
           } else {
             osc_set_preference('rewrite_user_activate', $rewrite_user_activate);
           }
-          
+
           $rewrite_user_activate_alert = substr(str_replace('//', '/', Params::getParam('rewrite_user_activate_alert').'/'), 0, -1);
           if(!osc_validate_text($rewrite_user_activate_alert)) {
             $errors += 1;
           } else {
             osc_set_preference('rewrite_user_activate_alert', $rewrite_user_activate_alert);
           }
-          
+
           $rewrite_user_profile = substr(str_replace('//', '/', Params::getParam('rewrite_user_profile').'/'), 0, -1);
           if(!osc_validate_text($rewrite_user_profile)) {
             $errors += 1;
           } else {
             osc_set_preference('rewrite_user_profile', $rewrite_user_profile);
           }
-          
+
           $rewrite_user_items = substr(str_replace('//', '/', Params::getParam('rewrite_user_items').'/'), 0, -1);
           if(!osc_validate_text($rewrite_user_items)) {
             $errors += 1;
           } else {
             osc_set_preference('rewrite_user_items', $rewrite_user_items);
           }
-          
+
           $rewrite_user_alerts = substr(str_replace('//', '/', Params::getParam('rewrite_user_alerts').'/'), 0, -1);
           if(!osc_validate_text($rewrite_user_alerts)) {
             $errors += 1;
           } else {
             osc_set_preference('rewrite_user_alerts', $rewrite_user_alerts);
           }
-          
+
           $rewrite_user_recover = substr(str_replace('//', '/', Params::getParam('rewrite_user_recover').'/'), 0, -1);
           if(!osc_validate_text($rewrite_user_recover)) {
             $errors += 1;
           } else {
             osc_set_preference('rewrite_user_recover', $rewrite_user_recover);
           }
-          
+
           $rewrite_user_forgot = substr(str_replace('//', '/', Params::getParam('rewrite_user_forgot').'/'), 0, -1);
           if(!osc_validate_text($rewrite_user_forgot)) {
             $errors += 1;
           } else {
             osc_set_preference('rewrite_user_forgot', $rewrite_user_forgot);
           }
-          
+
           $rewrite_user_change_password = substr(str_replace('//', '/', Params::getParam('rewrite_user_change_password').'/'), 0, -1);
           if(!osc_validate_text($rewrite_user_change_password)) {
             $errors += 1;
           } else {
             osc_set_preference('rewrite_user_change_password', $rewrite_user_change_password);
           }
-          
+
           $rewrite_user_change_email = substr(str_replace('//', '/', Params::getParam('rewrite_user_change_email').'/'), 0, -1);
           if(!osc_validate_text($rewrite_user_change_email)) {
             $errors += 1;
           } else {
             osc_set_preference('rewrite_user_change_email', $rewrite_user_change_email);
           }
-          
+
           $rewrite_user_change_username = substr(str_replace('//', '/', Params::getParam('rewrite_user_change_username').'/'), 0, -1);
           if(!osc_validate_text($rewrite_user_change_username)) {
             $errors += 1;
           } else {
             osc_set_preference('rewrite_user_change_username', $rewrite_user_change_username);
           }
-          
+
           $rewrite_user_change_email_confirm = substr(str_replace('//', '/', Params::getParam('rewrite_user_change_email_confirm').'/'), 0, -1);
           if(!osc_validate_text($rewrite_user_change_email_confirm)) {
             $errors += 1;
@@ -480,9 +494,14 @@ HTACCESS;
           $rewrite->addRule('^'.$search_url.'/(.*)$', 'index.php?page=search&sParams=$1');
 
           // Item rules
-          $rewrite->addRule('^'.osc_get_preference('rewrite_item_mark').'/(.*?)/([0-9]+)/?$', 'index.php?page=item&action=mark&as=$1&id=$2');
           $rewrite->addRule('^'.osc_get_preference('rewrite_item_send_friend').'/([0-9]+)/?$', 'index.php?page=item&action=send_friend&id=$1');
           $rewrite->addRule('^'.osc_get_preference('rewrite_item_contact').'/([0-9]+)/?$', 'index.php?page=item&action=contact&id=$1');
+
+          // Report rules
+          $rewrite->addRule('^'.osc_get_preference('rewrite_report_item').'/([0-9]+)/?$', 'index.php?page=report&action=item&id=$1');
+          $rewrite->addRule('^'.osc_get_preference('rewrite_report_user').'/([0-9]+)/?$', 'index.php?page=report&action=user&id=$1');
+          $rewrite->addRule('^'.osc_get_preference('rewrite_report_view').'/([0-9]+)/?$', 'index.php?page=report&action=view&id=$1');
+          $rewrite->addRule('^item/mark/(.*?)/([0-9]+)/?$', 'index.php?page=item&action=mark&as=$1&id=$2');
           $rewrite->addRule('^'.osc_get_preference('rewrite_item_new').'/?$', 'index.php?page=item&action=item_add');
           $rewrite->addRule('^'.osc_get_preference('rewrite_item_new').'/([0-9]+)/?$', 'index.php?page=item&action=item_add&catId=$1');
           $rewrite->addRule('^'.osc_get_preference('rewrite_item_activate').'/([0-9]+)/(.*?)/?$', 'index.php?page=item&action=activate&id=$1&secret=$2');
@@ -507,7 +526,7 @@ HTACCESS;
           if($id_pos!==false) { $comments_pos++; }
           if($title_pos!==false) { $comments_pos++; }
           if($cat_pos!==false) { $comments_pos++; }
-          
+
           // Old item rules
           // $rewrite->addRule('^([a-z]{2})_([A-Z]{2})/'. str_replace('{ITEM_CITY}', '.*', str_replace('{CATEGORIES}', '.*', str_replace('{ITEM_TITLE}', '.*', str_replace('{ITEM_ID}', '([0-9]+)', $item_url.'\?comments-page=([0-9al]*)')))).'$', 'index.php?page=item&id=$3&lang=$1_$2&comments-page=$4');
           // $rewrite->addRule('^'. str_replace('{ITEM_CITY}', '.*', str_replace('{CATEGORIES}', '.*', str_replace('{ITEM_TITLE}', '.*', str_replace('{ITEM_ID}', '([0-9]+)', $item_url.'\?comments-page=([0-9al]*)')))).'$', 'index.php?page=item&id=$1&comments-page=$2');
@@ -520,7 +539,7 @@ HTACCESS;
             array('([0-9]+)','.*','.*','.*','.*','.*','.*','.*','.*','.*','.*','.*','.*','.*'),
             $item_url
           );
-          
+
           $rewrite->addRule('^([a-z]{2})_([A-Z]{2})/'. $item_rule .'\?comments-page=([0-9al]*)$', 'index.php?page=item&id=$3&lang=$1_$2&comments-page=$4');
           $rewrite->addRule('^'. $item_rule .'\?comments-page=([0-9al]*)$', 'index.php?page=item&id=$2&comments-page=$3');
           $rewrite->addRule('^([a-z]{2})_([A-Z]{2})/'. $item_rule.'$', 'index.php?page=item&id=$3&lang=$1_$2');
@@ -557,7 +576,7 @@ HTACCESS;
           $pos_pSlug = stripos($page_url, '{PAGE_SLUG}');
           $pID_pos = 1;
           $pSlug_pos = 1;
-          
+
           if(is_numeric($pos_pID) && is_numeric($pos_pSlug)) {
             // set the order of the parameters
             if($pos_pID > $pos_pSlug) {
@@ -588,15 +607,15 @@ HTACCESS;
           $title_pos = stripos($item_url, '{CATEGORY_NAME}');
           $cat_pos = stripos($item_url, '{CATEGORIES');
           $param_pos = 1;
-          
+
           if($title_pos!==false && $id_pos>$title_pos) {
             $param_pos++;
           }
-          
+
           if($cat_pos!==false && $id_pos>$cat_pos) {
             $param_pos++;
           }
-          
+
           $rewrite->addRule('^'.str_replace('{CATEGORIES}', '(.+)', str_replace('{CATEGORY_NAME}', '([^/]+)', str_replace('{CATEGORY_ID}', '([0-9]+)', $cat_url))).'/([0-9]+)$', 'index.php?page=search&sCategory=$'.$param_pos.'&iPage=$'.($param_pos+1));
           $rewrite->addRule('^'.str_replace('{CATEGORIES}', '(.+)', str_replace('{CATEGORY_NAME}', '([^/]+)', str_replace('{CATEGORY_ID}', '([0-9]+)', $cat_url))).'/?$', 'index.php?page=search&sCategory=$'.$param_pos);
 
@@ -610,7 +629,7 @@ HTACCESS;
 
           osc_set_preference('seo_url_search_prefix', rtrim(Params::getParam('seo_url_search_prefix'), '/'));
 
-          $msg_error = '<br/>'._m('All fields are required.')." ".sprintf(_mn('One field was not updated', '%s fields were not updated', $errors), $errors);
+          $msg_error = '<br/>'._m('All fields are required')." ".sprintf(_mn('One field was not updated', '%s fields were not updated', $errors), $errors);
 
           switch($status) {
             case 1:
@@ -622,39 +641,39 @@ HTACCESS;
                 osc_add_flash_ok_message($msg, 'admin');
               }
               break;
-            
+
             case 2:
-              $msg = _m("Permalinks structure updated.");
+              $msg = _m("Permalinks structure updated");
               $msg .= " ";
-              $msg .= _m("However, we can't check if Apache module <b>mod_rewrite</b> is loaded. If you experience some problems with the URLs, you should deactivate <em>Friendly URLs</em>");
+              $msg .= _m("However, we cannot check if Apache module <b>mod_rewrite</b> is loaded. If you experience some problems with the URLs, you should deactivate <em>Friendly URLs</em>");
               if($errors>0) {
                 $msg .= $msg_error;
               }
               osc_add_flash_warning_message($msg, 'admin');
               break;
-            
+
             case 3:
               $msg = _m("File <b>.htaccess</b> couldn't be filled out with the right content.");
               $msg .= " ";
-              $msg .= _m("Here's the content you have to add to the <b>.htaccess</b> file. If you can't create the file, please deactivate the <em>Friendly URLs</em> option.");
+              $msg .= _m("Here's the content you have to add to the <b>.htaccess</b> file. If you cannot create the file, please deactivate the <em>Friendly URLs</em> option.");
               $msg .= "</p><pre>" . htmlentities($htaccess, ENT_COMPAT, "UTF-8") . '</pre><p>';
               if($errors>0) {
                 $msg .= $msg_error;
               }
               osc_add_flash_error_message($msg, 'admin');
               break;
-            
+
             case 4:
               $msg = _m("File <b>.htaccess</b> couldn't be filled out with the right content.");
               $msg .= " ";
-              $msg .= _m("Here's the content you have to add to the <b>.htaccess</b> file. If you can't create the file or experience some problems with the URLs, please deactivate the <em>Friendly URLs</em> option.");
+              $msg .= _m("Here's the content you have to add to the <b>.htaccess</b> file. If you cannot create the file or experience some problems with the URLs, please deactivate the <em>Friendly URLs</em> option.");
               $msg .= "</p><pre>" . htmlentities($htaccess, ENT_COMPAT, "UTF-8") . '</pre><p>';
               if($errors>0) {
                 $msg .= $msg_error;
               }
               osc_add_flash_error_message($msg, 'admin');
               break;
-              
+
             case 5:
               $warning = false;
               if(file_exists($htaccess_file)) {
@@ -662,27 +681,27 @@ HTACCESS;
                 if($htaccess_content!=$htaccess) {
                   $msg = _m("File <b>.htaccess</b> already exists and was not modified.");
                   $msg .= " ";
-                  $msg .= _m("Here's the content you have to add to the <b>.htaccess</b> file. If you can't modify the file or experience some problems with the URLs, please deactivate the <em>Friendly URLs</em> option.");
+                  $msg .= _m("Here's the content you have to add to the <b>.htaccess</b> file. If you cannot modify the file or experience some problems with the URLs, please deactivate the <em>Friendly URLs</em> option.");
                   $msg .= "</p><pre>" . htmlentities($htaccess, ENT_COMPAT, "UTF-8") . '</pre><p>';
                   $warning = true;
                 } else {
                   $msg = _m("Permalinks structure updated");
                 }
               }
-              
+
               if($errors>0) {
                 $msg .= $msg_error;
               }
-              
+
               if($errors>0 || $warning) {
                 osc_add_flash_warning_message($msg, 'admin');
               } else {
                 osc_add_flash_ok_message($msg, 'admin');
               }
-              
+
               break;
           }
-          
+
         } else {
           osc_set_preference('rewriteEnabled', 0);
           osc_set_preference('mod_rewrite_loaded', 0);
@@ -698,9 +717,9 @@ HTACCESS;
               $same_content = false;
             }
           }
-          
+
           if($deleted) {
-            osc_add_flash_ok_message(_m('Friendly URLs successfully deactivated'), 'admin');
+            osc_add_flash_ok_message(_m('Friendly URLs have been deactivated'), 'admin');
           } else {
             if($same_content) {
               osc_add_flash_warning_message(_m('Friendly URLs deactivated, but .htaccess file could not be deleted. Please, remove it manually'), 'admin');

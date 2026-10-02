@@ -2,7 +2,7 @@
   if(!defined('ABS_PATH')) {
     define('ABS_PATH', dirname(dirname(dirname(dirname(dirname(__FILE__))))) . '/');
   }
-  
+
   require_once ABS_PATH . 'oc-load.php';
   $api_valid = __get('api_valid');
 
@@ -39,7 +39,7 @@
     <div class="line price">
       <span><?php echo ($p['i_price'] <= 0 ? __('Free') : $p['i_price'] . '&euro;'); ?></span>
     </div>
-    
+
     <div class="line">
       <strong><?php _e('Author'); ?>:</strong>
       <span><?php echo $p['s_contact_name']; ?></span>
@@ -53,15 +53,15 @@
     <div class="line">
       <strong><?php _e('Require Osclass version'); ?>:</strong>
       <span>
-        <?php 
+        <?php
           if($p['i_osc_version_from'] == '' && $p['i_osc_version_to'] == '') {
             echo __('All versions');
-          } else if ($p['i_osc_version_from'] == '') {
+          } elseif($p['i_osc_version_from'] == '') {
             echo sprintf(__('up to %s'), $p['i_osc_version_to']);
           } else {
             echo sprintf(__('%s or higher'), $p['i_osc_version_from']);
           }
-        ?>      
+        ?>
       </span>
     </div>
 
@@ -101,7 +101,7 @@
       <?php if($p['s_demo_back'] <> '') { ?>
         <a href="<?php echo $p['s_demo_back']; ?>" target="_blank"><?php _e('Back-office demo'); ?> &raquo;</a>
       <?php } ?>
-      
+
     </div>
 
     <h3><?php _e('Average rating'); ?></h3>

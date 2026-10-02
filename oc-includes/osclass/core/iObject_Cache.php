@@ -53,7 +53,7 @@ interface iObject_Cache {
   public function delete( $key );
     public function flush();
     public function stats();
-    public function _get_cache(); // return string 
+    public function _get_cache(); // return string
     public static function is_supported();
 
 

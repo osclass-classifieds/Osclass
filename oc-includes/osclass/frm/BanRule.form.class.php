@@ -49,7 +49,7 @@ class BanRuleForm extends Form {
   public static function email_text( $rule = null ) {
     parent::generic_input_text('s_email', isset($rule['s_email']) ? $rule['s_email'] : '');
   }
-  
+
   /**
   * @param null $rule
   */

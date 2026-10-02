@@ -70,7 +70,7 @@ class WebThemes extends Themes {
   public function __construct() {
     parent::__construct();
     $this->path = osc_themes_path();
-    
+
     $demo_theme = osc_esc_html(Params::getParam('demoTheme') != '' ? Params::getParam('demoTheme') : Params::getParam('theme'));
     $demo_theme = osc_esc_html($demo_theme != '' ? $demo_theme : Session::newInstance()->_get('demo_theme'));
     $demo_theme = osc_esc_html($demo_theme != '' ? $demo_theme : Cookie::newInstance()->get_value('demo_theme'));
@@ -94,12 +94,12 @@ class WebThemes extends Themes {
         require_once $parent_functions_path;
       }
     }
-    
+
     $theme_split = explode('_', $this->theme);
 
     if(isset($theme_split[1]) && $theme_split[1] == 'child') {
       $this->setCurrentThemeIsChild($theme_split[0]);
-      
+
       $functions_child_path = $this->getCurrentThemePath() . 'functions_child.php';
       if(file_exists($functions_child_path)) {
         require_once $functions_child_path;
@@ -108,7 +108,7 @@ class WebThemes extends Themes {
   }
 
   public function setCurrentThemePath() {
-    if ($this->theme <> '' && file_exists($this->path . $this->theme . '/')) {
+    if($this->theme <> '' && file_exists($this->path . $this->theme . '/')) {
       $this->theme_exists = true;
       $this->theme_path   = $this->path . $this->theme . '/';
     } else {
@@ -118,7 +118,7 @@ class WebThemes extends Themes {
   }
 
   public function setCurrentThemeUrl() {
-    if ($this->theme_exists) {
+    if($this->theme_exists) {
       $this->theme_url = osc_apply_filter('theme_url', osc_base_url() . str_replace(osc_base_path(), '', $this->theme_path));
     } else {
       $this->theme_url = osc_apply_filter('theme_url', osc_base_url() . OC_INCLUDES_FOLDER . '/osclass/gui/');
@@ -179,26 +179,26 @@ class WebThemes extends Themes {
 
   /**
    * This function returns an array of themes (those copied in the oc-content/themes folder)
-   * @return array 
+   * @return array
    */
   public function getListThemes($sort = 'ASC') {
     $themes = array();
     $dir  = opendir($this->path);
-    
-    while ($file = readdir($dir)) {
-      if (preg_match('/^[a-zA-Z0-9_]+$/', $file)) {
+
+    while($file = readdir($dir)) {
+      if(preg_match('/^[a-zA-Z0-9_]+$/', $file)) {
         $themes[] = $file;
       }
     }
-    
+
     closedir($dir);
-    
+
     if($sort == 'ASC') {
       sort($themes);
-    } else { 
+    } else {
       rsort($themes);
     }
-    
+
     return $themes;
   }
 
@@ -206,7 +206,7 @@ class WebThemes extends Themes {
    *
    * @param  $theme
    *
-   * @return array|bool 
+   * @return array|bool
    */
   public function loadThemeInfo($theme) {
     $path = $this->path . $theme . '/index.php';
@@ -264,7 +264,7 @@ class WebThemes extends Themes {
     } else {
       $info['author_url'] = '';
     }
-    
+
     if(preg_match('|Support URI:([^\\r\\t\\n]*)|i', $s_info, $match)) {
       $info['support_url'] = trim($match[1]);
     } else {
@@ -292,7 +292,7 @@ class WebThemes extends Themes {
     // OLD CODE INFO
     require_once $path;
     $fxName = $theme . '_theme_info';
-    if (!function_exists($fxName)) {
+    if(!function_exists($fxName)) {
       return false;
     }
     $result       = $fxName();
@@ -320,8 +320,8 @@ class WebThemes extends Themes {
 
     $templates = array();
     $dir = opendir($this->path . $theme . '/');
-    while ($file = readdir($dir)) {
-      if (preg_match('/^template-[a-zA-Z0-9_\.]+$/', $file)) {
+    while($file = readdir($dir)) {
+      if(preg_match('/^template-[a-zA-Z0-9_\.]+$/', $file)) {
         $templates[] = $file;
       }
     }

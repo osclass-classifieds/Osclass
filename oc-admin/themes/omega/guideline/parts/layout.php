@@ -6,7 +6,7 @@
                 <h2 class="render-title">Layout</h2>
             </div>
         </div>
-        
+
         <div class="grid-row grid-30">
             <div class="row-wrapper">
                 <p>The basic template includes the admin toolbar, the menu, and the basic layout to render your page.</p>
@@ -44,6 +44,5 @@ osc_add_hook(<span style="color:#666">'admin_page_header'</span>,<span style="co
     </div>
     <!-- Explain end -->
 </div
-
 
 

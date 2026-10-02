@@ -17,7 +17,7 @@
 
 
 // meta tag robots
-if( osc_count_items() == 0 || stripos($_SERVER['REQUEST_URI'], 'search') ) {
+if(osc_count_items() == 0 || stripos($_SERVER['REQUEST_URI'], 'search') ) {
   osc_add_hook('header','sigma_nofollow_construct');
 } else {
   osc_add_hook('header','sigma_follow_construct');
@@ -157,4 +157,4 @@ $( "#sCity" ).autocomplete({
       <?php echo osc_search_pagination(); ?>
    </div>
    <?php } ?>
-<?php osc_current_web_theme_path('footer.php') ; ?>
+<?php osc_current_web_theme_path('footer.php') ;

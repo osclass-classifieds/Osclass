@@ -45,17 +45,20 @@ class Params
    */
   public static function getParam($param, $htmlencode = false, $xss_check = true, $quotes_encode = true)
   {
-    if ($param === '') {
+    if($param === '') {
       return '';
     }
-    if (!isset(self::$_request[$param])) {
+    if(!isset(self::$_request[$param])) {
       return '';
     }
 
     $value = self::_purify(self::$_request[$param], $xss_check);
 
-    if ($htmlencode) {
-      if ($quotes_encode) {
+    if($htmlencode) {
+      if(!is_string($value)) {
+        $value = is_scalar($value) ? (string)$value : '';
+      }
+      if($quotes_encode) {
         return htmlspecialchars(stripslashes($value), ENT_QUOTES);
       }
 
@@ -63,7 +66,7 @@ class Params
     }
 
     //$value = strip_tags($value);
-    //if (get_magic_quotes_gpc()) {
+    //if(get_magic_quotes_gpc()) {
       //$value = strip_slashes_extended($value);
     //}
 
@@ -78,7 +81,7 @@ class Params
    */
   private static function _purify($value, $xss_check)
   {
-    if (!$xss_check) {
+    if(!$xss_check) {
       return $value;
     }
 
@@ -86,12 +89,12 @@ class Params
     self::$_config->set('HTML.Allowed', '');
     self::$_config->set('Cache.SerializerPath', osc_uploads_path());
 
-    if (!isset(self::$_purifier)) {
+    if(!isset(self::$_purifier)) {
       self::$_purifier = new HTMLPurifier(self::$_config);
     }
 
-    if (is_array($value)) {
-      foreach ($value as $k => &$v) {
+    if(is_array($value)) {
+      foreach($value as $k => &$v) {
         $v = self::_purify($v, $xss_check); // recursive
       }
     } else {
@@ -108,10 +111,10 @@ class Params
    */
   public static function existParam($param)
   {
-    if ($param === '') {
+    if($param === '') {
       return false;
     }
-    if (!isset(self::$_request[$param])) {
+    if(!isset(self::$_request[$param])) {
       return false;
     }
 
@@ -128,24 +131,27 @@ class Params
    */
   public static function getServerParam($param, $htmlencode = false, $xss_check = true, $quotes_encode = true)
   {
-    if ($param === '') {
+    if($param === '') {
       return '';
     }
-    if (!isset(self::$_server[$param])) {
+    if(!isset(self::$_server[$param])) {
       return '';
     }
 
     $value = self::_purify(self::$_server[$param], $xss_check);
 
-    if ($htmlencode) {
-      if ($quotes_encode) {
+    if($htmlencode) {
+      if(!is_string($value)) {
+        $value = is_scalar($value) ? (string)$value : '';
+      }
+      if($quotes_encode) {
         return htmlspecialchars(stripslashes($value), ENT_QUOTES);
       }
 
       return htmlspecialchars(stripslashes($value), ENT_NOQUOTES);
     }
 
-    // if (get_magic_quotes_gpc()) {
+    // if(get_magic_quotes_gpc()) {
     //   $value = strip_slashes_extended($value);
     // }
 
@@ -159,10 +165,10 @@ class Params
    */
   public static function existServerParam($param)
   {
-    if ($param === '') {
+    if($param === '') {
       return false;
     }
-    if (!isset(self::$_server[$param])) {
+    if(!isset(self::$_server[$param])) {
       return false;
     }
 
@@ -178,7 +184,7 @@ class Params
   {
     $value = self::_purify(self::$_server, $xss_check);
 
-    // if (get_magic_quotes_gpc()) {
+    // if(get_magic_quotes_gpc()) {
     //   return strip_slashes_extended($value);
     // }
 
@@ -192,7 +198,7 @@ class Params
    */
   public static function getFiles($param)
   {
-    if (isset($_FILES[$param])) {
+    if(isset($_FILES[$param])) {
       return $_FILES[$param];
     }
 
@@ -234,27 +240,27 @@ class Params
    */
   public static function getParamsAsArray($what = '', $htmlencode = false, $xss_check = true, $quotes_encode = true)
   {
-    switch ($what) {
+    switch($what) {
       case('get'):
         $value = $_GET;
         break;
-        
+
       case('post'):
         $value = $_POST;
         break;
-        
+
       case('cookie'):
         return $_COOKIE;
         break;
-        
+
       case('files'):
         return $_FILES;
         break;
-        
+
       case('request'): // This should not be called, as it depends on server's configuration
         return $_REQUEST;
         break;
-        
+
       default:
         $value = self::$_request;
         break;
@@ -262,7 +268,7 @@ class Params
 
     $value = self::_purify($value, $htmlencode); // $xss_check, $quotes_encode );
 
-    // if (get_magic_quotes_gpc()) {
+    // if(get_magic_quotes_gpc()) {
     //   return strip_slashes_extended($value);
     // }
 

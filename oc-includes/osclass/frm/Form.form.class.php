@@ -31,25 +31,25 @@ class Form {
    * @param $id
    */
   protected static function generic_select($name, $items, $fld_key, $fld_name, $default_item, $id, $limit = 0) {
-    
+
     // Limit cities (or number of entries in general) in select box
     $limit = ($limit > 0 ? $limit : 4500);
-    
+
     $name = osc_esc_html($name);
     $fld_name_orig = $fld_name;
-    
+
     echo '<select name="' . $name . '" id="' . preg_replace('|([^_a-zA-Z0-9-]+)|', '', $name) . '">';
-    
-    if ( isset( $default_item ) && $default_item !== false ) {
+
+    if(isset( $default_item ) && $default_item !== false ) {
       echo '<option value="">' . $default_item . '</option>';
     }
-    
+
     $counter = 0;
     if(is_array($items) && !empty($items) && count($items) > 0) {
       foreach($items as $i) {
-        if (isset($fld_key) && isset($fld_name)) {
+        if(isset($fld_key) && isset($fld_name)) {
           $fld_name = $fld_name_orig;
-          
+
           if(osc_get_current_user_locations_native() == 1) {
             if(isset($i[$fld_name . '_native']) && $i[$fld_name . '_native'] <> '') {
               $fld_name = $fld_name . '_native';
@@ -60,18 +60,18 @@ class Form {
             echo '<option value="' . osc_esc_html($i[$fld_key]) . '"' . (($id == $i[$fld_key] || (isset($i['s_slug']) && $id == $i['s_slug'])) ? ' selected="selected"' : '') . '>' . $i[$fld_name] . '</option>';
           }
         }
-        
+
         if($counter > $limit) {
           break;
         }
-        
+
         $counter++;
       }
-      
+
     } else {
       echo '<option value="">' . __('No value') . '</option>';
     }
-    
+
     echo '</select>';
   }
 
@@ -86,32 +86,32 @@ class Form {
     $name = osc_esc_html($name);
     $type = osc_esc_html(strtolower(trim($type)));
     $value = ($value === NULL ? '' : $value);
-    
+
     if(!in_array($type, array('button','checkbox','color','date','datetime-local','email','file','hidden','image','month','number','password','radio','range','reset','search','submit','tel','text','time','url','week'))) {
       $type = 'text';
     }
-    
-    echo '<input id="' . preg_replace('|([^_a-zA-Z0-9-]+)|', '', $name) . '" type="' . $type . '" name="' . $name . '" value="' . osc_esc_html(htmlentities($value, ENT_COMPAT, 'UTF-8')) . '" placeholder="' . osc_esc_html($placeholder) . '"';
 
-    if (isset($maxLength) && $maxLength > 0) {
+    echo '<input id="' . preg_replace('|([^_a-zA-Z0-9-]+)|', '', $name) . '" type="' . $type . '" name="' . $name . '" value="' . osc_esc_html(html_entity_decode((string)$value, ENT_QUOTES, 'UTF-8')) . '" placeholder="' . osc_esc_html($placeholder) . '"';
+
+    if(isset($maxLength) && $maxLength > 0) {
       echo ' maxlength="' . osc_esc_html( $maxLength ) . '"';
     }
-    
-    if (!$autocomplete) {
+
+    if(!$autocomplete) {
       echo ' autocomplete="off"';
     }
-    
-    if ($size > 0) {
+
+    if($size > 0) {
       echo ' size="' . $size . '"';
     }
-    
-    if ($readOnly) {
+
+    if($readOnly) {
       echo ' disabled="disabled" readonly="readonly"';
     }
-    
+
     echo ' />';
   }
-  
+
 
   /**
   * @param    $name
@@ -121,16 +121,16 @@ class Form {
   */
   protected static function generic_password( $name , $value , $maxLength = null , $readOnly = false ) {
     $name = osc_esc_html($name);
-    echo '<input id="' . preg_replace('|([^_a-zA-Z0-9-]+)|', '', $name) . '" type="password" name="' . $name . '" value="' . osc_esc_html(htmlentities( $value, ENT_COMPAT, 'UTF-8' )) . '"';
+    echo '<input id="' . preg_replace('|([^_a-zA-Z0-9-]+)|', '', $name) . '" type="password" name="' . $name . '" value="' . osc_esc_html(html_entity_decode((string)$value, ENT_QUOTES, 'UTF-8')) . '"';
 
-    if (isset($maxLength) && $maxLength > 0) {
+    if(isset($maxLength) && $maxLength > 0) {
       echo ' maxlength="' . osc_esc_html( $maxLength ) . '"';
     }
-    
-    if ( $readOnly ) {
+
+    if($readOnly ) {
       echo ' disabled="disabled" readonly="readonly"';
     }
-    
+
     echo ' autocomplete="off" />';
   }
 
@@ -140,7 +140,7 @@ class Form {
   */
   protected static function generic_input_hidden( $name , $value ) {
     $name = osc_esc_html($name);
-    echo '<input id="' . preg_replace('|([^_a-zA-Z0-9-]+)|', '', $name) . '" type="hidden" name="' . $name . '" value="' . osc_esc_html(htmlentities( $value, ENT_COMPAT, 'UTF-8' )) . '" />';
+    echo '<input id="' . preg_replace('|([^_a-zA-Z0-9-]+)|', '', $name) . '" type="hidden" name="' . $name . '" value="' . osc_esc_html(html_entity_decode((string)$value, ENT_QUOTES, 'UTF-8')) . '" />';
   }
 
   /**
@@ -150,9 +150,9 @@ class Form {
   */
   protected static function generic_input_checkbox( $name , $value , $checked = false ) {
     $name = osc_esc_html($name);
-    echo '<input id="' . preg_replace('|([^_a-zA-Z0-9-]+)|', '', $name) . '" type="checkbox" name="' . $name . '" value="' . osc_esc_html(htmlentities( $value, ENT_COMPAT, 'UTF-8' )) . '"';
+    echo '<input id="' . preg_replace('|([^_a-zA-Z0-9-]+)|', '', $name) . '" type="checkbox" name="' . $name . '" value="' . osc_esc_html(html_entity_decode((string)$value, ENT_QUOTES, 'UTF-8')) . '"';
 
-    if ( $checked ) {
+    if($checked ) {
       echo ' checked="checked"';
     }
     echo ' />';

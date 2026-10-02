@@ -34,7 +34,7 @@ class UserEmailTmp extends DAO
    */
   public static function newInstance()
   {
-    if( !self::$instance instanceof self ) {
+    if(!self::$instance instanceof self ) {
       self::$instance = new self;
     }
     return self::$instance;
@@ -63,7 +63,7 @@ class UserEmailTmp extends DAO
   public function insertOrUpdate($userEmailTmp) {
 
     $status = $this->dao->insert($this->getTableName(), array('fk_i_user_id' => $userEmailTmp['fk_i_user_id'], 's_new_email' => $userEmailTmp['s_new_email'], 'dt_date' => date('Y-m-d H:i:s')));
-    if (!$status) {
+    if(!$status) {
       return $this->dao->update($this->getTableName(), array('s_new_email' => $userEmailTmp['s_new_email'], 'dt_date' => date('Y-m-d H:i:s')), array('fk_i_user_id' => $userEmailTmp['fk_i_user_id']));
     }
     return false;

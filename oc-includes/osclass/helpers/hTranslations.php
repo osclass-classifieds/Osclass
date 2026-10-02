@@ -33,9 +33,9 @@
  * @return string
  */
 function __($key, $domain = 'core') {
-  $gt = Translation::newInstance()->_get();
+  $gt = osc_get_translations();
   $string = $gt->dgettext((string)$domain, (string)$key);
-  return osc_apply_filter('gettext', (string)$string);
+  return osc_apply_filter('gettext', (string)$string, (string)$domain);
 }
 
 /**
@@ -74,9 +74,9 @@ function _m($key) {
  * @return string
  */
 function _n($single_key, $plural_key, $count, $domain = 'core') {
-  $gt = Translation::newInstance()->_get();
+  $gt = osc_get_translations();
   $string = $gt->dngettext((string)$domain, (string)$single_key, (string)$plural_key, (int)$count);
-  return osc_apply_filter('ngettext', (string)$string);
+  return osc_apply_filter('ngettext', (string)$string, (string)$domain, (string)$single_key, (string)$plural_key, $count);
 }
 
 /**
@@ -92,5 +92,21 @@ function _n($single_key, $plural_key, $count, $domain = 'core') {
 function _mn($single_key, $plural_key, $count) {
   return _n((string)$single_key, (string)$plural_key, (int)$count, 'messages');
 }
+
+
+// GET ALL TRANSLATIONS
+function osc_get_translations() {
+  $gt = Translation::newInstance()->_get();
+  return osc_apply_filter('get_translations', $gt);
+}
+
+
+// PRINT TRANSLATIONS FOR DEBUG
+function osc_print_translations() {
+  if(defined('OSC_DEBUG_TRANSLATIONS') && OSC_DEBUG_TRANSLATIONS === true) {
+    Translation::newInstance()->printTranslations();
+  }
+}
+
 
 /* file end: ./oc-includes/osclass/helpers/hTranslations.php */

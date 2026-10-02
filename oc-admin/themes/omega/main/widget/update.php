@@ -35,7 +35,7 @@ $s_version = $updatedata['version_string'];
 $latest = true;
 if($s_version <> '') {
   $check = version_compare2(OSCLASS_VERSION, $s_version);
-  
+
   if($check == -1) {
     $latest = false;
   }

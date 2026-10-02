@@ -23,11 +23,11 @@ function addHelp() {
 osc_add_hook('help_box','addHelp');
 
 
-function customPageHeader() { 
+function customPageHeader() {
   ?>
   <h1><?php _e('Pages'); ?>
     <a href="#" class="btn ico ico-32 ico-help float-right"></a>
-    <a href="<?php echo osc_admin_base_url(true); ?>?page=pages&amp;action=add" class="btn btn-green ico ico-add-white float-right"><?php _e('Create page'); ?></a>
+    <a href="<?php echo osc_admin_base_url(true); ?>?page=pages&amp;action=add" class="btn btn-green ico ico-add-white float-right"><?php _e('Add page'); ?></a>
   </h1>
   <?php
 }
@@ -35,7 +35,7 @@ osc_add_hook('admin_page_header','customPageHeader');
 
 
 function customPageTitle($string) {
-  return sprintf(__('Pages - %s'), $string);
+  return sprintf(__('%s - %s'), __('Manage pages'), $string);
 }
 osc_add_filter('admin_title', 'customPageTitle');
 
@@ -43,17 +43,22 @@ osc_add_filter('admin_title', 'customPageTitle');
 //customize Head
 function customHead() { ?>
   <script type="text/javascript">
+    function pagesReloadAfterReorder(id) {
+      var url = window.location.href.split('#')[0];
+      url = url.replace(/([?&])reorderId=\d+/g, '$1').replace(/[?&]$/, '');
+      var sep = (url.indexOf('?') >= 0 ? '&' : '?');
+      window.location.href = url + sep + 'reorderId=' + parseInt(id, 10);
+    }
+
     function order_up(id) {
       $('#datatables_list_processing').show();
       $.ajax({
         url: "<?php echo osc_admin_base_url(true)?>?page=ajax&action=order_pages&id="+id+"&order=up&<?php echo osc_csrf_token_url(); ?>",
         success: function(res) {
-          // TODO improve
-          window.location.reload( true );
+          pagesReloadAfterReorder(id);
         },
         error: function(){
-          // alert error
-          // TODO
+          $('#datatables_list_processing').hide();
         }
       });
     }
@@ -63,22 +68,31 @@ function customHead() { ?>
       $.ajax({
         url: "<?php echo osc_admin_base_url(true)?>?page=ajax&action=order_pages&id="+id+"&order=down&<?php echo osc_csrf_token_url(); ?>",
         success: function(res){
-          // TODO improve
-          window.location.reload( true );
+          pagesReloadAfterReorder(id);
         },
         error: function(){
-          // alert error
-          // TODO
+          $('#datatables_list_processing').hide();
         }
       });
     }
 
     $(document).ready(function(){
+      var $reorderedRow = $('.table tr.row-reordered');
+      if($reorderedRow.length) {
+        setTimeout(function() {
+          $reorderedRow.removeClass('row-reordered');
+          var url = window.location.href.split('#')[0];
+          url = url.replace(/([?&])reorderId=\d+/g, '$1').replace(/[?&]$/, '');
+          if(window.history && window.history.replaceState) {
+            window.history.replaceState({}, document.title, url);
+          }
+        }, 3000);
+      }
       // check_all bulkactions
       $("#check_all").change(function(){
         var isChecked = $(this).prop("checked");
         $('.col-bulkactions input').each( function() {
-          if( isChecked == 1 ) {
+          if(isChecked == 1 ) {
             this.checked = true;
           } else {
             this.checked = false;
@@ -97,27 +111,32 @@ function customHead() { ?>
         autoOpen: false,
         modal: true
       });
-      
+
       $("#bulk-actions-submit").click(function() {
         $("#datatablesForm").submit();
       });
-      
+
       $("#bulk-actions-cancel").click(function() {
         $("#datatablesForm").attr('data-dialog-open', 'false');
         $('#dialog-bulk-actions').dialog('close');
       });
-      
+
       // dialog bulk actions function
       $("#datatablesForm").submit(function() {
-        if( $("#bulk_actions option:selected").val() == "" ) {
+        if($("#bulk_actions option:selected").val() == "" ) {
           return false;
         }
 
-        if( $("#datatablesForm").attr('data-dialog-open') == "true" ) {
+        if($("#datatablesForm").attr('data-dialog-open') == "true" ) {
           return true;
         }
 
-        $("#dialog-bulk-actions .form-row").html($("#bulk_actions option:selected").attr('data-dialog-content'));
+        var dialogContent = $("#bulk_actions option:selected").attr('data-dialog-content') || '';
+        if($.trim(dialogContent) == '') {
+          return true;
+        }
+
+        $("#dialog-bulk-actions .form-row").html(dialogContent);
         $("#bulk-actions-submit").html($("#bulk_actions option:selected").text());
         $("#datatablesForm").attr('data-dialog-open', 'true');
         $("#dialog-bulk-actions").dialog('open');
@@ -143,7 +162,30 @@ $sort     = Params::getParam('sort');
 $direction  = Params::getParam('direction');
 
 $columns  = $aData['aColumns'];
+$columnSources = (isset($aData['aColumnSources']) ? $aData['aColumnSources'] : array());
+$sortableColumns = (isset($aData['aSortableColumns']) ? $aData['aSortableColumns'] : array());
 $rows     = $aData['aRows'];
+$hasActiveFilters = false;
+$filterExclude = array('page', 'action', 'iDisplayLength', 'sort', 'direction', 'iPage', 'reorderId');
+$reorderId = (int)Params::getParam('reorderId');
+
+foreach(Params::getParamsAsArray('get') as $key => $value) {
+  if(in_array($key, $filterExclude, true)) {
+    continue;
+  }
+
+  if(is_array($value)) {
+    foreach($value as $v) {
+      if(trim((string)$v) != '') {
+        $hasActiveFilters = true;
+        break 2;
+      }
+    }
+  } else if(trim((string)$value) != '') {
+    $hasActiveFilters = true;
+    break;
+  }
+}
 
 osc_current_admin_theme_path( 'parts/header.php' );
 ?>
@@ -151,6 +193,30 @@ osc_current_admin_theme_path( 'parts/header.php' );
 <h2 class="render-title"><?php _e('Manage pages'); ?> <a href="<?php echo osc_admin_base_url(true); ?>?page=pages&amp;action=add" class="btn btn-mini"><?php _e('Add new'); ?></a></h2>
 <div class="relative">
   <div id="pages-toolbar" class="table-toolbar">
+    <div class="float-right">
+      <form method="get" action="<?php echo osc_admin_base_url(true); ?>" class="inline nocsrf">
+        <?php foreach(Params::getParamsAsArray('get') as $key => $value ) { ?>
+          <?php if($key != 'iDisplayLength' ) { ?>
+            <input type="hidden" name="<?php echo osc_esc_html(strip_tags($key)); ?>" value="<?php echo osc_esc_html(strip_tags($value)); ?>" />
+          <?php } ?>
+        <?php } ?>
+        <select name="iDisplayLength" class="select-box-extra select-box-medium float-left" onchange="this.form.submit();" >
+          <option value="10" <?php if(Params::getParam('iDisplayLength') == 10 ) echo 'selected'; ?> ><?php printf(__('%d Pages'), 10); ?></option>
+          <option value="25" <?php if(Params::getParam('iDisplayLength') == 25 ) echo 'selected'; ?> ><?php printf(__('%d Pages'), 25); ?></option>
+          <option value="50" <?php if(Params::getParam('iDisplayLength') == 50 ) echo 'selected'; ?> ><?php printf(__('%d Pages'), 50); ?></option>
+          <option value="100" <?php if(Params::getParam('iDisplayLength') == 100 ) echo 'selected'; ?> ><?php printf(__('%d Pages'), 100); ?></option>
+        </select>
+      </form>
+      <?php if($hasActiveFilters) { ?>
+        <a id="btn-hide-filters" href="<?php echo osc_admin_base_url(true); ?>?page=pages" class="btn"><?php _e('Reset filters'); ?></a>
+      <?php } ?>
+      <form method="get" action="<?php echo osc_admin_base_url(true); ?>" id="shortcut-filters" class="inline nocsrf">
+        <input type="hidden" name="page" value="pages" />
+        <input type="hidden" name="iDisplayLength" value="<?php echo (int)Params::getParam('iDisplayLength'); ?>" />
+        <input id="fPattern" type="text" name="sSearch" value="<?php echo osc_esc_html(Params::getParam('sSearch')); ?>" class="input-text input-actions" placeholder="<?php echo osc_esc_html(__('Search page')); ?>" />
+        <input type="submit" class="btn submit-right" value="<?php echo osc_esc_html(__('Find')); ?>">
+      </form>
+    </div>
   </div>
   <form class="" id="datatablesForm" action="<?php echo osc_admin_base_url(true); ?>" method="post">
     <input type="hidden" name="page" value="pages" />
@@ -165,22 +231,27 @@ osc_current_admin_theme_path( 'parts/header.php' );
         <thead>
           <tr>
             <?php foreach($columns as $k => $v) {
-              echo '<th class="col-'.$k.' '.($sort==$k?($direction=='desc'?'sorting_desc':'sorting_asc'):'').'">'.$v.'</th>';
-            }; ?>
+              $sourceCol = (isset($columnSources[$k]) ? $columnSources[$k] : '');
+              $isSortable = ((in_array($k, $sortableColumns, true) || strpos((string)$v, 'sort=') !== false) ? 'is-sortable' : '');
+              echo '<th class="col-'.$k.' '.$isSortable.' '.($sort==$k?($direction=='desc'?'sort-desc':'sort-asc'):'').'" data-source-col="' . osc_esc_html($sourceCol) . '">' . $v . '</th>';
+            } ?>
           </tr>
         </thead>
         <tbody>
-        <?php if( count($rows) > 0 ) { ?>
-          <?php foreach($rows as $key => $row) { ?>
-            <tr>
+        <?php if(count($rows) > 0 ) { ?>
+          <?php foreach($rows as $key => $row) {
+            $rowId = (isset($aRawRows[$key]['pk_i_id']) ? (int)$aRawRows[$key]['pk_i_id'] : 0);
+            $rowClass = ($reorderId > 0 && $rowId === $reorderId ? 'row-reordered' : '');
+          ?>
+            <tr<?php if($rowClass != '') { echo ' class="' . osc_esc_html($rowClass) . '"'; } ?> data-row-id="<?php echo $rowId; ?>">
               <?php foreach($row as $k => $v) { ?>
                 <td class="col-<?php echo $k; ?>"><?php echo $v; ?></td>
-              <?php }; ?>
+              <?php } ?>
             </tr>
-          <?php }; ?>
+          <?php } ?>
         <?php } else { ?>
         <tr>
-          <td colspan="4" class="text-center">
+          <td colspan="<?php echo max(1, count($columns)); ?>" class="text-center">
           <p><?php _e('No data available in table'); ?></p>
           </td>
         </tr>
@@ -199,6 +270,21 @@ osc_current_admin_theme_path( 'parts/header.php' );
   osc_add_hook('before_show_pagination_admin','showingResults');
   osc_show_pagination_admin($aData);
 ?>
+<div class="display-select-bottom">
+  <form method="get" action="<?php echo osc_admin_base_url(true); ?>" class="inline nocsrf">
+    <?php foreach(Params::getParamsAsArray('get') as $key => $value ) { ?>
+      <?php if($key != 'iDisplayLength' ) { ?>
+        <input type="hidden" name="<?php echo osc_esc_html(strip_tags($key)); ?>" value="<?php echo osc_esc_html(strip_tags($value)); ?>" />
+      <?php } ?>
+    <?php } ?>
+    <select name="iDisplayLength" class="select-box-extra select-box-medium float-left" onchange="this.form.submit();" >
+      <option value="10" <?php if(Params::getParam('iDisplayLength') == 10 ) echo 'selected'; ?> ><?php printf(__('%d Pages'), 10); ?></option>
+      <option value="25" <?php if(Params::getParam('iDisplayLength') == 25 ) echo 'selected'; ?> ><?php printf(__('%d Pages'), 25); ?></option>
+      <option value="50" <?php if(Params::getParam('iDisplayLength') == 50 ) echo 'selected'; ?> ><?php printf(__('%d Pages'), 50); ?></option>
+      <option value="100" <?php if(Params::getParam('iDisplayLength') == 100 ) echo 'selected'; ?> ><?php printf(__('%d Pages'), 100); ?></option>
+    </select>
+  </form>
+</div>
 <form id="dialog-page-delete" method="get" action="<?php echo osc_admin_base_url(true); ?>" class="has-form-actions hide" title="<?php echo osc_esc_html(__('Delete page')); ?>">
   <input type="hidden" name="page" value="pages" />
   <input type="hidden" name="action" value="delete" />
@@ -227,4 +313,4 @@ osc_current_admin_theme_path( 'parts/header.php' );
     </div>
   </div>
 </div>
-<?php osc_current_admin_theme_path( 'parts/footer.php' ); ?>
+<?php osc_current_admin_theme_path( 'parts/footer.php' );

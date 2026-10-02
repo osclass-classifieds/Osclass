@@ -24,7 +24,6 @@
 */
 
 
-
 /**
  * True when Osclass can generate logs
  *
@@ -52,6 +51,205 @@ function osc_logging_auto_cleanup() {
  */
 function osc_logging_months() {
   return (int)getPreference('logging_months');
+}
+
+/**
+ * Get cleanup threshold in days
+ *
+ * @return int
+ */
+function osc_cleanup_threshold_days() {
+  $raw = getPreference('cleanup_threshold_days');
+
+  if($raw === '' || $raw === null) {
+    return 14;
+  }
+
+  return (int)$raw;
+}
+
+/**
+ * Get list of cleanup types to execute automatically
+ *
+ * @return string
+ */
+function osc_cleanup_auto_types() {
+  return (string)getPreference('cleanup_auto_types');
+}
+
+/**
+ * Get auto cleanup types as array
+ *
+ * @return array
+ */
+function osc_cleanup_auto_types_array() {
+  $raw = trim((string)osc_cleanup_auto_types());
+
+  if($raw == '') {
+    return array();
+  }
+
+  $parts = explode(',', $raw);
+  $types = array();
+
+  foreach($parts as $part) {
+    $part = trim((string)$part);
+
+    if($part != '') {
+      $types[] = $part;
+    }
+  }
+
+  return $types;
+}
+
+/**
+ * True when old item stats should be auto-cleaned by cron
+ *
+ * @return boolean
+ */
+function osc_item_stats_auto_cleanup_enabled() {
+  $raw = getPreference('item_stats_auto_cleanup_enabled');
+
+  if($raw === '' || $raw === null) {
+    $raw = getPreference('item_stats_auto_cleanup');
+  }
+
+  if($raw === '' || $raw === null) {
+    return false;
+  }
+
+  return ($raw == 1 || $raw == '1' || $raw === true);
+}
+
+/**
+ * Get retention number of months for item stats cleanup
+ *
+ * @return int
+ */
+function osc_item_stats_cleanup_months() {
+  $raw = getPreference('item_stats_cleanup_months');
+  if($raw === '' || $raw === null) {
+    return 24;
+  }
+  return (int)$raw;
+}
+
+/**
+ * True when alerts feature is enabled
+ *
+ * @return boolean
+ */
+function osc_alerts_enabled() {
+  $raw = getPreference('alerts_enabled');
+  if($raw === '' || $raw === null) {
+    return true;
+  }
+  return ($raw == 1 || $raw == '1' || $raw === true);
+}
+
+/**
+ * Get default expiration in months for logged user alerts
+ *
+ * @return int
+ */
+function osc_alerts_expiration_months_user() {
+  $raw = getPreference('alerts_expiration_months_user');
+  if($raw === '' || $raw === null) {
+    $raw_legacy = getPreference('alerts_expiration_days_user');
+    if($raw_legacy !== '' && $raw_legacy !== null) {
+      return (int)floor(((int)$raw_legacy) / 30);
+    }
+    return 3;
+  }
+  return (int)$raw;
+}
+
+/**
+ * Get default expiration in months for guest alerts
+ *
+ * @return int
+ */
+function osc_alerts_expiration_months_guest() {
+  $raw = getPreference('alerts_expiration_months_guest');
+  if($raw === '' || $raw === null) {
+    $raw_legacy = getPreference('alerts_expiration_days_guest');
+    if($raw_legacy !== '' && $raw_legacy !== null) {
+      return (int)floor(((int)$raw_legacy) / 30);
+    }
+    return 3;
+  }
+  return (int)$raw;
+}
+
+/**
+ * Legacy alias for older code paths
+ *
+ * @return int
+ */
+function osc_alerts_expiration_days_user() {
+  return (int)osc_alerts_expiration_months_user() * 30;
+}
+
+/**
+ * Legacy alias for older code paths
+ *
+ * @return int
+ */
+function osc_alerts_expiration_days_guest() {
+  return (int)osc_alerts_expiration_months_guest() * 30;
+}
+
+/**
+ * True when user can set alerts as non-expiring
+ *
+ * @return boolean
+ */
+function osc_alerts_allow_non_expiring() {
+  $raw = getPreference('alerts_allow_non_expiring');
+  if($raw === '' || $raw === null) {
+    return true;
+  }
+  return ($raw == 1 || $raw == '1' || $raw === true);
+}
+
+/**
+ * True when users can change alert expiration in user menu
+ *
+ * @return boolean
+ */
+function osc_alerts_allow_user_expiration_change() {
+  $raw = getPreference('alerts_allow_user_expiration_change');
+  if($raw === '' || $raw === null) {
+    return true;
+  }
+  return ($raw == 1 || $raw == '1' || $raw === true);
+}
+
+/**
+ * True when new alerts should default to non-expiring
+ *
+ * @return boolean
+ */
+function osc_alerts_default_non_expiring() {
+  $raw = getPreference('alerts_default_non_expiring');
+  if($raw === '' || $raw === null) {
+    return false;
+  }
+  return ($raw == 1 || $raw == '1' || $raw === true);
+}
+
+/**
+ * Number of months without login after which alerts are unsubscribed (0 disables)
+ *
+ * @return int
+ */
+function osc_alerts_unsub_inactive_months() {
+  $raw = getPreference('alerts_unsub_inactive_months');
+  if($raw === '' || $raw === null) {
+    return 3;
+  }
+  return (int)$raw;
 }
 
 
@@ -164,13 +362,228 @@ function osc_item_stats_method() {
   return getPreference('item_stats_method');
 }
 
-/**
- * Returns true when "Mark item as" feature is disabled
- *
- * @return boolean
- */
-function osc_item_mark_disable() {
-  return getBoolPreference('item_mark_disable');
+// Collect listing stats from logged-in visitors only
+function osc_item_stats_logged_only() {
+  return getBoolPreference('item_stats_logged_only');
+}
+
+// CSV of enabled listing-stat measure keys
+function osc_item_stats_enabled_pref() {
+  $raw = getPreference('item_stats_enabled');
+  $def = (function_exists('osc_item_stats_default_enabled_csv') ? osc_item_stats_default_enabled_csv() : 'views,premium_views,views_engaged,views_logged,view_minutes,phone_clicks,contactforms,reports,alerts_sent');
+  return ($raw == '' ? $def : (string)$raw);
+}
+
+// User summary chart on My listings
+function osc_item_stats_user_chart_enabled() {
+  $raw = getPreference('item_stats_user_chart_enabled');
+  if($raw === '' || $raw === null) {
+    return true;
+  }
+  return getBoolPreference('item_stats_user_chart_enabled');
+}
+
+// User summary chart measures
+function osc_item_stats_user_chart_measures() {
+  $raw = getPreference('item_stats_user_chart_measures');
+  $def = (function_exists('osc_item_stats_default_chart_csv') ? osc_item_stats_default_chart_csv() : 'views,premium_views,views_engaged,phone_clicks,contactforms,reports');
+  if($raw == '' || $raw == 'views,premium_views') {
+    return $def;
+  }
+  return (string)$raw;
+}
+
+// User summary chart default period
+function osc_item_stats_user_chart_period() {
+  $raw = getPreference('item_stats_user_chart_period');
+  return ($raw == '' ? '30d' : (string)$raw);
+}
+
+// User summary chart period tabs
+function osc_item_stats_user_chart_periods() {
+  $raw = getPreference('item_stats_user_chart_periods');
+  if($raw == '') {
+    $raw = osc_item_stats_chart_periods();
+  }
+  if(function_exists('osc_item_stats_sanitize_periods')) {
+    return osc_item_stats_sanitize_periods($raw);
+  }
+  return ($raw == '' ? '30d,90d,12m,all' : (string)$raw);
+}
+
+// User summary chart type (line|bar|area|stacked)
+function osc_item_stats_user_chart_type() {
+  $raw = getPreference('item_stats_user_chart_type');
+  $ok = array('bar', 'line', 'area', 'stacked_bar', 'stacked_area');
+  if($raw == '' || !in_array($raw, $ok, true)) {
+    return 'line';
+  }
+  return $raw;
+}
+
+// User summary chart hook names (comma-separated)
+function osc_item_stats_user_chart_hooks() {
+  $raw = trim((string)getPreference('item_stats_user_chart_hooks'));
+  return ($raw == '' ? 'user_items_top' : $raw);
+}
+
+// Who can see user summary and listing charts (all|company, plugins may add keys)
+function osc_item_stats_chart_audience() {
+  $raw = trim((string)getPreference('item_stats_chart_audience'));
+  if($raw == '') {
+    $raw = 'all';
+  }
+  if(function_exists('osc_item_stats_chart_audience_options')) {
+    $options = osc_item_stats_chart_audience_options();
+    if(!is_array($options) || !isset($options[$raw])) {
+      $raw = 'all';
+    }
+  }
+  return (string)osc_apply_filter('osc_item_stats_chart_audience', $raw);
+}
+
+// User listing chart
+function osc_item_stats_item_chart_enabled() {
+  $raw = getPreference('item_stats_item_chart_enabled');
+  if($raw === '' || $raw === null) {
+    return false;
+  }
+  return getBoolPreference('item_stats_item_chart_enabled');
+}
+
+// Show user listing chart to a logged-in administrator
+function osc_item_stats_item_chart_admin() {
+  $raw = getPreference('item_stats_item_chart_admin');
+  if($raw === '' || $raw === null) {
+    return true;
+  }
+  return getBoolPreference('item_stats_item_chart_admin');
+}
+
+// User listing chart measures
+function osc_item_stats_item_chart_measures() {
+  $raw = getPreference('item_stats_item_chart_measures');
+  $def = (function_exists('osc_item_stats_default_chart_csv') ? osc_item_stats_default_chart_csv() : 'views,premium_views,views_engaged,phone_clicks,contactforms,reports');
+  if($raw == '' || $raw == 'views,premium_views') {
+    return $def;
+  }
+  return (string)$raw;
+}
+
+// User listing chart type (line|bar|area|stacked)
+function osc_item_stats_item_chart_type() {
+  $raw = getPreference('item_stats_item_chart_type');
+  $ok = array('bar', 'line', 'area', 'stacked_bar', 'stacked_area');
+  if($raw == '' || !in_array($raw, $ok, true)) {
+    return osc_item_stats_user_chart_type();
+  }
+  return $raw;
+}
+
+// User listing chart hook names (comma-separated)
+function osc_item_stats_item_chart_hooks() {
+  $raw = trim((string)getPreference('item_stats_item_chart_hooks'));
+  return ($raw == '' ? 'item_top' : $raw);
+}
+
+// User listing chart default period
+function osc_item_stats_item_chart_period() {
+  $raw = getPreference('item_stats_item_chart_period');
+  return ($raw == '' ? '30d' : (string)$raw);
+}
+
+// User listing chart period tabs
+function osc_item_stats_item_chart_periods() {
+  $raw = getPreference('item_stats_item_chart_periods');
+  if($raw == '') {
+    $raw = osc_item_stats_chart_periods();
+  }
+  if(function_exists('osc_item_stats_sanitize_periods')) {
+    return osc_item_stats_sanitize_periods($raw);
+  }
+  return ($raw == '' ? '30d,90d,12m,all' : (string)$raw);
+}
+
+// Default admin statistics period
+function osc_item_stats_admin_default_period() {
+  $raw = getPreference('item_stats_admin_default_period');
+  return ($raw == '' ? '30d' : (string)$raw);
+}
+
+// Default Listing-details measures
+function osc_item_stats_admin_default_measures() {
+  $raw = getPreference('item_stats_admin_default_measures');
+  $def = (function_exists('osc_item_stats_default_enabled_csv') ? osc_item_stats_default_enabled_csv() : 'views,premium_views,views_engaged,views_logged,view_minutes,phone_clicks,contactforms,reports,alerts_sent');
+  return ($raw == '' || $raw == 'views,premium_views' ? $def : (string)$raw);
+}
+
+// Allowed chart period keys
+function osc_item_stats_chart_periods() {
+  $raw = getPreference('item_stats_chart_periods');
+  if(function_exists('osc_item_stats_sanitize_periods')) {
+    return osc_item_stats_sanitize_periods($raw);
+  }
+  return ($raw == '' ? '30d,90d,12m,all' : (string)$raw);
+}
+
+// Collection preset name
+function osc_item_stats_preset() {
+  $raw = getPreference('item_stats_preset');
+  return ($raw == '' ? 'essential' : (string)$raw);
+}
+
+// Custom measure label 1-3
+function osc_item_stats_custom_label($n) {
+  $n = (int)$n;
+  if($n < 1 || $n > 3) {
+    return '';
+  }
+  $raw = getPreference('item_stats_custom' . $n . '_label');
+  if($raw == '') {
+    return sprintf(__('Custom %d'), $n);
+  }
+  return (string)$raw;
+}
+
+// Seconds on the listing page before an engaged view is counted
+function osc_item_stats_engaged_seconds() {
+  static $seeded = false;
+  if(!$seeded) {
+    $seeded = true;
+    if((string)getPreference('item_stats_engaged_seeded') !== '1') {
+      $cur = (int)getPreference('item_stats_engaged_seconds');
+      if($cur == 60 || $cur < 5) {
+        osc_set_preference('item_stats_engaged_seconds', 15, 'osclass', 'INTEGER');
+      }
+      osc_set_preference('item_stats_engaged_seeded', '1', 'osclass', 'BOOLEAN');
+    }
+  }
+  $n = (int)getPreference('item_stats_engaged_seconds');
+  if($n < 5) {
+    $n = 15;
+  }
+  if($n > 600) {
+    $n = 600;
+  }
+  return $n;
+}
+
+// CSS selectors for phone clicks on the listing page
+function osc_item_stats_phone_selectors() {
+  $raw = trim((string)getPreference('item_stats_phone_selectors'));
+  if($raw == '') {
+    return '.phone, div.phone, .show-phone, .show-mobile, a[href^="tel:"]';
+  }
+  return $raw;
+}
+
+// CSS selectors for other-contact clicks on the listing page
+function osc_item_stats_contactother_selectors() {
+  $raw = trim((string)getPreference('item_stats_contactother_selectors'));
+  if($raw == '') {
+    return '.other, .contact-other, .show-other, [data-osc-stat="contactother_clicks"]';
+  }
+  return $raw;
 }
 
 /**
@@ -205,12 +618,37 @@ function osc_item_send_friend_form_disabled() {
 
 
 /**
+ * Legacy "Mark as" gate used by old themes (e.g. sigma 8.3.1).
+ * When reports are enabled, return false so Mark as UI stays visible and posts to action=mark,
+ * which redirects to the report form with the matching reason preselected.
+ *
+ * @return boolean
+ */
+function osc_item_mark_disable() {
+  if(function_exists('osc_reports_enabled')) {
+    return !osc_reports_enabled();
+  }
+  return true;
+}
+
+
+/**
  * Check if web contact form is enabled
  *
  * @return boolean
  */
 function osc_web_contact_form_disabled() {
   return getBoolPreference('web_contact_form_disabled');
+}
+
+
+/**
+ * Check if website contact form creates a report instead of sending email
+ *
+ * @return boolean
+ */
+function osc_web_contact_create_report() {
+  return getBoolPreference('web_contact_create_report');
 }
 
 
@@ -285,13 +723,13 @@ function osc_breadcrumbs_hide_custom_pref() {
  */
 function osc_breadcrumbs_hide($location = '', $section = '') {
   $data = explode(',', getPreference('breadcrumbs_hide'));
-  
-  $loc_sec = trim($location) . '-' . trim($section);
-  
+
+  $loc_sec = trim((string)$location) . '-' . trim((string)$section);
+
   if(in_array($loc_sec, $data)) {
     return true;
   }
-  
+
   return false;
 }
 
@@ -302,17 +740,17 @@ function osc_breadcrumbs_hide($location = '', $section = '') {
  * @return boolean
  */
 function osc_breadcrumbs_hide_custom($location = '', $section = '') {
-  if(trim($location) == '') {
+  if(trim((string)$location) == '') {
     return false;
   }
-  
+
   $data = explode(',', getPreference('breadcrumbs_hide_custom'));
-  $loc_sec = trim($location) . '-' . trim($section);
-  
+  $loc_sec = trim((string)$location) . '-' . trim((string)$section);
+
   if(in_array($loc_sec, $data)) {
     return true;
   }
-  
+
   return false;
 }
 
@@ -416,6 +854,69 @@ function osc_js_banned_words() {
  */
 function osc_js_banned_pages() {
   return getPreference('js_banned_pages');
+}
+
+/**
+ * Get optimization files automatic cleanup frequency
+ *
+ * @return string
+ */
+function osc_optimization_cleanup_frequency() {
+  $frequency = getPreference('optimization_cleanup_frequency');
+  if(!in_array($frequency, array('none', 'weekly', 'monthly'), true)) {
+    return 'weekly';
+  }
+
+  return $frequency;
+}
+
+/**
+ * Get database optimization frequency
+ *
+ * @return string
+ */
+function osc_database_optimization_frequency() {
+  $frequency = getPreference('database_optimization_frequency');
+  if(!in_array($frequency, array('none', 'daily', 'weekly', 'monthly'), true)) {
+    return 'none';
+  }
+
+  return $frequency;
+}
+
+/**
+ * Get database optimization operations
+ *
+ * @return string
+ */
+function osc_database_optimization_operations() {
+  $operations = getPreference('database_optimization_operations');
+  if(trim((string)$operations) == '') {
+    return 'check,analyze,optimize';
+  }
+
+  return $operations;
+}
+
+/**
+ * Get database optimization operations as array
+ *
+ * @return array
+ */
+function osc_database_optimization_operations_array() {
+  $available = array('check', 'analyze', 'optimize', 'flush');
+  $operations = explode(',', osc_database_optimization_operations());
+  $output = array();
+
+  foreach($operations as $operation) {
+    $operation = trim(strtolower((string)$operation));
+
+    if(in_array($operation, $available, true) && !in_array($operation, $output, true)) {
+      $output[] = $operation;
+    }
+  }
+
+  return $output;
 }
 
 /**
@@ -533,6 +1034,26 @@ function osc_latest_searches_restriction() {
  */
 function osc_latest_searches_words() {
   return getPreference('latest_searches_words');
+}
+
+/**
+ * Gets minimum latest search word length
+ *
+ * @return int
+ */
+function osc_latest_searches_min_length() {
+  $value = (int)getPreference('latest_searches_min_length');
+  return ($value > 0 ? $value : 3);
+}
+
+/**
+ * Gets maximum latest search word length
+ *
+ * @return int
+ */
+function osc_latest_searches_max_length() {
+  $value = (int)getPreference('latest_searches_max_length');
+  return ($value > 0 ? $value : 15);
 }
 
 /**
@@ -860,6 +1381,37 @@ function osc_tinymce_users_enabled() {
   return getBoolPreference('enabled_tinymce_users');
 }
 
+/**
+ * Widget locale-strict mode: current locale only, no fallback
+ *
+ * @return boolean
+ */
+function osc_widget_locale_strict() {
+  return getBoolPreference('widget_locale_strict');
+}
+
+/**
+ * Custom widget section slugs from preference
+ *
+ * @return array
+ */
+function osc_widget_custom_sections() {
+  $raw = getPreference('widget_custom_sections');
+  $out = array();
+
+  if($raw != '') {
+    $parts = preg_split('/[\s,]+/', (string)$raw, -1, PREG_SPLIT_NO_EMPTY);
+    foreach($parts as $part) {
+      $slug = osc_widget_sanitize_slug($part);
+      if($slug != '') {
+        $out[] = $slug;
+      }
+    }
+  }
+
+  return osc_apply_filter('widget_custom_sections', array_values(array_unique($out)));
+}
+
 
 /**
  * Gets if admin toolbar is enabled in front
@@ -888,7 +1440,6 @@ function osc_profile_img_users_enabled() {
 function osc_profile_picture_library() {
   return getPreference('profile_picture_library');
 }
-
 
 
 /**
@@ -1076,12 +1627,249 @@ function osc_max_size_kb() {
 }
 
 /**
- * Gets allowed extensions of uploads
+ * List of image extensions Osclass can handle for item uploads.
+ *
+ * @return array
+ */
+function osc_available_image_upload_extensions() {
+  $extensions = array('png', 'gif', 'jpg', 'jpeg', 'heif', 'webp', 'avif');
+
+  return osc_apply_filter('available_image_upload_extensions', $extensions);
+}
+
+/**
+ * Raw allowedExt preference (comma-separated), without server filtering.
+ *
+ * @return string
+ */
+function osc_allowed_extension_preference() {
+  $stored = trim((string)getPreference('allowedExt'));
+
+  if($stored === '') {
+    return 'png,gif,jpg,jpeg';
+  }
+
+  return $stored;
+}
+
+/**
+ * Parse allowed image extensions from comma-separated string or array input.
+ *
+ * @param string|array $extensions
+ *
+ * @return array
+ */
+function osc_parse_allowed_image_extensions($extensions) {
+  if(is_array($extensions)) {
+    $list = $extensions;
+  } else {
+    $list = explode(',', (string)$extensions);
+  }
+
+  $available = osc_available_image_upload_extensions();
+  $parsed = array();
+
+  foreach($list as $ext) {
+    $ext = strtolower(trim((string)$ext));
+
+    if($ext === 'heic') {
+      $ext = 'heif';
+    }
+
+    if($ext !== '' && in_array($ext, $available, true) && !in_array($ext, $parsed, true)) {
+      $parsed[] = $ext;
+    }
+  }
+
+  return $parsed;
+}
+
+/**
+ * Check if ImageMagick supports a given image format on this server.
+ *
+ * @param string $format
+ *
+ * @return bool
+ */
+function osc_imagick_supports_image_format($format) {
+  if(!extension_loaded('imagick') || !class_exists('Imagick')) {
+    return false;
+  }
+
+  $format = strtoupper(trim((string)$format));
+  $formats = @Imagick::queryFormats($format);
+
+  if(!is_array($formats) || count($formats) === 0) {
+    return false;
+  }
+
+  foreach($formats as $f) {
+    if(stripos((string)$f, $format) === 0) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Check if GD can read/write a given image extension.
+ *
+ * @param string $ext
+ *
+ * @return bool
+ */
+function osc_gd_supports_image_extension($ext) {
+  $ext = strtolower(trim((string)$ext));
+
+  if($ext === 'heic') {
+    $ext = 'heif';
+  }
+
+  switch($ext) {
+    case 'png':
+    case 'gif':
+    case 'jpg':
+    case 'jpeg':
+      return function_exists('imagecreatefromstring') && function_exists('imagepng');
+
+    case 'webp':
+      return function_exists('imagecreatefromwebp') && function_exists('imagewebp');
+
+    case 'avif':
+      return function_exists('imagecreatefromavif') && function_exists('imageavif');
+
+    case 'heif':
+      return false;
+
+    default:
+      return false;
+  }
+}
+
+/**
+ * Check if current server stack can process an image extension for uploads.
+ *
+ * @param string $ext
+ *
+ * @return bool
+ */
+function osc_server_supports_image_extension($ext) {
+  $ext = strtolower(trim((string)$ext));
+
+  if($ext === 'heic') {
+    $ext = 'heif';
+  }
+
+  if(!in_array($ext, osc_available_image_upload_extensions(), true)) {
+    return false;
+  }
+
+  if(in_array($ext, array('png', 'gif', 'jpg', 'jpeg'), true)) {
+    return true;
+  }
+
+  if(extension_loaded('imagick') && osc_use_imagick()) {
+    if($ext === 'webp') {
+      return osc_imagick_supports_image_format('WEBP');
+    }
+
+    if($ext === 'avif') {
+      return osc_imagick_supports_image_format('AVIF');
+    }
+
+    if($ext === 'heif') {
+      return (osc_imagick_supports_image_format('HEIC') || osc_imagick_supports_image_format('HEIF'));
+    }
+
+    return false;
+  }
+
+  return osc_gd_supports_image_extension($ext);
+}
+
+/**
+ * Human-readable reason why an extension is unavailable on this server.
+ *
+ * @param string $ext
+ *
+ * @return string
+ */
+function osc_server_unsupported_image_extension_reason($ext) {
+  $ext = strtolower(trim((string)$ext));
+
+  if($ext === 'heic') {
+    $ext = 'heif';
+  }
+
+  if(osc_server_supports_image_extension($ext)) {
+    return '';
+  }
+
+  if(extension_loaded('imagick') && osc_use_imagick()) {
+    return __('ImageMagick is active in Media Settings, but this format is not supported by your ImageMagick build.');
+  }
+
+  if($ext === 'heif') {
+    return __('HEIF/HEIC requires ImageMagick with HEIC/HEIF support enabled in Media Settings.');
+  }
+
+  if($ext === 'avif') {
+    return __('AVIF requires PHP 8.1+ GD (imageavif) or ImageMagick with AVIF support.');
+  }
+
+  if($ext === 'webp') {
+    return __('WebP requires GD (imagewebp) or ImageMagick with WebP support.');
+  }
+
+  return __('This image format is not supported by the active image library on this server.');
+}
+
+/**
+ * Normalize and validate allowed upload extensions for storage.
+ *
+ * @param string|array $extensions
+ *
+ * @return string
+ */
+function osc_prepare_allowed_image_extensions($extensions) {
+  $selected = osc_parse_allowed_image_extensions($extensions);
+  $supported = array();
+  $base = array('png', 'gif', 'jpg', 'jpeg');
+
+  foreach($selected as $ext) {
+    if(osc_server_supports_image_extension($ext)) {
+      $supported[] = $ext;
+    }
+  }
+
+  $has_base = false;
+
+  foreach($supported as $ext) {
+    if(in_array($ext, $base, true)) {
+      $has_base = true;
+      break;
+    }
+  }
+
+  if(!$has_base) {
+    $supported = array_values(array_unique(array_merge($base, $supported)));
+  }
+
+  if(count($supported) === 0) {
+    $supported = $base;
+  }
+
+  return implode(',', $supported);
+}
+
+/**
+ * Gets allowed extensions of uploads (effective list, server-capability aware).
  *
  * @return string
  */
 function osc_allowed_extension() {
-  return getPreference('allowedExt');
+  return osc_prepare_allowed_image_extensions(osc_allowed_extension_preference());
 }
 
 /**
@@ -1139,6 +1927,22 @@ function osc_last_version_check() {
 }
 
 /**
+ * Gets when selected stats were last recalculated
+ *
+ * @param string $type
+ * @return int
+ */
+function osc_stats_last_recalc($type = '') {
+  $type = strtolower(trim((string)$type));
+
+  if(!in_array($type, array('location', 'category', 'user'))) {
+    return 0;
+  }
+
+  return (int)(getPreference($type . '_stats_last_recalc'));
+}
+
+/**
  * Gets when was the last version check
  *
  * @return int
@@ -1181,7 +1985,7 @@ function osc_update_core_json() {
  */
 function osc_version($with_dots = false) {
   $version = getPreference('version');
-  
+
   if($with_dots) {
     return implode('.', str_split($version));
   } else {
@@ -1317,6 +2121,192 @@ function osc_num_category_levels() {
   return (int)(getPreference('num_category_levels'));
 }
 
+/**
+ * Catalog of category bulk expiration presets (keys + days + unit)
+ * Month = 30 days; whole years (12/24/36/48 months) = 365 days per year
+ * Filter: osc_category_bulk_expiration_option_defs
+ *
+ * @return array
+ */
+function osc_category_bulk_expiration_option_defs() {
+  $defs = array(
+    '3d' => array('days' => 3, 'unit' => 'day', 'n' => 3),
+    '7d' => array('days' => 7, 'unit' => 'day', 'n' => 7),
+    '14d' => array('days' => 14, 'unit' => 'day', 'n' => 14),
+    '21d' => array('days' => 21, 'unit' => 'day', 'n' => 21),
+    '1m' => array('days' => 30, 'unit' => 'month', 'n' => 1),
+    '2m' => array('days' => 60, 'unit' => 'month', 'n' => 2),
+    '3m' => array('days' => 90, 'unit' => 'month', 'n' => 3),
+    '6m' => array('days' => 180, 'unit' => 'month', 'n' => 6),
+    '9m' => array('days' => 270, 'unit' => 'month', 'n' => 9),
+    '12m' => array('days' => 365, 'unit' => 'month', 'n' => 12),
+    '18m' => array('days' => 540, 'unit' => 'month', 'n' => 18),
+    '24m' => array('days' => 730, 'unit' => 'month', 'n' => 24),
+    '36m' => array('days' => 1095, 'unit' => 'month', 'n' => 36),
+    '48m' => array('days' => 1460, 'unit' => 'month', 'n' => 48),
+  );
+
+  $defs = osc_apply_filter('osc_category_bulk_expiration_option_defs', $defs);
+  if(!is_array($defs)) {
+    return array();
+  }
+  return $defs;
+}
+
+/**
+ * Default selected keys for category bulk expiration options
+ * Filter: osc_category_bulk_expiration_options_default
+ *
+ * @return array
+ */
+function osc_category_bulk_expiration_options_default() {
+  $keys = array('14d', '1m', '3m');
+  $keys = osc_apply_filter('osc_category_bulk_expiration_options_default', $keys);
+  if(!is_array($keys)) {
+    return array('14d', '1m', '3m');
+  }
+
+  $defs = osc_category_bulk_expiration_option_defs();
+  $out = array();
+  foreach($keys as $key) {
+    $key = trim((string)$key);
+    if($key !== '' && isset($defs[$key]) && !in_array($key, $out, true)) {
+      $out[] = $key;
+    }
+  }
+  if(count($out) === 0) {
+    return array('14d', '1m', '3m');
+  }
+  return $out;
+}
+
+/**
+ * Raw preference string for category bulk expiration options
+ * Filter: osc_category_bulk_expiration_options
+ *
+ * @return string
+ */
+function osc_category_bulk_expiration_options() {
+  return (string)osc_apply_filter('osc_category_bulk_expiration_options', (string)getPreference('category_bulk_expiration_options'));
+}
+
+/**
+ * Selected category bulk expiration option keys (validated)
+ * Filter: osc_category_bulk_expiration_options_array
+ *
+ * @return array
+ */
+function osc_category_bulk_expiration_options_array() {
+  $defs = osc_category_bulk_expiration_option_defs();
+  $raw = trim(osc_category_bulk_expiration_options());
+  if($raw === '') {
+    $keys = osc_category_bulk_expiration_options_default();
+  } else {
+    $keys = array();
+    foreach(explode(',', $raw) as $part) {
+      $key = trim((string)$part);
+      if($key !== '' && isset($defs[$key]) && !in_array($key, $keys, true)) {
+        $keys[] = $key;
+      }
+    }
+    if(count($keys) === 0) {
+      $keys = osc_category_bulk_expiration_options_default();
+    }
+  }
+
+  $keys = osc_apply_filter('osc_category_bulk_expiration_options_array', $keys);
+  if(!is_array($keys)) {
+    return osc_category_bulk_expiration_options_default();
+  }
+
+  $out = array();
+  foreach($keys as $key) {
+    $key = trim((string)$key);
+    if($key !== '' && isset($defs[$key]) && !in_array($key, $out, true)) {
+      $out[] = $key;
+    }
+  }
+  if(count($out) === 0) {
+    return osc_category_bulk_expiration_options_default();
+  }
+  return $out;
+}
+
+/**
+ * Human label for a category bulk expiration option key
+ * Filter: osc_category_bulk_expiration_option_label
+ *
+ * @param string $key
+ * @return string
+ */
+function osc_category_bulk_expiration_option_label($key) {
+  $defs = osc_category_bulk_expiration_option_defs();
+  if(!isset($defs[$key])) {
+    return (string)osc_apply_filter('osc_category_bulk_expiration_option_label', '', $key);
+  }
+
+  $n = (int)$defs[$key]['n'];
+  if(isset($defs[$key]['unit']) && $defs[$key]['unit'] === 'month') {
+    $label = sprintf(_n('%d month', '%d months', $n), $n);
+  } else {
+    $label = sprintf(_n('%d day', '%d days', $n), $n);
+  }
+
+  return (string)osc_apply_filter('osc_category_bulk_expiration_option_label', $label, $key);
+}
+
+/**
+ * Day values for currently selected category bulk expiration options
+ * Filter: osc_category_bulk_expiration_selected_days
+ *
+ * @return array
+ */
+function osc_category_bulk_expiration_selected_days() {
+  $defs = osc_category_bulk_expiration_option_defs();
+  $days = array();
+  foreach(osc_category_bulk_expiration_options_array() as $key) {
+    if(isset($defs[$key]['days'])) {
+      $day = (int)$defs[$key]['days'];
+      if($day > 0 && !in_array($day, $days, true)) {
+        $days[] = $day;
+      }
+    }
+  }
+
+  $days = osc_apply_filter('osc_category_bulk_expiration_selected_days', $days);
+  if(!is_array($days)) {
+    return array();
+  }
+
+  $out = array();
+  foreach($days as $day) {
+    $day = (int)$day;
+    if($day > 0 && !in_array($day, $out, true)) {
+      $out[] = $day;
+    }
+  }
+  return $out;
+}
+
+/**
+ * Label for an expiration length in days (from catalog when possible)
+ * Filter: osc_category_bulk_expiration_days_label
+ *
+ * @param int $days
+ * @return string
+ */
+function osc_category_bulk_expiration_days_label($days) {
+  $days = (int)$days;
+  $label = sprintf(_n('%d day', '%d days', $days), $days);
+  foreach(osc_category_bulk_expiration_option_defs() as $key => $def) {
+    if(isset($def['days']) && (int)$def['days'] === $days) {
+      $label = osc_category_bulk_expiration_option_label($key);
+      break;
+    }
+  }
+  return (string)osc_apply_filter('osc_category_bulk_expiration_days_label', $label, $days);
+}
+
 
 /**
  * Gets default currency
@@ -1344,14 +2334,13 @@ function osc_currency_row() {
  */
 function osc_currency_symbol() {
   $data = osc_currency_row();
-  
+
   if(isset($data['s_description'])) {
     return $data['s_description'];
   }
-  
+
   return osc_currency();
 }
-
 
 
 /**
@@ -1381,7 +2370,7 @@ function osc_recaptcha_public_key($force = false) {
   if(!osc_recaptcha_enabled() && $force === false) {
     return '';
   }
-  
+
   return (getPreference('recaptchaPubKey'));
 }
 
@@ -1394,7 +2383,7 @@ function osc_recaptcha_private_key($force = false) {
   if(!osc_recaptcha_enabled() && $force === false) {
     return '';
   }
-  
+
   return (getPreference('recaptchaPrivKey'));
 }
 
@@ -1411,63 +2400,68 @@ function osc_market_external_sources() {
 function osc_osclass_url($action = '') {
   $url = 'https://osclass-classifieds.com/api/latest_version.php';
   $params = array();
-  
+
   if($action != '') {
     $params['action'] = $action;
   }
-  
+
   if(defined('ALPHA_TEST') && ALPHA_TEST === true) {
-    $params['alpha'] = 1; 
+    $params['alpha'] = 1;
   }
-  
+
   if(defined('BETA_TEST') && BETA_TEST === true) {
-    $params['beta'] = 1; 
+    $params['beta'] = 1;
   }
-  
+
   $p = http_build_query($params);
-  
+
   if($p != '') {
     $url .= '?' . $p;
   }
-  
-  return $url;  
+
+  return $url;
+}
+
+
+function osc_osclass_installed_url() {
+  return 'https://osclass-classifieds.com/api/installed.php';
 }
 
 
 function osc_share_translation_url($language, $type, $plugin = '', $theme = '') {
   $url = 'https://osclass-classifieds.com/api/share_translation.php';
   $params = array();
-  
+
   if($language != '') {
     $params['language'] = $language;
   }
-  
+
   if($type != '') {
     $params['type'] = $type;
   }
-  
+
   if($plugin != '') {
     $params['plugin'] = $plugin;
   }
-  
+
   if($theme != '') {
     $params['theme'] = $theme;
   }
-  
+
   $p = http_build_query($params);
-  
+
   if($p != '') {
     $url .= '?' . $p;
   }
-  
-  return $url;  
+
+  return $url;
 }
 
 
 function osc_language_url($code = '', $pattern = '', $sort = '', $type = 'osclass') {
   $api_url = 'https://osclass-classifieds.com/api/language.php';
   $osclass_version = trim(str_replace('.', '', osc_version()));
-  
+
   if($code == '' && $pattern == '') {
     $api_url .= '?osclassVersion=' . $osclass_version . '&type=' . $type . '&action=list&sort=' . $sort;
   } else if($code <> '') {
@@ -1475,15 +2469,15 @@ function osc_language_url($code = '', $pattern = '', $sort = '', $type = 'osclas
   } else if($pattern <> '') {
     $api_url .= '?osclassVersion=' . $osclass_version . '&type=' . $type . '&action=search&pattern=' . $pattern . '&sort=' . $sort;
   }
-  
+
   if(defined('ALPHA_TEST') && ALPHA_TEST === true) {
-    $api_url .= '&alpha=1'; 
+    $api_url .= '&alpha=1';
   }
-  
+
   if(defined('BETA_TEST') && BETA_TEST === true) {
-    $api_url .= '&beta=1'; 
+    $api_url .= '&beta=1';
   }
-  
+
   return $api_url;
 }
 
@@ -1499,15 +2493,15 @@ function osc_location_url($code = '', $pattern = '', $sort = '') {
   } else if($pattern <> '') {
     $api_url .= '?action=search&apiVersion=' . $api_version . '&pattern=' . $pattern . '&sort=' . $sort;
   }
-  
+
   if(defined('ALPHA_TEST') && ALPHA_TEST === true) {
-    $api_url .= '&alpha=1'; 
+    $api_url .= '&alpha=1';
   }
-  
+
   if(defined('BETA_TEST') && BETA_TEST === true) {
-    $api_url .= '&beta=1'; 
+    $api_url .= '&beta=1';
   }
-  
+
   return $api_url;
 }
 
@@ -1516,7 +2510,7 @@ function osc_market_url($type = '', $code = '') {
   $url = 'https://osclasspoint.com/oc-content/plugins/market/api/v3/';
   $key = osc_update_api_key();
   $domain = osc_get_parent_domain();
-  
+
   if($type == 'download') {
     $url .= 'download.php';
   } else if($type == 'product') {
@@ -1527,9 +2521,9 @@ function osc_market_url($type = '', $code = '') {
   } else if($type == 'product_updates') {
     $url .= 'product_updates.json';
     return $url;
-  } else if ($type == 'validate_api_key') {
+  } elseif($type == 'validate_api_key') {
     $url .= 'validate_api_key.php';
-  } else if ($type == 'blog') {
+  } elseif($type == 'blog') {
     $url .= 'blog.php';
     return $url;
   } else {
@@ -1540,13 +2534,13 @@ function osc_market_url($type = '', $code = '') {
   $url .= '&domain=' . $domain;
 
   if(defined('ALPHA_TEST') && ALPHA_TEST === true) {
-    $url .= '&alpha=1'; 
+    $url .= '&alpha=1';
   }
-  
+
   if(defined('BETA_TEST') && BETA_TEST === true) {
-    $url .= '&beta=1'; 
+    $url .= '&beta=1';
   }
-  
+
   if($type <> 'validate_api_key') {
     $url .= '&productKey=' . $code;
   }
@@ -1651,7 +2645,7 @@ function osc_installed_plugins() {
  * @return string
  */
 function osc_default_order_field_at_search() {
-  return (getPreference('defaultOrderField@search'));
+  return (osc_apply_filter('osc_default_order_field_at_search', getPreference('defaultOrderField@search')));
 }
 
 /**
@@ -1660,7 +2654,7 @@ function osc_default_order_field_at_search() {
  * @return string
  */
 function osc_default_order_type_at_search() {
-  return (getPreference('defaultOrderType@search'));
+  return (osc_apply_filter('osc_default_order_type_at_search', getPreference('defaultOrderType@search')));
 }
 
 /**
@@ -1669,7 +2663,7 @@ function osc_default_order_type_at_search() {
  * @return string
  */
 function osc_default_show_as_at_search() {
-  return (getPreference('defaultShowAs@search'));
+  return (osc_apply_filter('osc_default_show_as_at_search', getPreference('defaultShowAs@search')));
 }
 
 /**

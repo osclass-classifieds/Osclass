@@ -7,7 +7,6 @@
   <meta name="title" content="<?php echo osc_apply_filter('admin_title', osc_page_title() . ' - Osclass'); ?>" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0" />
   <meta http-equiv="content-language" content="<?php echo osc_current_admin_locale(); ?>" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
   <script type="text/javascript">
     <?php
       /* TODO: enqueue js lang strings */
@@ -54,13 +53,13 @@
   if($file <> '') {
     $pluginInfo = osc_plugin_get_info($file . '/index.php');
     $author = @$pluginInfo['author'] <> '' ? $pluginInfo['author'] : @$pluginInfo['author_name'];
-    
+
     // contains theme file
     if(strpos(Params::getParam('file'), OC_CONTENT_FOLDER . '/themes/') !== false) {
       $themeInfo = WebThemes::newInstance()->loadThemeInfo(WebThemes::newInstance()->getCurrentTheme());
       $author = @$themeInfo['author'] <> '' ? @$themeInfo['author'] : @$themeInfo['author_name'];
     }
-    
+
     if(strtolower($author) == 'mb themes' || strtolower($author) == 'mb-themes' || strtolower($author) == 'mbthemes' || strtolower($author) == 'osclasspoint') {
       $author = 'osclasspoint';
     }
@@ -73,18 +72,19 @@
   <script>
   $(document).ready(function(){
     $('.header-wrapper a').each(function() {
-      $(this).attr('title', $(this).text());
+      // $(this).attr('title', $(this).text());
+      $(this).attr('title', $(this).html().replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim());
     });
-    
+
     if($(window).width() <= 980) {
       $('body').removeClass('compact');
     }
-    
+
     $('body').on('click', '#sidebar > ul.oscmenu > li > h3 > a', function(e) {
       if($(window).width() <= 980) {
         if($(this).closest('li').find('ul').length) {
           e.preventDefault();
-          
+
           if(!$(this).closest('li').hasClass('current')) {
             $('#sidebar > ul.oscmenu > li').removeClass('current').removeClass('hover');
             $(this).closest('li').addClass('current').addClass('hover');
@@ -92,27 +92,27 @@
         }
       }
     });
-    
+
     $('body').on('click', '#osc_toolbar_mobilemenu', function(e) {
       e.preventDefault();
       $('#header .osc_mobile_list').slideToggle(200);
     });
-    
-    $(document).click(function(event) { 
+
+    $(document).click(function(event) {
       var $target = $(event.target);
       if(!$target.closest('#osc_toolbar_mobilemenu').length && !$target.closest('.osc_mobile_list').length && $('.osc_mobile_list').is(":visible")) {
         $('#header .osc_mobile_list').slideUp(200);
-      }        
+      }
     });
-    
-    
+
+
     if($('.header-wrapper a').lenth > 10) {
       $('#header').addClass('hide-useless');
     }
-      
+
     $('.open-admin-menu').click(function(e) {
       e.preventDefault();
-      
+
       if($(this).hasClass('active')) {   // hide menu
         $('#content').removeClass('opened');
         $(this).removeClass('active');
@@ -123,14 +123,14 @@
         $('#sidebar').show(0);
       }
     });
-    
-    $(document).click(function(event) { 
+
+    $(document).click(function(event) {
       var $target = $(event.target);
       if(!$target.closest('#sidebar').length && !$target.closest('.open-admin-menu').length && $('#content').hasClass('opened')) {
         $('#content').removeClass('opened');
         $('.open-admin-menu').removeClass('active');
         $('#sidebar').hide(0);
-      }        
+      }
     });
   });
   </script>
@@ -140,16 +140,16 @@
 
   <div id="content">
     <?php osc_draw_admin_menu(); ?>
-    
+
     <div id="content-render">
       <div id="content-head">
-        <?php 
-          ob_start(); 
+        <?php
+          ob_start();
           osc_show_flash_message('admin');
           $flashmessages = ob_get_contents();
-          ob_end_clean(); 
+          ob_end_clean();
 
-          osc_run_hook('admin_page_header'); 
+          osc_run_hook('admin_page_header');
         ?>
       </div>
       <div id="help-box">

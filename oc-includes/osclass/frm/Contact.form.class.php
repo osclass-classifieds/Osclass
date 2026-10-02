@@ -51,7 +51,7 @@ class ContactForm extends Form {
   * @return bool
   */
   public static function your_name() {
-    if( Session::newInstance()->_getForm( 'yourName' ) != '' ) {
+    if(Session::newInstance()->_getForm( 'yourName' ) != '' ) {
       $name = Session::newInstance()->_getForm( 'yourName' );
       parent::generic_input_text( 'yourName' , $name);
     } else {
@@ -64,7 +64,7 @@ class ContactForm extends Form {
   * @return bool
   */
   public static function your_email() {
-     if( Session::newInstance()->_getForm( 'yourEmail' ) != '' ) {
+     if(Session::newInstance()->_getForm( 'yourEmail' ) != '' ) {
       $email = Session::newInstance()->_getForm( 'yourEmail' );
       parent::generic_input_text( 'yourEmail' , $email);
     } else {
@@ -77,7 +77,7 @@ class ContactForm extends Form {
   * @return bool
   */
   public static function your_phone_number() {
-    if( Session::newInstance()->_getForm( 'phoneNumber' ) != '' ) {
+    if(Session::newInstance()->_getForm( 'phoneNumber' ) != '' ) {
       $phoneNumber = Session::newInstance()->_getForm( 'phoneNumber' );
       parent::generic_input_text( 'phoneNumber' , $phoneNumber);
     } else {
@@ -90,7 +90,7 @@ class ContactForm extends Form {
   * @return bool
   */
   public static function the_subject() {
-    if( Session::newInstance()->_getForm( 'subject' ) != '' ) {
+    if(Session::newInstance()->_getForm( 'subject' ) != '' ) {
       $subject = Session::newInstance()->_getForm( 'subject' );
       parent::generic_input_text( 'subject' , $subject);
     } else {
@@ -103,7 +103,7 @@ class ContactForm extends Form {
   * @return bool
   */
   public static function your_message() {
-    if( Session::newInstance()->_getForm( 'message_body' ) != '' ) {
+    if(Session::newInstance()->_getForm( 'message_body' ) != '' ) {
       $message = Session::newInstance()->_getForm( 'message_body' );
       parent::generic_textarea( 'message' , $message);
     } else {
@@ -134,12 +134,12 @@ class ContactForm extends Form {
         },
         messages: {
           yourEmail: {
-            required: "<?php _e( 'Email: this field is required' ); ?>.",
-            email: "<?php _e( 'Invalid email address' ); ?>."
+            required: "<?php echo sprintf(__('%s is required'), __('Email')); ?>.",
+            email: "<?php _e( 'The email is not valid' ); ?>."
           },
           message: {
-            required: "<?php _e( 'Message: this field is required' ); ?>.",
-            minlength: "<?php _e( 'Message: this field is required' ); ?>."
+            required: "<?php echo sprintf(__('%s is required'), __('Message')); ?>.",
+            minlength: "<?php echo sprintf(__('%s is required'), __('Message')); ?>."
           }
         },
         errorLabelContainer: "#error_list",

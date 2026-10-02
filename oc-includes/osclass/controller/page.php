@@ -52,18 +52,51 @@ class CWebPage extends BaseModel {
       $this->do404();
       return;
     }
-    
+
     $kwords = array('{WEB_URL}', '{WEB_TITLE}');
     $rwords = array(osc_base_url(), osc_page_title());
-    
+
     foreach($page['locale'] as $k => $v) {
       $page['locale'][$k]['s_title'] = str_ireplace($kwords, $rwords, osc_apply_filter('email_description', $v['s_title']));
       $page['locale'][$k]['s_text'] = str_ireplace($kwords, $rwords, osc_apply_filter('email_description', $v['s_text']));
     }
 
+    $prefLocale = osc_current_user_locale();
+    if(isset($page['locale'][$prefLocale])) {
+      $page['s_title'] = $page['locale'][$prefLocale]['s_title'];
+      $page['s_text'] = $page['locale'][$prefLocale]['s_text'];
+    } else {
+      $data = current($page['locale']);
+
+      if($data !== false && is_array($data)) {
+        $page['s_title'] = $data['s_title'];
+        $page['s_text'] = $data['s_text'];
+      } else {
+        $page['s_title'] = '';
+        $page['s_text'] = '';
+      }
+
+      unset($data);
+    }
+
     // export $page content to View
     $this->_exportVariableToView('page', $page);
-    
+
+    // redirect to the correct url just in case it has changed
+    if(osc_rewrite_enabled()) {
+      $pageURI = str_replace(osc_base_url(), '', osc_static_page_url());
+      $URI = preg_replace('|^' . REL_WEB_URL . '|', '', Params::getServerParam('REQUEST_URI', false, false));
+      $URI = str_replace('?' . Params::getServerParam('QUERY_STRING', false, false), '', $URI);
+
+      if(urlencode(strip_tags(strtolower(str_replace('+', '', str_replace(' ', '', urldecode($pageURI)))))) != urlencode(strip_tags(strtolower(str_replace(' ', '', urldecode($URI)))))) {
+        $this->redirectTo(osc_base_url() . strtolower($pageURI), 301);
+      }
+    }
+
+    if(osc_always_generate_canonical_enabled()) {
+      $this->_exportVariableToView('canonical', osc_apply_filter('canonical_url_page', osc_static_page_url()));
+    }
+
     // Update 8.0.2 - lang param handler moved to index.php
     // if(Params::getParam('lang') != '') {
     //   Session::newInstance()->_set('userLocale', Params::getParam('lang'));
@@ -74,16 +107,16 @@ class CWebPage extends BaseModel {
     // load the right template file
     if(file_exists(osc_themes_path() . osc_theme() . '/page-' . $page['s_internal_name'] . '.php')) {
       $this->doView('page-' . $page['s_internal_name'] . '.php');
-      
+
     } else if(isset($meta['template']) && file_exists(osc_themes_path() . osc_theme() . '/' . $meta['template'])) {
       $this->doView($meta['template']);
-      
+
     } else if(isset($meta['template']) && file_exists(osc_plugins_path() . '/' . $meta['template'])) {
       osc_run_hook('before_html');
       require osc_plugins_path() . '/' . $meta['template'];
       Session::newInstance()->_clearVariables();
       osc_run_hook('after_html');
-      
+
     } else {
       $this->doView('page.php');
     }

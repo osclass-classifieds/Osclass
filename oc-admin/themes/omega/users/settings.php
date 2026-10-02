@@ -24,7 +24,7 @@ function addHelp() {
 osc_add_hook('help_box','addHelp');
 
 
-function customPageHeader(){ 
+function customPageHeader(){
   ?>
   <h1><?php _e('Users'); ?>
     <a href="#" class="btn ico ico-32 ico-help float-right"></a>
@@ -36,16 +36,16 @@ osc_add_hook('admin_page_header','customPageHeader');
 
 
 function customPageTitle($string) {
-  return sprintf(__('User Settings - %s'), $string);
+  return sprintf(__('User settings - %s'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');
 
-osc_current_admin_theme_path('parts/header.php'); 
+osc_current_admin_theme_path('parts/header.php');
 ?>
 
 <!-- settings form -->
-<h2 class="render-title"><?php _e('User Settings'); ?></h2>
+<h2 class="render-title"><?php _e('User settings'); ?></h2>
 <form action="<?php echo osc_admin_base_url(true); ?>" method="post">
   <input type="hidden" name="page" value="users" />
   <input type="hidden" name="action" value="settings_post" />
@@ -53,7 +53,7 @@ osc_current_admin_theme_path('parts/header.php');
     <div class="form-horizontal">
       <div class="form-row" style="margin-bottom:0px;">
         <div class="form-label"><?php _e('Settings'); ?></div>
-        
+
         <div class="form-controls">
           <label id="enabled_users" class="form-label-checkbox">
             <input type="checkbox" id="enabled_users" name="enabled_users" <?php echo (osc_users_enabled() ? 'checked="checked"' : ''); ?> value="1" />
@@ -64,7 +64,7 @@ osc_current_admin_theme_path('parts/header.php');
 
       <div class="form-row" style="margin-bottom:0px;">
         <div class="form-label">&nbsp;</div>
-        
+
         <div class="form-controls separate-top-medium">
           <label id="enabled_user_registration">
             <input type="checkbox" id="enabled_user_registration" name="enabled_user_registration" <?php echo (osc_user_registration_enabled() ? 'checked="checked"' : ''); ?> value="1" />
@@ -75,7 +75,7 @@ osc_current_admin_theme_path('parts/header.php');
 
       <div class="form-row">
         <div class="form-label">&nbsp;</div>
-        
+
         <div class="form-controls separate-top-medium">
           <label id="enabled_user_validation">
             <input type="checkbox" id="enabled_user_validation" name="enabled_user_validation" <?php echo (osc_user_validation_enabled() ? 'checked="checked"' : ''); ?> value="1" />
@@ -83,7 +83,7 @@ osc_current_admin_theme_path('parts/header.php');
           </label>
         </div>
       </div>
-      
+
       <div class="form-row">
         <div class="form-label"><?php _e('Admin notifications'); ?></div>
         <div class="form-controls">
@@ -93,24 +93,24 @@ osc_current_admin_theme_path('parts/header.php');
           </label>
         </div>
       </div>
-      
+
       <div class="form-row">
         <div class="form-label"><?php _e('Admin toolbar'); ?></div>
         <div class="form-controls">
           <label id="admin_toolbar_front" class="form-label-checkbox">
             <input type="checkbox" id="admin_toolbar_front" name="admin_toolbar_front" <?php echo (osc_admin_toolbar_front_enabled() ? 'checked="checked"' : ''); ?> value="1" />
             <?php _e('Enable admin toolbar in front page'); ?>
-          </label> 
+          </label>
         </div>
       </div>
-      
+
       <div class="form-row">
         <div class="form-label"><?php _e('TinyMCE'); ?></div>
         <div class="form-controls">
           <label id="enabled_tinymce_users" class="form-label-checkbox">
             <input type="checkbox" id="enabled_tinymce_users" name="enabled_tinymce_users" <?php echo (osc_tinymce_users_enabled() ? 'checked="checked"' : ''); ?> value="1" />
             <?php _e('Enable TinyMCE on user profile - additional information textarea in front/back office'); ?>
-          </label> 
+          </label>
         </div>
       </div>
 
@@ -121,11 +121,11 @@ osc_current_admin_theme_path('parts/header.php');
             <option value="ID" <?php if(osc_username_generator() == 'ID' || osc_username_generator() == '') { ?>selected="selected"<?php } ?>><?php _e('Use user ID'); ?></option>
             <option value="SLUG" <?php if(osc_username_generator() == 'SLUG') { ?>selected="selected"<?php } ?>><?php _e('Create slug from name'); ?></option>
           </select>
-          
+
           <span class="help-box"><?php _e('Generator is not used, when user enters username in registration or profile form (when available).'); ?></span>
         </div>
       </div>
-      
+
       <div class="form-row">
         <div class="form-label"><?php _e('Username blacklist'); ?></div>
         <div class="form-controls">
@@ -143,7 +143,7 @@ osc_current_admin_theme_path('parts/header.php');
             <option value="ALL" <?php if(osc_user_public_profile_enabled() == 'ALL' || osc_username_generator() == '') { ?>selected="selected"<?php } ?>><?php _e('Enabled for all registered users'); ?></option>
             <option value="COMPANY" <?php if(osc_user_public_profile_enabled() == 'COMPANY') { ?>selected="selected"<?php } ?>><?php _e('Enabled for users registered as company only'); ?></option>
           </select>
-          
+
           <span class="help-box"><?php _e('Specify when user public profile URL is enabled, otherwise public profile page shows 404.'); ?></span>
         </div>
       </div>
@@ -154,27 +154,104 @@ osc_current_admin_theme_path('parts/header.php');
           <label id="user_public_profile_min_items" class="form-label-input">
             <input type="number" class="input-small" min="0" step="1" id="user_public_profile_min_items" name="user_public_profile_min_items" value="<?php echo osc_esc_html(osc_user_public_profile_min_items()); ?>" />
             <div class="inpt-desc"><?php _e('items'); ?></div>
-            
+
             <span class="help-box"><?php _e('Public profile page will be enabled just in case user has at least defined number of items. Default: 0'); ?></span>
           </label>
         </div>
       </div>
-      
+
+      <h2 class="render-title separate-top"><?php _e('Alerts settings'); ?></h2>
+
+      <div class="form-row">
+        <div class="form-label"><?php _e('Alerts'); ?></div>
+        <div class="form-controls">
+          <label id="alerts_enabled" class="form-label-checkbox">
+            <input type="checkbox" id="alerts_enabled" name="alerts_enabled" <?php echo (osc_alerts_enabled() ? 'checked="checked"' : ''); ?> value="1" />
+            <?php _e('Alerts enabled'); ?>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-label"><?php _e('Default expiration'); ?></div>
+        <div class="form-controls has-intext-input">
+          <?php _e('Logged user alerts expire after'); ?>
+          <input type="number" class="input-small in-text" name="alerts_expiration_months_user" min=0 value="<?php echo osc_esc_html((int)osc_alerts_expiration_months_user()); ?>"/>
+          <?php _e('months'); ?>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-label"></div>
+        <div class="form-controls has-intext-input">
+          <?php _e('Non-logged alerts expire after'); ?>
+          <input type="number" class="input-small in-text" name="alerts_expiration_months_guest" min=0 value="<?php echo osc_esc_html((int)osc_alerts_expiration_months_guest()); ?>"/>
+          <?php _e('months'); ?>
+          <span class="help-box"><?php _e('Set to 0 to disable expiration for both logged and non-logged alerts (only applies if alerts are not set as non-expiring).'); ?></span>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-label"><?php _e('Allow non-expiring alerts'); ?></div>
+        <div class="form-controls">
+          <div class="form-label-checkbox">
+            <label>
+              <input type="checkbox" <?php echo ((osc_get_preference('alerts_allow_non_expiring') ? 'checked="checked"' : '')); ?> name="alerts_allow_non_expiring" value="1"/>
+              <?php _e('Allow users to set alerts as non-expiring in user menu'); ?>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-label"><?php _e('Expiration controls'); ?></div>
+        <div class="form-controls">
+          <div class="form-label-checkbox">
+            <label>
+              <input type="checkbox" <?php echo ((osc_get_preference('alerts_allow_user_expiration_change') ? 'checked="checked"' : '')); ?> name="alerts_allow_user_expiration_change" value="1"/>
+              <?php _e('Enable users to change expiration of alert in user menu'); ?>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-label"><?php _e('Alerts are non-expiring'); ?></div>
+        <div class="form-controls">
+          <div class="form-label-checkbox">
+            <label>
+              <input type="checkbox" <?php echo ((osc_get_preference('alerts_default_non_expiring') ? 'checked="checked"' : '')); ?> name="alerts_default_non_expiring" value="1"/>
+              <?php _e('New alerts are created as non-expiring by default'); ?>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-label"><?php _e('Inactive users'); ?></div>
+        <div class="form-controls has-intext-input">
+          <?php _e('Unsubscribe alerts if user has not logged in for'); ?>
+          <input type="number" class="input-small in-text" name="alerts_unsub_inactive_months" min=0 value="<?php echo osc_esc_html((int)osc_get_preference('alerts_unsub_inactive_months')); ?>"/>
+          <?php _e('months'); ?>
+          <span class="help-box"><?php _e('Set to 0 to disable this feature.'); ?></span>
+        </div>
+      </div>
+
 
       <h2 class="render-title separate-top"><?php _e('Profile picture settings'); ?></h2>
-      
+
       <div class="form-row">
         <div class="form-label"><?php _e('Profile pictures'); ?></div>
         <div class="form-controls">
           <label id="enable_profile_img" class="form-label-checkbox">
             <input type="checkbox" id="enable_profile_img" name="enable_profile_img" <?php echo (osc_profile_img_users_enabled() ? 'checked="checked"' : ''); ?> value="1" />
             <?php _e('Enable users to upload their profile picture'); ?>
-          </label> 
-          
+          </label>
+
           <span class="help-box"><?php _e('Required scripts and styles on user profile page will be automatically loaded.'); ?></span>
         </div>
       </div>
-      
+
       <div class="form-row">
         <div class="form-label"><?php _e('Image uploader library'); ?></div>
         <div class="form-controls">
@@ -182,11 +259,11 @@ osc_current_admin_theme_path('parts/header.php');
             <option value="" <?php if(osc_profile_picture_library() == '') { ?>selected="selected"<?php } ?>><?php _e('Cropper.js'); ?></option>
             <option value="UPPY" <?php if(osc_profile_picture_library() == 'UPPY') { ?>selected="selected"<?php } ?>><?php _e('Uppy.io'); ?></option>
           </select>
-          
+
           <span class="help-box"><?php _e('Select library you want to use for profile pictures. Uppy.io is more advanced.'); ?></span>
         </div>
       </div>
-      
+
       <div class="form-row">
         <div class="form-label"><?php _e('Profile picture size'); ?></div>
         <div class="form-controls">
@@ -194,8 +271,8 @@ osc_current_admin_theme_path('parts/header.php');
           <span class="help-box"><?php _e('The size listed below determine the optimal dimensions in pixels to use when uploading a profile picture. Format: <b>Width</b> x <b>Height</b>.'); ?></span>
         </div>
       </div>
-      
-      
+
+
       <div class="form-actions">
         <input type="submit" id="save_changes" value="<?php echo osc_esc_html(__('Save changes')); ?>" class="btn btn-submit" />
       </div>
@@ -203,4 +280,4 @@ osc_current_admin_theme_path('parts/header.php');
   </fieldset>
 </form>
 <!-- /settings form -->
-<?php osc_current_admin_theme_path('parts/footer.php'); ?>
+<?php osc_current_admin_theme_path('parts/footer.php');

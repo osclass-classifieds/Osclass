@@ -17,7 +17,7 @@ if(!defined('ABS_PATH')) exit('ABS_PATH is not loaded. Direct access is not allo
  */
 
 
-$customPageHeader = static function () { 
+$customPageHeader = static function () {
   ?>
   <h1><?php echo sprintf(__('Osclass %s'), OSCLASS_VERSION); ?>
     <a href="#" class="btn ico ico-32 ico-help float-right"></a>
@@ -44,6 +44,12 @@ osc_current_admin_theme_path('parts/header.php');
   <div class="widget-box">
     <div class="widget-box-title">
       <h3><?php echo sprintf(__('Osclass changelog up to v%s'), OSCLASS_VERSION); ?></h3>
+      <?php if(defined('OSC_DEBUG') && OSC_DEBUG) {
+        $rerun = (int)str_replace('.', '', OSCLASS_VERSION);
+        if($rerun > 800) { ?>
+          <a class="btn btn-mini float-right" href="<?php echo osc_admin_base_url(true); ?>?page=upgrade&amp;action=upgrade-funcs&amp;rerun=<?php echo $rerun; ?>" onclick="return confirm('<?php echo osc_esc_js(sprintf(__('Re-run the %s upgrade now?'), OSCLASS_VERSION)); ?>');"><?php echo sprintf(__('Rerun %s upgrade'), OSCLASS_VERSION); ?></a>
+      <?php }
+      } ?>
     </div>
     <div class="widget-box-content">
       <ul class="version-list">
@@ -53,7 +59,7 @@ osc_current_admin_theme_path('parts/header.php');
           $data = explode(PHP_EOL, $content);
           $output = '';
           $li_ended = true;
-          
+
           if(count($data) > 0) {
             foreach($data as $d) {
               // if(substr(trim($d), 0, 7) === "Osclass") {
@@ -66,15 +72,15 @@ osc_current_admin_theme_path('parts/header.php');
                 $li_ended = false;
               } else if(substr(trim($d), 0, 6) === "------") {
                 // do nothing, skip
-              } else if (trim($d) != '') {
+              } elseif(trim($d) != '') {
                 $output .= ($li_ended === false ? '<br/>' : '');
                 $output .= trim(htmlentities($d));
-              }              
+              }
             }
-            
+
             $output .= ($li_ended === false ? '</li>' : '');
           }
-  
+
           echo $output;
         ?>
       </ul>
@@ -82,4 +88,4 @@ osc_current_admin_theme_path('parts/header.php');
   </div>
 </div>
 
-<?php osc_current_admin_theme_path('parts/footer.php'); ?>
+<?php osc_current_admin_theme_path('parts/footer.php');

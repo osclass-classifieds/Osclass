@@ -18,33 +18,17 @@ if(!defined('ABS_PATH')) exit('ABS_PATH is not loaded. Direct access is not allo
  */
 
 
-/**
- *
- */
-class Cron extends DAO
-{
-  /**
-   *
-   * @var type
-   */
+class Cron extends DAO {
   private static $instance;
 
-  /**
-   * @return \Cron|\type
-   */
-  public static function newInstance()
-  {
-    if( !self::$instance instanceof self ) {
+  public static function newInstance() {
+    if(!self::$instance instanceof self ) {
       self::$instance = new self;
     }
     return self::$instance;
   }
 
-  /**
-   *
-   */
-  public function __construct()
-  {
+  public function __construct() {
     parent::__construct();
     $this->setTableName('t_cron');
     $this->setFields( array('e_type', 'd_last_exec', 'd_next_exec') );
@@ -60,14 +44,17 @@ class Cron extends DAO
    *
    * @return array|bool
    */
-  public function getCronByType($type)
-  {
+  public function getCronByType($type) {
     $this->dao->select();
     $this->dao->from($this->getTableName());
     $this->dao->where('e_type', $type);
     $result = $this->dao->get();
 
-    if( $result->numRows == 0 ) {
+    if($result === false) {
+      return false;
+    }
+
+    if($result->numRows == 0) {
       return false;
     }
 

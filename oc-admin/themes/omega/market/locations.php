@@ -29,7 +29,7 @@ function addHelp() {
 }
 osc_add_hook('help_box','addHelp');
 
-function customPageHeader2(){ 
+function customPageHeader2(){
   ?>
   <h1>
     <?php echo sprintf(__('%s on market'), __('Locations')); ?>
@@ -57,7 +57,7 @@ $products = json_decode($products_json, true);
 
 $location_all = Country::newInstance()->listAll();
 
-osc_current_admin_theme_path( 'market/header.php' ); 
+osc_current_admin_theme_path( 'market/header.php' );
 ?>
 
 <div id="market-block" class="<?php echo osc_esc_html($action); ?>">
@@ -100,12 +100,12 @@ osc_current_admin_theme_path( 'market/header.php' );
           } else {
             $version_req = sprintf(__('%s or higher'), $p['s_version']);
           }
-          
+
           $compatible_from = true;
 
           if($vfrom != '' && $vfrom != null && $vfrom != 'null') {
             $check_from = version_compare2($vfrom, osc_version());
-            if ($check_from == 1) {    // A > B
+            if($check_from == 1) {    // A > B
               $compatible_from = false;
             }
           }
@@ -123,7 +123,7 @@ osc_current_admin_theme_path( 'market/header.php' );
             <div class="desc">
               <div class="line"><strong><?php _e('Contains'); ?>:</strong> <span><?php echo $p['region_count']; ?> <?php _e('regions'); ?>, <?php echo $p['city_count']; ?> <?php _e('cities'); ?></span></div>
               <div class="line"><strong><?php _e('File name'); ?>:</strong> <span><?php echo $p['file']; ?></span></div>
-              <div class="line"><strong><?php _e('Updated on'); ?>:</strong> <span><?php echo date('Y-m-d', strtotime($p['date'])); ?></span></div> 
+              <div class="line"><strong><?php _e('Updated on'); ?>:</strong> <span><?php echo date('Y-m-d', strtotime($p['date'])); ?></span></div>
             </div>
 
             <div class="actions">
@@ -131,7 +131,7 @@ osc_current_admin_theme_path( 'market/header.php' );
                 <a class="mkt-update btn btn-gray" href="<?php echo $p['url']; ?>" data-product-key="<?php echo osc_esc_html($p['code']); ?>"><i class="fa fa-download"></i> <?php _e('Download'); ?></a>
 
               <?php } else if(!$compatible_from) { ?>
-                <a class="btn btn-gray" href="#" onclick="return false" title="<?php echo osc_esc_html(__('Not compatible with your osclass version')); ?>"><i class="fa fa-ban"></i> <?php _e('Can\'t download'); ?></a>
+                <a class="btn btn-gray" href="#" onclick="return false" title="<?php echo osc_esc_html(__('Not compatible with your osclass version')); ?>"><i class="fa fa-ban"></i> <?php _e('Cannot download'); ?></a>
 
               <?php } else { ?>
                 <a href="<?php echo osc_admin_base_url(true); ?>?page=locations&country_code=<?php echo $p['code']; ?>"" class="btn btn-gray" title="<?php echo osc_esc_html(__('Click to open country configuration')); ?>"><i class="fa fa-check"></i> <?php _e('Active'); ?></a>
@@ -168,7 +168,7 @@ osc_current_admin_theme_path( 'market/header.php' );
     <input type="hidden" name="section" value="locations" />
     <input type="hidden" name="market_product_key" id="market_product_key" value="" />
     <input type="hidden" name="market_file_name" id="market_file_name" value="" />
-    
+
     <div class="osc-modal-content-market">
       <table class="table" cellpadding="0" cellspacing="0">
         <tbody>
@@ -218,7 +218,7 @@ osc_current_admin_theme_path( 'market/header.php' );
     $('a.btn.enable, a.btn.install').on('click', function(e){
       e.preventDefault();
 
-      $(this).find('i').removeClass().addClass('fa').addClass('fa-spinner').addClass('fa-spin'); 
+      $(this).find('i').removeClass().addClass('fa').addClass('fa-spinner').addClass('fa-spin');
 
       $.ajax({
         url : $(this).attr('href'),
@@ -245,11 +245,11 @@ osc_current_admin_theme_path( 'market/header.php' );
           content += oscEscapeHTML(data.message);
 
           if(elem.hasClass('is-update')) {
-            content += '<h3><?php echo osc_esc_js(__('Location has been updated correctly.')); ?></h3>';
+            content += '<h3><?php echo osc_esc_js(__('The package has been updated')); ?></h3>';
           } else {
-            content += '<h3><?php echo osc_esc_js(__('Location has been downloaded correctly.')); ?></h3>';
+            content += '<h3><?php echo osc_esc_js(__('The package has been downloaded')); ?></h3>';
           }
-          
+
           content += "<p>";
           content += '<a class="btn btn-mini btn-green" href="<?php echo osc_admin_base_url(true); ?>?page=locations&marketError='+data.error+'&message='+oscEscapeHTML(data.message)+'"><?php echo osc_esc_js(__('Go to locations page')); ?></a>';
           content += '<a class="btn btn-mini" href="javascript:location.reload(true)"><?php echo osc_esc_js(__('Close')); ?></a>';
@@ -300,11 +300,11 @@ osc_current_admin_theme_path( 'market/header.php' );
     }
 
     var dialogWidth = 485;
-    
+
     if($(window).width() < 525) {
       dialogWidth = $(window).width() - 40;
     }
-    
+
     $('#market_installer').dialog({
       modal: true,
       title: modalTitle,
@@ -315,4 +315,4 @@ osc_current_admin_theme_path( 'market/header.php' );
   });
 </script>
 
-<?php osc_current_admin_theme_path( 'parts/footer.php' ); ?>
+<?php osc_current_admin_theme_path( 'parts/footer.php' );

@@ -47,7 +47,7 @@ class CityArea extends DAO
    */
   public static function newInstance()
   {
-    if( !self::$instance instanceof self ) {
+    if(!self::$instance instanceof self ) {
       self::$instance = new self;
     }
     return self::$instance;
@@ -81,13 +81,13 @@ class CityArea extends DAO
     $this->dao->from($this->getTableName());
     $this->dao->where('s_name', $cityAreaName);
     $this->dao->limit(1);
-    if( $cityId != null ) {
+    if($cityId != null ) {
       $this->dao->where('fk_i_city_id', $cityId);
     }
 
     $result = $this->dao->get();
 
-    if( $result == false ) {
+    if($result == false ) {
       return array();
     }
 
@@ -109,7 +109,7 @@ class CityArea extends DAO
 
     $result = $this->dao->get();
 
-    if( $result == false ) {
+    if($result == false ) {
       return array();
     }
 

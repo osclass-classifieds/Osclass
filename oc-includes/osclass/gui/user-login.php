@@ -32,7 +32,7 @@
             <input type="hidden" name="action" value="login_post" />
 
             <div class="control-group">
-                <label class="control-label" for="email"><?php _e('E-mail', 'sigma'); ?></label>
+                <label class="control-label" for="email"><?php _e('Email', 'sigma'); ?></label>
                 <div class="controls">
                     <?php UserForm::email_login_text(); ?>
                 </div>
@@ -53,7 +53,7 @@
             <?php osc_run_hook('user_login_form'); ?>
 
             <div class="control-group"><?php osc_show_recaptcha('login'); ?></div>
-            
+
             <div class="control-group butt">
                 <div class="controls">
                     <button type="submit" class="btn btn-primary"><?php _e("Log in", 'sigma');?></button>
@@ -67,4 +67,4 @@
         </form>
     </div>
 </div>
-<?php osc_current_web_theme_path('footer.php') ; ?>
+<?php osc_current_web_theme_path('footer.php') ;

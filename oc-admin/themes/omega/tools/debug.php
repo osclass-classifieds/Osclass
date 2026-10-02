@@ -28,8 +28,8 @@ function addHelp() {
 osc_add_hook('help_box','addHelp');
 
 
-function customPageHeader(){ 
-  ?> 
+function customPageHeader(){
+  ?>
   <h1><?php _e('Debug/Error log'); ?>
     <a href="#" class="btn ico ico-32 ico-help float-right"></a>
   </h1>
@@ -40,7 +40,7 @@ osc_add_hook('admin_page_header','customPageHeader');
 
 
 function customPageTitle($string) {
-  return sprintf(__('Tools - %s'), $string);
+  return sprintf(__('%s - %s'), __('Tools'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');
@@ -48,24 +48,28 @@ osc_add_filter('admin_title', 'customPageTitle');
 osc_current_admin_theme_path( 'parts/header.php' );
 
 $log_files = __get('log_files');
-$file = Params::getParam('log_file');
+if(!is_array($log_files)) {
+  $log_files = array();
+}
+
+$file = basename((string)Params::getParam('log_file'));
 
 $log_file = '';
-$log_file_url = '';
+$log_download_url = '';
 $limit_lines = 2000;
 $log_exists = false;
 
-if($file != '' && file_exists(CONTENT_PATH . $file)) {
+if($file != '' && strtolower(pathinfo($file, PATHINFO_EXTENSION)) === 'log' && file_exists(CONTENT_PATH . $file) && is_file(CONTENT_PATH . $file)) {
   $log_exists = true;
-  $log_file_url = osc_base_url() . OC_CONTENT_FOLDER . '/' . $file;
-  
+  $log_download_url = osc_admin_base_url(true) . '?page=tools&action=debug_download&log_file=' . rawurlencode($file);
+
   $i = 0;
   $log_file = '';
   $handle = fopen(CONTENT_PATH . $file, "r");
   while(!feof($handle)){
     $log_file .= fgets($handle);
     $i++;
-    
+
     if($i > $limit_lines) {
       $log_file .= '<br/>' . sprintf(__('First %s lines of %s shown, download log file to see full content'), $limit_lines, $file);
       break;
@@ -81,12 +85,12 @@ if($file != '' && file_exists(CONTENT_PATH . $file)) {
     <div class="widget-box debg smr">
       <div class="widget-box-title"><h3><i class="fa fa-gear"></i> <?php _e('Debug/Error log settings'); ?></h3></div>
       <div class="widget-box-content">
-        <p><strong><?php _e('PHP error log'); ?>:</strong> <?php if(defined('OSC_DEBUG') && OSC_DEBUG) { echo '<span class="enabled"><i class="fa fa-check"></i>' . __('Enabled') . '</span>'; } else { echo '<span class="disabled"><i class="fa fa-times"></i>' . __('Disabled') . '</span>'; }; ?></span></p>
-        <p><strong><?php _e('PHP errors output to file'); ?>:</strong> <?php if(defined('OSC_DEBUG_LOG') && OSC_DEBUG_LOG) { echo '<span class="enabled"><i class="fa fa-check"></i>' . __('Enabled') . '</span>'; } else { echo '<span class="disabled"><i class="fa fa-times"></i>' . __('Disabled') . '</span>'; }; ?></span></p>
-        <p><strong><?php _e('Database debug mode'); ?>:</strong> <?php if(defined('OSC_DEBUG_DB') && OSC_DEBUG_DB) { echo '<span class="enabled"><i class="fa fa-check"></i>' . __('Enabled') . '</span>'; } else { echo '<span class="disabled"><i class="fa fa-times"></i>' . __('Disabled') . '</span>'; }; ?></span></p>
+        <p><strong><?php _e('PHP error log'); ?>:</strong> <?php if(defined('OSC_DEBUG') && OSC_DEBUG) { echo '<span class="enabled"><i class="fa fa-check"></i>' . __('Enabled') . '</span>'; } else { echo '<span class="disabled"><i class="fa fa-times"></i>' . __('Disabled') . '</span>'; } ?></span></p>
+        <p><strong><?php _e('PHP errors output to file'); ?>:</strong> <?php if(defined('OSC_DEBUG_LOG') && OSC_DEBUG_LOG) { echo '<span class="enabled"><i class="fa fa-check"></i>' . __('Enabled') . '</span>'; } else { echo '<span class="disabled"><i class="fa fa-times"></i>' . __('Disabled') . '</span>'; } ?></span></p>
+        <p><strong><?php _e('Database debug mode'); ?>:</strong> <?php if(defined('OSC_DEBUG_DB') && OSC_DEBUG_DB) { echo '<span class="enabled"><i class="fa fa-check"></i>' . __('Enabled') . '</span>'; } else { echo '<span class="disabled"><i class="fa fa-times"></i>' . __('Disabled') . '</span>'; } ?></span></p>
       </div>
     </div>
-    
+
     <div class="widget-box debg cnf">
       <div class="widget-box-title"><h3><i class="fa fa-gear"></i> <?php _e('Enable logs'); ?></h3></div>
       <div class="widget-box-content">
@@ -112,37 +116,39 @@ if($file != '' && file_exists(CONTENT_PATH . $file)) {
           <span style="float:left;">
             <i class="fa fa-database"></i> <?php _e('Log file'); ?>:
           </span>
-          
+
           <form method="get" action="<?php echo osc_admin_base_url(true); ?>" class="inline nocsrf">
             <input type="hidden" name="page" value="tools"/>
             <input type="hidden" name="action" value="debug"/>
 
             <select name="log_file" class="select-box-extra select-box-medium float-left" onchange="this.form.submit();">
               <option value=""><?php _e('Select log file'); ?></option>
-              
-              <?php if(is_array($log_files) && count($log_files) > 0) { ?>
+
+              <?php if(count($log_files) > 0) { ?>
                 <?php foreach($log_files as $lfile) { ?>
-                  <?php 
-                    $fname = basename($lfile);
-                    $fsize = round(filesize($lfile) / 1024, 2) . 'kb';
+                  <?php
+                    $fname = isset($lfile['name']) ? $lfile['name'] : '';
+                    $fsize = isset($lfile['size_label']) ? $lfile['size_label'] : '';
+                    if($fname == '') {
+                      continue;
+                    }
                   ?>
-                  
-                  <option value="<?php echo $fname; ?>" <?php if($fname == $file) { ?>selected="selected"<?php } ?>><?php echo $fname . ' (' . $fsize . ')'; ?></option>
+                  <option value="<?php echo osc_esc_html($fname); ?>" <?php if($fname == $file) { ?>selected="selected"<?php } ?>><?php echo osc_esc_html($fname . ($fsize != '' ? ' (' . $fsize . ')' : '')); ?></option>
                 <?php } ?>
               <?php } ?>
             </select>
           </form>
-        
-          <?php if($log_file_url <> '') { ?>
-            <a href="<?php echo $log_file_url; ?>" target="_blank" class="btn float-right" style="margin-top: -4px;"><?php _e('Download'); ?></a>
-            <a href="<?php echo osc_admin_base_url(true); ?>?page=tools&action=debug_delete&log_file=<?php echo $file; ?>" class="btn float-right" style="margin-top: -4px;"><?php _e('Remove'); ?></a>
+
+          <?php if($log_download_url <> '') { ?>
+            <a href="<?php echo osc_esc_html($log_download_url); ?>" class="btn float-right" style="margin-top: -4px;"><?php _e('Download'); ?></a>
+            <a href="<?php echo osc_admin_base_url(true); ?>?page=tools&action=debug_delete&log_file=<?php echo rawurlencode($file); ?>" class="btn float-right" style="margin-top: -4px;"><?php _e('Remove'); ?></a>
           <?php } ?>
         </h3>
       </div>
       <div class="widget-box-content dbgfl">
         <?php if($file == '') { ?>
           <div class="empty"><?php _e('No log file selected'); ?></div>
-        
+
         <?php } else if(trim($log_file) == '') { ?>
           <div class="empty"><?php _e('Log file is empty'); ?></div>
 
@@ -150,13 +156,13 @@ if($file != '' && file_exists(CONTENT_PATH . $file)) {
           <div class="dbgfl">
             <div class="debug-file"><?php echo $log_file; ?></div>
           </div>
-          
+
         <?php } else { ?>
           <div class="empty"><?php echo sprintf(__('Debug log file "%s" does not exists, it should be located in %s folder.'), $file, '<strong>' . OC_CONTENT_FOLDER . '</strong>'); ?></div>
         <?php } ?>
       </div>
     </div>
-    
+
   </div>
 </div>
-<?php osc_current_admin_theme_path( 'parts/footer.php' ); ?>
+<?php osc_current_admin_theme_path( 'parts/footer.php' );

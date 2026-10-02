@@ -62,10 +62,10 @@ class Country extends DAO
    * @return array
    */
   public function findByCode($code) {
-    if(trim((string)$code) == '') { 
+    if(trim((string)$code) == '') {
       return array();
     }
-    
+
     $this->dao->select();
     $this->dao->from($this->getTableName());
     $this->dao->where('pk_c_code', $code);
@@ -86,10 +86,10 @@ class Country extends DAO
    * @return array
    */
   public function findByName($name) {
-    if(trim((string)$name) == '') { 
+    if(trim((string)$name) == '') {
       return array();
     }
-    
+
     $this->dao->select();
     $this->dao->from($this->getTableName());
     $this->dao->where(sprintf('(s_name="%s" OR s_name_native="%s")', $name, $name));
@@ -113,7 +113,7 @@ class Country extends DAO
     $key = md5(osc_base_url().'Country::listAll');
     $found = null;
     $cache = osc_cache_get($key, $found);
-    
+
     if(OC_ADMIN || $cache_enabled === false || $cache === false) {
       $this->dao->select($this->getFields());
       $this->dao->from($this->getTableName());
@@ -125,11 +125,11 @@ class Country extends DAO
       } else {
         $data = $result->result();
       }
-      
+
       osc_cache_set($key, $data, OSC_CACHE_TTL);
       return $data;
     }
-    
+
     return $cache;
   }
 
@@ -144,11 +144,11 @@ class Country extends DAO
     if($user_id <= 0) {
       return array();
     }
-    
+
     $key = md5(osc_base_url().'Country::listUser' . (string)$user_id);
     $found = null;
     $cache = osc_cache_get($key, $found);
-    
+
     if(OC_ADMIN || $cache_enabled === false || $cache === false) {
       $this->dao->select('t.*');
       $this->dao->from($this->getTableName() . ' as t');
@@ -161,11 +161,11 @@ class Country extends DAO
       } else {
         $data = $result->result();
       }
-      
+
       osc_cache_set($key, $data, OSC_CACHE_TTL);
       return $data;
     }
-    
+
     return $cache;
   }
 
@@ -180,17 +180,17 @@ class Country extends DAO
     $key = md5(osc_base_url().'Country::count');
     $found = null;
     $cache = osc_cache_get($key, $found);
-    
+
     if(OC_ADMIN || $cache === false) {
       $count = 0;
-      
+
       $this->dao->select('count(*) as i_count');
       $this->dao->from($this->getTableName());
       $result = $this->dao->get();
 
       if($result !== false) {
         $data = $result->row();
-        
+
         if(is_array($data) && isset($data['i_count'])) {
           $count = (int)$data['i_count'];
         }
@@ -199,10 +199,10 @@ class Country extends DAO
       osc_cache_set($key, $count, OSC_CACHE_TTL);
       return $count;
     }
-    
+
     return $cache;
   }
-  
+
   /**
    * List names of all the countries. Used for location import.
    *
@@ -215,7 +215,7 @@ class Country extends DAO
     if($result == false) {
       return array();
     }
-    
+
     return array_column($result->result(), 's_name');
   }
 
@@ -297,10 +297,10 @@ class Country extends DAO
    * @return array
    */
   public function findBySlug($slug) {
-    if(trim((string)$slug) == '') { 
+    if(trim((string)$slug) == '') {
       return array();
     }
-    
+
     $this->dao->select();
     $this->dao->from($this->getTableName());
     $this->dao->where('s_slug', $slug);
@@ -359,7 +359,7 @@ class Country extends DAO
     if(isset($data['s_name']) && $data['s_name'] != '') {
       return $data['s_name'];
     }
-    
+
     return false;
   }
 }

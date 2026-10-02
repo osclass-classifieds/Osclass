@@ -23,12 +23,165 @@ class CAdminTools extends AdminSecBaseModel {
     parent::__construct();
   }
 
+  private function get_saved_backup_folder() {
+    $path = trim((string)osc_get_preference('tools_backup_folder', 'osclass'));
+
+    if($path == '') {
+      $path = osc_base_path();
+    }
+
+    return rtrim($path, '/\\') . '/';
+  }
+
+  private function get_backup_folder() {
+    $path = trim((string)Params::getParam('bck_dir'));
+
+    if($path != '') {
+      $path = rtrim($path, '/\\') . '/';
+      osc_set_preference('tools_backup_folder', $path, 'osclass', 'STRING');
+      return $path;
+    }
+
+    return $this->get_saved_backup_folder();
+  }
+
+  private function get_backup_filename($type) {
+    $timestamp = date('YmdHis');
+
+    if($type == 'db') {
+      return 'osclass_db_backup_' . $timestamp . '.sql';
+    }
+
+    return 'osclass_file_backup_' . $timestamp . '.zip';
+  }
+
+  private function get_backup_redirect_url() {
+    return osc_admin_base_url(true) . '?page=tools&action=backup';
+  }
+
+  private function is_backup_filename($name) {
+    $is_db = preg_match('/^osclass_db_backup_[0-9]{14}\.sql$/', $name);
+    $is_file = preg_match('/^osclass_file_backup_[0-9]{14}\.zip$/', $name);
+
+    return ($is_db || $is_file);
+  }
+
+  private function get_debug_log_redirect_url($file = '') {
+    $url = osc_admin_base_url(true) . '?page=tools&action=debug';
+
+    if($file != '') {
+      $url .= '&log_file=' . rawurlencode($file);
+    }
+
+    return $url;
+  }
+
+  private function is_debug_log_filename($name) {
+    $name = basename((string)$name);
+
+    if($name === '' || $name === '.' || $name === '..') {
+      return false;
+    }
+
+    return (strtolower(pathinfo($name, PATHINFO_EXTENSION)) === 'log');
+  }
+
+  private function get_debug_log_full_path($name) {
+    $name = basename((string)$name);
+
+    if(!$this->is_debug_log_filename($name)) {
+      return false;
+    }
+
+    $path = CONTENT_PATH . $name;
+
+    if(!file_exists($path) || !is_file($path)) {
+      return false;
+    }
+
+    $real = realpath($path);
+    $content_real = realpath(CONTENT_PATH);
+
+    if($real === false || $content_real === false) {
+      return false;
+    }
+
+    $real_norm = str_replace('\\', '/', $real);
+    $content_norm = rtrim(str_replace('\\', '/', $content_real), '/') . '/';
+
+    if(strpos($real_norm, $content_norm) !== 0) {
+      return false;
+    }
+
+    return $real;
+  }
+
+  private function get_backup_files($path) {
+    $files = array();
+
+    if($path == '' || !is_dir($path)) {
+      return $files;
+    }
+
+    $patterns = array('osclass_db_backup_*.sql', 'osclass_file_backup_*.zip');
+
+    foreach($patterns as $pattern) {
+      $matches = glob($path . $pattern);
+
+      if(!is_array($matches) || count($matches) <= 0) {
+        continue;
+      }
+
+      foreach($matches as $file) {
+        if(!is_file($file)) {
+          continue;
+        }
+
+        $name = basename($file);
+        $type = (strpos($name, 'osclass_db_backup_') === 0 ? 'db' : 'file');
+
+        $files[] = array(
+          'name' => $name,
+          'path' => $file,
+          'type' => $type,
+          'size' => (int)@filesize($file),
+          'size_label' => $this->get_backup_size_label((int)@filesize($file)),
+          'modified' => (int)@filemtime($file)
+        );
+      }
+    }
+
+    usort($files, function($a, $b) {
+      if($a['modified'] == $b['modified']) {
+        return 0;
+      }
+
+      return ($a['modified'] < $b['modified'] ? 1 : -1);
+    });
+
+    return $files;
+  }
+
+  private function get_backup_size_label($size) {
+    $size = (int)$size;
+
+    if($size >= 1048576) {
+      return round($size / 1048576, 2) . ' MB';
+    }
+
+    return round($size / 1024, 2) . ' KB';
+  }
+
+  private function add_stats_recalc_started_message($type) {
+    osc_add_flash_info_message(sprintf(_m('%s statistics recalculation started. Progress will continue on this page until finished. Do not close this window.'), $type), 'admin');
+  }
+
   //Business Layer...
   function doModel() {
     parent::doModel();
 
     switch($this->action) {
-      case('cleanup'):    // calling info view 
+      case('cleanup'):    // calling info view
         $this->doView('tools/cleanup.php');
         break;
 
@@ -37,35 +190,98 @@ class CAdminTools extends AdminSecBaseModel {
         break;
 
       case('debug'):       // calling info view
-        $logs = glob(CONTENT_PATH . '/*.log');
- 
-        $logs = osc_apply_filter("admin_tools_log_files", $logs);
-        $this->_exportVariableToView('log_files', $logs);
+        $logs = glob(CONTENT_PATH . '*.log');
+        if(!is_array($logs)) {
+          $logs = array();
+        }
 
-        // if(Params::getParam('log_file') == '') {
-          // Params::setParam('log_file', 'debug.log');
-        // }
-        
+        $logs = osc_apply_filter('admin_tools_log_files', $logs);
+        if(!is_array($logs)) {
+          $logs = array();
+        }
+
+        $log_files = array();
+        $seen = array();
+
+        foreach($logs as $lfile) {
+          $fname = basename((string)$lfile);
+
+          if(isset($seen[$fname]) || !$this->is_debug_log_filename($fname)) {
+            continue;
+          }
+
+          $full_path = $this->get_debug_log_full_path($fname);
+          if($full_path === false) {
+            continue;
+          }
+
+          $size = (int)@filesize($full_path);
+          $seen[$fname] = true;
+          $log_files[] = array(
+            'name' => $fname,
+            'size' => $size,
+            'size_label' => $this->get_backup_size_label($size)
+          );
+        }
+
+        usort($log_files, function($a, $b) {
+          return strcasecmp($a['name'], $b['name']);
+        });
+
+        $this->_exportVariableToView('log_files', $log_files);
         $this->doView('tools/debug.php');
         break;
 
+      case('debug_download'):
+        $file = basename((string)Params::getParam('log_file'));
+        $full_path = $this->get_debug_log_full_path($file);
+
+        if($full_path === false) {
+          osc_add_flash_error_message(sprintf(_m('Log file "%s" has not been found'), $file), 'admin');
+          $this->redirectTo($this->get_debug_log_redirect_url());
+        }
+
+        header('Content-Description: File Transfer');
+        header('Content-Type: application/octet-stream');
+        header('Content-Disposition: attachment; filename="' . basename($file) . '"');
+        header('Content-Transfer-Encoding: binary');
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+        header('Pragma: public');
+        header('Content-Length: ' . filesize($full_path));
+
+        if(function_exists('apache_setenv')) {
+          @apache_setenv('no-gzip', '1');
+        }
+        @ini_set('zlib.output_compression', 'Off');
+
+        while(ob_get_level() > 0) {
+          @ob_end_clean();
+        }
+
+        flush();
+        readfile($full_path);
+        exit;
+        break;
+
       case('debug_delete'):       // calling info view
-        $file = Params::getParam('log_file');
-        
-        if(pathinfo($file, PATHINFO_EXTENSION) === 'log') {
-          if(file_exists(CONTENT_PATH . $file)) {
+        $file = basename((string)Params::getParam('log_file'));
+        $full_path = $this->get_debug_log_full_path($file);
+
+        if($this->is_debug_log_filename($file)) {
+          if($full_path !== false) {
             osc_add_flash_ok_message(sprintf(_m('Log file "%s" has been removed'), $file), 'admin');
-            @unlink(CONTENT_PATH . $file);
-            
+            @unlink($full_path);
+
           } else {
             osc_add_flash_error_message(sprintf(_m('Log file "%s" has not been found'), $file), 'admin');
           }
-          
+
         } else {
           osc_add_flash_error_message(sprintf(_m('Log file "%s" is invalid and cannot be removed'), $file), 'admin');
         }
-        
-        $this->redirectTo(osc_admin_base_url(true) . '?page=tools&action=debug');
+
+        $this->redirectTo($this->get_debug_log_redirect_url());
         break;
 
       case('logs'):       // calling info view
@@ -75,7 +291,7 @@ class CAdminTools extends AdminSecBaseModel {
         if(Params::getParam('iDisplayLength') != '') {
           Cookie::newInstance()->push('listing_iDisplayLength', Params::getParam('iDisplayLength'));
           Cookie::newInstance()->set();
-          
+
         } else {
           // set a default value if it's set in the cookie
           if(Cookie::newInstance()->get_value('listing_iDisplayLength') != '') {
@@ -90,13 +306,13 @@ class CAdminTools extends AdminSecBaseModel {
         if(Params::getParam('sort') == '') {
           Params::setParam('sort', 'date');
         }
-        
+
         if(Params::getParam('direction') == '') {
           Params::setParam('direction', 'desc');
         }
 
         $page = (int)Params::getParam('iPage');
-        if($page==0) { $page = 1; };
+        if($page==0) { $page = 1; }
         Params::setParam('iPage', $page);
 
         $params = Params::getParamsAsArray();
@@ -124,6 +340,7 @@ class CAdminTools extends AdminSecBaseModel {
 
         $this->_exportVariableToView('aData', $aData);
         $this->_exportVariableToView('aRawRows', $logsDataTable->rawRows());
+        $this->_exportVariableToView('withFilters', $logsDataTable->withFilters());
 
         $bulk_options = array(
           array('value' => '', 'data-dialog-content' => '', 'label' => __('Bulk actions')),
@@ -132,7 +349,7 @@ class CAdminTools extends AdminSecBaseModel {
 
         $bulk_options = osc_apply_filter("logs_bulk_filter", $bulk_options);
         $this->_exportVariableToView('bulk_options', $bulk_options);
-        
+
         $this->doView("tools/logs.php");
         break;
 
@@ -148,12 +365,20 @@ class CAdminTools extends AdminSecBaseModel {
 
         $logsManager = Log::newInstance();
         foreach($logId as $raw_id) {
-          $parts = explode('|', urldecode($raw_id));
-          
-          if(!isset($parts[0]) || !isset($parts[1]) || !isset($parts[2]) || !isset($parts[3])) {
-            continue;   // log id is not in correct format
+          $decoded = json_decode(base64_decode(urldecode($raw_id)), true);
+
+          if(is_array($decoded) && isset($decoded['dt_date']) && isset($decoded['s_section']) && isset($decoded['s_action']) && isset($decoded['fk_i_id'])) {
+            if($logsManager->deleteExactLog($decoded)) {
+              $iDeleted++;
+            }
+            continue;
           }
-          
+
+          $parts = explode('|', urldecode($raw_id));
+          if(!isset($parts[0]) || !isset($parts[1]) || !isset($parts[2]) || !isset($parts[3])) {
+            continue;
+          }
+
           $date = $parts[0];
           $section = $parts[1];
           $action = $parts[2];
@@ -173,28 +398,28 @@ class CAdminTools extends AdminSecBaseModel {
         osc_add_flash_ok_message($msg, 'admin');
         $this->redirectTo(osc_admin_base_url(true) . '?page=tools&action=logs');
         break;
-        
+
       case('import'):     // calling import view
         $this->doView('tools/import.php');
         break;
 
-      case('import_post'):  
+      case('import_post'):
         if(defined('DEMO')) {
           osc_add_flash_warning_message( _m("This action cannot be done because it is a demo site"), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=tools&action=import');
         }
-        
+
         // calling
         osc_csrf_check();
         $sql = Params::getFiles('sql');
-        
+
         if(isset($sql['size']) && $sql['size'] != 0) {
           $content_file = file_get_contents($sql['tmp_name']);
 
           $conn = DBConnectionClass::newInstance();
           $c_db = $conn->getOsclassDb();
           $comm = new DBCommandClass($c_db);
-          
+
           // Already happens in importSQL from 8.3.1 together with engine, charset and collate force update
           // $content_file = str_replace('/*TABLE_PREFIX*/', DB_TABLE_PREFIX, $content_file);
           // $content_file = str_replace('/*LOCALE_CODE*/', osc_language(), $content_file);
@@ -202,7 +427,7 @@ class CAdminTools extends AdminSecBaseModel {
           if($comm->importSQL($content_file)) {
             osc_calculate_location_slug(osc_subdomain_type());
             osc_add_flash_ok_message( _m('Import complete'), 'admin');
-            
+
           } else {
             // echo '<pre>';
             // echo $conn;
@@ -211,49 +436,80 @@ class CAdminTools extends AdminSecBaseModel {
             // print_r($comm);
             // print_r($c_db);
             // exit;
-            
+
             // $conn->errorReport();
 
             //osc_add_flash_error_message( _m('There was a problem importing data to the database'), 'admin');
             osc_add_flash_error_message("There was a problem importing SQL file to the database: <br/><pre>" . $comm->getConnErrorLevel() . " - " . $comm->getConnErrorDesc() . '</pre>', 'admin');
           }
-          
+
         } else {
           osc_add_flash_error_message(_m('SQL File could not be uploaded into server temp folder - check your server permissions and file size!'), 'admin');
         }
-        
+
         @unlink($sql['tmp_name']);
-        
+
         $this->redirectTo(osc_admin_base_url(true) . '?page=tools&action=import');
         break;
 
       case('category'):
-        $this->doView('tools/category.php');
+        $this->redirectTo(osc_admin_base_url(true) . '?page=tools&action=statistics');
         break;
 
       case('category_post'):  if(defined('DEMO')) {
           osc_add_flash_warning_message( _m("This action cannot be done because it is a demo site"), 'admin');
-          $this->redirectTo(osc_admin_base_url(true) . '?page=tools&action=category');
+          $this->redirectTo(osc_admin_base_url(true) . '?page=tools&action=statistics');
         }
-        
-        osc_update_cat_stats();
-        osc_add_flash_ok_message(_m("Recount category stats has been successful"), 'admin');
-        $this->redirectTo(osc_admin_base_url(true) . '?page=tools&action=category');
+
+        osc_csrf_check();
+        osc_set_preference('category_stats_recalc_running', 1, 'osclass', 'BOOLEAN');
+        osc_set_preference('category_stats_recalc_done', 0, 'osclass', 'INTEGER');
+        osc_set_preference('category_stats_recalc_offset', 0, 'osclass', 'INTEGER');
+        osc_set_preference('category_stats_recalc_total', (int)osc_get_count_query_data(sprintf('SELECT count(*) FROM %st_category', DB_TABLE_PREFIX)), 'osclass', 'INTEGER');
+        $this->add_stats_recalc_started_message(__('Category'));
+        $this->redirectTo(osc_admin_base_url(true) . '?page=tools&action=statistics');
         break;
 
       case('locations'):
-        $this->doView('tools/locations.php');
+        $this->redirectTo(osc_admin_base_url(true) . '?page=tools&action=statistics');
         break;
 
-      case('locations_post'): 
+      case('locations_post'):
         if(defined('DEMO')) {
           osc_add_flash_warning_message( _m("This action cannot be done because it is a demo site"), 'admin');
-          $this->redirectTo(osc_admin_base_url(true) . '?page=tools&action=locations');
+          $this->redirectTo(osc_admin_base_url(true) . '?page=tools&action=statistics');
         }
 
         osc_update_location_stats(true);
+        $workToDo = LocationsTmp::newInstance()->count();
 
-        $this->redirectTo( osc_admin_base_url(true) . '?page=tools&action=locations' );
+        if($workToDo > 0) {
+          $this->add_stats_recalc_started_message(__('Location'));
+        } else {
+          osc_set_preference('location_stats_last_recalc', time(), 'osclass', 'INTEGER');
+          osc_add_flash_ok_message(_m("Location statistics are already up to date"), 'admin');
+        }
+
+        $this->redirectTo(osc_admin_base_url(true) . '?page=tools&action=statistics');
+        break;
+
+      case('user_stats_post'):
+        if(defined('DEMO')) {
+          osc_add_flash_warning_message( _m("This action cannot be done because it is a demo site"), 'admin');
+          $this->redirectTo(osc_admin_base_url(true) . '?page=tools&action=statistics');
+        }
+
+        osc_csrf_check();
+        osc_set_preference('user_stats_recalc_last_id', 0, 'osclass', 'INTEGER');
+        osc_set_preference('user_stats_recalc_running', 1, 'osclass', 'BOOLEAN');
+        osc_set_preference('user_stats_recalc_done', 0, 'osclass', 'INTEGER');
+        osc_set_preference('user_stats_recalc_total', (int)osc_get_count_query_data(sprintf('SELECT count(*) FROM %st_user WHERE b_active = 1', DB_TABLE_PREFIX)), 'osclass', 'INTEGER');
+        $this->add_stats_recalc_started_message(__('User'));
+        $this->redirectTo(osc_admin_base_url(true) . '?page=tools&action=statistics');
+        break;
+
+      case('statistics'):
+        $this->doView('tools/statistics.php');
         break;
 
       case('upgrade'):
@@ -261,7 +517,7 @@ class CAdminTools extends AdminSecBaseModel {
           osc_add_flash_warning_message( _m("This action cannot be done because it is a demo site"), 'admin');
           $this->redirectTo(osc_admin_base_url(true));
         }
-        
+
         $this->doView('tools/upgrade.php');
         break;
 
@@ -270,7 +526,68 @@ class CAdminTools extends AdminSecBaseModel {
         break;
 
       case('backup'):
+        $backup_folder = $this->get_backup_folder();
+        Params::setParam('bck_dir', $backup_folder);
+        $this->_exportVariableToView('backup_folder', $backup_folder);
+        $this->_exportVariableToView('backup_files', $this->get_backup_files($backup_folder));
         $this->doView('tools/backup.php');
+        break;
+
+      case('backup-download'):
+        $file = trim((string)Params::getParam('file'));
+        $file = basename($file);
+
+        if(!$this->is_backup_filename($file)) {
+          osc_add_flash_error_message(_m('Invalid backup file name'), 'admin');
+          $this->redirectTo($this->get_backup_redirect_url());
+        }
+
+        $path = $this->get_saved_backup_folder();
+        $full_path = $path . $file;
+
+        if(!file_exists($full_path) || !is_file($full_path)) {
+          osc_add_flash_error_message(_m('Backup file does not exist'), 'admin');
+          $this->redirectTo($this->get_backup_redirect_url());
+        }
+
+        header('Content-Description: File Transfer');
+        header('Content-Type: application/octet-stream');
+        header('Content-Disposition: attachment; filename=' . basename($file));
+        header('Content-Transfer-Encoding: binary');
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+        header('Pragma: public');
+        header('Content-Length: ' . filesize($full_path));
+        flush();
+        readfile($full_path);
+        exit;
+        break;
+
+      case('backup-delete'):
+        osc_csrf_check();
+        $file = trim((string)Params::getParam('file'));
+        $file = basename($file);
+
+        if(!$this->is_backup_filename($file)) {
+          osc_add_flash_error_message(_m('Invalid backup file name'), 'admin');
+          $this->redirectTo($this->get_backup_redirect_url());
+        }
+
+        $path = $this->get_saved_backup_folder();
+        $full_path = $path . $file;
+
+        if(!file_exists($full_path) || !is_file($full_path)) {
+          osc_add_flash_error_message(_m('Backup file does not exist'), 'admin');
+          $this->redirectTo($this->get_backup_redirect_url());
+        }
+
+        if(@unlink($full_path)) {
+          osc_add_flash_ok_message(_m('Backup file has been deleted'), 'admin');
+        } else {
+          osc_add_flash_error_message(_m('Backup file could not be deleted'), 'admin');
+        }
+
+        $this->redirectTo($this->get_backup_redirect_url());
         break;
 
       case('backup-sql'):
@@ -278,28 +595,20 @@ class CAdminTools extends AdminSecBaseModel {
           osc_add_flash_warning_message( _m("This action cannot be done because it is a demo site"), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=tools&action=backup');
         }
-        
-        osc_csrf_check();
-        //databasse dump...
-        if( Params::getParam('bck_dir') != '' ) {
-          $path = trim( Params::getParam('bck_dir') );
-          if(substr($path, -1, 1) != "/") {
-             $path .= '/';
-          }
-        } else {
-          $path = osc_base_path();
-        }
-        
-        $filename = 'Osclass_mysqlbackup.' . date('YmdHis') . '.sql';
 
-        switch ( osc_dbdump($path, $filename) ) {
+        osc_csrf_check();
+        $path = $this->get_backup_folder();
+        $filename = $this->get_backup_filename('db');
+
+        switch(osc_dbdump($path, $filename) ) {
           case(-1):
             $msg = _m('Path is empty');
             osc_add_flash_error_message( $msg, 'admin');
             break;
 
           case(-2):
-            $msg = sprintf(_m('Could not connect with the database. Error: %s'), mysql_error());
+            $dbError = function_exists('mysqli_connect_error') ? mysqli_connect_error() : '';
+            $msg = sprintf(_m('Cannot connect to the database. Error: %s'), $dbError);
             osc_add_flash_error_message( $msg, 'admin');
             break;
 
@@ -314,12 +623,12 @@ class CAdminTools extends AdminSecBaseModel {
             break;
 
           default:
-            $msg = _m('Backup completed successfully');
+            $msg = _m('The backup has been completed');
             osc_add_flash_ok_message( $msg, 'admin');
             break;
         }
-        
-        $this->redirectTo( osc_admin_base_url(true) . '?page=tools&action=backup' );
+
+        $this->redirectTo($this->get_backup_redirect_url());
         break;
 
       case('backup-sql_file'):
@@ -327,39 +636,35 @@ class CAdminTools extends AdminSecBaseModel {
           osc_add_flash_warning_message( _m("This action cannot be done because it is a demo site"), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=tools&action=backup');
         }
-        
-        //databasse dump...
-        $filename = 'Osclass_mysqlbackup.' . date('YmdHis') . '.sql';
+
+        $this->get_backup_folder();
+        $filename = $this->get_backup_filename('db');
         $path = sys_get_temp_dir()."/";
 
-        switch (osc_dbdump($path, $filename)) {
+        switch(osc_dbdump($path, $filename)) {
           case(-1):
             $msg = _m('Path is empty');
             osc_add_flash_error_message( $msg, 'admin');
             break;
 
           case(-2):
-            $msg = sprintf(_m('Could not connect with the database. Error: %s'), mysql_error());
+            $dbError = function_exists('mysqli_connect_error') ? mysqli_connect_error() : '';
+            $msg = sprintf(_m('Cannot connect to the database. Error: %s'), $dbError);
             osc_add_flash_error_message( $msg, 'admin');
             break;
 
           case(-3):
-            $msg = sprintf(_m('Could not select the database. Error: %s'), mysql_error());
-            osc_add_flash_error_message( $msg, 'admin');
-            break;
-
-          case(-4):
             $msg = _m('There are no tables to back up');
             osc_add_flash_error_message( $msg, 'admin');
             break;
 
-          case(-5):
+          case(-4):
             $msg = _m('The folder is not writable');
             osc_add_flash_error_message( $msg, 'admin');
             break;
 
           default:
-            $msg = _m('Backup completed successfully');
+            $msg = _m('The backup has been completed');
             osc_add_flash_ok_message( $msg, 'admin');
             header('Content-Description: File Transfer');
             header('Content-Type: application/octet-stream');
@@ -371,11 +676,12 @@ class CAdminTools extends AdminSecBaseModel {
             header('Content-Length: ' . filesize($path.$filename));
             flush();
             readfile($path.$filename);
+            @unlink($path.$filename);
             exit;
             break;
         }
-        
-        $this->redirectTo( osc_admin_base_url(true) . '?page=tools&action=backup' );
+
+        $this->redirectTo($this->get_backup_redirect_url());
         break;
 
       case('backup-zip_file'):
@@ -383,12 +689,13 @@ class CAdminTools extends AdminSecBaseModel {
           osc_add_flash_warning_message( _m("This action cannot be done because it is a demo site"), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=tools&action=backup');
         }
-        
-        $filename = "Osclass_backup." . date('YmdHis') . ".zip";
+
+        $this->get_backup_folder();
+        $filename = $this->get_backup_filename('file');
         $path = sys_get_temp_dir()."/";
 
-        if (osc_zip_folder(osc_base_path(),$path. $filename)) {
-          $msg = _m('Archived successfully!');
+        if(osc_zip_folder(osc_base_path(),$path. $filename)) {
+          $msg = _m('The archive has been created');
           osc_add_flash_ok_message( $msg, 'admin');
           header('Content-Description: File Transfer');
           header('Content-Type: application/octet-stream');
@@ -400,84 +707,77 @@ class CAdminTools extends AdminSecBaseModel {
           header('Content-Length: ' . filesize($path.$filename));
           flush();
           readfile($path.$filename);
+          @unlink($path.$filename);
           exit;
-          
+
         } else {
           $msg = _m('Error, the zip file was not created in the specified directory');
           osc_add_flash_error_message( $msg, 'admin');
         }
-        
-        $this->redirectTo( osc_admin_base_url(true) . '?page=tools&action=backup' );
+
+        $this->redirectTo($this->get_backup_redirect_url());
         break;
 
       case('backup-zip'):   if(defined('DEMO')) {
           osc_add_flash_warning_message( _m("This action cannot be done because it is a demo site"), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=tools&action=backup');
         }
-        
-        //zip of the code just to back it up
+
         osc_csrf_check();
-        if( Params::getParam('bck_dir') != '' ) {
-          $archive_name = trim( Params::getParam('bck_dir') );
-          if(substr(trim($archive_name), -1, 1) != "/") {
-            $archive_name .= '/';
-          }
-          $archive_name = Params::getParam('bck_dir') . '/Osclass_backup.' . date('YmdHis') . '.zip';
-        } else {
-          $archive_name = osc_base_path() . "Osclass_backup." . date('YmdHis') . ".zip";
-        }
-        
+        $path = $this->get_backup_folder();
+        $archive_name = $path . $this->get_backup_filename('file');
+
         $archive_folder = osc_base_path();
 
-        if ( osc_zip_folder($archive_folder, $archive_name) ) {
-          $msg = _m('Archived successfully!');
+        if(osc_zip_folder($archive_folder, $archive_name) ) {
+          $msg = _m('The archive has been created');
           osc_add_flash_ok_message( $msg, 'admin');
         }else{
           $msg = _m('Error, the zip file was not created in the specified directory');
           osc_add_flash_error_message( $msg, 'admin');
         }
-        
-        $this->redirectTo( osc_admin_base_url(true) . '?page=tools&action=backup' );
+
+        $this->redirectTo($this->get_backup_redirect_url());
         break;
 
       case('backup_post'):
         $this->doView('tools/backup.php');
         break;
 
-      case('maintenance'): 
+      case('maintenance'):
         if(defined('DEMO')) {
           osc_add_flash_warning_message( _m("This action cannot be done because it is a demo site"), 'admin');
           $this->doView('tools/maintenance.php');
           break;
         }
-        
+
         $mode = Params::getParam('mode');
-        if( $mode == 'on' ) {
+        if($mode == 'on' ) {
           osc_csrf_check();
           $maintenance_file = osc_base_path() . '.maintenance';
           $fileHandler = @fopen($maintenance_file, 'w');
-          
-          if( $fileHandler ) {
+
+          if($fileHandler ) {
             osc_add_flash_ok_message( _m('Maintenance mode is ON'), 'admin');
           } else {
             osc_add_flash_error_message( _m('There was an error creating the .maintenance file, please create it manually at the root folder'), 'admin');
           }
-          
+
           fclose($fileHandler);
           $this->redirectTo( osc_admin_base_url(true) . '?page=tools&action=maintenance' );
-          
-        } else if( $mode == 'off' ) {
+
+        } else if($mode == 'off' ) {
           osc_csrf_check();
           $deleted = @unlink(osc_base_path() . '.maintenance');
-          if( $deleted ) {
+          if($deleted ) {
             osc_add_flash_ok_message( _m('Maintenance mode is OFF'), 'admin');
           } else {
             osc_add_flash_error_message( _m('There was an error removing the .maintenance file, please remove it manually from the root folder'), 'admin');
           }
-          
+
           $this->redirectTo( osc_admin_base_url(true) . '?page=tools&action=maintenance' );
         }
-        
+
         $this->doView('tools/maintenance.php');
         break;
 
@@ -488,136 +788,24 @@ class CAdminTools extends AdminSecBaseModel {
         }
 
         $type = Params::getParam('type');
-        $limit_days = 7;
-        $limit_date = date('Y-m-d', strtotime('-' . $limit_days . ' days'));
-        $res = true;
+        $thresholdDays = (int)osc_cleanup_threshold_days();
 
-        if($type == 'items_inactive') {
-          $data = osc_get_query_results(sprintf('SELECT * FROM %st_item WHERE b_active != 1 AND dt_pub_date <= "%s" LIMIT 50000', DB_TABLE_PREFIX, $limit_date));
-
-          $manager = new ItemActions(true);
-          if(is_array($data) && !empty($data)) {
-            foreach($data as $d) {
-              $manager->delete($d['s_secret'], $d['pk_i_id']);
-            }
-          } else {
-            $res = false;
-          }
-          
-        } else if($type == 'items_blocked_spam') {
-          $data = osc_get_query_results(sprintf('SELECT * FROM %st_item WHERE b_enabled = 0 OR b_spam = 1 LIMIT 50000', DB_TABLE_PREFIX));
-
-          $manager = new ItemActions(true);
-          if(is_array($data) && !empty($data)) {
-            foreach($data as $d) {
-              $manager->delete($d['s_secret'], $d['pk_i_id']);
-            }
-          } else {
-            $res = false;
-          }
-          
-        } else if($type == 'items_expired') {
-          $data = osc_get_query_results(sprintf('SELECT * FROM %st_item WHERE dt_expiration <= "%s" LIMIT 50000', DB_TABLE_PREFIX, $limit_date));
-
-          $manager = new ItemActions(true);
-          if(is_array($data) && !empty($data)) {
-            foreach($data as $d) {
-              $manager->delete($d['s_secret'], $d['pk_i_id']);
-            }
-          } else {
-            $res = false;
-          }
-          
-        } else if($type == 'users_inactive') {
-          $data = osc_get_query_results(sprintf('SELECT * FROM %st_user WHERE b_active != 1 AND dt_reg_date <= "%s" LIMIT 50000', DB_TABLE_PREFIX, $limit_date));
-
-          $manager = User::newInstance();
-          if(is_array($data) && !empty($data)) {
-            foreach($data as $d) {
-              Log::newInstance()->insertLog('user', 'delete', $d['pk_i_id'], $d['s_email'], 'admin', osc_logged_admin_id());
-              $manager->deleteUser($d['pk_i_id']);
-            }
-          } else {
-            $res = false;
-          }
-          
-        } else if($type == 'users_blocked') {
-          $data = osc_get_query_results(sprintf('SELECT * FROM %st_user WHERE b_enabled = 0 LIMIT 50000', DB_TABLE_PREFIX));
-
-          $manager = User::newInstance();
-          if(is_array($data) && !empty($data)) {
-            foreach($data as $d) {
-              Log::newInstance()->insertLog('user', 'delete', $d['pk_i_id'], $d['s_email'], 'admin', osc_logged_admin_id());
-              $manager->deleteUser($d['pk_i_id']);
-            }
-          } else {
-            $res = false;
-          }
-          
-        } else if($type == 'comments_inactive') {
-          $data = osc_get_query_results(sprintf('SELECT * FROM %st_item_comment WHERE b_active != 1 AND dt_pub_date <= "%s" LIMIT 50000', DB_TABLE_PREFIX, $limit_date));
-
-          $manager = ItemComment::newInstance();
-          if(is_array($data) && !empty($data)) {
-            foreach($data as $d) {
-              $manager->delete(array('pk_i_id' => $d['pk_i_id']));
-            }
-          } else {
-            $res = false;
-          }
-          
-        } else if($type == 'comments_blocked') {
-          $data = osc_get_query_results(sprintf('SELECT * FROM %st_item_comment WHERE b_enabled = 0 LIMIT 50000', DB_TABLE_PREFIX));
-          
-          $manager = ItemComment::newInstance();
-          if(is_array($data) && !empty($data)) {
-            foreach($data as $d) {
-              $manager->delete(array('pk_i_id' => $d['pk_i_id']));
-            }
-          } else {
-            $res = false;
-          }
-          
-        } else if($type == 'unsubscribed_alerts') {
-          $data = osc_get_query_results(sprintf('SELECT * FROM %st_alerts WHERE b_active = 0 AND coalesce(dt_unsub_date, dt_date) <= "%s" LIMIT 50000', DB_TABLE_PREFIX, $limit_date));
-
-          $manager = Alerts::newInstance();
-          if(is_array($data) && !empty($data)) {
-            foreach($data as $d) {
-              $manager->delete(array('pk_i_id' => $d['pk_i_id']));
-            }
-          } else {
-            $res = false;
-          }
-          
-        } else if($type == 'expired_ban_rules') {
-          $data = osc_get_query_results(sprintf('SELECT * FROM %st_ban_rule WHERE dt_expire_date <= "%s" LIMIT 50000', DB_TABLE_PREFIX, $limit_date));
-
-          $manager = BanRule::newInstance();
-          if(is_array($data) && !empty($data)) {
-            foreach($data as $d) {
-              $manager->delete(array('pk_i_id' => $d['pk_i_id']));
-            }
-          } else {
-            $res = false;
-          }
-
-        } else if($type == 'old_logs') {
-          $limit_months = (osc_logging_months() > 0 ? osc_logging_months() : 24);
-          $limit_date_log = date('Y-m-d', strtotime('-' . $limit_months . ' months'));
-
-          // $data = osc_get_query_results(sprintf('SELECT * FROM %st_log WHERE dt_date <= "%s" LIMIT 50000', DB_TABLE_PREFIX, $limit_date_log));
-          $res = osc_execute_query(sprintf('DELETE FROM %st_log WHERE date(dt_date) <= "%s"', DB_TABLE_PREFIX, $limit_date_log));
+        if($type != 'old_logs' && $type != 'item_stats' && $thresholdDays <= 0) {
+          osc_add_flash_error_message(_m("Cleanup threshold is set to 0 days. Increase threshold in General Settings to enable cleanup."), 'admin');
+          $this->redirectTo(osc_admin_base_url(true) . '?page=tools&action=cleanup');
+          exit;
         }
 
-        if($res) {
-          osc_add_flash_ok_message( _m("Data cleaned up successfully"), 'admin');
+        $deleted = osc_cleanup_data_by_type($type, $thresholdDays);
+
+        if($deleted === false) {
+          osc_add_flash_error_message(_m("Unknown cleanup type"), 'admin');
+        } else if((int)$deleted > 0) {
+          osc_add_flash_ok_message(sprintf(_m("Data cleaned up successfully (%s records removed)"), (int)$deleted), 'admin');
         } else {
           osc_add_flash_error_message( _m("There was problem cleaning data (no data has been found)"), 'admin');
         }
 
-        //$this->doView('tools/cleanup.php');
-        //exit;
         $this->redirectTo(osc_admin_base_url(true) . '?page=tools&action=cleanup');
         exit;
         break;

@@ -22,7 +22,7 @@ if(!isset($category['pk_i_id']) ) {
   $category['pk_i_id'] = null;
 }
 
-$allowedTypesForSorting = Search::getAllowedTypesForSorting(); 
+$allowedTypesForSorting = Search::getAllowedTypesForSorting();
 $sort_order = (osc_search_order() == 'dt_pub_date' ? '' : osc_search_order());
 $sort_order_type = (osc_search_order() == 'dt_pub_date' ? '' : $allowedTypesForSorting[osc_search_order_type()])
 
@@ -40,9 +40,9 @@ $sort_order_type = (osc_search_order() == 'dt_pub_date' ? '' : $allowedTypesForS
       <?php foreach(osc_search_user() as $userId) { ?>
       <input type="hidden" name="sUser[]" value="<?php echo $userId; ?>"/>
       <?php } ?>
-      
+
       <?php osc_run_hook('search_sidebar_top'); ?>
-      
+
       <fieldset class="first">
         <h3><?php _e('Your search', 'sigma'); ?></h3>
         <div class="row">
@@ -56,7 +56,10 @@ $sort_order_type = (osc_search_order() == 'dt_pub_date' ? '' : $allowedTypesForS
           <input class="input-text" type="text" id="sCity" name="sCity" value="<?php echo osc_esc_html(osc_search_city()); ?>" />
         </div>
       </fieldset>
-      <?php if( osc_images_enabled_at_items() ) { ?>
+
+      <?php echo osc_run_hook('search_sidebar_location'); ?>
+
+      <?php if(osc_images_enabled_at_items() ) { ?>
       <fieldset>
         <h3><?php _e('Show only', 'sigma') ; ?></h3>
         <div class="row picture">
@@ -65,7 +68,7 @@ $sort_order_type = (osc_search_order() == 'dt_pub_date' ? '' : $allowedTypesForS
         </div>
       </fieldset>
       <?php } ?>
-      <?php if( osc_price_enabled_at_items() ) { ?>
+      <?php if(osc_price_enabled_at_items() ) { ?>
       <fieldset>
         <div class="row price-slice">
           <h3><?php _e('Price', 'sigma') ; ?></h3>
@@ -90,15 +93,15 @@ $sort_order_type = (osc_search_order() == 'dt_pub_date' ? '' : $allowedTypesForS
           osc_run_hook('search_form') ;
         }
         ?></div>
-        
+
       <?php
       $aCategories = osc_search_category();
       foreach($aCategories as $cat_id) { ?>
         <input type="hidden" name="sCategory[]" value="<?php echo osc_esc_html($cat_id); ?>"/>
       <?php } ?>
-      
+
       <?php osc_run_hook('search_sidebar_bottom'); ?>
-      
+
       <div class="actions">
         <button type="submit" class="btn btn-primary"><?php _e('Apply', 'sigma'); ?></button>
       </div>

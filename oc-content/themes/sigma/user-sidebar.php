@@ -15,7 +15,7 @@
  * this NOTICE section as it contains license information and copyrights.
  */
 
-if(osc_user_id() <= 0) { 
+if(osc_user_id() <= 0) {
   $user = User::newInstance()->findByPrimaryKey(Session::newInstance()->_get('userId'));
   View::newInstance()->_exportVariableToView('user', $user);
 }

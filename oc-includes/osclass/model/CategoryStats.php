@@ -47,7 +47,7 @@ class CategoryStats extends DAO
   */
   public static function newInstance()
   {
-    if( !self::$instance instanceof self ) {
+    if(!self::$instance instanceof self ) {
       self::$instance = new self;
     }
     return self::$instance;
@@ -83,7 +83,7 @@ class CategoryStats extends DAO
     $sql = sprintf('INSERT INTO %s (fk_i_category_id, i_num_items) VALUES (%d, 1) ON DUPLICATE KEY UPDATE i_num_items = i_num_items + 1', $this->getTableName(), $categoryId);
     $return = $this->dao->query($sql);
     $result = osc_get_category_row($categoryId);
-    
+
     if($return !== false) {
       if($result['fk_i_parent_id']!=NULL) {
         $parent_res = $this->increaseNumItems($result['fk_i_parent_id']);
@@ -120,7 +120,7 @@ class CategoryStats extends DAO
     $categoryStat = $result->row();
     $return     = 0;
 
-    if( isset( $categoryStat['i_num_items'] ) ) {
+    if(isset( $categoryStat['i_num_items'] ) ) {
       $this->dao->from( $this->getTableName() );
       $this->dao->set( 'i_num_items', 'i_num_items - 1', false );
       $this->dao->where( 'i_num_items > 0' );
@@ -138,11 +138,11 @@ class CategoryStats extends DAO
       }
     }
 
-    if( $return !== false ) {
+    if($return !== false ) {
       $result = osc_get_category_row($categoryId);
-      if( $result['fk_i_parent_id'] != NULL ) {
+      if($result['fk_i_parent_id'] != NULL ) {
         $parent_res = $this->decreaseNumItems( $result['fk_i_parent_id'] );
-        if( $parent_res !== false ) {
+        if($parent_res !== false ) {
           $return += $parent_res;
         } else {
           $return = false;
@@ -210,12 +210,12 @@ class CategoryStats extends DAO
   public function getNumItems($cat)
   {
     static $numItemsMap = null;
-    if ( null === $numItemsMap ) {
+    if(null === $numItemsMap ) {
       $numItemsMap = $this->toNumItemsMap();
     }
-    if ( isset( $numItemsMap[ 'parent' ][ $cat[ 'pk_i_id' ] ] ) ) {
+    if(isset( $numItemsMap[ 'parent' ][ $cat[ 'pk_i_id' ] ] ) ) {
       return $numItemsMap[ 'parent' ][ $cat[ 'pk_i_id' ] ][ 'numItems' ];
-    } else if ( isset( $numItemsMap[ 'subcategories' ][ $cat[ 'pk_i_id' ] ] ) ) {
+    } elseif(isset( $numItemsMap[ 'subcategories' ][ $cat[ 'pk_i_id' ] ] ) ) {
       return $numItemsMap[ 'subcategories' ][ $cat[ 'pk_i_id' ] ][ 'numItems' ];
     } else {
       return 0;
@@ -234,13 +234,13 @@ class CategoryStats extends DAO
     $map = array();
     $all = $this->listAll();
 
-    if ( empty( $all ) ) {
+    if(empty( $all ) ) {
       return array ();
     }
 
     $roots = Category::newInstance()->findRootCategories();
 
-    foreach ( $all as $a ) {
+    foreach($all as $a ) {
       $map[ $a[ 'fk_i_category_id' ] ] = $a[ 'i_num_items' ];
     }
 

@@ -26,12 +26,12 @@ osc_add_hook('help_box','addHelp');
 
 
 //customize Head
-function customHead(){ 
+function customHead(){
   ?>
   <script type="text/javascript">
   $(document).ready(function() {
     $('input[name="moderate_items"]').bind('change', function() {
-      if( $(this).is(':checked')) {
+      if($(this).is(':checked')) {
         $(".num-moderated-items").show();
         $('input[name="num_moderate_items"]').val(0);
       } else {
@@ -42,6 +42,24 @@ function customHead(){
     if(!$('input[name="moderate_items"]').is(':checked')) {
       $('.num-moderated-items').hide();
     }
+    var presets = <?php echo json_encode(array(
+      'essential' => osc_item_stats_preset_keys('essential'),
+      'engagement' => osc_item_stats_preset_keys('engagement'),
+      'commerce' => osc_item_stats_preset_keys('commerce'),
+      'full' => osc_item_stats_preset_keys('full')
+    )); ?>;
+    $('.osc-stats-preset').on('click', function(e) {
+      e.preventDefault();
+      var key = $(this).data('preset');
+      var list = presets[key] || [];
+      $('#item_stats_preset').val(key);
+      $('.osc-stats-measure').each(function() {
+        $(this).prop('checked', $.inArray($(this).val(), list) !== -1);
+      });
+    });
+    $('.osc-stats-measure').on('change', function() {
+      $('#item_stats_preset').val('custom');
+    });
   });
   </script>
   <?php
@@ -53,7 +71,7 @@ function render_offset(){
   return 'row-offset';
 }
 
-function customPageHeader(){ 
+function customPageHeader(){
   ?>
   <h1><?php _e('Listings'); ?>
     <a href="#" class="btn ico ico-32 ico-help float-right"></a>
@@ -65,18 +83,18 @@ osc_add_hook('admin_page_header','customPageHeader');
 
 
 function customPageTitle($string) {
-  return sprintf(__('Listing Settings - %s'), $string);
+  return sprintf(__('%s - %s'), __('Listing settings'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');
 
-osc_current_admin_theme_path( 'parts/header.php'); 
+osc_current_admin_theme_path( 'parts/header.php');
 ?>
 
 <div id="general-setting">
   <!-- settings form -->
   <div id="item-settings">
-    <h2 class="render-title"><?php _e('Listing Settings'); ?></h2>
+    <h2 class="render-title"><?php _e('Listing settings'); ?></h2>
       <form action="<?php echo osc_admin_base_url(true); ?>" method="post">
         <input type="hidden" name="page" value="items" />
         <input type="hidden" name="action" value="settings_post" />
@@ -91,35 +109,28 @@ osc_current_admin_theme_path( 'parts/header.php');
                     <?php _e('Only logged in users can post listings'); ?>
                   </label>
                 </div>
-                
+
                 <div>
                   <?php printf( __('An user has to wait %s seconds between each listing added'), '<input type="text" class="input-small" name="items_wait_time" value="' . osc_items_wait_time() . '" />'); ?>
                   <div class="help-box">
                     <?php _e('If the value is set to zero, there is no wait period'); ?>
                   </div>
                 </div>
-                
+
                 <div class="separate-top-medium">
                   <label>
                     <input type="checkbox" <?php echo ( ( osc_moderate_items() == -1) ? '' : 'checked="checked"'); ?> name="moderate_items" value="1" />
                     <?php _e('Users have to validate their listings'); ?>
                   </label>
                 </div>
-                
+
                 <div class="separate-top-medium">
                   <label>
                     <input type="checkbox" <?php echo ( osc_can_deactivate_items() ? 'checked="checked"' : ''); ?> name="can_deactivate_items" value="1" />
                     <?php _e('Users can disable / de-activate listing'); ?>
                   </label>
                 </div>
-                
-                <div class="separate-top-medium">
-                  <label>
-                    <input type="checkbox" <?php echo ( osc_item_mark_disable() ? 'checked="checked"' : ''); ?> name="item_mark_disable" value="1" />
-                    <?php _e('Disable mark/report listing feature'); ?>
-                  </label>
-                </div>
-                
+
                 <div class="num-moderated-items" >
                   <div>
                     <?php printf( __("After %s validated listings the user doesn't need to validate the listings any more"), '<input type="text" class="input-small" name="num_moderate_items" value="' . ( ( osc_moderate_items() == -1) ? '' : osc_moderate_items()) . '" />'); ?>
@@ -134,7 +145,7 @@ osc_current_admin_theme_path( 'parts/header.php');
                     </label>
                   </div>
                 </div>
-                
+
                 <div class="separate-top-medium">
                   <label>
                     <input type="checkbox" <?php echo ( ( osc_recaptcha_items_enabled() == '0') ? '' : 'checked="checked"'); ?> name="enabled_recaptcha_items" value="1" />
@@ -142,7 +153,7 @@ osc_current_admin_theme_path( 'parts/header.php');
                   </label>
                   <div class="help-box"><?php _e('<strong>Remember</strong> that you must configure reCAPTCHA first'); ?></div>
                 </div>
-                
+
                 <div>
                   <label>
                     <input type="checkbox" <?php echo ( ( osc_tinymce_items_enabled() == '0') ? '' : 'checked="checked"'); ?> name="enabled_tinymce_items" value="1" />
@@ -152,7 +163,7 @@ osc_current_admin_theme_path( 'parts/header.php');
                 </div>
               </div>
             </div>
-            
+
 
             <div class="form-row">
               <div class="form-label"> <?php _e('Renewal'); ?></div>
@@ -163,21 +174,21 @@ osc_current_admin_theme_path( 'parts/header.php');
                     <?php _e('User can renew its listings once expired. This feature is available only to registered users.'); ?>
                   </label>
                 </div>
-                
+
                 <div class="form-label-checkbox separate-top-medium">
                   <label>
                     <input type="checkbox" <?php echo ( osc_renewal_update_publish_date() ? 'checked="checked"' : ''); ?> name="renewal_update_pub_date" value="1" />
                     <?php _e('Publish date of renewed listing is updated to current date'); ?>
                   </label>
                 </div>
-                
+
                 <div class="separate-top-medium">
                   <?php printf( __('Listing can be republished %s times at maximum'), '<input type="text" class="input-small" name="renewal_limit" value="' . osc_renewal_limit() . '" />'); ?>
                   <div class="help-box">
                     <?php _e('If the value is set to zero, there is no renewal limit'); ?>
                   </div>
                 </div>
-                
+
               </div>
             </div>
 
@@ -190,21 +201,21 @@ osc_current_admin_theme_path( 'parts/header.php');
                     <?php _e('Disable contact publisher form'); ?>
                   </label>
                 </div>
-                
+
                 <div class="form-label-checkbox separate-top-medium">
                   <label>
                     <input type="checkbox" <?php echo ( osc_reg_user_can_contact() ? 'checked="checked"' : ''); ?> name="reg_user_can_contact" value="1" />
                     <?php _e('Only allow registered users to contact publisher'); ?>
                   </label>
                 </div>
-                
+
                 <div class="form-label-checkbox separate-top-medium">
                   <label>
                     <input type="checkbox" <?php echo ( osc_reg_user_can_see_phone() ? 'checked="checked"' : ''); ?> name="osc_reg_user_can_see_phone" value="1" />
                     <?php _e('Only allow registered users to see contact phone number'); ?>
                   </label>
                 </div>
-                
+
                 <div class="separate-top-medium">
                   <label>
                     <input type="checkbox" <?php echo ( osc_item_attachment() ? 'checked="checked"' : ''); ?> name="item_attachment" value="1" />
@@ -213,7 +224,7 @@ osc_current_admin_theme_path( 'parts/header.php');
                 </div>
               </div>
             </div>
-            
+
             <div class="form-row">
               <div class="form-label"> <?php _e('Send to friend'); ?></div>
               <div class="form-controls">
@@ -263,40 +274,40 @@ osc_current_admin_theme_path( 'parts/header.php');
             </div>
 
             <div class="form-row">
-							<div class="form-label"> <?php _e('Redirect priority after publish'); ?></div>
+              <div class="form-label"> <?php _e('Redirect priority after publish'); ?></div>
               <div class="form-controls">
-								<div class="">
+                <div class="">
                   <select name="item_post_redirect">
                     <option value="DASH-ITEM-CAT" <?php if(osc_get_redirect_after_publish() == 'DASH-ITEM-CAT') { ?>selected="selected"<?php } ?>><?php _e('Dashboard > Listing > Category'); ?></option>
                     <option value="ITEM-CAT" <?php if(osc_get_redirect_after_publish() == 'ITEM-CAT') { ?>selected="selected"<?php } ?>><?php _e('Listing > Category'); ?></option>
                     <option value="" <?php if(osc_get_redirect_after_publish() == '') { ?>selected="selected"<?php } ?>><?php _e('Category'); ?></option>
                   </select>
                   <div class="help-box"><?php _e('Redirect priority once item is published. I.e. Dashboard > Listing > Search means, that if user is logged in, will be redirected to user listings page in account. If is not logged and item is active, will be redirected to listing page. Otherwise will go to category page.'); ?></div>
-								</div> 
-							</div> 
-						</div>
+                </div>
+              </div>
+            </div>
 
             <div class="form-row">
-							<div class="form-label"> <?php _e('Title length'); ?></div>
+              <div class="form-label"> <?php _e('Title length'); ?></div>
               <div class="form-controls">
-								<div class="">
-									<?php printf(__('%s'), '<input type="text" class="input-medium" name="max_chars_per_title" value="' . osc_max_characters_per_title() . '" />'); ?>
+                <div class="">
+                  <?php printf(__('%s'), '<input type="text" class="input-medium" name="max_chars_per_title" value="' . osc_max_characters_per_title() . '" />'); ?>
                   <div class="inpt-desc"><?php _e('characters'); ?></div>
-								</div>
-							</div>
-						</div>
+                </div>
+              </div>
+            </div>
 
-						<div class="form-row">
-							<div class="form-label"> <?php _e('Description length'); ?></div>
-								<div class="form-controls">
+            <div class="form-row">
+              <div class="form-label"> <?php _e('Description length'); ?></div>
+                <div class="form-controls">
                   <div class="">
                     <?php printf(__('%s'), '<input type="text" class="input-medium" name="max_chars_per_description" value="' . osc_max_characters_per_description() . '" />'); ?>
                     <div class="inpt-desc"><?php _e('characters'); ?></div>
                   </div>
                 <div class="help-box"><?php _e('Note that if TinyMCE is enabled, real limit will be lower, as HTML symbols are counted towards limit as well. In this case you should set limit higher by 30%.'); ?></div>
-							</div>
-						</div>
-            
+              </div>
+            </div>
+
             <div class="form-row">
               <div class="form-label"> <?php _e('Optional fields'); ?></div>
               <div class="form-controls">
@@ -305,14 +316,14 @@ osc_current_admin_theme_path( 'parts/header.php');
                     <input type="checkbox" <?php echo (osc_price_enabled_at_items() ? 'checked="checked"' : ''); ?> name="enableField#f_price@items" value="1"  />
                     <?php _e('Price'); ?>
                   </label>
-                  
+
                   <div class="separate-top-medium">
                     <label>
                       <input type="checkbox" <?php echo (osc_images_enabled_at_items() ? 'checked="checked"' : ''); ?> name="enableField#images@items" value="1" />
                       <?php _e('Upload images'); ?>
                     </label>
                   </div>
-                  
+
                   <div class="separate-top-medium">
                     <?php printf(__('Upload max. %s images per listing'), '<input type="text" class="input-small" name="numImages@items" value="' . osc_max_images_per_item() . '" />'); ?>
                     <div class="help-box"><?php _e('If the value is zero, it means an unlimited number of images is allowed'); ?></div>
@@ -324,19 +335,58 @@ osc_current_admin_theme_path( 'parts/header.php');
             <div class="form-row">
               <div class="form-label"> <?php _e('Statistics'); ?></div>
               <div class="form-controls">
-								<div class="">
+                <div class="">
                   <select name="item_stats_method">
                     <option value="SESSION" <?php if(osc_item_stats_method() == 'SESSION') { ?>selected="selected"<?php } ?>><?php _e('One view per session'); ?></option>
                     <option value="PAGELOAD" <?php if(osc_item_stats_method() == 'PAGELOAD') { ?>selected="selected"<?php } ?>><?php _e('One view per page load'); ?></option>
                   </select>
-                  
-                  <div class="help-box"><?php _e('By default, page view is counter for each item once for each session. If one view per page load selected, it might be misused by sellers to increase page views.'); ?></div>
-								</div> 
-							</div>               
-              
+                  <div class="help-box"><?php _e('Applies to page views and premium views. Other impression measures always count once per session.'); ?></div>
+                </div>
+                <div class="separate-top-medium">
+                  <label>
+                    <input type="checkbox" name="item_stats_logged_only" value="1" <?php if(osc_item_stats_logged_only()) { echo 'checked="checked"'; } ?> />
+                    <?php _e('Collect from logged-in visitors only'); ?>
+                  </label>
+                  <div class="help-inline"><?php _e('Does not apply to renewals, promotions or alert emails.'); ?></div>
+                </div>
+                <div class="separate-top-medium">
+                  <p><a href="<?php echo osc_admin_base_url(true); ?>?page=stats&amp;action=settings"><?php _e('Open Statistics settings'); ?></a> <?php _e('for click selectors, engaged-view time and user charts.'); ?></p>
+                  <p><?php _e('Presets'); ?>:
+                    <a href="#" class="btn btn-mini osc-stats-preset" data-preset="essential"><?php _e('Essential'); ?></a>
+                    <a href="#" class="btn btn-mini osc-stats-preset" data-preset="engagement"><?php _e('Engagement'); ?></a>
+                    <a href="#" class="btn btn-mini osc-stats-preset" data-preset="commerce"><?php _e('Commerce'); ?></a>
+                    <a href="#" class="btn btn-mini osc-stats-preset" data-preset="full"><?php _e('Full'); ?></a>
+                  </p>
+                  <input type="hidden" name="item_stats_preset" id="item_stats_preset" value="<?php echo osc_esc_html(osc_item_stats_preset()); ?>" />
+                  <?php
+                    $enabled_keys = osc_item_stats_enabled_keys();
+                    $groups = osc_item_stats_groups();
+                    $by_group = array();
+                    foreach(osc_item_stats_measures(false) as $row) {
+                      if(isset($row['source']) && $row['source'] == 'item') {
+                        continue;
+                      }
+                      $gid = (isset($row['group']) ? $row['group'] : 'custom');
+                      $by_group[$gid][] = $row;
+                      if(!isset($groups[$gid])) {
+                        $groups[$gid] = $gid;
+                      }
+                    }
+                    foreach($groups as $gid => $glabel) {
+                      if(empty($by_group[$gid])) {
+                        continue;
+                      }
+                      echo '<h4>' . osc_esc_html($glabel) . '</h4>';
+                      foreach($by_group[$gid] as $row) {
+                        echo '<div class="form-label-checkbox"><label title="' . osc_esc_html($row['help']) . '"><input type="checkbox" class="osc-stats-measure" name="item_stats_enabled[]" value="' . osc_esc_html($row['key']) . '"' . (in_array($row['key'], $enabled_keys, true) ? ' checked="checked"' : '') . ' /> ' . osc_esc_html($row['label']) . '</label></div>';
+                      }
+                    }
+                  ?>
+                </div>
+              </div>
             </div>
-            
-            
+
+
             <div class="form-actions">
               <input type="submit" id="save_changes" value="<?php echo osc_esc_html(__('Save changes')); ?>" class="btn btn-submit" />
             </div>
@@ -346,4 +396,4 @@ osc_current_admin_theme_path( 'parts/header.php');
         </div>
         <!-- /settings form -->
 </div>
-<?php osc_current_admin_theme_path('parts/footer.php'); ?>
+<?php osc_current_admin_theme_path('parts/footer.php');

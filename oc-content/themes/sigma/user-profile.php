@@ -14,7 +14,7 @@
  * warranties or conditions of any kind, either express or implied. Do not remove
  * this NOTICE section as it contains license information and copyrights.
  */
- 
+
 
 // UserForm::upload_profile_img_js();
 
@@ -45,7 +45,7 @@ $osc_user = osc_user();
     <form action="<?php echo osc_base_url(true); ?>" method="post" *enctype="multipart/form-data">
       <input type="hidden" name="page" value="user" />
       <input type="hidden" name="action" value="profile_post" />
-      
+
       <?php osc_run_hook('user_profile_top'); ?>
 
       <?php if(osc_profile_img_users_enabled()) { ?>
@@ -55,8 +55,8 @@ $osc_user = osc_user();
             <div class="user-img">
               <div class="img-preview">
                 <img src="<?php echo osc_user_profile_img_url(osc_logged_user_id()); ?>" alt="<?php echo osc_esc_html(osc_logged_user_name()); ?>"/>
-              </div> 
-            </div> 
+              </div>
+            </div>
 
             <div class="user-img-button">
               <?php UserForm::upload_profile_img(); ?>
@@ -139,7 +139,7 @@ $osc_user = osc_user();
           <?php UserForm::info_textarea('s_info', osc_locale_code(), @$osc_user['locale'][osc_locale_code()]['s_info']); ?>
         </div>
       </div>
-      
+
       <?php osc_run_hook('user_profile_sidebar'); ?>
       <?php osc_run_hook('user_profile_form', osc_user()); ?>
       <?php osc_run_hook('user_form', osc_user()); ?>
@@ -154,4 +154,4 @@ $osc_user = osc_user();
   </div>
 </div>
 
-<?php osc_current_web_theme_path('footer.php') ; ?>
+<?php osc_current_web_theme_path('footer.php') ;

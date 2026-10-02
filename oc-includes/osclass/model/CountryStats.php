@@ -47,7 +47,7 @@ class CountryStats extends DAO
   */
   public static function newInstance()
   {
-    if( !self::$instance instanceof self ) {
+    if(!self::$instance instanceof self ) {
       self::$instance = new self;
     }
     return self::$instance;
@@ -81,7 +81,7 @@ class CountryStats extends DAO
     if(trim((string)$countryCode) == '' || $lenght > 2 || $lenght == 0) {
       return false;
     }
-    
+
     $sql = sprintf('INSERT INTO %s (fk_c_country_code, i_num_items) VALUES (\'%s\', 1) ON DUPLICATE KEY UPDATE i_num_items = i_num_items + 1', $this->getTableName(), $countryCode);
     return $this->dao->query($sql);
   }
@@ -102,17 +102,17 @@ class CountryStats extends DAO
     if(trim((string)$countryCode) == '' || $lenght > 2 || $lenght == 0) {
       return false;
     }
-    
+
     $this->dao->select( 'i_num_items' );
     $this->dao->from( $this->getTableName() );
     $this->dao->where( $this->getPrimaryKey(), $countryCode );
     $result = $this->dao->get();
-    
+
     if($result) {
       $countryStat = $result->row();
       $return = 0;
 
-      if( isset( $countryStat['i_num_items'] ) ) {
+      if(isset( $countryStat['i_num_items'] ) ) {
         $this->dao->from( $this->getTableName() );
         $this->dao->set( 'i_num_items', 'i_num_items - 1', false );
         $this->dao->where( 'i_num_items > 0' );
@@ -172,7 +172,7 @@ class CountryStats extends DAO
     $key = md5(osc_base_url().'CountryStats::listCountries'.(string)$order.(string)$zero);
     $found = null;
     $cache = osc_cache_get($key, $found);
-    
+
     if($cache===false) {
       $this->dao->select($this->getTableName().'.fk_c_country_code as country_code, '.$this->getTableName().'.i_num_items as items, '.DB_TABLE_PREFIX.'t_country.s_name as country_name, '.DB_TABLE_PREFIX.'t_country.s_name_native as country_name_native, '.DB_TABLE_PREFIX.'t_country.s_slug as country_slug');
       $this->dao->from($this->getTableName() );
@@ -213,7 +213,6 @@ class CountryStats extends DAO
   }
 
 
-
   /**
    * Return a list of countries and count items.
    *
@@ -223,12 +222,12 @@ class CountryStats extends DAO
     $key = md5(osc_base_url().'CountryStats::listCountriesLimit'.(string)$order.(string)$limit.(string)$min_items.(string)$custom_condition);
     $found = null;
     $cache = osc_cache_get($key, $found);
-    
+
     if($cache===false) {
       $this->dao->select('c.*, coalesce(s.i_num_items, 0) as i_num_items');
       $this->dao->from(DB_TABLE_PREFIX.'t_country as c');
       $this->dao->join($this->getTableName() . ' as s', 'c.pk_c_code = s.fk_c_country_code', 'LEFT');
-      
+
       if($min_items > 0) {
         $this->dao->where('i_num_items >= ' . $min_items);
       }
@@ -236,11 +235,11 @@ class CountryStats extends DAO
       if($limit > 0) {
         $this->dao->limit($limit);
       }
-      
+
       if(trim((string)$custom_condition) != '') {
         $this->dao->where($custom_condition);
       }
-      
+
       $this->dao->orderBy($order);
 
       $rs = $this->dao->get();
@@ -251,7 +250,7 @@ class CountryStats extends DAO
 
       $return = $rs->result();
       $output = array();
-      
+
       if(count($return) > 0 && osc_get_current_user_locations_native() == 1) {
         foreach($return as $r) {
           $row = $r;
@@ -268,14 +267,14 @@ class CountryStats extends DAO
       } else {
         $output = $return;
       }
-      
+
       osc_cache_set($key, $output, OSC_CACHE_TTL);
       return $output;
     } else {
       return $cache;
     }
   }
-  
+
   /**
    * Calculate the total items that belong to countryCode
    * @access public

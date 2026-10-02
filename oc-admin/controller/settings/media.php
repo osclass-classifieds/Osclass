@@ -36,7 +36,7 @@ class CAdminSettingsMedia extends AdminSecBaseModel {
         $this->_exportVariableToView('max_size_upload', $upload_mb);
         $this->doView('settings/media.php');
         break;
-        
+
       case('media_post'):
         // updating the media config
         osc_csrf_check();
@@ -57,12 +57,16 @@ class CAdminSettingsMedia extends AdminSecBaseModel {
         $bestFitImage = Params::getParam('best_fit_image');
         $forceJPEG = Params::getParam('force_jpeg');
         $use_imagick = Params::getParam('use_imagick');
+        $use_imagick_before = osc_use_imagick();
         $type_watermark = Params::getParam('watermark_type');
         $watermark_color = Params::getParam('watermark_text_color');
         $watermark_text = Params::getParam('watermark_text');
         $canvas_background = Params::getParam('canvas_background');
-        
-        switch ($type_watermark) {
+        $allowedExt = Params::getParam('allowedExt');
+        $media_regen_batch = Params::getParam('media_regen_batch');
+        $media_refresh_batch = Params::getParam('media_refresh_batch');
+
+        switch($type_watermark) {
           case 'none':
             $iUpdated += osc_set_preference('watermark_text_color', '');
             $iUpdated += osc_set_preference('watermark_text', '');
@@ -110,7 +114,9 @@ class CAdminSettingsMedia extends AdminSecBaseModel {
         $dimThumbnail = trim(strip_tags($dimThumbnail));
         $dimPreview = trim(strip_tags($dimPreview));
         $dimNormal = trim(strip_tags($dimNormal));
-        
+        $media_regen_batch = (int)trim(strip_tags($media_regen_batch));
+        $media_refresh_batch = (int)trim(strip_tags($media_refresh_batch));
+
         $imageUploadLibrary = trim(strip_tags(strtoupper($imageUploadLibrary)));
         $imageUploadReorder = ($imageUploadReorder != '' ? true : false);
         $imageUploadLibForceReplace = ($imageUploadLibForceReplace != '' ? true : false);
@@ -124,11 +130,11 @@ class CAdminSettingsMedia extends AdminSecBaseModel {
         if(!preg_match('|([0-9]+)x([0-9]+)|', $dimThumbnail, $match)) {
           $dimThumbnail = is_numeric($dimThumbnail) ? $dimThumbnail."x".$dimThumbnail : "240x200";
         }
-        
+
         if(!preg_match('|([0-9]+)x([0-9]+)|', $dimPreview, $match)) {
           $dimPreview = is_numeric($dimPreview) ? $dimPreview."x".$dimPreview : "480x360";
         }
-        
+
         if(!preg_match('|([0-9]+)x([0-9]+)|', $dimNormal, $match)) {
           $dimNormal = is_numeric($dimNormal) ? $dimNormal."x".$dimNormal : "1024x768";
         }
@@ -152,6 +158,51 @@ class CAdminSettingsMedia extends AdminSecBaseModel {
           $error   .= sprintf(_m("You cannot set a maximum file size higher than the one allowed in the PHP configuration: <b>%d KB</b>"), $upload_mb);
         }
 
+        if($media_regen_batch <= 0) {
+          if($status != 'error') {
+            $status = 'warning';
+          }
+
+          $media_regen_batch = 10;
+          $error .= _m('Regenerate batch must be greater than 0. Default value 10 has been applied.') . "<br />";
+        }
+
+        if($media_refresh_batch <= 0) {
+          if($status != 'error') {
+            $status = 'warning';
+          }
+
+          $media_refresh_batch = 10;
+          $error .= _m('Refresh batch must be greater than 0. Default value 10 has been applied.') . "<br />";
+        }
+
+        // Save active image library first, then normalize extensions against selected library capabilities.
+        $iUpdated += osc_set_preference('use_imagick', $use_imagick);
+
+        $allowedExtRequested = osc_parse_allowed_image_extensions($allowedExt);
+        $allowedExtPrepared = osc_prepare_allowed_image_extensions($allowedExt);
+        $allowedExtParsed = osc_parse_allowed_image_extensions($allowedExtPrepared);
+
+        if(trim((string)$allowedExtPrepared) == '' || count($allowedExtParsed) <= 0) {
+          $status = 'error';
+          $error .= _m('At least one image extension must be selected') . "<br />";
+          $allowedExtPrepared = osc_prepare_allowed_image_extensions(osc_allowed_extension_preference());
+
+          if(trim((string)$allowedExtPrepared) == '') {
+            $allowedExtPrepared = 'png,gif,jpg,jpeg';
+          }
+        }
+
+        if($use_imagick_before != $use_imagick) {
+          $removed = array_diff($allowedExtRequested, $allowedExtParsed);
+
+          if(!empty($removed)) {
+            $status = 'warning';
+            $error .= sprintf(_m('Some image extensions were removed because they are not supported by currently active image library: %s'), implode(', ', $removed)) . "<br />";
+          }
+        }
+
+        $iUpdated += osc_set_preference('allowedExt', $allowedExtPrepared);
         $iUpdated += osc_set_preference('maxSizeKb', $maxSizeKb);
         $iUpdated += osc_set_preference('dimThumbnail', $dimThumbnail);
         $iUpdated += osc_set_preference('dimPreview', $dimPreview);
@@ -164,8 +215,9 @@ class CAdminSettingsMedia extends AdminSecBaseModel {
         $iUpdated += osc_set_preference('force_aspect_image', $forceAspectImage);
         $iUpdated += osc_set_preference('best_fit_image', $bestFitImage);
         $iUpdated += osc_set_preference('force_jpeg', $forceJPEG);
-        $iUpdated += osc_set_preference('use_imagick', $use_imagick);
         $iUpdated += osc_set_preference('canvas_background', $canvas_background);
+        $iUpdated += osc_set_preference('media_regen_batch', $media_regen_batch, 'osclass', 'INTEGER');
+        $iUpdated += osc_set_preference('media_refresh_batch', $media_refresh_batch, 'osclass', 'INTEGER');
 
         if($error != '') {
           switch($status) {
@@ -180,129 +232,66 @@ class CAdminSettingsMedia extends AdminSecBaseModel {
             break;
           }
         } else {
-          osc_add_flash_ok_message(_m('Media config has been updated'), 'admin');
+          osc_add_flash_ok_message(_m('Settings have been updated'), 'admin');
         }
 
         $this->redirectTo(osc_admin_base_url(true).'?page=settings&action=media');
         break;
-      
+
       case('images_post_reset'):
-        osc_set_preference('regenerate_image_data', '');
-        osc_add_flash_ok_message(__("Regenerate process has been restarted"), 'admin');
-        $this->redirectTo(osc_admin_base_url(true).'?page=settings&action=media');
+        osc_csrf_check();
+        osc_set_preference('media_regen_running', 0, 'osclass', 'BOOLEAN');
+        osc_set_preference('media_regen_last_id', 0, 'osclass', 'INTEGER');
+        osc_set_preference('media_regen_done', 0, 'osclass', 'INTEGER');
+        osc_set_preference('media_regen_total', 0, 'osclass', 'INTEGER');
+        osc_set_preference('media_regen_skip_refresh', 0, 'osclass', 'BOOLEAN');
+        osc_set_preference('media_regen_batch_id', 0, 'osclass', 'INTEGER');
+        osc_set_preference('media_regen_start_date', '', 'osclass', 'STRING');
+        osc_add_flash_ok_message(__("Image processing has been cancelled"), 'admin');
+        $this->redirectTo(osc_admin_base_url(true).'?page=settings&action=media#regenerate');
         break;
 
       case('images_post'):
         if(defined('DEMO')) {
-          osc_add_flash_warning_message(_m("This action can't be done because it's a demo site"), 'admin');
+          osc_add_flash_warning_message(_m("This action cannot be done because it is a demo site"), 'admin');
           $this->redirectTo(osc_admin_base_url(true).'?page=settings&action=media');
         }
 
         osc_csrf_check();
 
-        $data = json_decode(osc_get_preference('regenerate_image_data'), true);
-
-        if(isset($data['batch_id']) && $data['batch_id'] > 0) {
-          $aResources = ItemResource::newInstance()->getAllResourcesFromId($data['last_id']);
-
-        } else {
-          $aResources = ItemResource::newInstance()->getAllResourcesFromId();
-
-          $data = array(
-            'batch_id' => date('z') + 1,
-            'last_id' => 0,
-            'image_done' => 0,
-            'count_all' => ItemResource::newInstance()->countResources(),
-            'skip_refresh' => (Params::getParam('skip_refresh') == 1 ? 1 : 0),
-            'date' => date('Y-m-d')
-          );
+        if((int)osc_get_preference('media_regen_running') == 1) {
+          $this->redirectTo(osc_admin_base_url(true).'?page=settings&action=media#regenerate');
+          break;
         }
 
-
-        $max_exec_time = ini_get('max_execution_time') - 8;   // seconds
-        $limit_time = time() + $max_exec_time;
-
-        if(is_array($aResources) && count($aResources) > 0) {
-          foreach($aResources as $resource) {
-            // break script, it's running too long
-            if(time() >= $limit_time) {
-              osc_add_flash_warning_message(__('Process has been paused as it was running too long. Click on "Continue regeneration" button to finish process.'), 'admin');
-              $this->redirectTo(osc_admin_base_url(true).'?page=settings&action=media');
-            }
-
-            osc_run_hook('regenerate_image', $resource);
-            
-            if(strpos($resource['s_content_type'], 'image')!==false) {
-              if(file_exists(osc_base_path().$resource['s_path'].$resource['pk_i_id']."_original.".$resource['s_extension'])) {
-                $image_tmp = osc_base_path().$resource['s_path'].$resource['pk_i_id']."_original.".$resource['s_extension'];
-                $use_original = true;
-              } else if(file_exists(osc_base_path().$resource['s_path'].$resource['pk_i_id'].".".$resource['s_extension'])) {
-                $image_tmp = osc_base_path().$resource['s_path'].$resource['pk_i_id'].".".$resource['s_extension'];
-                $use_original = false;
-              } else if(file_exists(osc_base_path().$resource['s_path'].$resource['pk_i_id']."_preview.".$resource['s_extension'])) {
-                $image_tmp = osc_base_path().$resource['s_path'].$resource['pk_i_id']."_preview.".$resource['s_extension'];
-                $use_original = false;
-              } else {
-                $use_original = false;
-                continue;
-              }
-
-
-              // Create normal size
-              $path_normal = $path = osc_base_path().$resource['s_path'].$resource['pk_i_id'].'.'.$resource['s_extension'];
-              $size = explode('x', osc_normal_dimensions());
-              
-              if($data['skip_refresh'] != 1) {
-                $img = ImageProcessing::fromFile($image_tmp)->resizeTo($size[0], $size[1]);
-                if($use_original) {
-                  if(osc_is_watermark_text()) {
-                    $img->doWatermarkText(osc_watermark_text(), osc_watermark_text_color());
-                  } elseif (osc_is_watermark_image()){
-                    $img->doWatermarkImage();
-                  }
-                }
-                $img->saveToFile($path);
-
-                // Create preview
-                $path = osc_base_path().$resource['s_path'].$resource['pk_i_id'].'_preview.'.$resource['s_extension'];
-                $size = explode('x', osc_preview_dimensions());
-                ImageProcessing::fromFile($path_normal)->resizeTo($size[0], $size[1])->saveToFile($path);
-
-                // Create thumbnail
-                $path = osc_base_path().$resource['s_path'].$resource['pk_i_id'].'_thumbnail.'.$resource['s_extension'];
-                $size = explode('x', osc_thumbnail_dimensions());
-                ImageProcessing::fromFile($path_normal)->resizeTo($size[0], $size[1])->saveToFile($path);
-              }
-              
-              osc_run_hook('regenerated_image', ItemResource::newInstance()->findByPrimaryKey($resource['pk_i_id']));
-
-              $data['last_id'] = $resource['pk_i_id'];
-              $data['image_done']++;
-              osc_set_preference('regenerate_image_data', json_encode($data));
-            } else {
-              // not supported extension
-            }
-
-          }
+        $regen_action = strtolower(trim((string)Params::getParam('regenerateAction')));
+        if($regen_action != 'refresh' && $regen_action != 'regenerate') {
+          $regen_action = 'regenerate';
         }
+        $skip_refresh = ($regen_action == 'refresh' ? 1 : 0);
 
-        osc_set_preference('regenerate_image_data', '');
+        osc_set_preference('media_regen_running', 1, 'osclass', 'BOOLEAN');
+        osc_set_preference('media_regen_last_id', 0, 'osclass', 'INTEGER');
+        osc_set_preference('media_regen_done', 0, 'osclass', 'INTEGER');
+        osc_set_preference('media_regen_total', 0, 'osclass', 'INTEGER');
+        osc_set_preference('media_regen_skip_refresh', $skip_refresh, 'osclass', 'BOOLEAN');
+        osc_set_preference('media_regen_batch_id', (int)time(), 'osclass', 'INTEGER');
+        osc_set_preference('media_regen_start_date', date('Y-m-d H:i:s'), 'osclass', 'STRING');
 
-        osc_add_flash_ok_message(_m('Image regeneration has succesfully completed and all images has been refreshed. Make sure to clear your browser cache to see updated images.'), 'admin');
-        $this->redirectTo(osc_admin_base_url(true).'?page=settings&action=media');
+        $this->redirectTo(osc_admin_base_url(true).'?page=settings&action=media#regenerate');
         break;
     }
   }
 
   function _sizeToKB($sSize) {
     $sSuffix = strtoupper(substr($sSize, -1));
-    if (!in_array($sSuffix,array('P','T','G','M','K'))){
+    if(!in_array($sSuffix,array('P','T','G','M','K'))){
       return (int)$sSize;
     }
-    
+
     $iValue = substr($sSize, 0, -1);
-    
-    switch ($sSuffix) {
+
+    switch($sSuffix) {
       case 'P':
         $iValue *= 1024;
       case 'T':
@@ -313,7 +302,7 @@ class CAdminSettingsMedia extends AdminSecBaseModel {
         $iValue *= 1024;
         break;
     }
-    
+
     return (int)$iValue;
   }
 }

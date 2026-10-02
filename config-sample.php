@@ -37,6 +37,7 @@ define('WEB_PATH', 'http://localhost');
 // define('OSC_DEBUG_DB_EXPLAIN', true);  // save DB explain logs into oc-content/explain_queries.log
 // define('OSC_DEBUG_CACHE', true);       // show cache debug information, when cache is enabled
 // define('OSC_DEBUG_DB_AJAX_PRINT', true);  // print errors on ajax calls
+// define('OSC_DEBUG_TRANSLATIONS', true);  // print translations debug messages
 
 
 // Change backoffice folder (after re-naming /oc-admin/ folder)

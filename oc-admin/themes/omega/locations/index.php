@@ -27,13 +27,13 @@ function customHead(){
   <script type="text/javascript">
   $(document).ready(function(){
     // dialog delete
-    
+
     var dialogWidth = 400;
-    
+
     if($(window).width() < 460) {
       dialogWidth = $(window).width() - 40;
     }
-    
+
     $("#dialog-location-delete").dialog({
       autoOpen: false,
       modal: true,
@@ -46,7 +46,7 @@ function customHead(){
     });
 
     $(".trc").on("mouseleave", function() {
-      if (!$(this).find(".checkboxc input").is(':checked')) {
+      if(!$(this).find(".checkboxc input").is(':checked')) {
         // $(this).find(".checkboxc").css({ 'visibility': 'hidden'});
       };
       if($(".checkboxc input:checked").length>0) {
@@ -145,9 +145,9 @@ function customHead(){
   var editNewCityText = '<?php echo osc_esc_js(__('Edit city')); ?>';
   var addNewCityText = '<?php echo osc_esc_js(__('Add new city')); ?>';
   var importLocationText = '<?php echo osc_esc_js(__('Import a location')); ?>';
-  var noentry = '<?php echo osc_esc_js(__('No entries has been found')); ?>';
-  var noentryCountry = '<?php echo osc_esc_js(__('No regions has been found for country code:')); ?>';
-  var noentryRegion = '<?php echo osc_esc_js(__('No cities has been found for region ID:')); ?>';
+  var noentry = '<?php echo osc_esc_js(__('No entries have been found')); ?>';
+  var noentryCountry = '<?php echo osc_esc_js(__('No regions have been found for country code:')); ?>';
+  var noentryRegion = '<?php echo osc_esc_js(__('No cities have been found for region ID:')); ?>';
 
   // dialog delete function
   function delete_dialog(item_id, item_type) {
@@ -170,9 +170,9 @@ function addHelp() {
 osc_add_hook('help_box','addHelp');
 
 
-function customPageHeader(){ 
+function customPageHeader(){
   ?>
-  <h1><?php _e('Settings'); ?>
+  <h1><?php _e('International'); ?>
     <a href="#" class="btn ico ico-32 ico-help float-right"></a>
   </h1>
   <?php
@@ -182,16 +182,16 @@ osc_add_hook('admin_page_header','customPageHeader');
 
 
 function customPageTitle($string) {
-  return sprintf(__('Locations - %s'), $string);
+  return sprintf(__('%s - %s'), __('Manage locations'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');
 
-osc_current_admin_theme_path('parts/header.php'); 
+osc_current_admin_theme_path('parts/header.php');
 ?>
 
 <!-- container -->
-<h1 class="render-title"><?php _e('Locations'); ?></h1>
+<h2 class="render-title"><?php _e('Manage locations'); ?></h2>
 <?php osc_show_flash_message('admin'); ?>
     </div>
   </div>
@@ -207,13 +207,13 @@ osc_current_admin_theme_path('parts/header.php');
       <label><?php _e('Country name'); ?>: </label><br />
       <input type="text" id="country" name="country" value="" />
     </p>
-    
+
     <p>
       <label><?php _e('Country code'); ?>: </label><br />
       <input type="text" id="c_country" name="c_country" required minlength="2" maxlength="2" value="" /><br />
       <div class="help-box"><?php _e('Exactly 2 uppercase characters!'); ?></div>
     </p>
-    
+
     <div class="form-actions">
       <div class="wrapper">
         <button type="submit" class="btn btn-submit" ><?php _e('Add country'); ?></button>
@@ -403,7 +403,7 @@ osc_current_admin_theme_path('parts/header.php');
         </div>
         <div class="widget-box-content">
           <div id="l_countries">
-            <?php foreach( $aCountries as $country ) { ?>
+            <?php foreach($aCountries as $country ) { ?>
             <div>
               <div class="float-left">
                 <div class="trc">
@@ -417,7 +417,7 @@ osc_current_admin_theme_path('parts/header.php');
                 <a class="close btn btn-white" onclick="return delete_dialog('<?php echo $country['pk_c_code']; ?>', 'delete_country');" href="<?php echo osc_admin_base_url(true); ?>?page=locations&action=delete_country&id[]=<?php echo $country['pk_c_code']; ?>">
                   <i class="fa fa-trash"></i>
                 </a>
-                  
+
                 <a class="view-more btn btn-green" href="javascript:void(0)" onclick="show_region('<?php echo osc_esc_js($country['pk_c_code']); ?>', '<?php echo osc_esc_js($country['s_name']); ?>')">
                   <?php _e('Expand'); ?>
                 </a>
@@ -467,7 +467,7 @@ osc_current_admin_theme_path('parts/header.php');
     <input type="hidden" name="id[]" value="" />
     <div class="form-horizontal">
       <div class="form-row">
-        <?php _e("This action can't be undone. Items associated to this location will be deleted. Users from this location will be unlinked, but not deleted. Are you sure you want to continue?");?>
+        <?php _e("This action cannot be undone. Listings associated to this location will be deleted. Users from this location will be unlinked, but not deleted. Are you sure you want to continue?");?>
       </div>
       <div class="form-actions">
         <div class="wrapper">
@@ -509,7 +509,7 @@ osc_current_admin_theme_path('parts/header.php');
       </div>
     </div>
   </form>
-  
+
   <script type="text/javascript">
   <?php if(Params::getParam('country_code')!='') { ?>
     show_region('<?php echo osc_esc_js(Params::getParam('country_code')); ?>', '<?php echo osc_esc_js(Params::getParam('country')); ?>');
@@ -517,10 +517,10 @@ osc_current_admin_theme_path('parts/header.php');
       <?php if(Params::getParam('region')!='') { ?>
       show_city(<?php echo osc_esc_js(Params::getParam('region')); ?>);
       hook_load_cities = function() { };
-      <?php }; ?>
+      <?php } ?>
     };
   <?php } else {
     echo 'function hook_load_cities() { };';
-  }; ?>
+  } ?>
   </script>
-<?php osc_current_admin_theme_path('parts/footer.php'); ?>
+<?php osc_current_admin_theme_path('parts/footer.php');

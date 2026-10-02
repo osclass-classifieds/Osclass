@@ -36,7 +36,7 @@
  * @return array $premiums
  */
 function osc_get_premiums($max = 2, $rand = false, $cache = true) {
-  if ($cache !== false && View::newInstance()->_exists('search')) {
+  if($cache !== false && View::newInstance()->_exists('search')) {
     $mSearch = View::newInstance()->_get('search');
   } else {
     $mSearch = Search::newInstance();
@@ -57,7 +57,7 @@ function osc_get_premiums($max = 2, $rand = false, $cache = true) {
  * @return array|string $premium, or null if not exist
  */
 function osc_premium() {
-  if (View::newInstance()->_exists('premiums')) {
+  if(View::newInstance()->_exists('premiums')) {
     return View::newInstance()->_current('premiums');
   } else {
     return null;
@@ -112,7 +112,7 @@ function osc_premium_user_id() {
  * @return string $desc
  */
 function osc_premium_description($locale = '') {
-  if ($locale == '') {
+  if($locale == '') {
     $locale = osc_current_user_locale();
   }
   $desc = osc_premium_field('s_description' , $locale);
@@ -138,7 +138,7 @@ function osc_premium_description($locale = '') {
  * @return string
  */
 function osc_premium_title($locale = '') {
-  if ($locale == '') {
+  if($locale == '') {
     $locale = osc_current_user_locale();
   }
   $title = osc_premium_field('s_title' , $locale);
@@ -176,16 +176,16 @@ function osc_premium_category_row() {
  * @throws \Exception
  */
 function osc_premium_category($locale = '') {
-  // if ($locale == '') {
+  // if($locale == '') {
     // $locale = osc_current_user_locale();
   // }
-  // if ( !View::newInstance()->_exists('premium_category') ) {
+  // if(!View::newInstance()->_exists('premium_category') ) {
     // View::newInstance()->_exportVariableToView('premium_category', Category::newInstance()->findByPrimaryKey(osc_premium_category_id(), $locale ) );
   // }
   // $category = View::newInstance()->_get('premium_category');
 
   // return osc_field($category , 's_name' , $locale );
-  
+
   return (string) osc_field(osc_premium_category_row(), 's_name', $locale);
 }
 
@@ -198,10 +198,10 @@ function osc_premium_category($locale = '') {
  * @throws \Exception
  */
 function osc_premium_category_description($locale = '') {
-  // if ($locale == '') {
+  // if($locale == '') {
     // $locale = osc_current_user_locale();
   // }
-  // if ( !View::newInstance()->_exists('premium_category') ) {
+  // if(!View::newInstance()->_exists('premium_category') ) {
     // View::newInstance()->_exportVariableToView('premium_category', Category::newInstance()->findByPrimaryKey(osc_premium_category_id() ) );
   // }
   // $category = View::newInstance()->_get('premium_category');
@@ -227,18 +227,18 @@ function osc_premium_category_id() {
  */
 function osc_premium_category_price_enabled($catId = null) {
   $category = array();
-  
+
   if($catId == null || ($catId == osc_premium_category_id() && $catId > 0)) {
     $category = osc_premium_category_row();
   } else if($catId > 0) {
     $category = osc_get_category_row($catId) ;
   }
-  
-  
+
+
   if(is_array($category) && isset($category['b_price_enabled'])) {
     return $category['b_price_enabled'] == 1 ? true : false;
   }
-  
+
   return true;
 }
 
@@ -266,7 +266,7 @@ function osc_premium_mod_date() {
  * @return float
  */
 function osc_premium_price() {
-  if (osc_premium_field('i_price') == '') {
+  if(osc_premium_field('i_price') == '') {
     return null;
   } else {
     return (float) osc_premium_field('i_price');
@@ -331,7 +331,7 @@ function osc_premium_country() {
   if(osc_get_current_user_locations_native() == 1) {
     return (osc_premium_field('s_country_native') <> '' ? osc_premium_field('s_country_native') : osc_premium_field('s_country'));
   }
-  
+
   return (string) osc_premium_field('s_country');
 }
 
@@ -354,7 +354,7 @@ function osc_premium_region() {
   if(osc_get_current_user_locations_native() == 1) {
     return (osc_premium_field('s_region_native') <> '' ? osc_premium_field('s_region_native') : osc_premium_field('s_region'));
   }
-  
+
   return (string) osc_premium_field('s_region');
 }
 
@@ -367,7 +367,7 @@ function osc_premium_city() {
   if(osc_get_current_user_locations_native() == 1) {
     return (osc_premium_field('s_city_native') <> '' ? osc_premium_field('s_city_native') : osc_premium_field('s_city'));
   }
-  
+
   return (string) osc_premium_field('s_city');
 }
 
@@ -431,7 +431,7 @@ function osc_premium_longitude() {
  * @return boolean
  */
 function osc_premium_is_premium() {
-  if (osc_premium_field('b_premium') ) {
+  if(osc_premium_field('b_premium') ) {
     return true;
   } else {
     return false;
@@ -446,10 +446,9 @@ function osc_premium_is_premium() {
 function osc_premium_views() {
   $item = osc_premium();
   if(isset($item['i_num_premium_views'])) {
-    return (int) osc_premium_field('i_num_premium_views');
-  } else {
-    return ItemStats::newInstance()->getViews(osc_premium_id());
+    return (int)osc_premium_field('i_num_premium_views');
   }
+  return osc_item_stat('premium_views', osc_premium_id());
 }
 
 /**
@@ -512,7 +511,7 @@ function osc_premium_total_comments() {
 /**
  * Gets page of comments in current pagination
  *
- * @return int 
+ * @return int
  */
 function osc_premium_comments_page() {
   $page = Params::getParam('comments-page');
@@ -527,7 +526,6 @@ function osc_premium_comments_page() {
 //////////////////////////
 
 
-
 /////////////
 // DETAILS //
 /////////////
@@ -538,13 +536,13 @@ function osc_premium_comments_page() {
  * @return bool
  */
 function osc_has_premiums() {
-  if ( View::newInstance()->_exists('resources') ) {
+  if(View::newInstance()->_exists('resources') ) {
     View::newInstance()->_erase('resources');
   }
-  if ( View::newInstance()->_exists('premium_category') ) {
+  if(View::newInstance()->_exists('premium_category') ) {
     View::newInstance()->_erase('premium_category');
   }
-  if ( View::newInstance()->_exists('metafields') ) {
+  if(View::newInstance()->_exists('metafields') ) {
     View::newInstance()->_erase('metafields');
   }
   return View::newInstance()->_next('premiums');
@@ -576,7 +574,7 @@ function osc_count_premiums() {
  * @throws \Exception
  */
 function osc_count_premium_resources() {
-  if ( !View::newInstance()->_exists('resources') ) {
+  if(!View::newInstance()->_exists('resources') ) {
     View::newInstance()->_exportVariableToView('resources', ItemResource::newInstance()->getAllResourcesFromItem(osc_premium_id() ) );
   }
   return osc_priv_count_item_resources();
@@ -590,7 +588,7 @@ function osc_count_premium_resources() {
  * @throws \Exception
  */
 function osc_has_premium_resources() {
-  if ( !View::newInstance()->_exists('resources') ) {
+  if(!View::newInstance()->_exists('resources') ) {
     View::newInstance()->_exportVariableToView('resources', ItemResource::newInstance()->getAllResourcesFromItem(osc_premium_id() ) );
   }
   return View::newInstance()->_next('resources');
@@ -604,7 +602,7 @@ function osc_has_premium_resources() {
  * @throws \Exception
  */
 function osc_get_premium_resources() {
-  if ( !View::newInstance()->_exists('resources') ) {
+  if(!View::newInstance()->_exists('resources') ) {
     View::newInstance()->_exportVariableToView('resources', ItemResource::newInstance()->getAllResourcesFromItem(osc_premium_id() ) );
   }
   return View::newInstance()->_get('resources');
@@ -616,7 +614,7 @@ function osc_get_premium_resources() {
  * @return int
  */
 function osc_count_premium_comments() {
-  if ( !View::newInstance()->_exists('comments') ) {
+  if(!View::newInstance()->_exists('comments') ) {
     View::newInstance()->_exportVariableToView('comments', ItemComment::newInstance()->findBypremiumID(osc_premium_id(), osc_premium_comments_page(), osc_comments_per_page() ) );
   }
   return View::newInstance()->_count('comments');
@@ -629,7 +627,7 @@ function osc_count_premium_comments() {
  * @return bool
  */
 function osc_has_premium_comments() {
-  if ( !View::newInstance()->_exists('comments') ) {
+  if(!View::newInstance()->_exists('comments') ) {
     View::newInstance()->_exportVariableToView('comments', ItemComment::newInstance()->findBypremiumID(osc_premium_id(), osc_premium_comments_page(), osc_comments_per_page() ) );
   }
   return View::newInstance()->_next('comments');
@@ -657,7 +655,7 @@ function osc_priv_count_premiums() {
  * @return integer
  */
 function osc_count_premium_meta() {
-  if ( !View::newInstance()->_exists('metafields') ) {
+  if(!View::newInstance()->_exists('metafields') ) {
     View::newInstance()->_exportVariableToView('metafields', Item::newInstance()->metaFields(osc_premium_id()) );
   }
   return View::newInstance()->_count('metafields');
@@ -670,7 +668,7 @@ function osc_count_premium_meta() {
  * @return bool
  */
 function osc_has_premium_meta() {
-  if ( !View::newInstance()->_exists('metafields') ) {
+  if(!View::newInstance()->_exists('metafields') ) {
     View::newInstance()->_exportVariableToView('metafields', Item::newInstance()->metaFields(osc_premium_id()) );
   }
   return View::newInstance()->_next('metafields');
@@ -682,7 +680,7 @@ function osc_has_premium_meta() {
  * @return array
  */
 function osc_get_premium_meta() {
-  if ( !View::newInstance()->_exists('metafields') ) {
+  if(!View::newInstance()->_exists('metafields') ) {
     View::newInstance()->_exportVariableToView('metafields', Item::newInstance()->metaFields(osc_premium_id()) );
   }
   return View::newInstance()->_get('metafields');

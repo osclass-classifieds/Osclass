@@ -42,7 +42,7 @@ class Dump extends DAO
    */
   public static function newInstance()
   {
-    if( !self::$instance instanceof self ) {
+    if(!self::$instance instanceof self ) {
       self::$instance = new self;
     }
     return self::$instance;
@@ -80,7 +80,7 @@ class Dump extends DAO
    */
   public function table_structure($path, $table)
   {
-    if ( ! is_writable( $path ) ) {
+    if(! is_writable( $path ) ) {
       return false;
     }
 
@@ -117,57 +117,58 @@ class Dump extends DAO
    */
   public function table_data($path, $table)
   {
-    if ( ! is_writable( $path ) ) {
+    if(! is_writable( $path ) ) {
       return false;
     }
 
     $this->dao->select();
     $this->dao->from($table);
     $res  = $this->dao->get();
-    $result = array ();
-    if ( $res ) {
-      $result = $res->result();
-    }
-
-    $_str = '';
     if($res) {
       $num_rows   = $res->numRows();
       $num_fields = $res->numFields();
       $fields   = $res->resultId->fetch_fields();
 
-      if( $num_rows > 0 ) {
-        $_str .= '/* dumping data for table `' . $table . '` */';
-        $_str .= "\n";
+      if($num_rows > 0 ) {
+        $f = fopen($path, 'ab');
+        if(!$f) {
+          return false;
+        }
+
+        fwrite($f, '/* dumping data for table `' . $table . '` */' . "\n");
 
         $field_type = array();
         $i = 0;
-
-        while ($meta = $res->resultId->fetch_field()) {
-          $field_type[] = $meta->type;
+        foreach($fields as $field) {
+          $field_type[] = $field->type;
         }
 
-        $_str .= 'insert into `' . $table . '` values';
-        $_str .= "\n";
+        fwrite($f, 'insert into `' . $table . '` values' . "\n");
 
         $index = 0;
         if($table==DB_TABLE_PREFIX.'t_category') {
+          $result = $res->result();
+          $_str = '';
           $this->_dump_table_category($result, $num_fields, $field_type, $fields, $index, $num_rows, $_str);
+          fwrite($f, $_str);
+
         } else {
-          foreach($result as $row) {
-            $_str .= '(';
-            for( $i = 0; $i < $num_fields; $i++ ) {
+          while($row = $res->resultId->fetch_assoc()) {
+            $_str = '(';
+            for($i = 0; $i < $num_fields; $i++ ) {
               $v = $row[$fields[$i]->name];
-              if ( null === $v ) {
+              if(null === $v ) {
                 $_str .= 'null';
               } else {
-                $this->_quotes($fields[$i]->type, $_str, $row[$fields[$i]->name]);
+                $this->_quotes($fields[$i]->type, $_str, $v);
               }
+
               if($i < $num_fields-1) {
                 $_str .= ',';
               }
             }
-            $_str .= ')';
 
+            $_str .= ')';
             if($index < $num_rows-1) {
               $_str .= ',';
             } else {
@@ -175,17 +176,15 @@ class Dump extends DAO
             }
             $_str .= "\n";
 
+            fwrite($f, $_str);
             $index++;
           }
         }
+
+        fwrite($f, "\n");
+        fclose($f);
       }
     }
-
-    $_str .= "\n";
-
-    $f = fopen( $path , 'ab' );
-    fwrite($f, $_str);
-    fclose($f);
 
     return true;
   }
@@ -206,7 +205,7 @@ class Dump extends DAO
     $short_rows = array();
     $unshort_rows = array();
     foreach($result as $row) {
-      if( $row['fk_i_parent_id'] == NULL) {
+      if($row['fk_i_parent_id'] == NULL) {
         $short_rows[] = $row;
       } else {
         $unshort_rows[$row['pk_i_id']] = $row;
@@ -226,9 +225,9 @@ class Dump extends DAO
 
     foreach($short_rows as $row) {
       $_str .= '(';
-      for( $i = 0; $i < $num_fields; $i++ ) {
+      for($i = 0; $i < $num_fields; $i++ ) {
         $v = $row[$fields[$i]->name];
-        if ( null === $v ) {
+        if(null === $v ) {
           $_str .= 'null';
         } else {
           $this->_quotes($fields[$i]->type, $_str, $v);
@@ -277,11 +276,11 @@ class Dump extends DAO
     $aDates   = array(10, 12, 7, 11, 13 );
     $aString  = array ( 254 , 253 , 252 );
 
-    if ( in_array( $type , $aNumeric , true ) ) {
+    if(in_array( $type , $aNumeric , true ) ) {
       $_str .= $value;
-    } else if ( in_array( $type , $aDates , true ) ) {
+    } elseif(in_array( $type , $aDates , true ) ) {
       $_str .= '\'' . $this->dao->connId->real_escape_string($value) . '\'';
-    } else if ( in_array( $type , $aString , true ) ) {
+    } elseif(in_array( $type , $aString , true ) ) {
       $_str .= '\'' . $this->dao->connId->real_escape_string($value) . '\'';
     }
   }

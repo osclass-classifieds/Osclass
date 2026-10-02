@@ -25,7 +25,7 @@ function customFrmText(){
   $rule = __get('rule');
   $return = array();
 
-  if( isset($rule['pk_i_id']) ) {
+  if(isset($rule['pk_i_id']) ) {
     $return['edit']       = true;
     $return['title']      = __('Edit rule');
     $return['action_frm'] = 'edit_ban_rule_post';
@@ -40,7 +40,7 @@ function customFrmText(){
 }
 
 
-function customPageHeader(){ 
+function customPageHeader(){
 ?>
   <h1><?php _e('Ban rules'); ?></h1>
 <?php
@@ -63,19 +63,19 @@ osc_add_hook('admin_header','customHead', 10);
 
 $aux  = customFrmText();
 
-osc_current_admin_theme_path('parts/header.php'); 
+osc_current_admin_theme_path('parts/header.php');
 ?>
 
 <div id="user-settings">
 <h2 class="render-title"><?php echo $aux['title']; ?></h2>
   <div class="settings-user">
     <ul id="error_list"></ul>
-    
+
     <form name="register" action="<?php echo osc_admin_base_url(true); ?>" method="post">
       <input type="hidden" name="page" value="users" />
       <input type="hidden" name="action" value="<?php echo $aux['action_frm']; ?>" />
       <?php BanRuleForm::primary_input_hidden($rule); ?>
-      
+
       <fieldset>
         <div class="form-horizontal">
           <div class="form-row">
@@ -84,7 +84,7 @@ osc_current_admin_theme_path('parts/header.php');
               <?php BanRuleForm::name_text($rule); ?>
             </div>
           </div>
-          
+
           <div class="form-row">
             <div class="form-label"><?php _e('IP rule'); ?></div>
             <div class="form-controls">
@@ -92,15 +92,15 @@ osc_current_admin_theme_path('parts/header.php');
               <span class="help-box"><?php _e('Example: 192.168.10-20.*, 192.*.*.*, 192.*.20.*, 192.*.10-20.1, 192.168.10.1'); ?></span>
             </div>
           </div>
-          
+
           <div class="form-row">
-            <div class="form-label"><?php _e('E-mail rule'); ?></div>
+            <div class="form-label"><?php _e('Email rule'); ?></div>
             <div class="form-controls">
               <?php BanRuleForm::email_text($rule); ?>
               <span class="help-box"><?php _e('Example: *@badsite.com, *@subdomain.badsite.com, *@*badsite.com, *badsite.*, *badsite*, *.com'); ?></span>
             </div>
           </div>
-          
+
           <div class="form-row">
             <div class="form-label"><?php _e('Expire date'); ?></div>
             <div class="form-controls">
@@ -108,9 +108,9 @@ osc_current_admin_theme_path('parts/header.php');
               <span class="help-box"><?php _e('After this date, ban rule will not be used. Keep blank for never-expiring ban rules.'); ?></span>
             </div>
           </div>
-          
+
           <div class="clear"></div>
-          
+
           <div class="form-actions">
             <input type="submit" value="<?php echo osc_esc_html($aux['btn_text']); ?>" class="btn btn-submit" />
           </div>
@@ -119,4 +119,4 @@ osc_current_admin_theme_path('parts/header.php');
     </form>
   </div>
 </div>
-<?php osc_current_admin_theme_path('parts/footer.php'); ?>
+<?php osc_current_admin_theme_path('parts/footer.php');

@@ -175,7 +175,7 @@ class DBCommandClass
     $this->aOrderby = array();
     $this->aWherein = array();
 
-    if (OSC_DEBUG_DB || OSC_DEBUG_DB_EXPLAIN) {
+    if(OSC_DEBUG_DB || OSC_DEBUG_DB_EXPLAIN) {
       $this->log = LogDatabase::newInstance();
     }
   }
@@ -189,7 +189,7 @@ class DBCommandClass
    * @since  2.3
    */
   public static function newInstance() {
-    if (!self::$instance instanceof self) {
+    if(!self::$instance instanceof self) {
       self::$instance = new self;
     }
 
@@ -214,14 +214,14 @@ class DBCommandClass
    * @since  2.3
    */
   public function select($select = '*') {
-    if (is_string($select)) {
+    if(is_string($select)) {
       $select = explode(',', $select);
     }
 
-    foreach ($select as $s) {
+    foreach($select as $s) {
       $s = trim($s);
 
-      if ($s != '') {
+      if($s != '') {
         $this->aSelect[] = $s;
       }
     }
@@ -242,10 +242,10 @@ class DBCommandClass
    * @since  2.3
    */
   public function join($table, $cond, $type = '') {
-    if ($type != '') {
+    if($type != '') {
       $type = strtoupper(trim($type));
 
-      if (!in_array($type, array('LEFT', 'RIGHT', 'OUTER', 'INNER', 'LEFT OUTER', 'RIGHT OUTER'))) {
+      if(!in_array($type, array('LEFT', 'RIGHT', 'OUTER', 'INNER', 'LEFT OUTER', 'RIGHT OUTER'))) {
         $type = '';
       } else {
         $type .= ' ';
@@ -286,18 +286,18 @@ class DBCommandClass
    * @since  2.3
    */
   public function _where($key, $value = null, $type = 'AND ') {
-    if (!is_array($key)) {
+    if(!is_array($key)) {
       $key = array($key => $value);
     }
 
-    foreach ($key as $k => $v) {
+    foreach($key as $k => $v) {
       $prefix = (count($this->aWhere) > 0) ? $type : '';
 
-      if (!$this->_hasOperator($k)) {
+      if(!$this->_hasOperator($k)) {
         $k .= ' =';
       }
 
-      if (null !== $v) {
+      if(null !== $v) {
         $v = ' ' . $this->escape($v);
       }
 
@@ -320,7 +320,7 @@ class DBCommandClass
   public function _hasOperator($str) {
     $str = trim($str);
 
-    if (!preg_match('/(\s|<|>|!|=|is null|is not null)/i', $str)) {
+    if(!preg_match('/(\s|<|>|!|=|is null|is not null)/i', $str)) {
       return false;
     }
 
@@ -338,13 +338,13 @@ class DBCommandClass
    * @since  2.3
    */
   public function escape($str) {
-    if (is_array($str)) {
+    if(is_array($str)) {
       $str = '';
-    } else if (is_string($str)) {
+    } elseif(is_string($str)) {
       $str = "'" . $this->escapeStr($str) . "'";
-    } elseif (is_bool($str)) {
+    } elseif(is_bool($str)) {
       $str = ($str === false) ? 0 : 1;
-    } elseif (null === $str) {
+    } elseif(null === $str) {
       $str = 'NULL';
     }
 
@@ -363,13 +363,13 @@ class DBCommandClass
    * @since  2.3
    */
   public function escapeStr($str, $like = false) {
-    if (is_object($this->connId)) {
+    if(is_object($this->connId)) {
       $str = $this->connId->real_escape_string($str);
     } else {
       $str = addslashes($str);
     }
 
-    if ($like) {
+    if($like) {
       $str = str_replace(array('%', '_'), array('\\%', '\\_'), $str);
     }
 
@@ -405,13 +405,13 @@ class DBCommandClass
    * @since  2.3
    */
   public function _whereIn($key = null, $values = null, $not = false, $type = 'AND ') {
-    if (!is_array($values)) {
+    if(!is_array($values)) {
       $values = array($values);
     }
 
     $not = $not ? ' NOT' : '';
 
-    foreach ($values as $value) {
+    foreach($values as $value) {
       $this->aWherein[] = $this->escape($value);
     }
 
@@ -502,15 +502,15 @@ class DBCommandClass
   public function _like($field, $match = '', $type = 'AND ', $side = 'both', $not = '') {
     $likeStatement = '';
 
-    if (!is_array($field)) {
+    if(!is_array($field)) {
       $field = array($field => $match);
     }
 
-    foreach ($field as $k => $v) {
+    foreach($field as $k => $v) {
       $prefix = (count($this->aLike) == 0) ? '' : $type;
       $v = $this->escapeStr($v, true);
 
-      switch ($side) {
+      switch($side) {
         case 'left':
         case 'before':
           $likeStatement = "$prefix $k $not LIKE '%$v'";
@@ -590,14 +590,14 @@ class DBCommandClass
    * @since  2.3
    */
   public function groupBy($by) {
-    if (is_string($by)) {
+    if(is_string($by)) {
       $by = explode(',', $by);
     }
 
-    foreach ($by as $val) {
+    foreach($by as $val) {
       $val = trim($val);
 
-      if ($val != '') {
+      if($val != '') {
         $this->aGroupby[] = $val;
       }
     }
@@ -623,14 +623,14 @@ class DBCommandClass
    * @param string $type $type
    */
   public function _having($key, $value = '', $type = 'AND ') {
-    if (!is_array($key)) {
+    if(!is_array($key)) {
       $key = array($key => $value);
     }
 
-    foreach ($key as $k => $v) {
+    foreach($key as $k => $v) {
       $prefix = (count($this->aHaving) == 0) ? '' : $type;
 
-      if (!$this->_hasOperator($k)) {
+      if(!$this->_hasOperator($k)) {
         $k .= ' = ';
       }
 
@@ -664,9 +664,9 @@ class DBCommandClass
    *
    */
   public function orderBy($orderby, $direction = '') {
-    if (strtolower($direction) === 'random') {
+    if(strtolower($direction) === 'random') {
       $direction = ' RAND()';
-    } elseif (trim($direction) != '') {
+    } elseif(trim($direction) != '') {
       $direction = in_array(strtoupper(trim($direction)), array('ASC', 'DESC')) ? ' ' . $direction : ' ASC';
     }
 
@@ -687,7 +687,7 @@ class DBCommandClass
    */
   public function offset($offset) {
     $this->aOffset = 0;
-    if (is_numeric($offset)) {
+    if(is_numeric($offset)) {
       $this->aOffset = (int)$offset;
     }
 
@@ -706,16 +706,16 @@ class DBCommandClass
    * @since  2.3
    */
   public function insert($table = '', $set = null) {
-    if (null !== $set) {
+    if(null !== $set) {
       $this->set($set);
     }
 
-    if (count($this->aSet) == 0) {
+    if(count($this->aSet) == 0) {
       return false;
     }
 
-    if ($table == '') {
-      if (!isset($this->aFrom[0])) {
+    if($table == '') {
+      if(!isset($this->aFrom[0])) {
         return false;
       }
 
@@ -741,12 +741,12 @@ class DBCommandClass
    * @since  2.3
    */
   public function set($key, $value = '', $escape = true) {
-    if (!is_array($key)) {
+    if(!is_array($key)) {
       $key = array($key => $value);
     }
 
-    foreach ($key as $k => $v) {
-      if ($escape) {
+    foreach($key as $k => $v) {
+      if($escape) {
         $this->aSet[$k] = $this->escape($v);
       } else {
         $this->aSet[$k] = $v;
@@ -802,7 +802,7 @@ class DBCommandClass
    * @since  2.3
    */
   public function _resetRun($aReset) {
-    foreach ($aReset as $item => $defaultValue) {
+    foreach($aReset as $item => $defaultValue) {
       $this->$item = $defaultValue;
     }
   }
@@ -818,11 +818,11 @@ class DBCommandClass
    * @since  2.3
    */
   public function query($sql) {
-    if ($sql == '') {
+    if($sql == '') {
       return false;
     }
 
-    if (OSC_DEBUG_DB_EXPLAIN && $this->isSelectType($sql)) {
+    if(OSC_DEBUG_DB_EXPLAIN && $this->isSelectType($sql)) {
       $this->query_debug($sql);
     }
 
@@ -832,8 +832,8 @@ class DBCommandClass
     $this->resultId = $this->_execute($sql);
 
     $this->errorReport();
-    if (false === $this->resultId) {
-      if (OSC_DEBUG_DB) {
+    if(false === $this->resultId) {
+      if(OSC_DEBUG_DB) {
         $this->log->addMessage($sql, 0, $this->errorLevel, $this->errorDesc);
       }
 
@@ -845,11 +845,11 @@ class DBCommandClass
 
     $this->queryCount++;
 
-    if (OSC_DEBUG_DB) {
+    if(OSC_DEBUG_DB) {
       $this->log->addMessage($sql, $timeEnd - $timeStart, $this->errorLevel, $this->errorDesc);
     }
 
-    if ($this->isWriteType($sql) === true) {
+    if($this->isWriteType($sql) === true) {
       return true;
     }
 
@@ -872,7 +872,7 @@ class DBCommandClass
    * @since  2.3
    */
   public function isSelectType($sql) {
-    if (!preg_match('/^\s*"?(SELECT)\s+/i', $sql)) {
+    if(!preg_match('/^\s*"?(SELECT)\s+/i', $sql)) {
       return false;
     }
 
@@ -885,14 +885,14 @@ class DBCommandClass
    * @return bool
    */
   public function query_debug($sql) {
-    if ($sql == '') {
+    if($sql == '') {
       return false;
     }
 
     $sql = 'EXPLAIN ' . $sql;
     $rsID = $this->_execute($sql);
 
-    if (false === $rsID) {
+    if(false === $rsID) {
       return false;
     }
 
@@ -901,7 +901,7 @@ class DBCommandClass
     $rs->resultId = $rsID;
     $rs->numRows = $rs->numRows();
 
-    if ($rs->numRows() == 0) {
+    if($rs->numRows() == 0) {
       return false;
     }
 
@@ -934,11 +934,11 @@ class DBCommandClass
     $this->errorLevel = $this->connId->errno;
     $this->errorDesc = $this->connId->error;
   }
-  
+
   public function getConnErrorLevel() {
     return $this->connId->errno;
   }
-  
+
   public function getConnErrorDesc() {
     return $this->connId->error;
   }
@@ -946,7 +946,7 @@ class DBCommandClass
   public function getConnSqlState() {
     return $this->connId->sqlstate;
   }
-  
+
   /**
    * Check if the sql is a write such as INSERT, UPDATE, UPDATE...
    *
@@ -958,7 +958,7 @@ class DBCommandClass
    * @since  2.3
    */
   public function isWriteType($sql) {
-    if (!preg_match('/^\s*"?(SET|INSERT|UPDATE|DELETE|REPLACE|CREATE|DROP|TRUNCATE|LOAD DATA|COPY|ALTER|GRANT|REVOKE|LOCK|UNLOCK|RENAME)\s+/i', $sql)) {
+    if(!preg_match('/^\s*"?(SET|INSERT|UPDATE|DELETE|REPLACE|CREATE|DROP|TRUNCATE|LOAD DATA|COPY|ALTER|GRANT|REVOKE|LOCK|UNLOCK|RENAME)\s+/i', $sql)) {
       return false;
     }
 
@@ -977,16 +977,16 @@ class DBCommandClass
    * @since  2.3
    */
   public function replace($table = '', $set = null) {
-    if (null !== $set) {
+    if(null !== $set) {
       $this->set($set);
     }
 
-    if (count($this->aSet) == 0) {
+    if(count($this->aSet) == 0) {
       return false;
     }
 
-    if ($table == '') {
-      if (!isset($this->aFrom[0])) {
+    if($table == '') {
+      if(!isset($this->aFrom[0])) {
         return false;
       }
 
@@ -1028,23 +1028,23 @@ class DBCommandClass
    * @since  2.3
    */
   public function update($table = '', $set = null, $where = null) {
-    if (null !== $set) {
+    if(null !== $set) {
       $this->set($set);
     }
 
-    if (count($this->aSet) == 0) {
+    if(count($this->aSet) == 0) {
       return false;
     }
 
-    if ($table == '') {
-      if (!isset($this->aFrom[0])) {
+    if($table == '') {
+      if(!isset($this->aFrom[0])) {
         return false;
       }
 
       $table = $this->aFrom[0];
     }
 
-    if ($where != null) {
+    if($where != null) {
       $this->where($where);
     }
 
@@ -1053,7 +1053,7 @@ class DBCommandClass
     $this->_resetWrite();
     $result = $this->query($sql);
 
-    if ($result == false) {
+    if($result == false) {
       return false;
     }
 
@@ -1073,23 +1073,23 @@ class DBCommandClass
    * @since  8.0.2
    */
   public function upsert($table = '', $set = null, $where = null) {
-    if (null !== $set) {
+    if(null !== $set) {
       $this->set($set);
     }
 
-    if (count($this->aSet) == 0) {
+    if(count($this->aSet) == 0) {
       return false;
     }
 
-    if ($table == '') {
-      if (!isset($this->aFrom[0])) {
+    if($table == '') {
+      if(!isset($this->aFrom[0])) {
         return false;
       }
 
       $table = $this->aFrom[0];
     }
 
-    if ($where != null) {
+    if($where != null) {
       $this->where($where);
     }
 
@@ -1098,7 +1098,7 @@ class DBCommandClass
     $this->_resetWrite();
     $result = $this->query($sql);
 
-    if ($result == false) {
+    if($result == false) {
       return false;
     }
 
@@ -1133,7 +1133,7 @@ class DBCommandClass
    * @since  2.3
    */
   public function _update($table, $values, $where) {
-    foreach ($values as $k => $v) {
+    foreach($values as $k => $v) {
       $valstr[] = $k . ' = ' . $v;
     }
 
@@ -1143,7 +1143,7 @@ class DBCommandClass
 
     return $sql;
   }
-  
+
   /**
    * Create the UPDATE sql string
    *
@@ -1159,7 +1159,7 @@ class DBCommandClass
   public function _upsert($table, $values, $where = array()) {
     $keys = array_keys($values);
 
-    foreach ($values as $k => $v) {
+    foreach($values as $k => $v) {
       $valstr[] = $k . ' = ' . $v;
     }
 
@@ -1193,19 +1193,19 @@ class DBCommandClass
    * @since  2.3
    */
   public function delete($table = '', $where = '') {
-    if ($table == '') {
-      if (!isset($this->aFrom[0])) {
+    if($table == '') {
+      if(!isset($this->aFrom[0])) {
         return false;
       }
 
       $table = $this->aFrom[0];
     }
 
-    if ($where != null) {
+    if($where != null) {
       $this->where($where);
     }
 
-    if (count($this->aWhere) == 0 && count($this->aWherein) == 0 && count($this->aLike) == 0) {
+    if(count($this->aWhere) == 0 && count($this->aWherein) == 0 && count($this->aLike) == 0) {
       return false;
     }
 
@@ -1214,7 +1214,7 @@ class DBCommandClass
     $this->_resetWrite();
     $result = $this->query($sql);
 
-    if ($result == false) {
+    if($result == false) {
       return false;
     }
 
@@ -1236,11 +1236,11 @@ class DBCommandClass
   public function _delete($table, $where, $like) {
     $conditions = '';
 
-    if (count($where) > 0 || count($like) > 0) {
+    if(count($where) > 0 || count($like) > 0) {
       $conditions = "\nWHERE ";
       $conditions .= implode("\n", $where);
 
-      if (count($where) > 0 && count($like) > 0) {
+      if(count($where) > 0 && count($like) > 0) {
         $conditions .= ' AND ';
       }
       $conditions .= implode("\n", $like);
@@ -1263,11 +1263,11 @@ class DBCommandClass
    * @since  2.3
    */
   public function get($table = '', $limit = null, $offset = null) {
-    if ($table != '') {
+    if($table != '') {
       $this->from($table);
     }
 
-    if (null !== $limit) {
+    if(null !== $limit) {
       $this->limit($limit, $offset);
     }
 
@@ -1287,15 +1287,15 @@ class DBCommandClass
    * @return DBCommandClass
    */
   public function from($from) {
-    if (!is_array($from)) {
-      if (strpos($from, ',') !== false) {
+    if(!is_array($from)) {
+      if(strpos($from, ',') !== false) {
         $from = explode(',', $from);
       } else {
         $from = array($from);
       }
     }
 
-    foreach ($from as $f) {
+    foreach($from as $f) {
       $this->aFrom[] = $f;
     }
 
@@ -1314,13 +1314,13 @@ class DBCommandClass
    * @since  2.3
    */
   public function limit($value, $offset = '') {
-    if (is_numeric($value)) {
+    if(is_numeric($value)) {
       $this->aLimit = (int)$value;
     }
 
-    if ($offset != '') {
+    if($offset != '') {
       $this->aOffset = 0;
-      if (is_numeric($offset)) {
+      if(is_numeric($offset)) {
         $this->aOffset = (int)$offset;
       }
     }
@@ -1339,29 +1339,29 @@ class DBCommandClass
     $sql = 'SELECT ';
 
     // "SELECT" portion of the query
-    if (count($this->aSelect) == 0) {
+    if(count($this->aSelect) == 0) {
       $sql .= '*';
     } else {
       $sql .= implode(', ', $this->aSelect);
     }
 
     // "FROM" portion of the query
-    if (count($this->aFrom) > 0) {
+    if(count($this->aFrom) > 0) {
       $sql .= "\nFROM ";
-      if (!is_array($this->aFrom)) {
+      if(!is_array($this->aFrom)) {
         $this->a_from = array($this->aFrom);
       }
       $sql .= '(' . implode(', ', $this->aFrom) . ')';
     }
 
     // "JOIN" portion of the query
-    if (count($this->aJoin) > 0) {
+    if(count($this->aJoin) > 0) {
       $sql .= "\n";
       $sql .= implode("\n", $this->aJoin);
     }
 
     // "WHERE" portion of the query
-    if (count($this->aWhere) > 0 || count($this->aLike) > 0) {
+    if(count($this->aWhere) > 0 || count($this->aLike) > 0) {
       $sql .= "\n";
       $sql .= 'WHERE ';
     }
@@ -1369,8 +1369,8 @@ class DBCommandClass
     $sql .= implode("\n", $this->aWhere);
 
     // "LIKE" portion of the query
-    if (count($this->aLike) > 0) {
-      if (count($this->aWhere) > 0) {
+    if(count($this->aLike) > 0) {
+      if(count($this->aWhere) > 0) {
         $sql .= "\nAND";
       }
 
@@ -1378,33 +1378,33 @@ class DBCommandClass
     }
 
     // "GROUP BY" portion of the query
-    if (count($this->aGroupby) > 0) {
+    if(count($this->aGroupby) > 0) {
       $sql .= "\nGROUP BY ";
       $sql .= implode(', ', $this->aGroupby);
     }
 
     // "HAVING" portion of the query
-    if (count($this->aHaving) > 0) {
+    if(count($this->aHaving) > 0) {
       $sql .= "\nHAVING ";
       $sql .= implode(', ', $this->aHaving);
     }
 
     // "ORDER BY" portion of the query
-    if (count($this->aOrderby) > 0) {
+    if(count($this->aOrderby) > 0) {
       $sql .= "\nORDER BY ";
       $sql .= implode(', ', $this->aOrderby);
 
-      if ($this->aOrder !== false) {
+      if($this->aOrder !== false) {
         $sql .= ($this->aOrder === 'desc') ? ' DESC' : ' ASC';
       }
     }
 
     // "LIMIT" portion of the query
-    if (is_numeric($this->aLimit)) {
+    if(is_numeric($this->aLimit)) {
       $sql .= "\n";
       $sql .= 'LIMIT ' . $this->aLimit;
 
-      if ($this->aOffset > 0) {
+      if($this->aOffset > 0) {
         $sql .= ', ' . $this->aOffset;
       }
     }
@@ -1461,13 +1461,13 @@ class DBCommandClass
     if(defined('IMPORTSQL_FORCE_ENGINE') && IMPORTSQL_FORCE_ENGINE != '') {
       $sql = preg_replace('/ENGINE\s*=\s*([^\s]+)/i', 'ENGINE=' . IMPORTSQL_FORCE_ENGINE, $sql);
     }
-    
+
     // Force charset to utf8mb4 (handles utf8 / UTF8 / 'UTF8')
     if(defined('IMPORTSQL_FORCE_CHARSET') && IMPORTSQL_FORCE_CHARSET != '') {
       $charsetPattern = '/\b(?:DEFAULT\s+CHARACTER\s+SET|DEFAULT\s+CHARSET|CHARSET)\s*(?:=\s*)?[\'"]?([a-z0-9_]+)[\'"]?/i';
       $sql = preg_replace($charsetPattern, 'CHARSET=' . IMPORTSQL_FORCE_CHARSET, $sql);
     }
-    
+
     // Force collation to utf8mb4_unicode_ci (handles UTF8_GENERAL_CI, quotes, etc.)
     if(defined('IMPORTSQL_FORCE_COLLATE') && IMPORTSQL_FORCE_COLLATE != '') {
       $collatePattern = '/\bCOLLATE\s*(?:=\s*)?[\'"]?([a-z0-9_]+)[\'"]?/i';
@@ -1482,7 +1482,7 @@ class DBCommandClass
 
     foreach($queries as $q) {
       $q = trim($q);
-      
+
       if(!empty($q) && !$this->query($q)) {
         return false;
       }
@@ -1500,7 +1500,7 @@ class DBCommandClass
    * @return array
    */
   private function splitSQL($sql, $explodeChars) {
-    if (preg_match('|^(.*)DELIMITER (\S+)\s(.*)$|isU', $sql, $matches)) {
+    if(preg_match('|^(.*)DELIMITER (\S+)\s(.*)$|isU', $sql, $matches)) {
       $queries = explode($explodeChars, $matches[1]);
       $recursive = $this->splitSQL($matches[3], $matches[2]);
 
@@ -1538,7 +1538,7 @@ class DBCommandClass
    */
   public function updateDB($queries = '') {
     error_log(' ----- START updateDB ----- ');
-    if (!is_array($queries)) {
+    if(!is_array($queries)) {
       $queries = $this->splitSQL($queries, ';');
     }
 
@@ -1553,13 +1553,13 @@ class DBCommandClass
     // Get tables from DB (already installed)
     $result = $this->query('SHOW TABLES');
     $tables = $result->result();
-    foreach ($tables as $v) {
+    foreach($tables as $v) {
       $table = current($v);
-      if ($this->existTableIntoStruct($table, $struct_queries)) {
+      if($this->existTableIntoStruct($table, $struct_queries)) {
         $lastTable = null;
         $normal_fields = $indexes = $constrains = array();
         $fields = $this->getTableFieldsFromStruct($table, $struct_queries);
-        if ($fields) {
+        if($fields) {
           // classify fields (into sql file)
           $this->classifyFieldsSql($fields, $normal_fields, $indexes, $constrains, $lastTable);
           // Take fields from the DB (now into database)
@@ -1593,12 +1593,12 @@ class DBCommandClass
 
 
     error_log(' --- last_struct_queries ---');
-    foreach ($struct_queries as $q) {
+    foreach($struct_queries as $q) {
       error_log(' --- ' . $q);
     }
     // HACK: AUTO_INCREMENT fields needs to be also a PRIMARY KEY
-    foreach ($struct_queries as $k => $v) {
-      if (stripos($v, 'auto_increment') !== false && stripos($v, 'primary key') === false) {
+    foreach($struct_queries as $k => $v) {
+      if(stripos($v, 'auto_increment') !== false && stripos($v, 'primary key') === false) {
         $struct_queries[$k] = $v . ' PRIMARY KEY';
       }
     }
@@ -1607,20 +1607,20 @@ class DBCommandClass
 
     $ok = true;
     $error_queries = array();
-    foreach ($queries as $query) {
+    foreach($queries as $query) {
       // hack for 2.4
-      if (stripos($query, 'country ADD PRIMARY KEY')) {
+      if(stripos($query, 'country ADD PRIMARY KEY')) {
         continue;
       }
       $res = $this->query($query);
-      if (!$res) {
+      if(!$res) {
         $ok = false;
         $error_queries[] = $query;
       }
     }
-    if (!empty($error_queries)) {
+    if(!empty($error_queries)) {
       error_log(' --- error_queries ---');
-      foreach ($struct_queries as $q) {
+      foreach($struct_queries as $q) {
         error_log(' --- ' . $q);
       }
     }
@@ -1639,14 +1639,14 @@ class DBCommandClass
    * @param array $struct_queries
    */
   private function prepareAndSepareQueries($queries, &$data_queries, &$struct_queries) {
-    foreach ($queries as $query) {
-      if (preg_match('|CREATE DATABASE ([^ ]*)|', $query, $match)) {
+    foreach($queries as $query) {
+      if(preg_match('|CREATE DATABASE ([^ ]*)|', $query, $match)) {
         array_unshift($struct_queries, $query);
-      } elseif (preg_match('|CREATE TABLE ([^ ]*)|', $query, $match)) {
+      } elseif(preg_match('|CREATE TABLE ([^ ]*)|', $query, $match)) {
         $struct_queries[strtolower(trim($match[1], '`'))] = $query;
-      } elseif (preg_match('|INSERT INTO ([^ ]*)|', $query, $match)) {
+      } elseif(preg_match('|INSERT INTO ([^ ]*)|', $query, $match)) {
         $data_queries[] = $query;
-      } elseif (preg_match('|UPDATE ([^ ]*)|', $query, $match)) {
+      } elseif(preg_match('|UPDATE ([^ ]*)|', $query, $match)) {
         $data_queries[] = $query;
       }
     }
@@ -1673,9 +1673,9 @@ class DBCommandClass
    * @return array|bool
    */
   private function getTableFieldsFromStruct($table, &$struct_queries) {
-    if (preg_match('|\((.*)\)|ms', $struct_queries[strtolower($table)], $match)) {
+    if(preg_match('|\((.*)\)|ms', $struct_queries[strtolower($table)], $match)) {
       $fields = explode("\n", trim($match[1]));
-      foreach ($fields as $key => $value) {
+      foreach($fields as $key => $value) {
         $fields[$key] = trim(preg_replace('/,$/', '', $value));
       }
     } else {
@@ -1695,17 +1695,17 @@ class DBCommandClass
    * @param $lastTable
    */
   private function classifyFieldsSql($fields, &$normal_fields, &$indexes, &$constrains, &$lastTable) {
-    foreach ($fields as $field) {
-      if (preg_match('|([^ ]+)|', trim($field), $field_name)) {
-        switch (strtolower($field_name[1])) {
+    foreach($fields as $field) {
+      if(preg_match('|([^ ]+)|', trim($field), $field_name)) {
+        switch(strtolower($field_name[1])) {
           case '':
           case 'on':
-            if ($lastTable) {
+            if($lastTable) {
               $constrains[$lastTable] = $constrains[$lastTable] . ' ' . trim($field);
             }
             break;
           case 'foreign':
-            if (preg_match("|FOREIGN KEY\s+(.*)\s+REFERENCES\s+(.*)|mi", $field, $match)) {
+            if(preg_match("|FOREIGN KEY\s+(.*)\s+REFERENCES\s+(.*)|mi", $field, $match)) {
               $_table = $match[1];
               $refere = $match[2];
               $refere = str_replace(',', '', $refere);
@@ -1719,15 +1719,15 @@ class DBCommandClass
           case 'unique':
           case 'key':
             $added = false;
-            if (preg_match("|PRIMARY KEY\s+\((.*)\)|mi", $field, $match)) {
+            if(preg_match("|PRIMARY KEY\s+\((.*)\)|mi", $field, $match)) {
               $_field = strtolower($match[1]);
-              if (isset($normal_fields[$_field])) {
+              if(isset($normal_fields[$_field])) {
                 $normal_fields[$_field] .= ' PRIMARY KEY';
                 $added = true;
               }
             }
 
-            if (!$added) {
+            if(!$added) {
               $indexes[] = trim($field, ", \n");
             }
             break;
@@ -1748,16 +1748,16 @@ class DBCommandClass
    * @param    $struct_queries
    */
   private function createAlterTable($tbl_fields, $table, &$normal_fields, &$struct_queries) {
-    foreach ($tbl_fields as $tbl_field) {
+    foreach($tbl_fields as $tbl_field) {
       //Every field should we on the definition, so else SHOULD never happen, unless a very aggressive plugin modify our tables
-      if (array_key_exists(strtolower($tbl_field['Field']), $normal_fields)) {
+      if(array_key_exists(strtolower($tbl_field['Field']), $normal_fields)) {
         // Take the of the field
-        if (preg_match('|' . $tbl_field['Field'] . " (ENUM\s*\(([^\)]*)\))|i", $normal_fields[strtolower($tbl_field['Field'])], $match)
+        if(preg_match('|' . $tbl_field['Field'] . " (ENUM\s*\(([^\)]*)\))|i", $normal_fields[strtolower($tbl_field['Field'])], $match)
           || preg_match('|' . $tbl_field['Field'] . ' ([^ ]*( unsigned)?)|i', $normal_fields[strtolower($tbl_field['Field'])], $match)
         ) {
           $field_type = $match[1];
           // Are they the same?
-          if (strtolower($field_type) != strtolower($tbl_field['Type'])
+          if(strtolower($field_type) != strtolower($tbl_field['Type'])
             && str_replace(' ', '', strtolower($field_type)) != str_replace(' ', '', strtolower($tbl_field['Type']))
           ) {
             $struct_queries[] =
@@ -1767,22 +1767,22 @@ class DBCommandClass
         error_log(' --- ' . $normal_fields[strtolower($tbl_field['Field'])]);
 
         // Have we changed the default value? [with quotes]
-        if (preg_match("| DEFAULT\s+'(.*)'|i", $normal_fields[strtolower($tbl_field['Field'])], $default_match)) {
+        if(preg_match("| DEFAULT\s+'(.*)'|i", $normal_fields[strtolower($tbl_field['Field'])], $default_match)) {
           // alter column only if default value has been changed
-          if ($tbl_field['Default'] != $default_match[1]) {
+          if($tbl_field['Default'] != $default_match[1]) {
             $struct_queries[] = 'ALTER TABLE ' . $table . ' ALTER COLUMN ' . $tbl_field['Field'] . " SET DEFAULT '" . $default_match[1] . "'";
           }
           // Have we changed the default value? [without quotes]
-        } elseif (preg_match("| DEFAULT\s+(.*)|i", $normal_fields[strtolower($tbl_field['Field'])], $default_match)) {
-          if (isset($tbl_field['Default'])) {
+        } elseif(preg_match("| DEFAULT\s+(.*)|i", $normal_fields[strtolower($tbl_field['Field'])], $default_match)) {
+          if(isset($tbl_field['Default'])) {
             // alter column only if default value has been changed
-            if ($tbl_field['Default'] != $default_match[1]) {
+            if($tbl_field['Default'] != $default_match[1]) {
               $struct_queries[] = 'ALTER TABLE ' . $table . ' ALTER COLUMN ' . $tbl_field['Field'] . ' SET DEFAULT ' . $default_match[1];
             }
           } else {
             // check NULL default values
             // if new default value is diferent, alter column ...
-            if ($default_match[1] !== 'NULL') {
+            if($default_match[1] !== 'NULL') {
               $struct_queries[] = 'ALTER TABLE ' . $table . ' ALTER COLUMN ' . $tbl_field['Field'] . ' SET DEFAULT ' . $default_match[1];
             }
           }
@@ -1792,7 +1792,7 @@ class DBCommandClass
       }
     }
     // For the rest of normal fields (they are not in the table) we add them.
-    foreach ($normal_fields as $k => $v) {
+    foreach($normal_fields as $k => $v) {
       $struct_queries[] = 'ALTER TABLE ' . $table . ' ADD COLUMN ' . $v;
     }
   }
@@ -1807,36 +1807,36 @@ class DBCommandClass
    * @param    $struct_queries
    */
   private function createNewIndex($tbl_indexes, &$indexes, $table, &$struct_queries) {
-    if ($tbl_indexes) {
+    if($tbl_indexes) {
       unset($indexes_array);
-      foreach ($tbl_indexes as $tbl_index) {
+      foreach($tbl_indexes as $tbl_index) {
         $indexes_array[$tbl_index['Key_name']]['columns'][] = array('fieldname' => $tbl_index['Column_name'], 'subpart' => $tbl_index['Sub_part']);
         $indexes_array[$tbl_index['Key_name']]['unique'] = $tbl_index['Non_unique'] == 0;
         $indexes_array[$tbl_index['Key_name']]['index_type'] = $tbl_index['Index_type'];
         $indexes_array[$tbl_index['Key_name']]['Key_name'] = $tbl_index['Key_name'];
       }
 
-      foreach ($indexes_array as $k => $v) {
+      foreach($indexes_array as $k => $v) {
 
         // if PRIMARY KEY already exist
         $exist_primary = false;
-        if ($k === 'PRIMARY') {
-          if (isset($indexes_array['PRIMARY'])) {
-            if (count($indexes_array['PRIMARY']['columns']) > 0) {
+        if($k === 'PRIMARY') {
+          if(isset($indexes_array['PRIMARY'])) {
+            if(count($indexes_array['PRIMARY']['columns']) > 0) {
               $exist_primary = true;
             }
           }
         }
 
         $string = '';
-        if ($k === 'PRIMARY') {
+        if($k === 'PRIMARY') {
           $string .= 'PRIMARY KEY ';
-        } elseif ($v['unique']) {
+        } elseif($v['unique']) {
           $string .= 'UNIQUE KEY ';
-        } elseif ($v['index_type'] === 'FULLTEXT') {  // FULLTEXT INDEX MUST HAVE KEY_NAME
+        } elseif($v['index_type'] === 'FULLTEXT') {  // FULLTEXT INDEX MUST HAVE KEY_NAME
           $string .= 'FULLTEXT ' . $k . ' ';
         } else {
-          if ((count($v['columns']) == 1 && $v['columns'][0]['fieldname'] != $k) || (preg_match('/^idx/', $k, $coincidencias) > 0)) {
+          if((count($v['columns']) == 1 && $v['columns'][0]['fieldname'] != $k) || (preg_match('/^idx/', $k, $coincidencias) > 0)) {
             $string .= 'INDEX ' . $k . ' ';
           } else {
             $string .= 'INDEX ' . $v['Key_name'] . ' ';
@@ -1845,13 +1845,13 @@ class DBCommandClass
 
         $columns = '';
         // For each column in the index
-        foreach ($v['columns'] as $column) {
-          if ($columns != '') {
+        foreach($v['columns'] as $column) {
+          if($columns != '') {
             $columns .= ', ';
           }
           // Add the field to the column list string
           $columns .= '' . $column['fieldname'] . '';
-          if ($column['subpart'] != '') {
+          if($column['subpart'] != '') {
             $columns .= '(' . $column['subpart'] . ')';
           }
         }
@@ -1860,11 +1860,11 @@ class DBCommandClass
         $string  .= '(' . $columns . ')';
         $var_index = array_search($string, $indexes);
 
-        if (!($var_index === false)) {
+        if(!($var_index === false)) {
           unset($indexes[$var_index]);
         } else {
           $var_index = array_search(str_replace(', ', ',', $string), $indexes);
-          if (!($var_index === false)) {
+          if(!($var_index === false)) {
             unset($indexes[$var_index]);
           }
         }
@@ -1872,8 +1872,8 @@ class DBCommandClass
     }
 
     // alter table
-    foreach ($indexes as $v) {
-      if (preg_match('/primary key/i', $v, $coincidencias) > 0) {
+    foreach($indexes as $v) {
+      if(preg_match('/primary key/i', $v, $coincidencias) > 0) {
         $struct_queries[] = 'ALTER TABLE ' . $table . ' DROP PRIMARY KEY, ADD ' . $v;
       } else {
         $struct_queries[] = 'ALTER TABLE ' . $table . ' ADD ' . $v;
@@ -1891,16 +1891,16 @@ class DBCommandClass
    */
   private function createForeignKey($tbl_constraint, $table, &$struct_queries, $constrains) {
     $constrainsDB = $foreignRepited = array();
-    if (preg_match_all("| CONSTRAINT\s+(.*)\s+FOREIGN KEY\s+(.*)\s+REFERENCES\s+(.*),?\n|i", $tbl_constraint['Create Table'], $default_match)) {
+    if(preg_match_all("| CONSTRAINT\s+(.*)\s+FOREIGN KEY\s+(.*)\s+REFERENCES\s+(.*),?\n|i", $tbl_constraint['Create Table'], $default_match)) {
       $aKeyName = $default_match[1];
       $aTables = $default_match[2];
       $aRefere = $default_match[3];
-      foreach ($aTables as $index => $value) {
+      foreach($aTables as $index => $value) {
         $_refere = str_replace('`', '', $aRefere[$index]);
         $_keyName = str_replace('`', '', $aKeyName[$index]);
         $_refere = str_replace(',', '', $_refere);
         $_value = str_replace('`', '', $value);
-        if (in_array($_refere, $constrainsDB)) {
+        if(in_array($_refere, $constrainsDB)) {
           $foreignRepited[] = $_keyName;
         }
         $constrainsDB[$_value] = $_refere;
@@ -1908,16 +1908,16 @@ class DBCommandClass
     }
 
     $delete_foreign = array();
-    if (count($foreignRepited) > 0) {
-      foreach ($foreignRepited as $_key) {
+    if(count($foreignRepited) > 0) {
+      foreach($foreignRepited as $_key) {
         echo 'ALTER TABLE ' . $table . ' DROP FOREIGN KEY ' . $_key . '<br>';
         $struct_queries[] = 'ALTER TABLE ' . $table . ' DROP FOREIGN KEY ' . $_key;
       }
     }
 
     $keys = array_keys($constrainsDB);
-    foreach ($constrains as $k => $v) {
-      if (in_array($k, $keys) && $constrainsDB[$k] == $v) {
+    foreach($constrains as $k => $v) {
+      if(in_array($k, $keys) && $constrainsDB[$k] == $v) {
         // nothing to do
       } else {
         // alter table
@@ -1936,7 +1936,7 @@ class DBCommandClass
    * @since  8.3.1
    */
   private function _runOrPrint($sql, $dryRun = false) {
-    if ($dryRun) {
+    if($dryRun) {
       $sql = trim(preg_replace('/\s+/', ' ', $sql));
 
       echo "$sql;" . PHP_EOL;
@@ -1957,10 +1957,10 @@ class DBCommandClass
     $charset = 'utf8mb4';
     $collate = 'utf8mb4_unicode_ci';
     $prefix = DB_TABLE_PREFIX;
-    
+
     if($dryRun) {
       echo '<pre id="sql-dryrun" style="font-size:13px;line-height:18px;border:1px solid #000;width:calc(100% - 30px);margin:15px;padding:15px;">';
-      echo '[DRY-RUN] Start: Migrate to utf8mb4' . PHP_EOL; 
+      echo '[DRY-RUN] Start: Migrate to utf8mb4' . PHP_EOL;
       echo str_repeat('-', 120) . PHP_EOL;
     }
 
@@ -1980,7 +1980,7 @@ class DBCommandClass
         AND TABLE_COLLATION <> '$collate'
     ")->result();
 
-   
+
     if(is_array($tables) && count($tables) > 0) {
       foreach($tables as $t) {
         $table = $t['TABLE_NAME'];
@@ -2004,7 +2004,7 @@ class DBCommandClass
             AND REFERENCED_TABLE_NAME IS NOT NULL
             AND REFERENCED_COLUMN_NAME <> 'pk_i_id'
         ")->result();
-        
+
         if(is_array($fks) && count($fks) > 0) {
           foreach($fks as $fk) {
             $name = $fk['CONSTRAINT_NAME'];
@@ -2078,13 +2078,12 @@ class DBCommandClass
 
     if($dryRun) {
       echo str_repeat('-', 120) . PHP_EOL;
-      echo '[DRY-RUN] End: Migrate to utf8mb4'; 
+      echo '[DRY-RUN] End: Migrate to utf8mb4';
       echo '</pre>';
     }
 
     return true;
   }
-
 
 
   /**

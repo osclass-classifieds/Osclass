@@ -29,9 +29,9 @@ function _purify($value, $xss_check) {
   if(!$xss_check) {
     return $value;
   }
-  
+
   $uploads_path = dirname(dirname(dirname(__FILE__))) . '/oc-content/uploads/';
-  
+
   if(!file_exists($uploads_path) || !is_dir($uploads_path)) {
     return $value;
   }
@@ -45,7 +45,7 @@ function _purify($value, $xss_check) {
 
 
   if(is_array($value)) {
-    foreach ($value as $k => &$v) {
+    foreach($value as $k => &$v) {
       $v = _purify($v, $xss_check); // recursive
     }
   } else {
@@ -129,9 +129,9 @@ function get_relative_url() {
  */
 function get_requirements() {
   // Defined in oc-includes/osclass/install.php
-  $php_min = (defined('PHP_MIN') ? PHP_MIN : '7.2');
+  $php_min = (defined('PHP_MIN') ? PHP_MIN : '7.4');
   $php_max = (defined('PHP_MAX') ? PHP_MAX : '');
-  
+
   $array = array();
 
   if($php_min <> '') {
@@ -142,7 +142,7 @@ function get_requirements() {
       'optional' => true
     );
   }
-  
+
   if($php_max <> '') {
     $array['PHP max version'] = array(
       'requirement' => sprintf(__('PHP version %s or lower'), $php_max),
@@ -157,7 +157,7 @@ function get_requirements() {
     'fn' => extension_loaded('curl'),
     'solution' => __('CURL extension is required. How to <a target="_blank" href="https://www.php.net/manual/en/curl.setup.php">install/configure</a>.')
   );
-  
+
   $array['MySQLi extension for PHP'] = array(
     'requirement' => __('MySQLi extension for PHP'),
     'fn' => extension_loaded('mysqli'),
@@ -209,12 +209,12 @@ function get_requirements() {
   $config_writable = false;
   $root_writable = false;
   $config_sample = false;
-  
+
   if(file_exists(ABS_PATH . 'config.php')) {
     if(is_writable(ABS_PATH . 'config.php')) {
       $config_writable = true;
     }
-    
+
     $array['File <code>config.php</code> is writable'] = array(
       'requirement' => __('<code>config.php</code> file is writable'),
       'fn' => $config_writable,
@@ -224,7 +224,7 @@ function get_requirements() {
     if(is_writable(ABS_PATH)) {
       $root_writable = true;
     }
-    
+
     $array['Root directory is writable'] = array(
       'requirement' => __('Root directory is writable'),
       'fn' => $root_writable,
@@ -234,7 +234,7 @@ function get_requirements() {
     if(file_exists(ABS_PATH . 'config-sample.php')) {
       $config_sample = true;
     }
-    
+
     $array['File <code>config-sample.php</code> exists'] = array(
       'requirement' => __('<code>config-sample.php</code> file exists'),
       'fn' => $config_sample,
@@ -255,7 +255,7 @@ function get_requirements() {
  * @since 1.2
  */
 function check_requirements($array) {
-  foreach ($array as $k => $v) {
+  foreach($array as $k => $v) {
     if($v['fn'] == false) {
       if(!isset($v['optional']) || isset($v['optional']) && $v['optional'] == false) {
         return true;      // Means at least one requirement failed
@@ -330,13 +330,13 @@ function oc_install() {
       $error_num = $master_conn->getErrorLevel();
       $error_desc = $comaster_connnn->getErrorDesc();
     }
-    
+
     if($error_num > 0) {
       if(reportToOsclass()) {
-        LogOsclassInstaller::instance()->error(sprintf(__('Cannot connect to the database. <br/>[%s: %s]'), $error_num, $error_desc), __FILE__ . "::" . __LINE__);
+        LogOsclassInstaller::instance()->error(sprintf(__('Cannot connect to the database. [%s] %s'), $error_num, $error_desc), __FILE__ . "::" . __LINE__);
       }
 
-      switch ($error_num) {
+      switch($error_num) {
         case 1049:
           return array('error' => sprintf(__("The database doesn't exist. You should check the \"Create DB\" checkbox and fill in a username and password with the right privileges. <br/>[%s: %s]"), $error_num, $error_desc));
           break;
@@ -347,10 +347,10 @@ function oc_install() {
           return array('error' => sprintf(__('Cannot connect to the database. Check if the username and password are correct. <br/>[%s: %s]'), $error_num, $error_desc));
           break;
         case 2005:
-          return array('error' => sprintf(__("Can't resolve MySQL host. Check if the host is correct. <br/>[%s: %s]"), $error_num, $error_desc));
+          return array('error' => sprintf(__("Cannot resolve the MySQL host. Check if the host is correct. [%s] %s"), $error_num, $error_desc));
           break;
         default:
-          return array('error' => sprintf(__('Cannot connect to the database. <br/>[%s: %s]'), $error_num, $error_desc));
+          return array('error' => sprintf(__('Cannot connect to the database. [%s] %s'), $error_num, $error_desc));
           break;
 
       }
@@ -365,14 +365,14 @@ function oc_install() {
 
     if($error_num > 0) {
       if(reportToOsclass()) {
-        LogOsclassInstaller::instance()->error(sprintf(__("Can't create the database. <br/>[%s: %s]"), $error_num, $error_desc), __FILE__ . "::" . __LINE__);
+        LogOsclassInstaller::instance()->error(sprintf(__("Cannot create the database. [%s] %s"), $error_num, $error_desc), __FILE__ . "::" . __LINE__);
       }
 
       if(in_array($error_num, array(1006, 1044, 1045))) {
-        return array('error' => sprintf(__("Can't create the database. Check if the admin username and password are correct. <br/>[%s: %s]"), $error_num, $error_desc));
+        return array('error' => sprintf(__("Cannot create the database. Check if the admin username and password are correct. [%s] %s"), $error_num, $error_desc));
       }
 
-      return array('error' => sprintf(__("Can't create the database. Error number: <br/>[%s: %s]"), $error_num, $error_desc));
+      return array('error' => sprintf(__("Cannot create the database. [%s] %s"), $error_num, $error_desc));
     }
 
     unset($conn);
@@ -391,10 +391,10 @@ function oc_install() {
 
   if($error_num > 0) {
     if(reportToOsclass()) {
-      LogOsclassInstaller::instance()->error(sprintf(__('Cannot connect to the database. ERROR: [%s] %s'), $error_num, $error_desc), __FILE__ . "::" . __LINE__);
+      LogOsclassInstaller::instance()->error(sprintf(__('Cannot connect to the database. [%s] %s'), $error_num, $error_desc), __FILE__ . "::" . __LINE__);
     }
 
-    switch ($error_num) {
+    switch($error_num) {
       case 1049:
         return array('error' => sprintf(__("The database doesn't exist. You should check the \"Create DB\" checkbox and fill in a username and password with the right privileges. <br/>[%s: %s]"), $error_num, $error_desc));
         break;
@@ -405,10 +405,10 @@ function oc_install() {
         return array('error' => sprintf(__('Cannot connect to the database. Check if the username and password are correct. <br/>[%s: %s]'), $error_num, $error_desc));
         break;
       case 2005:
-        return array('error' => sprintf(__("Can't resolve MySQL host. Check if the host is correct. <br/>[%s: %s]"), $error_num, $error_desc));
+        return array('error' => sprintf(__("Cannot resolve the MySQL host. Check if the host is correct. [%s] %s"), $error_num, $error_desc));
         break;
       default:
-        return array('error' => sprintf(__('Cannot connect to the database. <br/>[%s]: %s'), $error_num, $error_desc));
+        return array('error' => sprintf(__('Cannot connect to the database. [%s] %s'), $error_num, $error_desc));
         break;
     }
   }
@@ -416,14 +416,14 @@ function oc_install() {
   if(file_exists(ABS_PATH . 'config.php')) {
     if(!is_writable(ABS_PATH . 'config.php')) {
       if(reportToOsclass()) {
-        LogOsclassInstaller::instance()->error(__("Can't write in config.php file. Check if the file is writable."), __FILE__ . "::" . __LINE__);
+        LogOsclassInstaller::instance()->error(__("Cannot write config.php. Check if the file is writable."), __FILE__ . "::" . __LINE__);
       }
 
-      return array('error' => __("Can't write in config.php file. Check if the file is writable."));
+      return array('error' => __("Cannot write config.php. Check if the file is writable."));
     }
-    
+
     create_config_file($dbname, $username, $password, $dbhost, $tableprefix);
-    
+
   } else {
     if(!file_exists(ABS_PATH . 'config-sample.php')) {
       if(reportToOsclass()) {
@@ -432,15 +432,15 @@ function oc_install() {
 
       return array('error' => __("config-sample.php doesn't exist. Check if everything is decompressed correctly."));
     }
-    
+
     if(!is_writable(ABS_PATH)) {
       if(reportToOsclass()) {
-        LogOsclassInstaller::instance()->error(__('Can\'t copy config-sample.php. Check if the root directory is writable.'), __FILE__ . "::" . __LINE__);
+        LogOsclassInstaller::instance()->error(__('Cannot copy config-sample.php. Check if the root directory is writable.'), __FILE__ . "::" . __LINE__);
       }
 
-      return array('error' => __('Can\'t copy config-sample.php. Check if the root directory is writable.'));
+      return array('error' => __('Cannot copy config-sample.php. Check if the root directory is writable.'));
     }
-    
+
     copy_config_file($dbname, $username, $password, $dbhost, $tableprefix);
   }
 
@@ -457,15 +457,15 @@ function oc_install() {
 
   if($error_num > 0) {
     if(reportToOsclass()) {
-      LogOsclassInstaller::instance()->error(sprintf(__('Cannot create tables - database structure (struct.sql). ERROR: [%s] %s'), $error_num, $error_desc), __FILE__ . "::" . __LINE__);
+      LogOsclassInstaller::instance()->error(sprintf(__('Cannot create tables (struct.sql). [%s] %s'), $error_num, $error_desc), __FILE__ . "::" . __LINE__);
     }
 
-    switch ($error_num) {
+    switch($error_num) {
       case 1050:
         return array('error' => __('There are tables with the same name in the database. Change the table prefix or the database and try again.'));
         break;
       default:
-        return array('error' => sprintf(__('Cannot create tables - database structure (struct.sql). <br/>[%s] %s'), $error_num, $error_desc));
+        return array('error' => sprintf(__('Cannot create tables (struct.sql). [%s] %s'), $error_num, $error_desc));
         break;
     }
   }
@@ -491,7 +491,7 @@ function oc_install() {
   if(isset($locales[ osc_current_admin_locale() ]['stop_words'])) {
     $values['s_stop_words'] = $locales[ osc_current_admin_locale() ]['stop_words'];
   }
-  
+
   $localeManager->insert($values);
 
   $required_files = array(
@@ -501,7 +501,7 @@ function oc_install() {
   );
 
   $sql = '';
-  foreach ($required_files as $file) {
+  foreach($required_files as $file) {
     if(!file_exists($file)) {
       if(reportToOsclass()) {
         LogOsclassInstaller::instance()->error(sprintf(__('The file %s doesn\'t exist'), $file), __FILE__ . "::" . __LINE__);
@@ -519,15 +519,15 @@ function oc_install() {
 
   if($error_num > 0) {
     if(reportToOsclass()) {
-      LogOsclassInstaller::instance()->error(sprintf(__("Can't insert basic configuration. Error number: %s"), $error_num), __FILE__ . "::" . __LINE__);
+      LogOsclassInstaller::instance()->error(sprintf(__("Cannot insert basic configuration. Error number: %s"), $error_num), __FILE__ . "::" . __LINE__);
     }
 
-    switch ($error_num) {
+    switch($error_num) {
       case 1471:
-        return array('error' => __("Can't insert basic configuration. This user has no privileges to 'INSERT' into the database."));
+        return array('error' => __("Cannot insert basic configuration. This user has no INSERT privilege."));
         break;
       default:
-        return array('error' => sprintf(__("Can't insert basic configuration. Error number: %s"), $error_num));
+        return array('error' => sprintf(__("Cannot insert basic configuration. Error number: %s"), $error_num));
         break;
     }
   }
@@ -574,7 +574,7 @@ function oc_install_example_data() {
   }
 
 
-  foreach ($categories as $category) {
+  foreach($categories as $category) {
 
     $fields['pk_i_id'] = $category['pk_i_id'];
     $fields['fk_i_parent_id'] = $category['fk_i_parent_id'];
@@ -613,7 +613,7 @@ function oc_install_example_data() {
 
   $mItem = new ItemActions(true);
 
-  foreach ($item as $k => $v) {
+  foreach($item as $k => $v) {
     if($k == 'description' || $k == 'title') {
       Params::setParam($k, array(osc_current_admin_locale() => $v));
     } else {
@@ -700,8 +700,8 @@ function copy_config_file($dbname, $username, $password, $dbhost, $tableprefix) 
   $rel_url = get_relative_url();
   $config_sample = file(ABS_PATH . 'config-sample.php');
 
-  foreach ($config_sample as $line_num => $line) {
-    switch (substr($line, 0, 16)) {
+  foreach($config_sample as $line_num => $line) {
+    switch(substr($line, 0, 16)) {
       case "define('DB_NAME'":
         $config_sample[ $line_num ] = str_replace("database_name", $dbname, $line);
         break;
@@ -727,7 +727,7 @@ function copy_config_file($dbname, $username, $password, $dbhost, $tableprefix) 
   }
 
   $handle = fopen(ABS_PATH . 'config.php', 'w');
-  foreach ($config_sample as $line) {
+  foreach($config_sample as $line) {
     fwrite($handle, $line);
   }
   fclose($handle);
@@ -886,7 +886,7 @@ function display_database_config() {
           </tr>
           <tr id="admin_password_row">
             <th align="left"><label for="admin_password"><?php _e('DB admin password'); ?></label></th>
-            <td><input type="password" id="admin_password" name="admin_password" value="" size="25" disabled="disabled" autocomplete="off"/> 
+            <td><input type="password" id="admin_password" name="admin_password" value="" size="25" disabled="disabled" autocomplete="off"/>
             <td class="small"><?php _e('Password copied from above'); ?></td>
           </tr>
           </tbody>
@@ -906,7 +906,7 @@ function display_target() {
   require_once LIB_PATH . 'osclass/helpers/hUtils.php';
   $country_list = osc_file_get_contents_json(osc_get_locations_json_url());
   $country_list = $country_list['children'];
-  
+
   $internet_error = false;
 
   $country_ip = '';
@@ -954,9 +954,9 @@ function display_target() {
             <td></td>
           </tr>
           <tr>
-            <th><label for="email"><?php _e('Contact e-mail'); ?></label></th>
+            <th><label for="email"><?php _e('Contact email'); ?></label></th>
             <td><input type="text" id="email" name="email" size="25" required/></td>
-            <td><span id="email-error" class="error" style="display:none;"><?php _e('Put your e-mail here'); ?></span></td>
+            <td><span id="email-error" class="error" style="display:none;"><?php _e('Put your email here'); ?></span></td>
           </tr>
           </tbody>
         </table>
@@ -970,12 +970,12 @@ function display_target() {
               <select name="locationsql" id="locationsql">
                 <option value="skip"><?php _e("Skip location"); ?></option>
                 <!-- <option value="all"><?php _e("International"); ?></option> -->
-                <?php foreach ($country_list as $c) { ?>
+                <?php foreach($country_list as $c) { ?>
                 <?php /* BUG: */ if($c['name'] == '') continue; ?>
                   <option value="<?php echo $c['file']; ?>" <?php if(substr($c['file'], 0, 2) == $country_ip) {
           echo 'selected="selected"';
-        }; ?>><?php echo $c['name']; ?></option>
-        <?php }; ?>
+        } ?>><?php echo $c['name']; ?></option>
+        <?php } ?>
               </select>
             </div>
     <?php } else { ?>
@@ -983,7 +983,7 @@ function display_target() {
       <?php _e('No internet connection. You can continue the installation and insert countries later.'); ?>
               <input type="hidden" id="skip-location-input" name="skip-location-input" value="1"/>
             </div>
-    <?php }; ?>
+    <?php } ?>
         </div>
       </div>
       <div class="clear"></div>
@@ -1041,6 +1041,47 @@ function ping_search_engines($bool) {
 }
 
 
+// Ping osclass-classifieds install stats via osc_doRequest (max 5s)
+function osc_ping_install_stats($email) {
+  try {
+    if(!function_exists('osc_doRequest') || !function_exists('osc_osclass_installed_url')) {
+      return false;
+    }
+
+    $site_url = get_absolute_url();
+    $host = parse_url($site_url, PHP_URL_HOST);
+    if($host == '' || $host === false) {
+      return false;
+    }
+
+    $version = '';
+    if(defined('OSCLASS_VERSION')) {
+      $version = OSCLASS_VERSION;
+    }
+
+    $ip = '';
+    if(function_exists('osc_get_ip')) {
+      $ip = (string)osc_get_ip();
+    }
+
+    $payload = array(
+      'domain' => substr((string)$host, 0, 253),
+      'url' => substr((string)$site_url, 0, 512),
+      'email' => substr((string)$email, 0, 128),
+      'ip' => substr($ip, 0, 45),
+      'version' => substr((string)$version, 0, 32)
+    );
+
+    $sent = osc_doRequest(osc_osclass_installed_url(), $payload, 5);
+    return ($sent !== false && (int)$sent > 0);
+  } catch(Exception $e) {
+    return false;
+  } catch(Throwable $e) {
+    return false;
+  }
+}
+
+
 function display_finish($password) {
   $data = finish_installation($password);
   ?>
@@ -1050,11 +1091,11 @@ function display_finish($password) {
         $('.error-location').fadeOut('slow');
       }, 5000);
     </script>
-    <div class="flash error imp"><?php _e('The selected location could not been installed'); ?></div>
+    <div class="flash error imp"><?php _e('The selected location could not be installed'); ?></div>
   <?php } ?>
 
   <h2><?php _e('Congratulations!'); ?></h2>
-  <div class="row"><?php _e("Osclass has been installed. Were you expecting more steps? Sorry to disappoint you!"); ?><br/><?php echo sprintf(__('An e-mail with the password for oc-admin has been sent to: %s'), $data['s_email']); ?></div>
+  <div class="row"><?php _e("Osclass has been installed. Were you expecting more steps? Sorry to disappoint you!"); ?><br/><?php echo sprintf(__('An email with the oc-admin password has been sent to %s'), $data['s_email']); ?></div>
   <div style="clear:both;"></div>
   <div class="form-table finish">
     <table>
@@ -1088,4 +1129,5 @@ function display_finish($password) {
     <a target="_blank" href="<?php echo get_absolute_url() ?>" class="btn btn-secondary"><?php _e('Explore frontoffice'); ?></a>
   </p>
   <?php
+  osc_ping_install_stats($data['s_email']);
 }

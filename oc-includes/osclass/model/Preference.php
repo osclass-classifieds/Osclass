@@ -38,7 +38,7 @@ class Preference extends DAO
    * @return \Preference|\type
    */
   public static function newInstance() {
-    if( !self::$instance instanceof self ) {
+    if(!self::$instance instanceof self ) {
       self::$instance = new self;
     }
     return self::$instance;
@@ -73,11 +73,11 @@ class Preference extends DAO
     $this->dao->where('s_name', $name);
     $result = $this->dao->get();
 
-    if( $result == false ) {
+    if($result == false ) {
       return false;
     }
 
-    if( $result->numRows() == 0 ) {
+    if($result->numRows() == 0 ) {
       return false;
     }
 
@@ -102,11 +102,11 @@ class Preference extends DAO
     $this->dao->where('s_section', $name);
     $result = $this->dao->get();
 
-    if( $result == false ) {
+    if($result == false ) {
       return array();
     }
 
-    if( $result->numRows() == 0 ) {
+    if($result->numRows() == 0 ) {
       return false;
     }
 
@@ -125,11 +125,11 @@ class Preference extends DAO
     $this->dao->from($this->getTableName());
     $result = $this->dao->get();
 
-    if( $result == false ) {
+    if($result == false ) {
       return false;
     }
 
-    if( $result->numRows() == 0 ) {
+    if($result->numRows() == 0 ) {
       return false;
     }
 
@@ -152,7 +152,7 @@ class Preference extends DAO
    */
   public function get($key, $section = 'osclass' )
   {
-    if (isset($this->pref[$section]) && isset($this->pref[$section][$key])) {
+    if(isset($this->pref[$section]) && isset($this->pref[$section][$key])) {
       return $this->pref[$section][$key];
     }
     return '';
@@ -168,7 +168,7 @@ class Preference extends DAO
    */
   public function getSection($section = 'osclass' )
   {
-    if (isset($this->pref[$section]) && is_array($this->pref[$section])) {
+    if(isset($this->pref[$section]) && is_array($this->pref[$section])) {
       return $this->pref[$section];
     }
     return array();

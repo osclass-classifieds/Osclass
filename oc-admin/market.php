@@ -27,7 +27,7 @@ class CAdminMarket extends AdminSecBaseModel {
   function doModel() {
     parent::doModel();
 
-    if($this->action == 'themes' || $this->action == 'plugins') { 
+    if($this->action == 'themes' || $this->action == 'plugins') {
       $api_key = osc_get_preference('osclasspoint_api_key', 'osclass');
       $data = osc_file_get_contents_json(osc_market_url('validate_api_key'));
 
@@ -42,7 +42,7 @@ class CAdminMarket extends AdminSecBaseModel {
       } else if(!isset($data['success']) || $data['success'] == '') {
         $msg = sprintf(_m('API key "%s" validation failed, invalid response from server'), osc_update_api_key());
         $msg .= ((isset($data['status']) && $data['status'] == 'ERR') ? ' (' . $data['message'] . ')' : '');
-        
+
         osc_add_flash_warning_message($msg, 'admin');
 
       } else {
@@ -55,35 +55,35 @@ class CAdminMarket extends AdminSecBaseModel {
       $this->_exportVariableToView("api_valid", $api_valid);
     }
 
-    switch ($this->action) {
+    switch($this->action) {
       case('plugins'):
         $this->doView("market/plugins.php");
         break;
-      
+
       case('themes'):
         $this->doView("market/themes.php");
         break;
-      
+
       case('languages'):
         $this->doView("market/languages.php");
         break;
-      
+
       case('languages-themes'):
         $this->doView("market/languages_themes.php");
         break;
-      
+
       case('languages-plugins'):
         $this->doView("market/languages_plugins.php");
         break;
-      
+
       case('locations'):
         $this->doView("market/locations.php");
         break;
-      
+
       case('overview'):
         $this->doView("market/overview.php");
         break;
-      
+
       default:
         $this->doView("market/themes.php");
         break;
@@ -93,7 +93,7 @@ class CAdminMarket extends AdminSecBaseModel {
   function __call($name, $arguments) {
     // TODO: Implement __call() method.
   }
-  
+
   function doView($file) {
     osc_run_hook("before_admin_html");
     osc_current_admin_theme_path($file);

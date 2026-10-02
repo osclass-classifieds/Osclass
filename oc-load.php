@@ -107,6 +107,8 @@ require_once LIB_PATH . 'osclass/helpers/hLocale.php';
 require_once LIB_PATH . 'osclass/helpers/hMessages.php';
 require_once LIB_PATH . 'osclass/helpers/hUsers.php';
 require_once LIB_PATH . 'osclass/helpers/hItems.php';
+require_once LIB_PATH . 'osclass/helpers/hItemStats.php';
+require_once LIB_PATH . 'osclass/helpers/hReport.php';
 require_once LIB_PATH . 'osclass/helpers/hSearch.php';
 require_once LIB_PATH . 'osclass/helpers/hUtils.php';
 require_once LIB_PATH . 'osclass/helpers/hCurrency.php';
@@ -116,6 +118,7 @@ require_once LIB_PATH . 'osclass/helpers/hSecurity.php';
 require_once LIB_PATH . 'osclass/helpers/hSanitize.php';
 require_once LIB_PATH . 'osclass/helpers/hValidate.php';
 require_once LIB_PATH . 'osclass/helpers/hPage.php';
+require_once LIB_PATH . 'osclass/helpers/hWidget.php';
 require_once LIB_PATH . 'osclass/helpers/hPagination.php';
 require_once LIB_PATH . 'osclass/helpers/hPremium.php';
 require_once LIB_PATH . 'osclass/helpers/hTheme.php';
@@ -156,6 +159,7 @@ require_once LIB_PATH . 'osclass/model/ItemComment.php';
 require_once LIB_PATH . 'osclass/model/ItemResource.php';
 require_once LIB_PATH . 'osclass/model/ItemStats.php';
 require_once LIB_PATH . 'osclass/model/Page.php';
+require_once LIB_PATH . 'osclass/model/Report.php';
 require_once LIB_PATH . 'osclass/model/PluginCategory.php';
 require_once LIB_PATH . 'osclass/model/Region.php';
 require_once LIB_PATH . 'osclass/model/User.php';
@@ -196,6 +200,7 @@ require_once LIB_PATH . 'osclass/frm/Comment.form.class.php';
 require_once LIB_PATH . 'osclass/frm/User.form.class.php';
 require_once LIB_PATH . 'osclass/frm/Language.form.class.php';
 require_once LIB_PATH . 'osclass/frm/SendFriend.form.class.php';
+require_once LIB_PATH . 'osclass/frm/Report.form.class.php';
 require_once LIB_PATH . 'osclass/frm/Alert.form.class.php';
 require_once LIB_PATH . 'osclass/frm/Field.form.class.php';
 require_once LIB_PATH . 'osclass/frm/Admin.form.class.php';
@@ -293,6 +298,7 @@ if(JQUERY_VERSION == '3') {
   osc_register_script('jquery-ui', osc_assets_url('js/jquery3/jquery-ui/jquery-ui.min.js'), array('jquery'));
   osc_register_script('jquery-ui-backoffice', osc_assets_url('js/jquery3/jquery-ui-backoffice/jquery-ui.min.js'), array('jquery'));
   osc_register_script('jquery-validate', osc_assets_url('js/jquery3/jquery.validate.min.js'), array('jquery'));
+  osc_register_script('jquery-validate-additional-methods', osc_assets_url('js/jquery3/additional-methods.min.js'), array('jquery','jquery-validate'));
   osc_register_script('fancybox', osc_assets_url('js/jquery3/jquery.fancybox.min.js'), array('jquery'));
 } else {
   osc_register_script('jquery', osc_assets_url('js/jquery.min.js'));
@@ -300,6 +306,7 @@ if(JQUERY_VERSION == '3') {
   osc_register_script('jquery-ui', osc_assets_url('js/jquery-ui.min.js'), array('jquery'));
   osc_register_script('jquery-ui-backoffice', osc_assets_url('js/jquery-ui.min.js'), array('jquery'));
   osc_register_script('jquery-validate', osc_assets_url('js/jquery.validate.min.js'), array('jquery'));
+  osc_register_script('jquery-validate-additional-methods', osc_assets_url('js/additional-methods.min.js'), array('jquery','jquery-validate'));
   osc_register_script('fancybox', osc_assets_url('js/fancybox/jquery.fancybox.pack.js'), array ('jquery'));
 }
 
@@ -326,6 +333,8 @@ $locale = osc_current_user_locale();
 Plugins::init();
 Translation::init();
 osc_csrfguard_start();
+
+
 
 
 // Run backoffice

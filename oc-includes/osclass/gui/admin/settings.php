@@ -19,28 +19,8 @@
 
 <?php
 if(!defined('ABS_PATH')) exit('ABS_PATH is not loaded. Direct access is not allowed.'); ?>
-<?php if ( !OC_ADMIN ) exit('User access is not allowed.'); ?>
-<?php if( (!defined('MULTISITE') || MULTISITE==0)&& !osc_get_preference('footer_link', 'sigma') && !osc_get_preference('donation', 'sigma') ) { ?>
-<form name="_xclick" action="https://www.paypal.com/in/cgi-bin/webscr" method="post" class="nocsrf">
-    <input type="hidden" name="cmd" value="_donations">
-    <input type="hidden" name="rm" value="2">
-    <input type="hidden" name="business" value="info@osclass">
-    <input type="hidden" name="item_name" value="Osclass project">
-    <input type="hidden" name="return" value="https://osclass-classifieds.com/paypal/">
-    <input type="hidden" name="currency_code" value="USD">
-    <input type="hidden" name="lc" value="US" />
-    <input type="hidden" name="custom" value="<?php echo osc_admin_render_theme_url('oc-content/themes/sigma/admin/settings.php'); ?>&donation=successful&source=sigma">
-    <div id="flashmessage" class="flashmessage flashmessage-inline flashmessage-warning" style="color: #505050; display: block; ">
-        <p><?php _e('I would like to contribute to the development of Osclass with a donation of', 'sigma'); ?> <select name="amount" class="select-box-medium">
-            <option value="50">50$</option>
-            <option value="25">25$</option>
-            <option value="10" selected>10$</option>
-            <option value="5">5$</option>
-            <option value=""><?php _e('Custom', 'sigma'); ?></option>
-        </select><input type="submit" class="btn btn-mini" name="submit" value="<?php echo osc_esc_html(__('Donate', 'sigma')); ?>"></p>
-    </div>
-</form>
-<?php } ?>
+<?php if(!OC_ADMIN ) exit('User access is not allowed.'); ?>
+
 <h2 class="render-title <?php echo (osc_get_preference('footer_link', 'sigma') ? '' : 'separate-top'); ?>"><?php _e('Theme settings', 'sigma'); ?></h2>
 <form action="<?php echo osc_admin_render_theme_url('oc-content/themes/sigma/admin/settings.php'); ?>" method="post" class="nocsrf">
     <input type="hidden" name="action_specific" value="settings" />
@@ -59,7 +39,6 @@ if(!defined('ABS_PATH')) exit('ABS_PATH is not loaded. Direct access is not allo
                     </select>
                 </div>
             </div>
-            <?php if(!defined('MULTISITE') || MULTISITE==0) { ?>
             <div class="form-row">
                 <div class="form-label"><?php _e('Footer link', 'sigma'); ?></div>
                 <div class="form-controls">
@@ -67,7 +46,6 @@ if(!defined('ABS_PATH')) exit('ABS_PATH is not loaded. Direct access is not allo
                     <span class="help-box"><?php _e('This website is proudly using the <a title="Osclass web" href="https://osclass-classifieds.com/">classifieds scripts</a> software <strong>Osclass</strong>', 'sigma'); ?></span>
                 </div>
             </div>
-            <?php } ?>
         </div>
     </fieldset>
 

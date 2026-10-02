@@ -52,10 +52,11 @@ class AdminToolbar {
     if(!$is_front) {
       osc_add_hook('add_admin_toolbar_menus', 'osc_admin_toolbar_menu', 0);
     }
-    
+
     osc_add_hook('add_admin_toolbar_menus', 'osc_admin_toolbar_demo', 0);
     osc_add_hook('add_admin_toolbar_menus', 'osc_admin_toolbar_comments', 0);
-    osc_add_hook('add_admin_toolbar_menus', 'osc_admin_toolbar_spam', 0);
+    osc_add_hook('add_admin_toolbar_menus', 'osc_admin_toolbar_reports', 0);
+    osc_add_hook('add_admin_toolbar_menus', 'osc_admin_toolbar_report_comments', 0);
 
     osc_add_hook('add_admin_toolbar_menus', 'osc_admin_toolbar_update_core', 0);
 
@@ -69,7 +70,7 @@ class AdminToolbar {
     } else {
       osc_add_hook('add_admin_toolbar_menus', 'osc_admin_toolbar_logout2', 9);
     }
-    
+
     osc_run_hook('add_admin_toolbar_menus');
   }
 
@@ -132,30 +133,32 @@ class AdminToolbar {
    * </div>
    */
   public function render($is_front = false) {
-    if (count($this->nodes) > 0) {
-      
+    if(count($this->nodes) > 0) {
+
       $scheme_class = '';
       if($is_front && osc_get_preference('admin_color_scheme') <> '') {
         $scheme_class = ' scheme-' . osc_get_preference('admin_color_scheme');
       }
-      
+
       echo '<div id="header' . ($is_front ? '-admin' : '') . '" class="navbar' . $scheme_class . '"><div class="header-wrapper">';
       osc_run_hook('render_admintoolbar_pre');
 
       foreach($this->nodes as $value) {
         $meta = "";
-        if (isset($value->meta)) {
-          foreach($value->meta as $k => $v)
+        if(isset($value->meta)) {
+          foreach($value->meta as $k => $v) {
             $meta .= $k.'="'.$v.'" ';
+          }
         }
+
         echo '<div id="osc_toolbar_'.$value->id.'" ><a '.$meta.' href="'.$value->href.'" ' . ((isset($value->target)) ? 'target="' . $value->target . '"' : '') . '><span>'.$value->title.'</span></a>';
 
-        if (isset($value->submenu) && is_array($value->submenu)) {
+        if(isset($value->submenu) && is_array($value->submenu)) {
           echo '<nav class="osc_admin_submenu" id="osc_toolbar_sub_'.$value->id.'"><ul>';
           foreach($value->submenu as $subvalue) {
-            if (isset($subvalue->subid)) {
+            if(isset($subvalue->subid)) {
               $submeta = "";
-              if (isset($subvalue->meta)) {
+              if(isset($subvalue->meta)) {
                 foreach($subvalue->meta as $sk => $sv)
                   $submeta .= $sk.'="'.$sv.'" ';
               }
@@ -176,13 +179,13 @@ class AdminToolbar {
         }
       }
       echo '</ul>';
-      
+
       echo '<div id="osc_toolbar_mobilemenu" ' . ($notif_count > 0 ? '' : 'is-empty') . ' style="display:none;"><a class="" href="#"><i class="fa fa-exclamation-circle"></i></a></div>';
 
-      
+
       osc_run_hook('render_admintoolbar');
       echo '<div style="clear: both;"></div></div></div>';  // end of header-wrapper
-      
+
       osc_run_hook('render_admintoolbar_after');
     }
   }

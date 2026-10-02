@@ -37,13 +37,13 @@ function osc_draw_admin_menu() {
   $aMenu = $adminMenu->get_array_menu();
   $current_menu_id = osc_current_menu();
   $is_moderator = osc_is_moderator();
-  
+
   // Get plugins admin menu items from hook. It's HTML content
   ob_start();
   osc_run_hook('admin_menu');
   $plugins_out = ob_get_contents();
   ob_end_clean();
-  
+
   // clean old menus (remove h3 element)
   $plugins_out = preg_replace('|<h3><a .*>(.*)</a></h3>|', '<li class="submenu-divide">$1</li>', $plugins_out);
   $plugins_out = preg_replace('|<ul>|', '', $plugins_out);
@@ -61,7 +61,7 @@ function osc_draw_admin_menu() {
   $current_menu = '';
   $priority = 0;
   $urlLenght = 0;
-  
+
   foreach($aMenu as $key => $value) {
     // --- submenu section
     if(array_key_exists('sub', $value)) {
@@ -113,14 +113,14 @@ function osc_draw_admin_menu() {
 
   $match_length = 0;
   $current_submenu = $current_menu;
-  
+
   foreach($aMenu as $key => $value) {
     // --- submenu section
     if(array_key_exists('sub', $value)) {
       $aSubmenu = $value['sub'];
       foreach($aSubmenu as $aSub) {
         $sub_url = str_replace(array(osc_admin_base_url(true) . '?' , osc_admin_base_url()) , '' , $aSub[1]);
-        
+
         if(strpos($actual_url, $sub_url) === 0 && strlen($sub_url) > $match_length) {
           $current_submenu = $aSub[2];
         }
@@ -128,38 +128,38 @@ function osc_draw_admin_menu() {
     }
   }
 
-  
+
   $value = array();
-  
+
   foreach($aMenu as $key => $value) {
     $sSubmenu = '';
     $credential = $value[3];
-    
+
     if(!$is_moderator || ($is_moderator && $credential == 'moderator')) { // show
       $class = '';
-      
+
       if(array_key_exists('sub', $value)) {
         // submenu
         $aSubmenu = $value['sub'];
 
         if($aSubmenu) {
           $sSubmenu .= '<ul>' . PHP_EOL;
-          
+
           foreach($aSubmenu as $aSub) {
             $credential_sub = isset($aSub[4]) ? $aSub[4] : $aSub[3];
-            
+
             if(!$is_moderator || ($is_moderator && $credential_sub == 'moderator')) { // show
               if(substr($aSub[1], 0, 8) == 'divider_') {
                 $sSubmenu .= '<li class="submenu-divide">'.$aSub[0].'</li>' . PHP_EOL;
               } else {
                 $srtcut = str_replace(array (osc_admin_base_url(true) . '?' , osc_admin_base_url()) , '' , $aSub[1]);
                 $act_url = $actual_url;
-                
+
                 $sSubmenu .= '<li><a id="'.$aSub[2].'" href="'.$aSub[1].'"' . ($aSub[2] == $current_submenu ? ' class="active"' : '') . '>'.$aSub[0].'</a></li>' . PHP_EOL;
               }
             }
           }
-          
+
           // hardcoded plugins/themes under menu plugins
           if($key == 'plugins' && !$is_moderator) {
             $sSubmenu .= $plugins_out;
@@ -173,24 +173,24 @@ function osc_draw_admin_menu() {
       $class = osc_apply_filter('current_admin_menu_' . $value[2],$class);
 
       $icon = '';
-      
+
       if(isset($value[4])) {
         $icon = '<div class="ico ico-48" style="background-image:url(\''.$value[4].'\');">';
       } else {
         $icon = '<div class="ico ico-48 ico-'.$value[2].'">';
       }
 
-      if($current_menu == $value[2]) { 
-        $class = 'current'; 
+      if($current_menu == $value[2]) {
+        $class = 'current';
       }
-      
+
       $sMenu .= '<li id="menu_'.$value[2].'" class="'.$class.'">' . PHP_EOL;
       $sMenu .= '<h3><a id="'.$value[2].'" href="'.$value[1].'">'.$icon.'</div>'.$value[0].'</a></h3>' . PHP_EOL;
       $sMenu .= $sSubmenu;
       $sMenu .= '</li>' . PHP_EOL;
     }
   }
-  
+
   $sMenu .= '</ul>'. PHP_EOL;
 
   $sMenu .= '<div id="show-more">' . PHP_EOL;

@@ -25,7 +25,7 @@
 
 use OpensslCryptor\Cryptor;
 
-if(!defined('BCRYPT_COST')) { 
+if(!defined('BCRYPT_COST')) {
   define('BCRYPT_COST', 15);   // could be reduced i.e. to 8 to speed-up login time
 }
 
@@ -57,7 +57,7 @@ function osc_csrf_token_form() {
   // list($name, $token) = osc_csrfguard_generate_token();
   // return "<input type='hidden' name='CSRFName' value='".$name."' />
   // <input type='hidden' name='CSRFToken' value='".$token."' />";
-  
+
   $token = osc_csrfguard_generate_token();
   return "<input type='hidden' name='octoken' value='".$token."' />";
 }
@@ -71,8 +71,8 @@ function osc_csrf_token_form() {
 function osc_csrf_token_url() {
   // list($name, $token) = osc_csrfguard_generate_token();
   // return 'CSRFName=' . $name . '&CSRFToken=' . $token;
-  
-  // update 420 
+
+  // update 420
   $token = osc_csrfguard_generate_token();
   return 'octoken=' . $token;
 }
@@ -87,23 +87,23 @@ function osc_csrf_check($enabled = true) {
   if(!$enabled) {
     return true;
   }
-  
+
   $error  = false;
   $str_error  = '';
-  
+
   if(Params::getParam('octoken') == '') {
     $str_error = _m('Probable invalid request.') ;
     $error = true;
   } else {
     $token = Params::getParam('octoken');
-    if (!osc_csrfguard_validate_token($token)) {
+    if(!osc_csrfguard_validate_token($token)) {
       $str_error = _m('Invalid CSRF/Security token.');
       $error = true;
     }
   }
-  
 
-  if (defined('IS_AJAX') && $error && IS_AJAX === true) {
+
+  if(defined('IS_AJAX') && $error && IS_AJAX === true) {
     echo json_encode(array('error' => 1, 'msg' => $str_error));
     exit;
   }
@@ -113,7 +113,7 @@ function osc_csrf_check($enabled = true) {
     if(OC_ADMIN) {
       osc_add_flash_error_message($str_error, 'admin');
       error_log($str_error);
-      
+
     } else {
       osc_add_flash_error_message($str_error);
     }
@@ -145,15 +145,15 @@ function osc_is_banned($email = '', $ip = null) {
   if($ip == null) {
     $ip = osc_get_ip();
   }
-  
+
   //$rules = BanRule::newInstance()->listAll();
-  
+
   if(osc_is_ip_banned($ip)) {
     return 2;
   } else if(osc_is_email_banned($email)) {
     return 1;
   }
-  
+
   return 0;
 }
 
@@ -166,27 +166,27 @@ function osc_is_banned($email = '', $ip = null) {
  * @return boolean
  */
 function osc_is_ip_banned($ip, $rules = null) {
-  $ip = trim($ip);
-  
+  $ip = trim((string)$ip);
+
   if($ip == '') {
     return false;
   }
-  
+
   if($rules === null) {
     //$rules = BanRule::newInstance()->listAll();
     $rules = BanRule::newInstance()->getIpRules();
   }
-  
+
   $ip_blocks = explode('.' , $ip);
-  
+
   if(count($ip_blocks) == 4) {
     foreach($rules as $rule) {
       if($rule['s_ip'] != '') {
         $blocks = explode( '.' , $rule['s_ip']);
-        
+
         if(count($blocks)==4) {
           $matched = true;
-          
+
           for($k=0;$k<4;$k++) {
             if(preg_match('|([0-9]+)-([0-9]+)|', $blocks[$k], $match)) {
               if($ip_blocks[$k]<$match[1] || $ip_blocks[$k]>$match[2]) {
@@ -198,7 +198,7 @@ function osc_is_ip_banned($ip, $rules = null) {
               break;
             }
           }
-          
+
           if($matched) {
             BanRule::newInstance()->increaseHit($rule['pk_i_id']);
             return true;
@@ -207,7 +207,7 @@ function osc_is_ip_banned($ip, $rules = null) {
       }
     }
   }
-  
+
   return false;
 }
 
@@ -220,31 +220,31 @@ function osc_is_ip_banned($ip, $rules = null) {
  * @return boolean
  */
 function osc_is_email_banned($email, $rules = null) {
-  $email = strtolower(trim($email));
+  $email = strtolower(trim((string)$email));
 
   if($email == '') {
     return false;
   }
-  
+
   if($rules === null) {
     //$rules = BanRule::newInstance()->listAll();
     $rules = BanRule::newInstance()->getEmailRules();
   }
-  
+
   if(is_array($rules) && count($rules) > 0) {  // update 450 - whole function
     foreach($rules as $rule) {
       $rule_email = str_replace(array('*', '|'), array('.*', "\\"), str_replace('.', "\.", strtolower(trim($rule['s_email']))));
       $rlist = array_filter(array_map('trim', explode(',', $rule_email)));
-      
+
       if(is_array($rlist) && count($rlist) > 0) {
         foreach($rlist as $ritem) {
           if($ritem != '') {
-            if (isset($ritem[0]) && $ritem[0] === '!') {
+            if(isset($ritem[0]) && $ritem[0] === '!') {
               $ritem = '|^((?'.$ritem.').*)$|';
             } else {
               $ritem = '|^'.$ritem.'$|';
             }
-            
+
             if(preg_match($ritem, $email)) {
               //echo sprintf('Email %s banned based on rule %s', $email, $ritem) . PHP_EOL;
               BanRule::newInstance()->increaseHit($rule['pk_i_id']);
@@ -255,7 +255,7 @@ function osc_is_email_banned($email, $rules = null) {
       }
     }
   }
-  
+
   return false;
 }
 
@@ -271,9 +271,9 @@ function osc_is_username_blacklisted($username) {
   if(preg_replace('|(\d+)|', '', $username) == '') {
     return true;
   }
-  
+
   $blacklist = explode(',', osc_username_blacklist());
-  
+
   if(is_array($blacklist) && count($blacklist) > 0) {
     foreach($blacklist as $bl) {
       if(stripos($username, $bl) !== false) {
@@ -281,7 +281,7 @@ function osc_is_username_blacklisted($username) {
       }
     }
   }
-  
+
   return false;
 }
 
@@ -333,7 +333,7 @@ function osc_encrypt_alert( $alert ) {
   }
 
   // COMPATIBILITY
-  while (strlen($string) % 32 != 0) {
+  while(strlen($string) % 32 != 0) {
     $string .= "\0";
   }
 
@@ -407,30 +407,30 @@ function osc_random_string( $length ) {
   $buffer = '';
   $buffer_valid = false;
 
-  if (function_exists('openssl_random_pseudo_bytes')) {
+  if(function_exists('openssl_random_pseudo_bytes')) {
     $buffer = openssl_random_pseudo_bytes($length);
-    if ($buffer) {
+    if($buffer) {
       $buffer_valid = true;
     }
   }
 
-  if (!$buffer_valid && is_readable('/dev/urandom')) {
+  if(!$buffer_valid && is_readable('/dev/urandom')) {
     $f  = fopen( '/dev/urandom' , 'rb' );
     $read = strlen($buffer);
-    while ($read < $length) {
+    while($read < $length) {
       $buffer .= fread($f, $length - $read);
       $read = strlen($buffer);
     }
     fclose($f);
-    if ($read >= $length) {
+    if($read >= $length) {
       $buffer_valid = true;
     }
   }
 
-  if (!$buffer_valid || strlen($buffer) < $length) {
+  if(!$buffer_valid || strlen($buffer) < $length) {
     $bl = strlen($buffer);
-    for ($i = 0; $i < $length; $i++) {
-      if ($i < $bl) {
+    for($i = 0; $i < $length; $i++) {
+      if($i < $bl) {
       $buffer[ $i ] ^= chr( mt_rand( 0 , 255 ) );
       } else {
       $buffer .= chr(mt_rand(0, 255));

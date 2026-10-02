@@ -26,7 +26,7 @@ class Cookie {
   public $domain = '';
   public $secure = false;
   public $httponly = true;
-  
+
   private static $instance;
 
   /**
@@ -36,7 +36,7 @@ class Cookie {
     if(!self::$instance instanceof self) {
       self::$instance = new self;
     }
-    
+
     return self::$instance;
   }
 
@@ -47,7 +47,7 @@ class Cookie {
     // Set cookies path - sanitize it
     $this->path = trim(REL_WEB_URL, '/ ');
     $this->path = ($this->path === '' ? '/' : $this->path);
-    
+
     // Set cookies domain
     if(defined('COOKIE_DOMAIN') && trim(COOKIE_DOMAIN, './ ') != '') {
       $this->domain = trim(COOKIE_DOMAIN, './ ');   // in config, define domain without leading dot, ie website.com
@@ -59,11 +59,11 @@ class Cookie {
     if($this->domain != '' && strpos($this->domain, 'http') !== false) {
       $this->domain = parse_url($this->domain, PHP_URL_HOST) ?? $this->domain;
     }
-    
+
     if(osc_is_ssl()) {
       $this->secure = true;
     }
-    
+
     // $http_url = osc_is_ssl() ? "https://" : "http://";
     // $web_path = ($domain == '' ? WEB_PATH : $http_url . $domain);
     // $this->name = md5($web_path);
@@ -81,7 +81,7 @@ class Cookie {
     if(!isset($_COOKIE['oc_master_id']) || $_COOKIE['oc_master_id'] == '') {
       $this->_setcookie('oc_master_id', bin2hex(random_bytes(6)));
     }
-    
+
     // Set cookie timestamp
     if(!isset($_COOKIE['oc_master_created']) || $_COOKIE['oc_master_created'] == '') {
       $this->_setcookie('oc_master_created', date('Y-m-d_H-i-s'));
@@ -90,7 +90,7 @@ class Cookie {
     // Get values from Osclass entry and set cookies
     if(isset($_COOKIE[$this->name]) && $_COOKIE[$this->name] != '') {
       $cookies_arr = $this->decodeCookieArray($_COOKIE[$this->name]);
-      
+
       if(count($cookies_arr) > 0) {
         foreach($cookies_arr as $ckey => $cval) {
           $this->_setcookie($ckey, $cval);    // run setcookie & update $this->val
@@ -99,23 +99,23 @@ class Cookie {
     }
   }
 
-  
+
   // Set cookie in uniform way
   public function _setcookie($key, $value = '', $httponly = NULL) {
     // Set if cookie can be read by javascript or no ($httponly = true means javascript cannot read cookie value)
-    
+
     if($httponly !== NULL) {
       $httponly = ($httponly === true ? true : false);
-      
+
     } else {
       $httponly = $this->httponly;
-      
+
       // Osclass cookies & explicitely defined as secure cookies are always httponly. Ie: oc_userId, eps_secret_secure
       if(strpos($key, 'oc_') === 0 || stripos($key, '_secure') !== false) {
         $httponly = true;
-        
+
       } else if(stripos($key, '_unsecure') !== false || stripos($key, '_unsec') !== false || stripos($key, '_js') !== false || strpos($key, 'ocx_') === 0 || strpos($key, 'ocjs_') === 0 || strpos($key, 'oc_js_') === 0 || strpos($key, 'js_') === 0) {
-      // } else if (preg_match('/(_unsecure|_unsec|_js|^ocx_|^ocjs_|^js_)/i', $key)) {
+      // } elseif(preg_match('/(_unsecure|_unsec|_js|^ocx_|^ocjs_|^js_)/i', $key)) {
         $httponly = false;
       }
     }
@@ -132,7 +132,7 @@ class Cookie {
       if(!in_array($key, array($this->name, 'oc_master_id', 'oc_master_created', 'oc_http_referer_history'))) {
         $this->val[$key_clean] = $value;    // Do not encode value stored in class
       }
-      
+
       if(PHP_VERSION_ID >= 70300) {
         setcookie($key_clean, $value_clean, [
           'expires' => $this->expires,
@@ -142,13 +142,13 @@ class Cookie {
           'httponly' => $httponly,
           'samesite' => 'Lax'
         ]);
-        
+
       } else {
         setcookie($key_clean, $value_clean, $this->expires, $this->path, $this->domain, $this->secure, $httponly);
       }
-      
+
       return true;
-      
+
     // Drop cookie
     } else {
       if(PHP_VERSION_ID >= 70300) {
@@ -160,22 +160,22 @@ class Cookie {
           'httponly' => $httponly,
           'samesite' => 'Lax'
         ]);
-        
+
       } else {
         setcookie($key_clean, '', time() - 3600, $this->path, $this->domain, $this->secure, $httponly);
       }
-      
+
       unset($this->val[$key_clean], $_COOKIE[$key_clean]);
       return false;
     }
   }
-  
+
 
   // Define cookie value into array
   public function push($key, $value = '', $httponly = NULL) {
     $this->_setcookie($key, $value, $httponly);
   }
- 
+
 
   // Update osclass cookie entry
   public function set() {
@@ -191,11 +191,11 @@ class Cookie {
     if(isset($this->val[$key_clean])) {
       return $this->val[$key_clean];
     }
-    
+
     if(isset($COOKIE[$key_clean])) {
       return $COOKIE[$key_clean];
     }
-    
+
     return '';
   }
 
@@ -204,7 +204,7 @@ class Cookie {
   public function _get($key) {
     return $this->get_value($key);
   }
-  
+
   public function _set($key, $value = '', $httponly = NULL) {
     $this->push($key, $value, $httponly);
     $this->set();
@@ -223,7 +223,7 @@ class Cookie {
   public function _count() {
     return $this->num_vals();
   }
-  
+
 
   // Remove one cookie
   public function pop($key) {
@@ -250,12 +250,11 @@ class Cookie {
   }
 
 
-
   // Encode cookies
   // Stores cookies as one value in format key1=value1|key2=value2|key3=value3
   public function encodeCookieArray($data = array()) {
     $pairs = array();
- 
+
     if(is_array($data) && count($data) > 0) {
       // ksort($data);
 
@@ -275,14 +274,14 @@ class Cookie {
     if($encoded) {
       $cookie = $this->decodeCookieValue($cookie);
     }
-    
+
     $result = array();
     $pairs = explode('|', $cookie);
 
     if(count($pairs) > 0) {
       foreach($pairs as $pair) {
         $parts = explode('=', $pair, 2);
-        
+
         if(count($parts) === 2) {
           $result[$this->decodeCookieValue($parts[0])] = $this->decodeCookieValue($parts[1]);
         } else {
@@ -294,8 +293,8 @@ class Cookie {
     // ksort($result);
     return $result;
   }
-  
-  
+
+
   // Encode cookie value
   public function encodeCookieValue($value = '') {
     return rawurlencode((string)$value);
@@ -322,11 +321,11 @@ class Cookie {
       $this->_drop('oc_http_referer_history');
       return array();
     }
-    
+
     $ref_hist = (array)$this->_getRefererHistory();
     $http_ref = Params::getServerParam('HTTP_REFERER', false, false);
     $http_ref_path = parse_url($http_ref, PHP_URL_PATH);
-    
+
     // Check if URL is OK
     if(filter_var($http_ref, FILTER_VALIDATE_URL) === false) {
       return false;
@@ -347,7 +346,7 @@ class Cookie {
       array_unshift($ref_hist, $value);                                  // Add latest page at first array index position
       $ref_hist = array_slice(array_filter(array_unique($ref_hist)), 0, 5);     // Keep last XY urls
     }
-    
+
     $this->_set('oc_http_referer_history', $this->encodeUrlArray($ref_hist));
   }
 
@@ -358,13 +357,13 @@ class Cookie {
       $this->_drop('oc_http_referer_history');
       return array();
     }
-    
+
     $ref_hist = $this->get_value('oc_http_referer_history');
     $ref_hist = $ref_hist != '' ? $this->decodeUrlArray($ref_hist) : array();
-    
+
     return (array)$ref_hist;
   }
-  
+
 
   // From referer history, get last valid (that does not match to login/registration/redirect page
   public function _getTrueReferer() {
@@ -377,16 +376,16 @@ class Cookie {
         if($this->urlValidForHist($h) == false) {
           continue;
         }
-        
+
         $current = osc_get_current_url();
-        
+
         if(OC_ADMIN === true || stripos(osc_get_current_url(), OC_ADMIN_FOLDER)) {
           $is_backoffice = true;
         } else {
           $is_backoffice = false;
         }
-        
-      
+
+
         // For front - get front url, for oc-admin - get oc-admin url
         if($is_backoffice === true && stripos($h, osc_admin_base_url()) === false || $is_backoffice === false && stripos($h, osc_admin_base_url()) !== false) {
           continue;
@@ -396,15 +395,15 @@ class Cookie {
         if(in_array($h, array(osc_search_url(), osc_contact_url(), osc_item_post_url(), osc_user_dashboard_url(), osc_user_items_url(), osc_user_profile_url()))) {
           return $h;
         }
-        
+
         return $h;
       }
     }
 
     return false;
   }
-  
-  
+
+
   // Encode url array
   public function encodeUrlArray($data = array()) {
     $url_arr = array();
@@ -440,7 +439,7 @@ class Cookie {
   public function urlValidForHist($url = '') {
     $url = trim((string)$url);
     $uri = parse_url($url, PHP_URL_PATH);
-    
+
     // Check if it does not refer 3rd party url
     if($url == '' || strlen($url) <= 5 || stripos($url, osc_base_url()) === false) {
       return false;
@@ -450,27 +449,27 @@ class Cookie {
     if(!filter_var($url, FILTER_VALIDATE_URL)) {
       return false;
     }
-    
+
     // File url
     if(preg_match('/\.[a-zA-Z0-9]{3,4}(\?.*)?$/', $uri)) {
       return false;
     }
-    
+
     // Check if it's wrong page.
     // if(in_array($url, array(osc_base_url(), osc_base_url(true), osc_base_url(true, true), osc_base_url(false, true), osc_admin_base_url(), osc_admin_base_url(true), osc_admin_base_url(true) . '&page=login', osc_user_logout_url(), osc_user_login_url(), osc_register_account_url()))) {
     if(in_array($url, array(osc_admin_base_url(true) . '&page=login', osc_user_logout_url(), osc_user_login_url(), osc_register_account_url(), osc_recover_user_password_url(), osc_change_user_password_url(), osc_change_user_email_url()))) {
       return false;
     }
-    
+
     // Check if it contains blocked word
     $blocked_words = array(
       'login','logout','register','recover','forgot','activate',
       osc_get_preference('rewrite_user_login'),osc_get_preference('rewrite_user_logout'),osc_get_preference('rewrite_user_register'),osc_get_preference('rewrite_user_forgot'),osc_get_preference('rewrite_user_recover'),osc_get_preference('rewrite_user_change_password'),osc_get_preference('rewrite_user_change_email'),osc_get_preference('rewrite_user_change_username'),osc_get_preference('rewrite_user_change_email_confirm'),osc_get_preference('rewrite_user_activate'),
       '/images/','/img/','/css/','/js/','/minify/','/themes/','/plugins/','/oc-content/','/uploads/'
     );
-    
+
     $blocked_words = array_filter(array_unique(array_map('trim', $blocked_words)));
-    
+
     foreach($blocked_words as $bword) {
       if(stripos($uri, $bword) !== false) {
         return false;

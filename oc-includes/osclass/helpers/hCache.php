@@ -62,7 +62,7 @@ function osc_cache_flush() {
 function osc_cache_init() {
   try {
   Object_Cache_Factory::newInstance();
-  } catch ( Exception $e ) {
+  } catch(Exception $e ) {
   }
 }
 
@@ -76,12 +76,12 @@ function osc_cache_init() {
  */
 function osc_cache_get( $key , &$found ) {
   $key .= osc_current_user_locale();
-  
+
   // disable cache completely in backoffice
   if(defined('OC_ADMIN') && OC_ADMIN === true) {
     return false;
   }
-  
+
   return Object_Cache_Factory::newInstance()->get($key, $found);
 }
 

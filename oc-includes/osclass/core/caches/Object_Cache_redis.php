@@ -51,15 +51,20 @@ class Object_Cache_redis implements iObject_Cache {
   public $default_expiration = 60;
 
   /**
-   * Adds data to the cache (will overwrite existing key).
+   * Adds data to the cache only if the key does not already exist.
    * @since 8.1
    *
    * @param int|string $key What to call the contents in the cache
    * @param mixed $data The contents to store in the cache
    * @param int $expire When to expire the cache contents
-   * @return bool True on success, false on failure
+   * @return bool False if cache key already exists, true on success
    */
   public function add($key, $data, $expire = 0) {
+    // FIX: add() must not overwrite an existing key - check local cache first
+    if(isset($this->cache[$key])) {
+      return false;
+    }
+
     if(is_object($data)) {
       $data = clone $data;
     }
@@ -71,8 +76,10 @@ class Object_Cache_redis implements iObject_Cache {
 
     $expire = ($expire == 0) ? $this->default_expiration : $expire;
 
-    // Always write (overwrite if exists) as requested
-    $result = $this->_redis->setex($key, $expire, serialize(array($store_data, time(), $expire)));
+    // FIX: use atomic NX+EX so Redis itself enforces the "only if not exists" guarantee,
+    // preventing a race condition between the isset() check above and the write.
+    // FIX: serialize only $store_data (same format as set()) so get() can deserialize uniformly.
+    $result = $this->_redis->set($key, serialize($store_data), array('nx', 'ex' => $expire));
 
     if($result) {
       $this->cache[$key] = $data;
@@ -121,26 +128,26 @@ class Object_Cache_redis implements iObject_Cache {
   public function get($key, &$found = null) {
     $found = false;
 
+    // Serve from local in-process cache first
     if(isset($this->cache[$key])) {
       $found = true;
-      $value = is_object($this->cache[$key]) ? clone $this->cache[$key] : $this->cache[$key];
       ++$this->cache_hits;
-      return $value;
+      return is_object($this->cache[$key]) ? clone $this->cache[$key] : $this->cache[$key];
     }
 
     $raw = $this->_redis->get($key);
+
+    // FIX: Redis returns false on a miss; that is the only falsy return value
+    // because all stored values are serialized strings (never the bare boolean false).
     if($raw === false) {
       ++$this->cache_misses;
       return false;
     }
 
-    $unserialized = @unserialize($raw);
-    if(is_array($unserialized) && isset($unserialized[0])) {
-      $value = $unserialized[0];
-    } else {
-      $value = $unserialized;
-    }
+    // FIX: uniform unserialization - both add() and set() now store just $store_data serialized
+    $value = @unserialize($raw);
 
+    // Convert ArrayObject back to plain array (mirrors the storage conversion in add/set)
     if(is_object($value) && 'ArrayObject' === get_class($value)) {
       $value = $value->getArrayCopy();
     }
@@ -184,12 +191,12 @@ class Object_Cache_redis implements iObject_Cache {
    */
   public function stats() {
     echo '<fieldset id="osc-cache-logs" class="osc-cache-redis" style="border:1px solid #000;line-height:1.4;padding:8px 10px 10px 10px;margin: 12px;width:calc(100% - 24px);background-color:#fff;">' . PHP_EOL;
-    echo '<legend style="font-size:14px;font-weight:600;padding:4px 8px;border:1px solid #000;background:#fff;">' . ucwords($this->_get_cache()) . ' stats (Cache hits: ' . $this->cache_hits .' - Cache misses: ' . $this->cache_misses . ')</legend>' . PHP_EOL;
+    echo '<legend style="font-size:14px;font-weight:600;padding:4px 8px;border:1px solid #000;background:#fff;">' . ucwords($this->_get_cache()) . ' stats (Cache hits: ' . $this->cache_hits . ' - Cache misses: ' . $this->cache_misses . ')</legend>' . PHP_EOL;
     echo '<table style="border-collapse: collapse;width:100%;font-size:13px;padding:0;border-spacing:0;font-family:monospace;line-height:1.4;">' . PHP_EOL;
-    if (count($this->cache) == 0) {
+    if(count($this->cache) == 0) {
       echo '<tr><td>No cache entries</td></tr>' . PHP_EOL;
     } else {
-      foreach ($this->cache as $key => $data) {
+      foreach($this->cache as $key => $data) {
         echo '<tr>' . PHP_EOL;
         echo '<td style="padding:6px 8px;text-align:left;vertical-align:top;border: 1px solid #ccc;min-width:100px;">' . $key . '</td>' . PHP_EOL;
         echo '<td style="padding:6px 8px;text-align:left;vertical-align:top;border: 1px solid #ccc;">' . json_encode($data) . '</td>' . PHP_EOL;
@@ -250,7 +257,7 @@ class Object_Cache_redis implements iObject_Cache {
           $this->_redis->auth($_config['password']);
         }
         $this->_redis->select($_config['database']);
-      } catch (RedisException $e) {
+      } catch(RedisException $e) {
         error_log('Redis connection failed: ' . $e->getMessage());
       }
       break; // only first server used

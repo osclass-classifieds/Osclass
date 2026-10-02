@@ -35,7 +35,7 @@ class PluginCategory extends DAO
    */
   public static function newInstance()
   {
-    if( !self::$instance instanceof self ) {
+    if(!self::$instance instanceof self ) {
       self::$instance = new self;
     }
     return self::$instance;
@@ -70,7 +70,7 @@ class PluginCategory extends DAO
 
     $result = $this->dao->get();
 
-    if( $result == false ) {
+    if($result == false ) {
       return array();
     }
 
@@ -93,7 +93,7 @@ class PluginCategory extends DAO
 
     $result = $this->dao->get();
 
-    if( $result == false ) {
+    if($result == false ) {
       return array();
     }
 
@@ -123,11 +123,11 @@ class PluginCategory extends DAO
 
     $result = $this->dao->get();
 
-    if( $result == false ) {
+    if($result == false ) {
       return false;
     }
 
-    if( $result->numRows() == 0 ) {
+    if($result->numRows() == 0 ) {
       return false;
     }
 

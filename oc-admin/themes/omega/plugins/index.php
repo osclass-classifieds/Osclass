@@ -18,7 +18,7 @@ if(!defined('ABS_PATH')) exit('ABS_PATH is not loaded. Direct access is not allo
 
 
 function addHelp() {
-  echo '<p>' . __("Install or uninstall the plugins available in your installation. In some cases, you'll have to configure the plugin in order to get it to work.") . '</p>';
+  echo '<p>' . __("Install or uninstall plugins on your site. Upload a .zip file or download plugins from the Market. Configure each plugin after installation if required.") . '</p>';
 }
 
 osc_add_hook('help_box','addHelp');
@@ -33,15 +33,15 @@ if(!function_exists('addBodyClass')){
 osc_add_filter('admin_body_class','addBodyClass');
 
 
-function customPageHeader() { 
+function customPageHeader() {
   ?>
-  <h1><?php _e('Manage Plugins'); ?>
+  <h1><?php _e('Plugins'); ?>
     <a href="#" class="btn ico ico-32 ico-help float-right"></a>
     <a href="<?php echo osc_admin_base_url(true); ?>?page=plugins&amp;action=add" class="btn btn-green ico ico-add-white float-right"><?php _e('Add plugin'); ?></a>
   </h1>
   </div>
   <?php osc_show_flash_message('admin'); ?>
-  <?php if( Params::getParam('error') != '' ) { ?>
+  <?php if(Params::getParam('error') != '' ) { ?>
     <!-- flash message -->
     <div class="flashmessage flashmessage-error" style="display:block">
       <?php _e("Plugin couldn't be installed because it triggered a <strong>fatal error</strong>"); ?>
@@ -54,7 +54,7 @@ function customPageHeader() {
 osc_add_hook('admin_page_header','customPageHeader');
 
 function customPageTitle($string) {
-  return sprintf(__('Plugins - %s'), $string);
+  return sprintf(__('%s - %s'), __('Plugins'), $string);
 }
 osc_add_filter('admin_title', 'customPageTitle');
 
@@ -64,7 +64,7 @@ function customHead() { ?>
   <script type="text/javascript">
     $(document).ready(function(){
       omg_plugins_update_list();
-      
+
       $('body').on('click', 'a.plugin-btn', function(e) {
         e.preventDefault();
         document.location.hash = $(this).attr('href');
@@ -73,8 +73,8 @@ function customHead() { ?>
 
       $('input:hidden[name="installed"]').each(function() {
         $(this).parent().parent().children().css('background', 'none');
-        if( $(this).val() == '1' ) {
-          if( $(this).attr("enabled") == 1 ) {
+        if($(this).val() == '1' ) {
+          if($(this).attr("enabled") == 1 ) {
             $(this).parent().parent().css('background-color', '#EDFFDF');
           } else {
             $(this).parent().parent().css('background-color', '#FFFFDF');
@@ -101,26 +101,26 @@ function customHead() { ?>
         autoOpen: false,
         modal: true
       });
-      
+
       $("#bulk-actions-submit").click(function() {
         if($("#bulk-actions-submit").prop("clicked")==false) {
           $("#bulk-actions-submit").prop("clicked", true);
           $("#datatablesFormPlugin").submit();
         }
       });
-      
+
       $("#bulk-actions-cancel").click(function() {
         $("#datatablesFormPlugin").attr('data-dialog-open', 'false');
         $('#dialog-bulk-actions').dialog('close');
       });
-      
+
       // dialog bulk actions function
       $("#datatablesFormPlugin").submit(function() {
-        if( $("#bulk_actions option:selected").val() == "" ) {
+        if($("#bulk_actions option:selected").val() == "" ) {
           return false;
         }
 
-        if( $("#datatablesFormPlugin").attr('data-dialog-open') == "true" ) {
+        if($("#datatablesFormPlugin").attr('data-dialog-open') == "true" ) {
           return true;
         }
 
@@ -131,12 +131,12 @@ function customHead() { ?>
         $("#dialog-bulk-actions").dialog('open');
         return false;
       });
-      
+
       // check_all bulkactions
       $("#check_all").change(function(){
         var isChecked = $(this).prop("checked");
         $('.col-bulkactions input').each( function() {
-          if( isChecked == 1 ) {
+          if(isChecked == 1 ) {
             this.checked = true;
           } else {
             this.checked = false;
@@ -152,24 +152,24 @@ function customHead() { ?>
       $("#dialog-uninstall").dialog('open');
       return false;
     }
-    
+
     function omg_plugins_update_list(frag = -1) {
       var boxId = '';
-      
+
       if(frag === -1) {
         var frag = window.location.hash;
       }
-      
+
       if(window.location.hash !== '') {
         var boxId = (window.location.hash).substring(1);
       }
-      
+
       if(boxId === 'update-plugins') {
         $('div.isTab#upload-plugins, a.update-plugins-button, #plg-show-bot').hide(0);
         $('div.isTab#update-plugins, a.upload-plugins-button').show(0);
       } else {
         $('div.isTab#upload-plugins, a.update-plugins-button, #plg-show-bot').show(0);
-        $('div.isTab#update-plugins, a.upload-plugins-button').hide(0);      
+        $('div.isTab#update-plugins, a.upload-plugins-button').hide(0);
       }
     }
   </script>
@@ -190,55 +190,79 @@ $tab_index = 2;
   <?php
     $aPluginsToUpdate = json_decode(osc_get_preference('plugins_to_update'));
     $bPluginsToUpdate = is_array($aPluginsToUpdate) ? true : false;
-    
+
     if($bPluginsToUpdate && count($aPluginsToUpdate) > 0) {
       $tab_index = 0;
     }
-    
+
     $search_term = trim(osc_esc_html(Params::getParam('sSearch')));
     $search_term = ($search_term != '' ? $search_term : osc_get_session('pluginSearchTerm'));
+    $hasActiveFilters = false;
+    $filterExclude = array('page', 'action', 'pluginSearchSubmit', 'iDisplayLength', 'sort', 'direction', 'iPage');
+
+    foreach(Params::getParamsAsArray('get') as $key => $value) {
+      if(in_array($key, $filterExclude, true)) {
+        continue;
+      }
+
+      if(is_array($value)) {
+        foreach($value as $v) {
+          if(trim((string)$v) != '') {
+            $hasActiveFilters = true;
+            break 2;
+          }
+        }
+      } else if(trim((string)$value) != '') {
+        $hasActiveFilters = true;
+        break;
+      }
+    }
   ?>
-  
+
   <div class="display-select-top">
     <form method="get" action="<?php echo osc_admin_base_url(true); ?>" class="inline nocsrf" id="shortcut-filters">
       <input type="hidden" name="pluginSearchSubmit" value="1"/>
-      
+
       <?php foreach(Params::getParamsAsArray('get') as $key => $value) { ?>
         <?php if(!in_array($key, array('pluginSearchSubmit', 'iDisplayLength', 'sSearch'))) { ?>
           <input type="hidden" name="<?php echo osc_esc_html(strip_tags($key)); ?>" value="<?php echo osc_esc_html(strip_tags($value)); ?>" />
         <?php } ?>
       <?php } ?>
-      
+
+      <select name="iDisplayLength" class="select-box-extra select-box-medium float-left" onchange="this.form.submit();" >
+        <option value="10" <?php if(Params::getParam('iDisplayLength') == 10 ) echo 'selected'; ?> ><?php printf(__('%d plugins'), 10); ?></option>
+        <option value="25" <?php if(Params::getParam('iDisplayLength') == 25 ) echo 'selected'; ?> ><?php printf(__('%d plugins'), 25); ?></option>
+        <option value="50" <?php if(Params::getParam('iDisplayLength') == 50 ) echo 'selected'; ?> ><?php printf(__('%d plugins'), 50); ?></option>
+        <option value="100" <?php if(Params::getParam('iDisplayLength') == 100 ) echo 'selected'; ?> ><?php printf(__('%d plugins'), 100); ?></option>
+        <option value="500" <?php if(Params::getParam('iDisplayLength') == 500 ) echo 'selected'; ?> ><?php printf(__('%d plugins'), 500); ?></option>
+      </select>
+
+      <?php if($hasActiveFilters) { ?>
+        <a id="btn-hide-filters" href="<?php echo osc_admin_base_url(true); ?>?page=plugins" class="btn"><?php _e('Reset filters'); ?></a>
+      <?php } ?>
+
       <input type="text" name="sSearch" id="fPattern" class="input-text input-actions" value="<?php echo $search_term; ?>" placeholder="<?php echo osc_esc_html(__('Search for plugin')); ?>" />
       <input type="submit" class="btn submit-right" value="<?php echo osc_esc_html(__('Find')); ?>">
-      
-      <select name="iDisplayLength" class="select-box-extra select-box-medium float-left" onchange="this.form.submit();" >
-        <option value="10" <?php if( Params::getParam('iDisplayLength') == 10 ) echo 'selected'; ?> ><?php printf(__('%d plugins'), 10); ?></option>
-        <option value="25" <?php if( Params::getParam('iDisplayLength') == 25 ) echo 'selected'; ?> ><?php printf(__('%d plugins'), 25); ?></option>
-        <option value="50" <?php if( Params::getParam('iDisplayLength') == 50 ) echo 'selected'; ?> ><?php printf(__('%d plugins'), 50); ?></option>
-        <option value="100" <?php if( Params::getParam('iDisplayLength') == 100 ) echo 'selected'; ?> ><?php printf(__('%d plugins'), 100); ?></option>
-        <option value="500" <?php if( Params::getParam('iDisplayLength') == 500 ) echo 'selected'; ?> ><?php printf(__('%d plugins'), 500); ?></option>
-      </select>
     </form>
   </div>
-    
+
   <form class="" id="datatablesFormPlugin" action="<?php echo osc_admin_base_url(true); ?>?page=plugins" method="post" data-dialog-open="false">
     <input type="hidden" name="action" value="bulk_actions" />
-    
+
     <div id="bulk-actions">
       <label>
         <?php osc_print_bulk_actions('bulk_actions', 'bulk_actions', __get('bulk_options'), 'select-box-extra'); ?>
         <input type="submit" id="bulk_apply" class="btn" value="<?php echo osc_esc_html( __('Apply') ); ?>" />
       </label>
-      
+
       <a href="#" class="btn btn-submit plugin-btn upload-plugins-button" style="display:none"><?php _e('Show all plugins'); ?></a>
-      
+
       <?php if($bPluginsToUpdate && count($aPluginsToUpdate) > 0) { ?>
         <a href="#update-plugins" class="btn btn-submit plugin-btn update-plugins-button"><?php _e('Show plugins to update'); ?></a>
       <?php } ?>
-    </div>  
+    </div>
 
-    
+
     <div class="isTab" id="upload-plugins">
       <table class="table" cellpadding="0" cellspacing="0">
         <thead>
@@ -255,7 +279,7 @@ $tab_index = 2;
         </thead>
         <tbody>
         <?php if(is_array($aData['aaData']) && count($aData['aaData'])>0) { ?>
-          <?php foreach( $aData['aaData'] as $array) { ?>
+          <?php foreach($aData['aaData'] as $array) { ?>
             <tr>
               <?php foreach($array as $key => $value) { ?>
                 <td class="col-<?php echo $key; ?>">
@@ -267,7 +291,7 @@ $tab_index = 2;
         <?php } else { ?>
           <tr>
             <td colspan="8" class="text-center">
-              <p style="padding:20px 0;margin:0;"><?php _e('No plugins has been found'); ?></p>
+              <p style="padding:20px 0;margin:0;"><?php _e('No plugins have been found'); ?></p>
             </td>
           </tr>
         <?php } ?>
@@ -275,38 +299,38 @@ $tab_index = 2;
       </table>
     </div>
   </form>
-  
-  
+
+
   <div id="plg-show-bot">
     <?php
       function showingResults(){
         $aData = __get('aPlugins');
-        echo '<ul class="showing-results"><li><span>'.osc_pagination_showing((Params::getParam('iPage')-1)*$aData['iDisplayLength']+1, ((Params::getParam('iPage')-1)*$aData['iDisplayLength'])+count(is_array($aData['aaData']) ? $aData['aaData'] : array()), $aData['iTotalDisplayRecords']).'</span></li></ul>';
+        echo '<ul class="showing-results"><li><span>'.osc_pagination_showing((Params::getParam('iPage')-1)*$aData['iDisplayLength']+1, ((Params::getParam('iPage')-1)*$aData['iDisplayLength'])+count(is_array($aData['aaData']) ? $aData['aaData'] : array()), $aData['iTotalDisplayRecords'], (isset($aData['iTotalRecords']) ? $aData['iTotalRecords'] : null)).'</span></li></ul>';
       }
-      
+
       osc_add_hook('before_show_pagination_admin','showingResults');
       osc_show_pagination_admin($aData);
     ?>
 
     <div class="display-select-bottom">
       <form method="get" action="<?php echo osc_admin_base_url(true); ?>"  class="inline nocsrf">
-        <?php foreach( Params::getParamsAsArray('get') as $key => $value ) { ?>
-          <?php if( $key != 'iDisplayLength' ) { ?>
+        <?php foreach(Params::getParamsAsArray('get') as $key => $value ) { ?>
+          <?php if($key != 'iDisplayLength' ) { ?>
             <input type="hidden" name="<?php echo osc_esc_html(strip_tags($key)); ?>" value="<?php echo osc_esc_html(strip_tags($value)); ?>" />
           <?php } ?>
         <?php } ?>
-        
+
         <select name="iDisplayLength" class="select-box-extra select-box-medium float-left" onchange="this.form.submit();" >
-          <option value="10" <?php if( Params::getParam('iDisplayLength') == 10 ) echo 'selected'; ?> ><?php printf(__('%d plugins'), 10); ?></option>
-          <option value="25" <?php if( Params::getParam('iDisplayLength') == 25 ) echo 'selected'; ?> ><?php printf(__('%d plugins'), 25); ?></option>
-          <option value="50" <?php if( Params::getParam('iDisplayLength') == 50 ) echo 'selected'; ?> ><?php printf(__('%d plugins'), 50); ?></option>
-          <option value="100" <?php if( Params::getParam('iDisplayLength') == 100 ) echo 'selected'; ?> ><?php printf(__('%d plugins'), 100); ?></option>
-          <option value="500" <?php if( Params::getParam('iDisplayLength') == 500 ) echo 'selected'; ?> ><?php printf(__('%d plugins'), 500); ?></option>
+          <option value="10" <?php if(Params::getParam('iDisplayLength') == 10 ) echo 'selected'; ?> ><?php printf(__('%d plugins'), 10); ?></option>
+          <option value="25" <?php if(Params::getParam('iDisplayLength') == 25 ) echo 'selected'; ?> ><?php printf(__('%d plugins'), 25); ?></option>
+          <option value="50" <?php if(Params::getParam('iDisplayLength') == 50 ) echo 'selected'; ?> ><?php printf(__('%d plugins'), 50); ?></option>
+          <option value="100" <?php if(Params::getParam('iDisplayLength') == 100 ) echo 'selected'; ?> ><?php printf(__('%d plugins'), 100); ?></option>
+          <option value="500" <?php if(Params::getParam('iDisplayLength') == 500 ) echo 'selected'; ?> ><?php printf(__('%d plugins'), 500); ?></option>
         </select>
       </form>
     </div>
   </div>
-  
+
   <?php if($bPluginsToUpdate && count($aPluginsToUpdate) > 0) { ?>
     <div class="isTab" id="update-plugins" style="display:none;">
       <?php
@@ -351,7 +375,7 @@ $tab_index = 2;
           <?php } else { ?>
             <tr>
               <td colspan="8" class="text-center">
-                <p style="padding:20px 0;margin:0;"><?php _e('No plugins has been found'); ?></p>
+                <p style="padding:20px 0;margin:0;"><?php _e('No plugins have been found'); ?></p>
               </td>
             </tr>
           <?php } ?>
@@ -359,7 +383,7 @@ $tab_index = 2;
       </table>
     </div>
   <?php } ?>
-  
+
   <div id="market_installer" class="has-form-actions hide">
     <form name="mkti" action="<?php echo osc_admin_base_url(true); ?>?page=ajax&action=market&<?php echo osc_csrf_token_url(); ?>" method="post">
       <input type="hidden" name="section" value="plugins" />
@@ -407,7 +431,7 @@ $tab_index = 2;
   <input type="hidden" name="plugin" value="" />
   <div class="form-horizontal">
     <div class="form-row">
-      <?php _e('This action can not be undone. Uninstalling plugins may result in a permanent loss of data. Are you sure you want to continue?'); ?>
+      <?php _e('This action cannot be undone. Uninstalling plugins may result in a permanent loss of data. Are you sure you want to continue?'); ?>
     </div>
     <div class="form-actions">
       <div class="wrapper">
@@ -447,7 +471,7 @@ $tab_index = 2;
     $("#market_install").on("click", function(){
       $(".ui-dialog-content").dialog("close");
       $('<div id="downloading"><div class="osc-modal-content"><img class="ui-download-loading" src="<?php echo osc_current_admin_theme_url(); ?>images/spinner.gif" alt="loading..."/><?php echo osc_esc_js(__('Please wait until the download is completed')); ?></div></div>').dialog({title:'<?php echo osc_esc_js(__('Downloading')); ?>...',modal:true});
- 
+
       $.ajax({
         url: "<?php echo osc_admin_base_url(true); ?>?page=ajax&action=market&<?php echo osc_csrf_token_url(); ?>",
         data: {"market_product_key" : $("#market_product_key").attr("value"), "section" : 'plugins'},
@@ -457,7 +481,7 @@ $tab_index = 2;
 
           if(data.error == 0) { // no errors
             content += oscEscapeHTML(data.message);
-            content += '<h3><?php echo osc_esc_js(__('Plugin has been downloaded correctly.')); ?></h3><br/>';
+            content += '<h3><?php echo osc_esc_js(__('The package has been downloaded')); ?></h3><br/>';
             content += "<p>";
             content += '<a class="btn btn-mini btn-green" href="<?php echo osc_admin_base_url(true); ?>?page=plugins&marketError='+data.error+'&message='+oscEscapeHTML(data.message)+'&slug='+oscEscapeHTML(data.data['download'])+'"><?php echo osc_esc_js(__('Ok')); ?></a>';
             content += '<a class="btn btn-mini" href="javascript:location.reload(true)"><?php echo osc_esc_js(__('Close')); ?></a>';
@@ -466,7 +490,7 @@ $tab_index = 2;
             content += '<p>' + oscEscapeHTML(data.message) + '</p><p>&nbsp;</p>';
             content += '<a class="btn btn-mini" href="javascript:location.reload(true)"><?php echo osc_esc_js(__('Close')); ?></a>';
           }
-          $("#downloading .osc-modal-content").html(content);          
+          $("#downloading .osc-modal-content").html(content);
         },
         error: function(data){
           console.log(data);
@@ -474,7 +498,7 @@ $tab_index = 2;
 
           if(data.error == 0) { // no errors
             content += oscEscapeHTML(data.message);
-            content += '<h3><?php echo osc_esc_js(__('Plugin has been downloaded correctly.')); ?></h3><br/>';
+            content += '<h3><?php echo osc_esc_js(__('The package has been downloaded')); ?></h3><br/>';
             content += "<p>";
             content += '<a class="btn btn-mini btn-green" href="<?php echo osc_admin_base_url(true); ?>?page=plugins&marketError='+data.error+'&message='+oscEscapeHTML(data.message)+'&slug='+oscEscapeHTML(data.data['download'])+'"><?php echo osc_esc_js(__('Ok')); ?></a>';
             content += '<a class="btn btn-mini" href="javascript:location.reload(true)"><?php echo osc_esc_js(__('Close')); ?></a>';
@@ -483,10 +507,10 @@ $tab_index = 2;
             content += '<p>' + oscEscapeHTML(data.message) + '</p><p>&nbsp;</p>';
             content += '<a class="btn btn-mini" href="javascript:location.reload(true)"><?php echo osc_esc_js(__('Close')); ?></a>';
           }
-          $("#downloading .osc-modal-content").html(content);  
+          $("#downloading .osc-modal-content").html(content);
         }
       });
- 
+
       return false;
     });
   });
@@ -518,11 +542,11 @@ $tab_index = 2;
           $('#market_install').text("<?php echo osc_esc_js( __('Update') ); ?>");
 
           var dialogWidth = 485;
-          
+
           if($(window).width() < 525) {
             dialogWidth = $(window).width() - 40;
           }
-          
+
           $('#market_installer').dialog({
             modal: true,
             title: '<?php echo osc_esc_js( __('Update plugin from OsclassPoint') ); ?>',
@@ -534,7 +558,7 @@ $tab_index = 2;
 
     return false;
   });
-  
+
   function delete_plugin(plugin) {
     var x = confirm('<?php echo osc_esc_js(__('You are about to delete the files of the plugin. Do you want to continue?'))?>');
     if(x) {
@@ -543,4 +567,4 @@ $tab_index = 2;
   }
 </script>
 
-<?php osc_current_admin_theme_path( 'parts/footer.php' ); ?>
+<?php osc_current_admin_theme_path( 'parts/footer.php' );

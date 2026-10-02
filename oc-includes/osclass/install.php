@@ -23,7 +23,7 @@ define('CONTENT_PATH', ABS_PATH . 'oc-content/');
 define('TRANSLATIONS_PATH', CONTENT_PATH . 'languages/');
 define('OSC_INSTALLING', 1);
 
-define('PHP_MIN', '7.2');
+define('PHP_MIN', '7.4');
 define('PHP_MAX', '');
 
 
@@ -106,12 +106,12 @@ if(is_osclass_installed()) {
   osc_die('Osclass Error', $message);
 }
 
-switch ($step) {
+switch($step) {
   case 1:
     $requirements = get_requirements();
     $error = check_requirements($requirements);
     break;
-    
+
   case 2:
     if(isset($_COOKIE)) {
       if(Params::getParam('save_stats') == '1' || isset($_COOKIE['osclass_save_stats'])) {
@@ -125,25 +125,25 @@ switch ($step) {
       }
     }
     break;
-    
+
   case 3:
     if(Params::getParam('dbname') != '') {
       $error = oc_install();
     }
     break;
-    
+
   case 4:
     if(Params::getParam('result') != '') {
       $error = Params::getParam('result');
     }
-    
+
     $password = Params::getParam('password', false, false);
     break;
-    
+
   case 5:
     $password = Params::getParam('password', false, false);
     break;
-    
+
   default:
     break;
 }
@@ -173,7 +173,7 @@ switch ($step) {
     <div id="header" class="installation">
       <h1><?php _e('Installation assistant'); ?></h1>
       <h2>
-        <?php 
+        <?php
           if($step == 1) {
             _e('1. Hosting requirements check');
           } else if($step == 2) {
@@ -207,7 +207,7 @@ switch ($step) {
               <div>
                 <label for="install_locale" class="line-label"><?php _e('Continue installation in:'); ?></label>
                 <select name="install_locale" id="install_locale" onchange="window.location.href='?install_locale='+document.getElementById(this.id).value">
-                  <?php foreach ($locales as $k => $locale) { ?>
+                  <?php foreach($locales as $k => $locale) { ?>
                     <option value="<?php echo osc_esc_html($k); ?>" <?php if($k == $current_locale) { echo 'selected="selected"';} ?>><?php echo $locale['name']; ?></option>
                   <?php } ?>
                 </select>
@@ -219,12 +219,12 @@ switch ($step) {
           <div class="form-table reqs">
             <?php if($error) { ?>
               <p><?php _e('Check the next requirements:'); ?></p>
-              
+
               <div class="flash info">
                 <p><b><?php _e('Requirements help:'); ?></b></p>
-                
+
                 <ul>
-                  <?php foreach ($requirements as $k => $v) { ?>
+                  <?php foreach($requirements as $k => $v) { ?>
                     <?php if(!$v['fn'] && $v['solution'] != '') { ?>
                       <li><?php echo $v['solution']; ?></li>
                     <?php } ?>
@@ -234,9 +234,9 @@ switch ($step) {
             <?php } else { ?>
               <p><?php _e('All right, all the requirements have met!'); ?></p>
             <?php } ?>
-            
+
             <ul>
-              <?php foreach ($requirements as $k => $v) { ?>
+              <?php foreach($requirements as $k => $v) { ?>
                 <li><?php echo $v['requirement']; ?> <img src="<?php echo get_absolute_url(); ?>oc-includes/images/<?php echo $v['fn'] ? 'tick.svg' : 'cross.svg'; ?>" alt="" title=""/></li>
               <?php } ?>
             </ul>
@@ -270,11 +270,11 @@ switch ($step) {
           setcookie('osclass_save_stats', '', time() - 3600);
           setcookie('osclass_ping_engines', '', time() - 3600);
         }
-        
+
         // copy robots.txt
         $source = LIB_PATH . 'osclass/installer/robots.txt';
         $destination = ABS_PATH . 'robots.txt';
-        
+
         if(function_exists('copy')) {
           @copy($source, $destination);
         } else {
@@ -283,12 +283,12 @@ switch ($step) {
           fwrite($openedfile, $contentx);
           fclose($openedfile);
           $status = true;
-          
+
           if($contentx === false) {
             $status = false;
           }
         }
-        
+
         display_finish($password);
       }
       ?>

@@ -64,7 +64,7 @@ class Admin extends DAO {
 
     if(osc_version() < 420) {
       $this->setFields(array('pk_i_id', 's_name', 's_username', 's_password', 's_email', 's_secret'));
-      
+
     } else if($return !== false && $return->numRows() > 0) {
       $this->setFields(array('pk_i_id', 's_name', 's_username', 's_password', 's_email', 's_secret', 'i_login_fails', 'dt_login_fail_date', 'b_moderator', 's_moderator_access'));
 
@@ -83,11 +83,11 @@ class Admin extends DAO {
     if($id == ''){
       return '';
     }
-    
+
     if(isset($this->cachedAdmin[$id])) {
       return $this->cachedAdmin[$id];
     }
-    
+
     $this->cachedAdmin[$id] = parent::findByPrimaryKey($id);
     return $this->cachedAdmin[$id];
   }
@@ -154,11 +154,11 @@ class Admin extends DAO {
    */
   public function findByCredentials($username, $password) {
     $user = $this->findByusername($username);
-    
+
     if($user !== false && isset($user['s_password']) && osc_verify_password($password, $user['s_password'])) {
       return $user;
     }
-    
+
     return false;
   }
 
@@ -175,7 +175,7 @@ class Admin extends DAO {
     if($date == '') {
       $date = date('Y-m-d H:i:s');
     }
-    
+
     if($login_fails_count <= 0) {
       $date = null;
     }
@@ -246,8 +246,65 @@ class Admin extends DAO {
   public function deleteBatch($id) {
     $this->dao->from($this->getTableName());
     $this->dao->whereIn('pk_i_id', $id);
-    
+
     return $this->dao->delete();
+  }
+
+  // Search admins for datatable
+  public function search($start = 0, $end = 10, $order_column = 'pk_i_id', $order_direction = 'DESC', $conditions = null) {
+    $admins = array();
+    $admins['rows'] = 0;
+    $admins['total_results'] = 0;
+    $admins['admins'] = array();
+
+    $allowed_sort = array('pk_i_id', 's_name', 's_username', 's_email', 'b_moderator');
+    if(!in_array($order_column, $allowed_sort)) {
+      $order_column = 'pk_i_id';
+    }
+
+    $order_direction = strtoupper($order_direction);
+    if(!in_array($order_direction, array('ASC', 'DESC'))) {
+      $order_direction = 'DESC';
+    }
+
+    $this->dao->select('SQL_CALC_FOUND_ROWS *');
+    $this->dao->from($this->getTableName());
+    $this->dao->orderBy($order_column, $order_direction);
+    $this->dao->limit($start, $end);
+
+    if(is_array($conditions)) {
+      foreach($conditions as $k => $v) {
+        if($v === null) {
+          $this->dao->where($k);
+        } else {
+          $this->dao->where($k, $v);
+        }
+      }
+    }
+
+    $rs = $this->dao->get();
+
+    if(!$rs) {
+      return $admins;
+    }
+
+    $admins['admins'] = $rs->result();
+
+    $rsRows = $this->dao->query('SELECT FOUND_ROWS() as total');
+    $data = $rsRows->row();
+
+    if($data['total']) {
+      $admins['total_results'] = $data['total'];
+    }
+
+    $rsTotal = $this->dao->query('SELECT COUNT(*) as total FROM ' . $this->getTableName());
+    $data = $rsTotal->row();
+
+    if($data['total']) {
+      $admins['rows'] = $data['total'];
+    }
+
+    return $admins;
   }
 }
 

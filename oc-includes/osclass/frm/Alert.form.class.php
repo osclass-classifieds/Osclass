@@ -42,7 +42,7 @@ class AlertForm extends Form {
   * @return string
   */
   public static function default_email_text() {
-    return __('Enter your e-mail');
+    return __('Enter your email');
   }
 
   /**
@@ -50,7 +50,7 @@ class AlertForm extends Form {
   */
   public static function email_text() {
     $value = '';
-    if( osc_logged_user_email() == '' ){
+    if(osc_logged_user_email() == '' ){
       $value = self::default_email_text();
     }
     parent::generic_input_text('alert_email', $value );

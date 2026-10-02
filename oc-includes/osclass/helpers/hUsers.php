@@ -14,7 +14,7 @@
  * warranties or conditions of any kind, either express or implied. Do not remove
  * this NOTICE section as it contains license information and copyrights.
  */
- 
+
 
 /**
  * Helper Users
@@ -64,14 +64,14 @@ function osc_get_user_row($id, $cache = true) {
   if($id <= 0) {
     return false;
   }
-  
+
   if($cache === true && View::newInstance()->_exists('user_' . $id)) {
     return View::newInstance()->_get('user_' . $id);
   }
-  
+
   $user = User::newInstance()->findByPrimaryKey((int)$id);
   View::newInstance()->_exportVariableToView('user_' . $id, $user);
-  
+
   return $user;
 }
 
@@ -83,7 +83,7 @@ function osc_get_user_row($id, $cache = true) {
  */
 function osc_get_user_row_by_username($username) {
   $username = trim((string)$username);
-  
+
   if($username == '') {
     return false;
   }
@@ -91,10 +91,33 @@ function osc_get_user_row_by_username($username) {
   if(View::newInstance()->_exists('user_' . $username)) {
     return View::newInstance()->_get('user_' . $username);
   }
-  
+
   $user = User::newInstance()->findByUsername($username);
   View::newInstance()->_exportVariableToView('user_' . $username, $user);
-  
+
+  return $user;
+}
+
+
+/**
+ * Gets user array from view and cache it if not exists
+ *
+ * @return array
+ */
+function osc_get_user_row_by_email($email) {
+  $email = trim((string)$email);
+
+  if($email == '') {
+    return false;
+  }
+
+  if(View::newInstance()->_exists('user_' . $email)) {
+    return View::newInstance()->_get('user_' . $email);
+  }
+
+  $user = User::newInstance()->findByEmail($email);
+  View::newInstance()->_exportVariableToView('user_' . $email, $user);
+
   return $user;
 }
 
@@ -116,9 +139,9 @@ function osc_is_web_user_logged_in() {
 
   if(Session::newInstance()->_get("userId") > 0) {
     $user = osc_get_user_row(Session::newInstance()->_get("userId"));
-    
+
     View::newInstance()->_exportVariableToView('_loggedUser', $user);
-    
+
     if(isset($user['b_enabled']) && $user['b_enabled']==1) {
       return true;
     } else {
@@ -157,7 +180,7 @@ function osc_logged_user() {
       return View::newInstance()->_get('_loggedUser');
     }
   }
-  
+
   return false;
 }
 
@@ -203,16 +226,16 @@ function osc_logged_user_phone() {
  * @return boolean
  */
 function osc_user_public_profile_is_enabled($user) {
-  if($user === false || !isset($user['pk_i_id']) || $user['b_enabled'] = 0 || $user['b_active'] = 0) {
+  if($user === false || !isset($user['pk_i_id']) || $user['b_enabled'] == 0 || $user['b_active'] == 0) {
     return osc_apply_filter('user_public_profile_is_enabled', false, $user);
-  
+
   } else if(osc_user_public_profile_min_items() > 0 && $user['i_items'] < osc_user_public_profile_min_items()) {
     return osc_apply_filter('user_public_profile_is_enabled', false, $user);
-    
+
   } else if(osc_user_public_profile_enabled() == 'COMPANY' && $user['b_company'] == 0) {
     return osc_apply_filter('user_public_profile_is_enabled', false, $user);
   }
-  
+
   return osc_apply_filter('user_public_profile_is_enabled', true, $user);
 }
 
@@ -366,7 +389,7 @@ function osc_user_profile_img_url($id = null) {
   if(file_exists(osc_user_profile_img_path($id))) {
     return (string) osc_apply_filter('user_profile_img_url', osc_base_url(). OC_CONTENT_FOLDER . '/uploads/user-images/' . osc_user_profile_img($id));
   }
-  
+
   return (string) osc_apply_filter('user_profile_img_url', osc_base_url(). OC_CONTENT_FOLDER . '/uploads/user-images/default-user-image.png');
 }
 
@@ -418,7 +441,7 @@ function osc_user_is_online($user_id = '') {
       return false;
     }
   }
-  
+
   $limit_seconds = 300; // 5 minutes
   $last_access_date = date('Y-m-d H:i:s', strtotime($date));
   $threshold = date('Y-m-d H:i:s', strtotime(' -' . $limit_seconds . ' seconds', time()));
@@ -447,8 +470,8 @@ function osc_user_def_locale_code($user_id = '', $email = '') {
         return (string) $user["fk_c_locale_code"];
       }
     }
-    
-    if($email != '') { 
+
+    if($email != '') {
       $user = User::newInstance()->findByEmail($email);
 
       if(isset($user['pk_i_id']) && $user['pk_i_id'] > 0) {
@@ -456,7 +479,7 @@ function osc_user_def_locale_code($user_id = '', $email = '') {
       }
     }
   }
-  
+
   return '';
 }
 
@@ -537,7 +560,7 @@ function osc_user_phone() {
   } else if(osc_user_field("s_phone_land") != "") {
     return osc_esc_html(osc_user_field("s_phone_land"));
   }
-  
+
   return "";
 }
 
@@ -692,7 +715,7 @@ function osc_total_users($type = '', $condition = '') {
     case 'online':
       $limit_seconds = 300; // 5 minutes
       $threshold = date('Y-m-d H:i:s', strtotime(' -' . $limit_seconds . ' seconds', time()));
-  
+
       return User::newInstance()->countUsers(sprintf('b_enabled = 1 AND b_active = 1 AND dt_access_date >= "%s"', $threshold));
       break;
     case 'custom':
@@ -713,11 +736,11 @@ function osc_total_users($type = '', $condition = '') {
 // Get list of alert types
 function osc_alert_types($with_custom = false) {
   $list = array('INSTANT', 'HOURLY', 'DAILY', 'WEEKLY');
-  
+
   if($with_custom) {
     $list[] = 'CUSTOM';
   }
-  
+
   return osc_apply_filter('alert_types', $list, $with_custom);
 }
 
@@ -727,18 +750,18 @@ function osc_alert_change_frequency($alert) {
   if(!isset($alert['pk_i_id'])) {
     return false;
   }
-  
+
   $active_type = $alert['e_type'];
   $types = osc_alert_types();
-  
+
   $html = '<div class="alert-frequency">';
-  
-  foreach($types as $to_type) { 
+
+  foreach($types as $to_type) {
     $html .= osc_alert_change_frequency_url($alert, $to_type, '');
   }
-  
+
   $html .= '</div>';
-  
+
   return osc_apply_filter('alert_change_frequency', $html, $alert);
 }
 
@@ -748,16 +771,16 @@ function osc_alert_change_frequency_url($alert, $to_type, $label = '') {
   if(!isset($alert['pk_i_id'])) {
     return false;
   }
-  
+
   $id = $alert['pk_i_id'];
   $secret = $alert['s_secret'];
-  
+
   $label = ($label == '' ? osc_alert_type_label($to_type) : $label);
   $link = osc_base_url(true) . '?page=user&action=alert_change_freq&id='. $id . '&secret=' . $secret . '&type=' . $to_type;
   $active = ($to_type == $alert['e_type'] ? true : false);
-  
+
   $url = '<a href="' . $link . '" class="' . ($active ? 'active' : '') . '">' . $label . '</a>';
-  
+
   return osc_apply_filter('alert_change_frequency_url', $url, $alert, $to_type, $label);
 }
 
@@ -768,12 +791,12 @@ function osc_search_alert_url($id = null, $secret = null) {
     $id = osc_alert_id();
     $secret = osc_alert_secret();
   }
-  
+
   if($id > 0 && $secret != '') {
     $url = osc_search_url(array('page' => 'search', 'iAlertId' => $id, 'sAlertSecret' => $secret));
     return osc_apply_filter('search_alert_url', $url, $id, $secret, osc_alert());
   }
-  
+
   return false;
 }
 
@@ -866,6 +889,14 @@ function osc_alert_unsub_date() {
 }
 
 /**
+ * Gets expire date of current alert
+ * @return string
+ */
+function osc_alert_expire_date() {
+  return (string)osc_alert_field('dt_expire_date');
+}
+
+/**
  * Gets type of current alert
  * @return string
  */
@@ -879,20 +910,20 @@ function osc_alert_type() {
  */
 function osc_alert_type_label($type = '') {
   $type = ($type == '' ? osc_alert_type() : $type);
-  
+
   switch($type) {
     case 'INSTANT':
       return __('Instant');
-    
+
     case 'HOURLY':
       return __('Hourly');
-      
+
     case 'DAILY':
       return __('Daily');
-      
+
     case 'WEEKLY':
       return __('Weekly');
-      
+
     case 'CUSTOM':
       return __('Custom');
   }
@@ -912,6 +943,249 @@ function osc_alert_is_active() {
  */
 function osc_alert_is_unsubscribed() {
   return osc_alert_unsub_date() <> '' ? true : false;
+}
+
+/**
+ * Check if alert is expired
+ *
+ * @return boolean
+ */
+function osc_alert_is_expired() {
+  $expire = trim((string)osc_alert_expire_date());
+  if($expire == '' || $expire === null) {
+    return false;
+  }
+  return (strtotime($expire) <= time());
+}
+
+/**
+ * Get number of alert triggers
+ *
+ * @return int
+ */
+function osc_alert_triggers() {
+  return (int)osc_alert_field('i_num_trigger');
+}
+
+/**
+ * Get alert trigger label
+ *
+ * @return string
+ */
+function osc_alert_triggers_label($triggers = null) {
+  if($triggers === null) {
+    $triggers = osc_alert_triggers();
+  }
+
+  $triggers = (int)$triggers;
+  if($triggers == 1) {
+    return __('1 email notification sent');
+  }
+
+  return sprintf(__('%d email notifications sent'), $triggers);
+}
+
+/**
+ * Get alert status code
+ *
+ * @return string
+ */
+function osc_alert_status($alert = null) {
+  if($alert === null) {
+    $alert = osc_alert();
+  }
+
+  if(!is_array($alert) || !isset($alert['pk_i_id'])) {
+    return 'inactive';
+  }
+
+  if(isset($alert['dt_unsub_date']) && trim((string)$alert['dt_unsub_date']) != '') {
+    return 'unsubscribed';
+  }
+
+  if(isset($alert['dt_expire_date']) && trim((string)$alert['dt_expire_date']) != '' && strtotime($alert['dt_expire_date']) <= time()) {
+    return 'expired';
+  }
+
+  if(isset($alert['b_active']) && (int)$alert['b_active'] === 1) {
+    return 'active';
+  }
+
+  return 'inactive';
+}
+
+/**
+ * Get alert status label
+ *
+ * @return string
+ */
+function osc_alert_status_label($status = '', $alert = null) {
+  $status = trim((string)$status);
+  if($status == '') {
+    $status = osc_alert_status($alert);
+  }
+
+  switch($status) {
+    case 'active':
+      return __('Active');
+    case 'expired':
+      return __('Expired');
+    case 'unsubscribed':
+      return __('Unsubscribed');
+    default:
+      return __('Inactive');
+  }
+}
+
+/**
+ * Get alert status title
+ *
+ * @return string
+ */
+function osc_alert_status_title($status = '', $alert = null) {
+  $status = trim((string)$status);
+  if($status == '') {
+    $status = osc_alert_status($alert);
+  }
+
+  switch($status) {
+    case 'active':
+      return __('Alert is active and notifications can be sent');
+    case 'expired':
+      return __('Alert has expired and notifications are no longer sent');
+    case 'unsubscribed':
+      return __('Alert was unsubscribed and notifications are stopped');
+    default:
+      return __('Alert is inactive and notifications are not sent');
+  }
+}
+
+/**
+ * Format duration in days into friendly label
+ *
+ * @return string
+ */
+function osc_format_duration_days($days) {
+  $days = (int)$days;
+  if($days <= 0) {
+    return '0 ' . __('days');
+  }
+
+  if($days % 365 == 0) {
+    $years = (int)($days / 365);
+    return ($years == 1 ? __('1 year') : sprintf(__('%d years'), $years));
+  }
+
+  if($days % 30 == 0) {
+    $months = (int)($days / 30);
+    return ($months == 1 ? __('1 month') : sprintf(__('%d months'), $months));
+  }
+
+  if($days % 7 == 0) {
+    $weeks = (int)($days / 7);
+    return ($weeks == 1 ? __('1 week') : sprintf(__('%d weeks'), $weeks));
+  }
+
+  return ($days == 1 ? __('1 day') : sprintf(__('%d days'), $days));
+}
+
+/**
+ * Create box to change alert expiration (similar to frequency)
+ */
+function osc_alert_change_expiration($alert) {
+  if(!isset($alert['pk_i_id'])) {
+    return false;
+  }
+
+  $id = (int)$alert['pk_i_id'];
+  $secret = (string)$alert['s_secret'];
+  $expire = (isset($alert['dt_expire_date']) ? trim((string)$alert['dt_expire_date']) : '');
+  $expireTs = ($expire != '' ? strtotime($expire) : null);
+  $now = time();
+  $futureLimit = $now + (2 * 365 * 86400);
+  $tooFar = ($expireTs !== null && $expireTs >= $futureLimit);
+  $isExpired = ($expireTs !== null && $expireTs <= $now);
+  $allowChange = osc_alerts_allow_user_expiration_change();
+  $defaultMonths = (int)osc_alerts_expiration_months_user();
+  if($defaultMonths <= 0) {
+    $defaultMonths = 3;
+  }
+  $thresholdTs = strtotime('+' . $defaultMonths . ' month', $now);
+
+  $html = '<div class="alert-frequency alert-expiration">';
+
+  if($expire == '' || $expire === null) {
+    $html .= '<a href="#" class="active static" onclick="return false;">' . __('Non-expiring') . '</a>';
+
+    if($allowChange) {
+      $html .= osc_alert_change_expiration_url($alert, 'IN_DEFAULT', sprintf(__('%d months'), $defaultMonths));
+      $html .= osc_alert_change_expiration_url($alert, 'IN_12M', __('1 year'));
+    }
+  } else if($isExpired) {
+    $html .= '<a href="#" class="active static" onclick="return false;">' . sprintf(__('Expired on %s'), date('Y/m/d', strtotime($expire))) . '</a>';
+
+    if($allowChange) {
+      $html .= osc_alert_change_expiration_url($alert, 'RENEW', __('Renew alert'));
+    }
+  } else {
+    $html .= '<a href="#" class="active static" onclick="return false;">' . sprintf(__('Expire on %s'), date('Y/m/d', strtotime($expire))) . '</a>';
+
+    if($allowChange && !$tooFar) {
+      $html .= osc_alert_change_expiration_url($alert, 'PLUS_DEFAULT', sprintf(__('+%d months'), $defaultMonths));
+
+      if($expireTs !== null && $expireTs <= $thresholdTs) {
+        $html .= osc_alert_change_expiration_url($alert, 'EXPIRE', __('Expire'));
+      } else {
+        $html .= osc_alert_change_expiration_url($alert, 'MINUS_DEFAULT', sprintf(__('-%d months'), $defaultMonths));
+      }
+    }
+  }
+
+  $html .= '</div>';
+  return osc_apply_filter('alert_change_expiration', $html, $alert);
+}
+
+/**
+ * Generate url to change expiration
+ */
+function osc_alert_change_expiration_url($alert, $op, $label = '', $active = false) {
+  if(!isset($alert['pk_i_id'])) {
+    return false;
+  }
+
+  $id = (int)$alert['pk_i_id'];
+  $secret = (string)$alert['s_secret'];
+  $label = ($label == '' ? $op : $label);
+  $title = __('Change alert expiration date');
+  $defaultMonths = (int)osc_alerts_expiration_months_user();
+  if($defaultMonths <= 0) {
+    $defaultMonths = 3;
+  }
+
+  if($op == 'IN_DEFAULT' || $op == 'PLUS_DEFAULT') {
+    $title = sprintf(__('Change alert expiration date - will expire in %d months'), $defaultMonths);
+  } else if($op == 'MINUS_DEFAULT') {
+    $title = sprintf(__('Change alert expiration date - shorten by %d months'), $defaultMonths);
+  } else if($op == 'EXPIRE') {
+    $title = __('Set alert as expired immediately');
+  } else if($op == 'IN_3M' || $op == 'PLUS_3M') {
+    $title = __('Change alert expiration date - will expire in 3 months');
+  } else if($op == 'IN_12M' || $op == 'PLUS_12M') {
+    $title = __('Change alert expiration date - will expire in 1 year');
+  } else if($op == 'RENEW') {
+    $renew_months = (int)osc_alerts_expiration_months_user();
+    if($renew_months <= 0) {
+      $renew_months = 3;
+    }
+    $title = sprintf(__('Renew alert from today (+%d months)'), $renew_months);
+  } else if($op == 'NEVER') {
+    $title = __('Change alert expiration date - alert will never expire');
+  }
+
+  $link = osc_base_url(true) . '?page=user&action=alert_change_expire&id=' . $id . '&secret=' . $secret . '&op=' . rawurlencode($op);
+  $url = '<a href="' . $link . '" class="' . ($active ? 'active' : '') . '" title="' . osc_esc_html($title) . '">' . $label . '</a>';
+
+  return osc_apply_filter('alert_change_expiration_url', $url, $alert, $op, $label, $active);
 }
 
 /**

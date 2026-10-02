@@ -1,22 +1,21 @@
-# Copyright (C) 2013 Osclass
-# This file is distributed under the same license as the {package-name} package.
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: Osclass Sigma Theme\n"
+"Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-14 10:58+0100\n"
-"PO-Revision-Date: 2020-10-08 09:09+0200\n"
-"Last-Translator: _CONEJO <conejo@conejo.me>\n"
-"Language-Team: OsclassPoint.com\n"
-"Language: en_US\n"
+"POT-Creation-Date: 2026-10-01 14:15+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 3.6\n"
-"X-Poedit-KeywordsList: __;_e;_m\n"
-"X-Poedit-Basepath: ../..\n"
-"X-Poedit-SearchPath-0: .\n"
 
 #: 404.php:27
 msgid "404"
@@ -34,7 +33,7 @@ msgstr ""
 msgid "Take me home"
 msgstr ""
 
-#: admin/header.php:27 functions.php:646
+#: admin/header.php:27 functions.php:648
 msgid "Header logo"
 msgstr ""
 
@@ -78,7 +77,7 @@ msgid "The images folder <strong>%s</strong> is not writable on your server"
 msgstr ""
 
 #: admin/header.php:77
-msgid "Osclass can't upload the logo image from the administration panel."
+msgid "Osclass cannot upload the logo image from the administration panel."
 msgstr ""
 
 #: admin/header.php:78
@@ -90,182 +89,169 @@ msgid ""
 "To make a directory writable under UNIX execute this command from the shell:"
 msgstr ""
 
-#: admin/settings.php:34
-msgid ""
-"I would like to contribute to the development of Osclass with a donation of"
-msgstr ""
-
-#: admin/settings.php:39
-msgid "Custom"
-msgstr ""
-
-#: admin/settings.php:40
-msgid "Donate"
-msgstr ""
-
-#: admin/settings.php:44 functions.php:647
+#: admin/settings.php:24 functions.php:649
 msgid "Theme settings"
 msgstr ""
 
-#: admin/settings.php:50
+#: admin/settings.php:30
 msgid "Search placeholder"
 msgstr ""
 
-#: admin/settings.php:54
+#: admin/settings.php:34
 msgid "Show lists as:"
 msgstr ""
 
-#: admin/settings.php:57
+#: admin/settings.php:37
 msgid "Gallery"
 msgstr ""
 
-#: admin/settings.php:58
+#: admin/settings.php:38
 msgid "List"
 msgstr ""
 
-#: admin/settings.php:64
+#: admin/settings.php:43
 msgid "Footer link"
 msgstr ""
 
-#: admin/settings.php:66
+#: admin/settings.php:45
 msgid ""
 "I want to help Osclass by linking to <a href=\"https://osclass-"
 "classifieds.com/\" target=\"_blank\">osclass</a> from my site with the "
 "following text:"
 msgstr ""
 
-#: admin/settings.php:67
+#: admin/settings.php:46
 msgid ""
 "This website is proudly using the <a title=\"Osclass web\" href=\"https://"
 "osclass-classifieds.com/\">classifieds scripts</a> software <strong>Osclass</"
 "strong>"
 msgstr ""
 
-#: admin/settings.php:76
+#: admin/settings.php:54
 msgid "Right-To-Left (RTL)"
 msgstr ""
 
-#: admin/settings.php:80
+#: admin/settings.php:58
 msgid "Enable Right-To-Left"
 msgstr ""
 
-#: admin/settings.php:83
+#: admin/settings.php:61
 msgid "enable/disable"
 msgstr ""
 
-#: admin/settings.php:91
+#: admin/settings.php:69
 msgid "Location input"
 msgstr ""
 
-#: admin/settings.php:95
+#: admin/settings.php:73
 msgid "Show location input as:"
 msgstr ""
 
-#: admin/settings.php:98
+#: admin/settings.php:76
 msgid "Dropdown"
 msgstr ""
 
-#: admin/settings.php:99
+#: admin/settings.php:77
 msgid "Autocomplete"
 msgstr ""
 
-#: admin/settings.php:106
+#: admin/settings.php:84
 msgid "Ads management"
 msgstr ""
 
-#: admin/settings.php:110
+#: admin/settings.php:88
 msgid ""
 "In this section you can configure your site to display ads and start "
 "generating revenue."
 msgstr ""
 
-#: admin/settings.php:110
+#: admin/settings.php:88
 msgid ""
 "If you are using an online advertising platform, such as Google Adsense, "
 "copy and paste here the provided code for ads."
 msgstr ""
 
-#: admin/settings.php:116
+#: admin/settings.php:94
 msgid "Header 728x90"
 msgstr ""
 
-#: admin/settings.php:120
+#: admin/settings.php:98
 msgid ""
 "This ad will be shown at the top of your website, next to the site title and "
 "above the search results. Note that the size of the ad has to be 728x90 "
 "pixels."
 msgstr ""
 
-#: admin/settings.php:124
+#: admin/settings.php:102
 msgid "Homepage 728x90"
 msgstr ""
 
-#: admin/settings.php:128
+#: admin/settings.php:106
 msgid ""
 "This ad will be shown on the main site of your website. It will appear both "
 "at the top and bottom of your site homepage. Note that the size of the ad "
 "has to be 728x90 pixels."
 msgstr ""
 
-#: admin/settings.php:132
+#: admin/settings.php:110
 msgid "Search results 728x90 (top of the page)"
 msgstr ""
 
-#: admin/settings.php:136
+#: admin/settings.php:114
 msgid ""
 "This ad will be shown on top of the search results of your site. Note that "
 "the size of the ad has to be 728x90 pixels."
 msgstr ""
 
-#: admin/settings.php:140
+#: admin/settings.php:118
 msgid "Search results 728x90 (middle of the page)"
 msgstr ""
 
-#: admin/settings.php:144
+#: admin/settings.php:122
 msgid ""
 "This ad will be shown among the search results of your site. Note that the "
 "size of the ad has to be 728x90 pixels."
 msgstr ""
 
-#: admin/settings.php:148
+#: admin/settings.php:126
 msgid "Sidebar 300x250"
 msgstr ""
 
-#: admin/settings.php:152
+#: admin/settings.php:130
 msgid ""
 "This ad will be shown at the right sidebar of your website, on the product "
 "detail page. Note that the size of the ad has to be 300x350 pixels."
 msgstr ""
 
-#: admin/settings.php:156
+#: admin/settings.php:134
 msgid "Save changes"
 msgstr ""
 
-#: alert-form.php:24
+#: alert-form.php:29
 msgid "You have sucessfully subscribed to the alert"
 msgstr ""
 
-#: alert-form.php:25 user-change_email.php:74
-msgid "Invalid email address"
+#: alert-form.php:30 user-change_email.php:74
+msgid "The email is not valid"
 msgstr ""
 
-#: alert-form.php:26
+#: alert-form.php:31
 msgid "There was a problem with the alert"
 msgstr ""
 
-#: alert-form.php:58
-msgid "Already subscribed to this search."
+#: alert-form.php:63
+msgid "Already subscribed to this search"
 msgstr ""
 
-#: alert-form.php:58
+#: alert-form.php:63
 msgid "Manage"
 msgstr ""
 
-#: alert-form.php:62
+#: alert-form.php:67
 msgid "Subscribe to this search"
 msgstr ""
 
-#: alert-form.php:77
+#: alert-form.php:82
 msgid "Subscribe now"
 msgstr ""
 
@@ -273,17 +259,17 @@ msgstr ""
 msgid "Contact us"
 msgstr ""
 
-#: contact.php:39 item-send-friend.php:47 item-sidebar.php:107 item.php:286
+#: contact.php:39 item.php:285 item-send-friend.php:47 item-sidebar.php:97
 #: user-public-sidebar.php:30
 msgid "Your name"
 msgstr ""
 
-#: contact.php:39 contact.php:49 item-sidebar.php:115
+#: contact.php:39 contact.php:49 item-sidebar.php:105
 #: user-public-sidebar.php:38
 msgid "optional"
 msgstr ""
 
-#: contact.php:44 item-send-friend.php:53 item-sidebar.php:111 item.php:292
+#: contact.php:44 item.php:291 item-send-friend.php:53 item-sidebar.php:101
 #: user-public-sidebar.php:34
 msgid "Your email address"
 msgstr ""
@@ -292,16 +278,16 @@ msgstr ""
 msgid "Subject"
 msgstr ""
 
-#: contact.php:54 item-send-friend.php:81 item-sidebar.php:120
+#: contact.php:54 item-send-friend.php:81 item-sidebar.php:110
 #: user-public-sidebar.php:43
 msgid "Message"
 msgstr ""
 
-#: contact.php:60 item-sidebar.php:126
+#: contact.php:60 item-sidebar.php:116 report.php:59
 msgid "Attachment"
 msgstr ""
 
-#: contact.php:70 item-send-friend.php:90 item-sidebar.php:135 item.php:342
+#: contact.php:70 item.php:341 item-send-friend.php:90 item-sidebar.php:125
 #: user-public-sidebar.php:66
 msgid "Send"
 msgstr ""
@@ -337,7 +323,7 @@ msgstr ""
 msgid "Send to a friend"
 msgstr ""
 
-#: functions.php:451 item-sidebar.php:50
+#: functions.php:451 item-sidebar.php:37
 msgid "Contact publisher"
 msgstr ""
 
@@ -359,15 +345,15 @@ msgstr ""
 msgid "%s's profile"
 msgstr ""
 
-#: functions.php:456 functions.php:505
+#: functions.php:456 functions.php:507
 msgid "Account"
 msgstr ""
 
-#: functions.php:457 functions.php:495 search.php:145 user-alerts.php:68
+#: functions.php:457 functions.php:495 search.php:146 user-alerts.php:74
 msgid "Listings"
 msgstr ""
 
-#: functions.php:458 functions.php:500 user-alerts.php:29 user-alerts.php:34
+#: functions.php:458 functions.php:501 user-alerts.php:29 user-alerts.php:34
 msgid "Alerts"
 msgstr ""
 
@@ -375,22 +361,23 @@ msgstr ""
 msgid "Update account"
 msgstr ""
 
-#: functions.php:460 functions.php:510
+#: functions.php:460 functions.php:512 user-change_email.php:30
+#: user-change_email.php:35
 msgid "Change email"
 msgstr ""
 
-#: functions.php:461 functions.php:515 user-change_username.php:31
+#: functions.php:461 functions.php:517 user-change_username.php:31
 #: user-change_username.php:36
 msgid "Change username"
 msgstr ""
 
-#: functions.php:462 functions.php:465 functions.php:520
+#: functions.php:462 functions.php:465 functions.php:522
 #: user-change_password.php:29 user-change_password.php:34
 #: user-forgot_password.php:52
 msgid "Change password"
 msgstr ""
 
-#: functions.php:463 header.php:58 item-sidebar.php:97
+#: functions.php:463 header.php:58 item-sidebar.php:87
 msgid "Login"
 msgstr ""
 
@@ -406,27 +393,27 @@ msgstr ""
 msgid "Public Profile"
 msgstr ""
 
-#: functions.php:525 user-sidebar.php:32
+#: functions.php:527 user-sidebar.php:32
 msgid "Delete account"
 msgstr ""
 
-#: functions.php:592
-msgid "Theme settings updated correctly"
-msgstr ""
-
-#: functions.php:607
-msgid "The logo image has been uploaded correctly"
+#: functions.php:594
+msgid "Settings have been updated"
 msgstr ""
 
 #: functions.php:609
-msgid "An error has occurred, please try again"
+msgid "The logo image has been uploaded"
 msgstr ""
 
-#: functions.php:620
-msgid "The logo image has been removed"
+#: functions.php:611
+msgid "An error occurred. Please try again"
 msgstr ""
 
 #: functions.php:622
+msgid "The logo image has been removed"
+msgstr ""
+
+#: functions.php:624
 msgid "Image not found"
 msgstr ""
 
@@ -434,7 +421,7 @@ msgstr ""
 msgid "All categories"
 msgstr ""
 
-#: head.php:22 item.php:206 item.php:254 loop-single.php:77
+#: head.php:22 item.php:206 item.php:253 loop-single.php:77
 msgid "Delete"
 msgstr ""
 
@@ -442,15 +429,15 @@ msgstr ""
 msgid "Cancel"
 msgstr ""
 
-#: head.php:70
+#: head.php:69
 msgid "Previous image"
 msgstr ""
 
-#: head.php:71
+#: head.php:70
 msgid "Next image"
 msgstr ""
 
-#: head.php:72
+#: head.php:71
 msgid "Close"
 msgstr ""
 
@@ -478,12 +465,12 @@ msgstr ""
 msgid "What are you looking for today?"
 msgstr ""
 
-#: header.php:105 user-items.php:58 user-public-profile.php:105
+#: header.php:105 user-items.php:58 user-public-profile.php:108
 msgid "Keyword"
 msgstr ""
 
 #: header.php:110 item-post.php:66 user-items.php:66
-#: user-public-profile.php:113
+#: user-public-profile.php:116
 msgid "Category"
 msgstr ""
 
@@ -493,181 +480,6 @@ msgstr ""
 
 #: header.php:116
 msgid "Search"
-msgstr ""
-
-#: item-post.php:64
-msgid "General Information"
-msgstr ""
-
-#: item-post.php:75 item.php:324
-msgid "Title"
-msgstr ""
-
-#: item-post.php:82 user-profile.php:137 user-public-profile.php:87
-msgid "Description"
-msgstr ""
-
-#: item-post.php:92 search-sidebar.php:71
-msgid "Price"
-msgstr ""
-
-#: item-post.php:111
-msgid "Listing Location"
-msgstr ""
-
-#: item-post.php:114 user-profile.php:95
-msgid "Country"
-msgstr ""
-
-#: item-post.php:120 item-post.php:146 user-profile.php:101
-msgid "Region"
-msgstr ""
-
-#: item-post.php:168 search-sidebar.php:53 user-profile.php:107
-#: user-public-profile.php:121
-msgid "City"
-msgstr ""
-
-#: item-post.php:184
-msgid "City Area"
-msgstr ""
-
-#: item-post.php:190 user-profile.php:125
-msgid "Address"
-msgstr ""
-
-#: item-post.php:201
-msgid "Seller's information"
-msgstr ""
-
-#: item-post.php:205 item-sidebar.php:59 item-sidebar.php:61
-#: user-profile.php:70 user-register.php:39
-msgid "Name"
-msgstr ""
-
-#: item-post.php:212 item-sidebar.php:65 user-login.php:37 user-recover.php:34
-#: user-register.php:45
-msgid "E-mail"
-msgstr ""
-
-#: item-post.php:220
-msgid "Show e-mail on the listing page"
-msgstr ""
-
-#: item-post.php:226 item-sidebar.php:115 user-public-sidebar.php:38
-msgid "Phone number"
-msgstr ""
-
-#: item-post.php:234
-msgid "Show phone on the listing page"
-msgstr ""
-
-#: item-post.php:239
-msgid "Other contact"
-msgstr ""
-
-#: item-post.php:259 user-change_email.php:56 user-change_password.php:61
-#: user-change_username.php:99 user-profile.php:149
-msgid "Update"
-msgstr ""
-
-#: item-post.php:259
-msgid "Publish"
-msgstr ""
-
-#: item-send-friend.php:34
-msgid "Send to friend form is disabled."
-msgstr ""
-
-#: item-send-friend.php:60
-msgid "Your friend's name"
-msgstr ""
-
-#: item-send-friend.php:66
-msgid "Your friend's e-mail address"
-msgstr ""
-
-#: item-send-friend.php:73
-msgid "Subject (optional)"
-msgstr ""
-
-#: item-sidebar.php:31
-msgid "Mark as..."
-msgstr ""
-
-#: item-sidebar.php:32
-msgid "Mark as spam"
-msgstr ""
-
-#: item-sidebar.php:33
-msgid "Mark as misclassified"
-msgstr ""
-
-#: item-sidebar.php:34
-msgid "Mark as duplicated"
-msgstr ""
-
-#: item-sidebar.php:35
-msgid "Mark as expired"
-msgstr ""
-
-#: item-sidebar.php:36
-msgid "Mark as offensive"
-msgstr ""
-
-#: item-sidebar.php:59
-msgid "online"
-msgstr ""
-
-#: item-sidebar.php:69
-msgid "Phone"
-msgstr ""
-
-#: item-sidebar.php:73
-msgid "Other"
-msgstr ""
-
-#: item-sidebar.php:76 item.php:130 item.php:135
-msgid "Contact seller"
-msgstr ""
-
-#: item-sidebar.php:86
-msgid "The listing is expired. You can't contact the publisher."
-msgstr ""
-
-#: item-sidebar.php:90
-msgid "It's your own listing, you can't contact the publisher."
-msgstr ""
-
-#: item-sidebar.php:94
-msgid ""
-"You must log in or register a new account in order to contact the advertiser"
-msgstr ""
-
-#: item-sidebar.php:147
-msgid "Useful information"
-msgstr ""
-
-#: item-sidebar.php:149
-msgid "Avoid scams by acting locally or paying with PayPal"
-msgstr ""
-
-#: item-sidebar.php:150
-msgid ""
-"Never pay with Western Union, Moneygram or other anonymous payment services"
-msgstr ""
-
-#: item-sidebar.php:151
-msgid ""
-"Don't buy or sell outside of your country. Don't accept cashier cheques from "
-"outside your country"
-msgstr ""
-
-#: item-sidebar.php:152
-msgid ""
-"This site is never involved in any transaction, and does not handle "
-"payments, shipping, guarantee transactions, provide escrow services, or "
-"offer \"buyer protection\" or \"seller certification\""
 msgstr ""
 
 #: item.php:62
@@ -685,11 +497,15 @@ msgid "Location"
 msgstr ""
 
 #: item.php:73 loop-single.php:63
-msgid "Edit item"
+msgid "Edit listing"
 msgstr ""
 
 #: item.php:86 item.php:91
 msgid "Image"
+msgstr ""
+
+#: item.php:130 item.php:135 item-sidebar.php:66
+msgid "Contact seller"
 msgstr ""
 
 #: item.php:138
@@ -710,14 +526,14 @@ msgid "Comments"
 msgstr ""
 
 #: item.php:173
-msgid "No comments has been published yet"
+msgid "No comments have been published yet"
 msgstr ""
 
-#: item.php:185 item.php:233
+#: item.php:185 item.php:232
 msgid "by"
 msgstr ""
 
-#: item.php:199 item.php:247
+#: item.php:199 item.php:246
 #, php-format
 msgid "%d of 5"
 msgstr ""
@@ -726,46 +542,197 @@ msgstr ""
 msgid "not rated"
 msgstr ""
 
-#: item.php:206 item.php:254
+#: item.php:206 item.php:253
 msgid "Delete your comment"
 msgstr ""
 
-#: item.php:218
+#: item.php:217
 #, php-format
 msgid "You are replying to: %s"
 msgstr ""
 
-#: item.php:218
+#: item.php:217
 msgid "Reply"
 msgstr ""
 
-#: item.php:271
+#: item.php:270
 msgid "Leave your comment (spam and offensive messages will be removed)"
 msgstr ""
 
-#: item.php:301
+#: item.php:300
 msgid "Rating"
 msgstr ""
 
-#: item.php:317
+#: item.php:316
 #, php-format
 msgid "Not available, you have already rated this item %d time(s)"
 msgstr ""
 
-#: item.php:330
+#: item.php:323 item-post.php:75
+msgid "Title"
+msgstr ""
+
+#: item.php:329
 msgid "Click to post as standard comment and not reply"
 msgstr ""
 
-#: item.php:335
+#: item.php:334
 msgid "Comment"
 msgstr ""
 
-#: item.php:351
+#: item.php:350
 msgid "You must be logged in to comment"
 msgstr ""
 
-#: item.php:367
+#: item.php:366
 msgid "of"
+msgstr ""
+
+#: item-post.php:64
+msgid "General Information"
+msgstr ""
+
+#: item-post.php:82 user-profile.php:137 user-public-profile.php:90
+msgid "Description"
+msgstr ""
+
+#: item-post.php:92 search-sidebar.php:74
+msgid "Price"
+msgstr ""
+
+#: item-post.php:111
+msgid "Listing Location"
+msgstr ""
+
+#: item-post.php:114 user-profile.php:95
+msgid "Country"
+msgstr ""
+
+#: item-post.php:120 item-post.php:147 user-profile.php:101
+msgid "Region"
+msgstr ""
+
+#: item-post.php:170 search-sidebar.php:53 user-profile.php:107
+#: user-public-profile.php:124
+msgid "City"
+msgstr ""
+
+#: item-post.php:186
+msgid "City Area"
+msgstr ""
+
+#: item-post.php:192 user-profile.php:125
+msgid "Address"
+msgstr ""
+
+#: item-post.php:203
+msgid "Seller's information"
+msgstr ""
+
+#: item-post.php:207 item-sidebar.php:46 item-sidebar.php:48
+#: user-profile.php:70 user-register.php:39
+msgid "Name"
+msgstr ""
+
+#: item-post.php:214 item-sidebar.php:52 user-change_email.php:73
+#: user-login.php:37 user-recover.php:34 user-register.php:45
+msgid "Email"
+msgstr ""
+
+#: item-post.php:222
+msgid "Show email on the listing page"
+msgstr ""
+
+#: item-post.php:228 item-sidebar.php:105 user-public-sidebar.php:38
+msgid "Phone number"
+msgstr ""
+
+#: item-post.php:236
+msgid "Show phone on the listing page"
+msgstr ""
+
+#: item-post.php:241
+msgid "Other contact"
+msgstr ""
+
+#: item-post.php:261 user-change_email.php:56 user-change_password.php:61
+#: user-change_username.php:99 user-profile.php:149
+msgid "Update"
+msgstr ""
+
+#: item-post.php:261
+msgid "Publish"
+msgstr ""
+
+#: item-send-friend.php:34
+msgid "Send to friend form is disabled."
+msgstr ""
+
+#: item-send-friend.php:60
+msgid "Your friend's name"
+msgstr ""
+
+#: item-send-friend.php:66
+msgid "Your friend's email address"
+msgstr ""
+
+#: item-send-friend.php:73
+msgid "Subject (optional)"
+msgstr ""
+
+#: item-sidebar.php:25
+msgid "Report this listing"
+msgstr ""
+
+#: item-sidebar.php:46
+msgid "online"
+msgstr ""
+
+#: item-sidebar.php:56
+msgid "Phone"
+msgstr ""
+
+#: item-sidebar.php:60
+msgid "Other"
+msgstr ""
+
+#: item-sidebar.php:76
+msgid "The listing is expired. You cannot contact the publisher."
+msgstr ""
+
+#: item-sidebar.php:80
+msgid "It's your own listing, you cannot contact the publisher."
+msgstr ""
+
+#: item-sidebar.php:84
+msgid ""
+"You must log in or register a new account in order to contact the advertiser"
+msgstr ""
+
+#: item-sidebar.php:137
+msgid "Useful information"
+msgstr ""
+
+#: item-sidebar.php:139
+msgid "Avoid scams by acting locally or paying with PayPal"
+msgstr ""
+
+#: item-sidebar.php:140
+msgid ""
+"Never pay with Western Union, Moneygram or other anonymous payment services"
+msgstr ""
+
+#: item-sidebar.php:141
+msgid ""
+"Don't buy or sell outside of your country. Don't accept cashier cheques from "
+"outside your country"
+msgstr ""
+
+#: item-sidebar.php:142
+msgid ""
+"This site is never involved in any transaction, and does not handle "
+"payments, shipping, guarantee transactions, provide escrow services, or "
+"offer \"buyer protection\" or \"seller certification\""
 msgstr ""
 
 #: loop-single.php:66
@@ -780,74 +747,141 @@ msgstr ""
 msgid "Deactivate"
 msgstr ""
 
-#: loop-single.php:77
-msgid "This action can not be undone. Are you sure you want to continue?"
+#: loop-single.php:77 user-alerts.php:53
+msgid "This action cannot be undone. Are you sure you want to continue?"
 msgstr ""
 
 #: main.php:56
 msgid "All locations"
 msgstr ""
 
-#: search-sidebar.php:47
-msgid "Your search"
+#: report.php:23
+msgid "Reports are not available."
 msgstr ""
 
-#: search-sidebar.php:61
-msgid "Show only"
+#: report.php:37
+#, php-format
+msgid "Report #%d"
 msgstr ""
 
-#: search-sidebar.php:64
-msgid "listings with pictures"
+#: report.php:43
+msgid "Status"
 msgstr ""
 
-#: search-sidebar.php:74
-msgid "Min"
+#: report.php:48
+msgid "Reason"
 msgstr ""
 
-#: search-sidebar.php:79
-msgid "Max"
+#: report.php:53
+msgid "Report details"
 msgstr ""
 
-#: search-sidebar.php:103 user-items.php:77 user-public-profile.php:131
-msgid "Apply"
+#: report.php:60
+msgid "Download attachment"
 msgstr ""
 
-#: search-sidebar.php:112
-msgid "Refine category"
+#: report.php:69
+msgid "Conversation history"
 msgstr ""
 
-#: search.php:57
+#: report.php:97
+msgid "Your reply"
+msgstr ""
+
+#: report.php:105
+msgid "Send reply"
+msgstr ""
+
+#: report.php:111
+msgid "Manage this report in backoffice"
+msgstr ""
+
+#: report.php:113
+msgid "This report has been closed."
+msgstr ""
+
+#: report.php:115
+msgid "You can reply only when feedback was requested on this report."
+msgstr ""
+
+#: report.php:126 user-public-profile.php:82
+msgid "Report user"
+msgstr ""
+
+#: report.php:126
+msgid "Report listing"
+msgstr ""
+
+#: report.php:130
+#, php-format
+msgid "You are reporting user %s."
+msgstr ""
+
+#: report.php:132
+#, php-format
+msgid "You are reporting listing %s."
+msgstr ""
+
+#: search.php:60
 msgid "Selected"
 msgstr ""
 
-#: search.php:58
+#: search.php:61
 msgid "Nothing selected, input was"
 msgstr ""
 
-#: search.php:80
+#: search.php:81
 #, php-format
 msgid "There are no results matching \"%s\""
 msgstr ""
 
-#: search.php:84
+#: search.php:85
 #, php-format
 msgid "%d - %d of %d listings"
 msgstr ""
 
-#: search.php:87
+#: search.php:88
 msgid "Show filters"
 msgstr ""
 
-#: search.php:91
+#: search.php:92
 msgid "Sort by"
 msgstr ""
 
-#: search.php:136
+#: search.php:138
 msgid "Premium listings"
 msgstr ""
 
-#: search.php:159
+#: search.php:160
 msgid "Other searches that may interest you"
+msgstr ""
+
+#: search-sidebar.php:47
+msgid "Your search"
+msgstr ""
+
+#: search-sidebar.php:64
+msgid "Show only"
+msgstr ""
+
+#: search-sidebar.php:67
+msgid "listings with pictures"
+msgstr ""
+
+#: search-sidebar.php:77
+msgid "Min"
+msgstr ""
+
+#: search-sidebar.php:82
+msgid "Max"
+msgstr ""
+
+#: search-sidebar.php:106 user-items.php:77 user-public-profile.php:134
+msgid "Apply"
+msgstr ""
+
+#: search-sidebar.php:115
+msgid "Refine category"
 msgstr ""
 
 #: subdomain-navigation.php:41
@@ -873,10 +907,6 @@ msgid "Alert #%d"
 msgstr ""
 
 #: user-alerts.php:53
-msgid "This action can't be undone. Are you sure you want to continue?"
-msgstr ""
-
-#: user-alerts.php:53
 msgid "Delete this alert"
 msgstr ""
 
@@ -884,20 +914,17 @@ msgstr ""
 msgid "Open in search"
 msgstr ""
 
-#: user-change_email.php:30 user-change_email.php:35
-msgid "Change e-mail"
-msgstr ""
-
 #: user-change_email.php:43
-msgid "Current e-mail"
+msgid "Current email"
 msgstr ""
 
 #: user-change_email.php:49
-msgid "New e-mail"
+msgid "New email"
 msgstr ""
 
-#: user-change_email.php:73
-msgid "Email: this field is required"
+#: user-change_email.php:73 user-change_username.php:47
+#, php-format
+msgid "%s is required"
 msgstr ""
 
 #: user-change_password.php:42
@@ -912,8 +939,8 @@ msgstr ""
 msgid "Repeat new password"
 msgstr ""
 
-#: user-change_username.php:47
-msgid "Username: this field is required"
+#: user-change_username.php:47 user-change_username.php:91
+msgid "Username"
 msgstr ""
 
 #: user-change_username.php:72
@@ -922,10 +949,6 @@ msgstr ""
 
 #: user-change_username.php:74
 msgid "The username is NOT available"
-msgstr ""
-
-#: user-change_username.php:91
-msgid "Username"
 msgstr ""
 
 #: user-forgot_password.php:27 user-recover.php:27
@@ -940,7 +963,7 @@ msgstr ""
 msgid "Item type"
 msgstr ""
 
-#: user-items.php:82 user-public-profile.php:138
+#: user-items.php:82 user-public-profile.php:141
 msgid "No listings found"
 msgstr ""
 
@@ -1006,7 +1029,7 @@ msgstr ""
 msgid "<strong>Location:</strong> %1$s"
 msgstr ""
 
-#: user-public-profile.php:95
+#: user-public-profile.php:98
 msgid "User listings"
 msgstr ""
 
@@ -1031,7 +1054,7 @@ msgid "Repeat password"
 msgstr ""
 
 #: user-register.php:61
-msgid "Passwords don't match"
+msgid "The passwords do not match"
 msgstr ""
 
 #: user-register.php:72

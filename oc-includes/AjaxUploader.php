@@ -17,11 +17,11 @@ class AjaxUploader {
     if($allowedExtensions === null) {
       $allowedExtensions = osc_allowed_extension();
     }
-    
+
     if($sizeLimit === null) {
       $sizeLimit = 1024 * osc_max_size_kb();
     }
-    
+
     $this->_allowedExtensions = $allowedExtensions;
     $this->_sizeLimit = $sizeLimit;
 
@@ -38,6 +38,10 @@ class AjaxUploader {
    * @return mixed
    */
   public function getOriginalName() {
+    if(!$this->_file) {
+      return false;
+    }
+
     return $this->_file->getOriginalName();
   }
 
@@ -52,25 +56,27 @@ class AjaxUploader {
     if(!is_writable(dirname($uploadFilename))) {
       return array('error' => __("Server error. Upload directory isn't writable."));
     }
-    
+
     if(!$this->_file) {
-      return array('error' => __('No files were uploaded.'));
+      return array('error' => __('No files were uploaded'));
     }
-    
+
     $size = $this->_file->getSize();
     if($size == 0) {
-      return array('error' => __('File is empty.'));
+      return array('error' => __('File is empty'));
     }
-    
+
     if($size > $this->_sizeLimit) {
-      return array('error' => __('File is too large.') . ' ' . round($size/1000) . '/' . round($this->_sizeLimit/1000) . 'kb');
+      return array('error' => __('File is too large') . ' ' . round($size/1000) . '/' . round($this->_sizeLimit/1000) . 'kb');
     }
 
     $pathinfo = pathinfo($this->_file->getOriginalName());
     $ext = @$pathinfo['extension'];
     $uuid = pathinfo($uploadFilename);
 
-    if($this->_allowedExtensions && stripos($this->_allowedExtensions, strtolower($ext)) === false) {
+    $aAllowedExt = osc_parse_allowed_image_extensions($this->_allowedExtensions);
+
+    if(count($aAllowedExt) > 0 && !in_array(strtolower((string)$ext), $aAllowedExt, true)) {
       @unlink($uploadFilename); // Wrong extension, remove it for security reasons
 
       return array('error' => sprintf(__('File has an invalid extension (%s), it should be one of %s.'), strtolower($ext), $this->_allowedExtensions));
@@ -83,25 +89,25 @@ class AjaxUploader {
     if($this->_file->save($uploadFilename)) {
       if($do_extended_extension_check !== false) {
         $result = $this->checkAllowedExt($uploadFilename, $this->_allowedExtensions);
-        
+
         if(!$result) {
           @unlink($uploadFilename); // Wrong extension, remove it for security reasons
 
           return array('error' => sprintf(__('File has an invalid extension, it should be one of %s.'), $this->_allowedExtensions));
         }
       }
-      
+
       // Standard publish/edit item image upload
       if($to_session !== false) {
         $files = Session::newInstance()->_get('ajax_files');
         if(!is_array($files)) {
           $files = array();
         }
-        
+
         $files[Params::getParam('qquuid')] = $uuid['basename'];
         Session::newInstance()->_set('ajax_files', $files);
       }
-      
+
       return array('success' => true);
     }
 
@@ -118,19 +124,19 @@ class AjaxUploader {
     require LIB_PATH . 'osclass/mimes.php';
     if($file != '') {
       $aMimesAllowed = array();
-   
+
       if($allowedExtensions === null) {
         $allowedExtensions = osc_allowed_extension();
       }
-    
+
       $aExt = explode(',', $allowedExtensions);
-      
-      foreach ($aExt as $ext) {
+
+      foreach($aExt as $ext) {
         if(isset($mimes[$ext])) {
           $mime = $mimes[$ext];
-          
+
           if(is_array($mime)) {
-            foreach ($mime as $aux) {
+            foreach($mime as $aux) {
               if(!in_array($aux, $aMimesAllowed, false)) {
                 $aMimesAllowed[] = $aux;
               }
@@ -144,19 +150,19 @@ class AjaxUploader {
       if(function_exists('finfo_file') && function_exists('finfo_open')) {
         $finfo = finfo_open(FILEINFO_MIME_TYPE);
         $fileMime = finfo_file($finfo, $file);
-        
+
       } elseif(function_exists('mime_content_type')) {
         $fileMime = mime_content_type($file);
-        
+
       } else {
         // *WARNING* There's no way check the mime type of the file, you should not blindly trust on your users' input!
-        
+
         if(osc_image_upload_library() == '') {
           $ftmp = Params::getFiles('qqfile');
         } else {
           $ftmp = Params::getFiles('uppyfile');
         }
-        
+
         $fileMime = @$ftmp['type'];
       }
 
@@ -168,8 +174,8 @@ class AjaxUploader {
           } else {
             $fileMime = '';
           }
-        };
-      };
+        }
+      }
 
       if(in_array($fileMime, $aMimesAllowed, false)) {
         return true;
@@ -197,11 +203,11 @@ class AjaxUploadedFileXhr {
     $temp = tmpfile();
     $realSize = stream_copy_to_stream($input, $temp);
     fclose($input);
-    
+
     if($realSize !== $this->getSize()) {
       return false;
     }
-    
+
     $target = fopen($path, 'wb');
     fseek($temp, 0);
     stream_copy_to_stream($temp, $target);

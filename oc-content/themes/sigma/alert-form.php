@@ -16,13 +16,18 @@
  */
 
 ?>
+<?php
+if(function_exists('osc_alerts_enabled') && !osc_alerts_enabled()) {
+  return;
+}
+?>
 <script type="text/javascript">
 $(document).ready(function(){
     $(".sub_button").click(function(){
         $.post('<?php echo osc_base_url(true); ?>', {email:$("#alert_email").val(), userid:$("#alert_userId").val(), alert:$("#alert").val(), page:"ajax", action:"alerts"},
             function(data){
                 if(data==1) { alert('<?php echo osc_esc_js(__('You have sucessfully subscribed to the alert', 'sigma')); ?>'); }
-                else if(data==-1) { alert('<?php echo osc_esc_js(__('Invalid email address', 'sigma')); ?>'); }
+                else if(data==-1) { alert('<?php echo osc_esc_js(__('The email is not valid', 'sigma')); ?>'); }
                 else { alert('<?php echo osc_esc_js(__('There was a problem with the alert', 'sigma')); ?>');
                 };
         });
@@ -55,7 +60,7 @@ $(document).ready(function(){
 <div class="alert_form">
     <?php if(function_exists('osc_search_alert_subscribed') && osc_search_alert_subscribed()) { ?>
         <h3>
-            <strong><?php _e('Already subscribed to this search.', 'sigma'); ?> <a href="<?php echo osc_user_alerts_url(); ?>"><?php _e('Manage', 'sigma'); ?></a></strong>
+            <strong><?php _e('Already subscribed to this search', 'sigma'); ?> <a href="<?php echo osc_user_alerts_url(); ?>"><?php _e('Manage', 'sigma'); ?></a></strong>
         </h3>
     <?php } else { ?>
         <h3>
@@ -73,7 +78,7 @@ $(document).ready(function(){
                     <?php AlertForm::user_id_hidden(); ?>
                     <?php AlertForm::email_text(); ?>
 
-                <?php }; ?>
+                <?php } ?>
                 <button type="submit" class="sub_button btn btn-secondary" ><?php _e('Subscribe now', 'sigma'); ?>!</button>
         </form>
     <?php } ?>

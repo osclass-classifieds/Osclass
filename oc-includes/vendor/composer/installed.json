@@ -2,17 +2,17 @@
     "packages": [
         {
             "name": "ezyang/htmlpurifier",
-            "version": "v4.19.0",
-            "version_normalized": "4.19.0.0",
+            "version": "v4.19.1",
+            "version_normalized": "4.19.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ezyang/htmlpurifier.git",
-                "reference": "b287d2a16aceffbf6e0295559b39662612b77fcf"
+                "reference": "5e0539132d934f936fbae2c88b55d58f9438623f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ezyang/htmlpurifier/zipball/b287d2a16aceffbf6e0295559b39662612b77fcf",
-                "reference": "b287d2a16aceffbf6e0295559b39662612b77fcf",
+                "url": "https://api.github.com/repos/ezyang/htmlpurifier/zipball/5e0539132d934f936fbae2c88b55d58f9438623f",
+                "reference": "5e0539132d934f936fbae2c88b55d58f9438623f",
                 "shasum": ""
             },
             "require": {
@@ -28,7 +28,7 @@
                 "ext-iconv": "Converts text to and from non-UTF-8 encodings",
                 "ext-tidy": "Used for pretty-printing HTML"
             },
-            "time": "2025-10-17T16:34:55+00:00",
+            "time": "2026-09-15T15:42:51+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -60,7 +60,7 @@
             ],
             "support": {
                 "issues": "https://github.com/ezyang/htmlpurifier/issues",
-                "source": "https://github.com/ezyang/htmlpurifier/tree/v4.19.0"
+                "source": "https://github.com/ezyang/htmlpurifier/tree/v4.19.1"
             },
             "install-path": "../ezyang/htmlpurifier"
         },
@@ -143,17 +143,17 @@
         },
         {
             "name": "gettext/languages",
-            "version": "2.12.1",
-            "version_normalized": "2.12.1.0",
+            "version": "2.12.2",
+            "version_normalized": "2.12.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-gettext/Languages.git",
-                "reference": "0b0b0851c55168e1dfb14305735c64019732b5f1"
+                "reference": "079d6f4842cbcbf5673a70d8e93169a684e7aadd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-gettext/Languages/zipball/0b0b0851c55168e1dfb14305735c64019732b5f1",
-                "reference": "0b0b0851c55168e1dfb14305735c64019732b5f1",
+                "url": "https://api.github.com/repos/php-gettext/Languages/zipball/079d6f4842cbcbf5673a70d8e93169a684e7aadd",
+                "reference": "079d6f4842cbcbf5673a70d8e93169a684e7aadd",
                 "shasum": ""
             },
             "require": {
@@ -162,7 +162,7 @@
             "require-dev": {
                 "phpunit/phpunit": "^4.8 || ^5.7 || ^6.5 || ^7.5 || ^8.4"
             },
-            "time": "2025-03-19T11:14:02+00:00",
+            "time": "2026-02-23T14:05:50+00:00",
             "bin": [
                 "bin/export-plural-rules",
                 "bin/import-cldr-data"
@@ -205,7 +205,7 @@
             ],
             "support": {
                 "issues": "https://github.com/php-gettext/Languages/issues",
-                "source": "https://github.com/php-gettext/Languages/tree/2.12.1"
+                "source": "https://github.com/php-gettext/Languages/tree/2.12.2"
             },
             "funding": [
                 {
@@ -283,17 +283,17 @@
         },
         {
             "name": "gettext/translator",
-            "version": "v1.2.1",
-            "version_normalized": "1.2.1.0",
+            "version": "v1.2.3",
+            "version_normalized": "1.2.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-gettext/Translator.git",
-                "reference": "8ae0ac79053bcb732a6c584cd86f7a82ef183161"
+                "reference": "e6d96e03d8c1afb3ef497799921ad0adfc9f4f96"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-gettext/Translator/zipball/8ae0ac79053bcb732a6c584cd86f7a82ef183161",
-                "reference": "8ae0ac79053bcb732a6c584cd86f7a82ef183161",
+                "url": "https://api.github.com/repos/php-gettext/Translator/zipball/e6d96e03d8c1afb3ef497799921ad0adfc9f4f96",
+                "reference": "e6d96e03d8c1afb3ef497799921ad0adfc9f4f96",
                 "shasum": ""
             },
             "require": {
@@ -309,7 +309,7 @@
             "suggest": {
                 "gettext/gettext": "Is necessary to load and generate array files used by the translator"
             },
-            "time": "2025-01-09T09:20:22+00:00",
+            "time": "2026-06-18T22:49:04+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -340,7 +340,7 @@
             "support": {
                 "email": "oom@oscarotero.com",
                 "issues": "https://github.com/php-gettext/Translator/issues",
-                "source": "https://github.com/php-gettext/Translator/tree/v1.2.1"
+                "source": "https://github.com/php-gettext/Translator/tree/v1.2.3"
             },
             "funding": [
                 {
@@ -544,21 +544,20 @@
         },
         {
             "name": "nikic/php-parser",
-            "version": "v5.7.0",
-            "version_normalized": "5.7.0.0",
+            "version": "v5.9.0",
+            "version_normalized": "5.9.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/nikic/PHP-Parser.git",
-                "reference": "dca41cd15c2ac9d055ad70dbfd011130757d1f82"
+                "reference": "9e33da9553fe7786f0962b35f4e4ecf01be89def"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/dca41cd15c2ac9d055ad70dbfd011130757d1f82",
-                "reference": "dca41cd15c2ac9d055ad70dbfd011130757d1f82",
+                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/9e33da9553fe7786f0962b35f4e4ecf01be89def",
+                "reference": "9e33da9553fe7786f0962b35f4e4ecf01be89def",
                 "shasum": ""
             },
             "require": {
-                "ext-ctype": "*",
                 "ext-json": "*",
                 "ext-tokenizer": "*",
                 "php": ">=7.4"
@@ -567,7 +566,7 @@
                 "ircmaxell/php-yacc": "^0.0.7",
                 "phpunit/phpunit": "^9.0"
             },
-            "time": "2025-12-06T11:56:16+00:00",
+            "time": "2026-09-13T18:51:52+00:00",
             "bin": [
                 "bin/php-parse"
             ],
@@ -599,7 +598,7 @@
             ],
             "support": {
                 "issues": "https://github.com/nikic/PHP-Parser/issues",
-                "source": "https://github.com/nikic/PHP-Parser/tree/v5.7.0"
+                "source": "https://github.com/nikic/PHP-Parser/tree/v5.9.0"
             },
             "install-path": "../nikic/php-parser"
         },
@@ -809,17 +808,17 @@
         },
         {
             "name": "phpmailer/phpmailer",
-            "version": "v7.0.1",
-            "version_normalized": "7.0.1.0",
+            "version": "v7.1.1",
+            "version_normalized": "7.1.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPMailer/PHPMailer.git",
-                "reference": "360ae911ce62e25e11249f6140fa58939f556ebe"
+                "reference": "1bc1716a507a65e039d4ac9d9adebbbd0d346e15"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPMailer/PHPMailer/zipball/360ae911ce62e25e11249f6140fa58939f556ebe",
-                "reference": "360ae911ce62e25e11249f6140fa58939f556ebe",
+                "url": "https://api.github.com/repos/PHPMailer/PHPMailer/zipball/1bc1716a507a65e039d4ac9d9adebbbd0d346e15",
+                "reference": "1bc1716a507a65e039d4ac9d9adebbbd0d346e15",
                 "shasum": ""
             },
             "require": {
@@ -850,7 +849,7 @@
                 "symfony/polyfill-mbstring": "To support UTF-8 if the Mbstring PHP extension is not enabled (^1.2)",
                 "thenetworg/oauth2-azure": "Needed for Microsoft XOAUTH2 authentication"
             },
-            "time": "2025-11-25T07:18:09+00:00",
+            "time": "2026-05-18T08:06:14+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -882,7 +881,7 @@
             "description": "PHPMailer is a full-featured email creation and transfer class for PHP",
             "support": {
                 "issues": "https://github.com/PHPMailer/PHPMailer/issues",
-                "source": "https://github.com/PHPMailer/PHPMailer/tree/v7.0.1"
+                "source": "https://github.com/PHPMailer/PHPMailer/tree/v7.1.1"
             },
             "funding": [
                 {
@@ -894,17 +893,17 @@
         },
         {
             "name": "phpseclib/phpseclib",
-            "version": "3.0.48",
-            "version_normalized": "3.0.48.0",
+            "version": "3.0.57",
+            "version_normalized": "3.0.57.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpseclib/phpseclib.git",
-                "reference": "64065a5679c50acb886e82c07aa139b0f757bb89"
+                "reference": "d17e0ddaeaf6f22f7e007cbb437d78792fe2a0e4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpseclib/phpseclib/zipball/64065a5679c50acb886e82c07aa139b0f757bb89",
-                "reference": "64065a5679c50acb886e82c07aa139b0f757bb89",
+                "url": "https://api.github.com/repos/phpseclib/phpseclib/zipball/d17e0ddaeaf6f22f7e007cbb437d78792fe2a0e4",
+                "reference": "d17e0ddaeaf6f22f7e007cbb437d78792fe2a0e4",
                 "shasum": ""
             },
             "require": {
@@ -922,7 +921,7 @@
                 "ext-mcrypt": "Install the Mcrypt extension in order to speed up a few other cryptographic operations.",
                 "ext-openssl": "Install the OpenSSL extension in order to speed up a wide variety of cryptographic operations."
             },
-            "time": "2025-12-15T11:51:42+00:00",
+            "time": "2026-08-26T12:13:21+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -987,7 +986,7 @@
             ],
             "support": {
                 "issues": "https://github.com/phpseclib/phpseclib/issues",
-                "source": "https://github.com/phpseclib/phpseclib/tree/3.0.48"
+                "source": "https://github.com/phpseclib/phpseclib/tree/3.0.57"
             },
             "funding": [
                 {

@@ -31,7 +31,7 @@
         <input type="hidden" name="page" value="login" />
         <input type="hidden" name="action" value="recover_post" />
         <div class="control-group">
-            <label class="control-label" for="email"><?php _e('E-mail', 'sigma'); ?></label>
+            <label class="control-label" for="email"><?php _e('Email', 'sigma'); ?></label>
             <div class="controls">
                 <?php UserForm::email_text(); ?>
                 <?php osc_run_hook('user_recover_form'); ?>
@@ -46,4 +46,4 @@
         </form>
     </div>
 </div>
-<?php osc_current_web_theme_path('footer.php') ; ?>
+<?php osc_current_web_theme_path('footer.php') ;

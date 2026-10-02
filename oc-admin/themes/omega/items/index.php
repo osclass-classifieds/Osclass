@@ -20,11 +20,11 @@ if(!defined('ABS_PATH')) exit('ABS_PATH is not loaded. Direct access is not allo
 osc_enqueue_script('jquery-validate');
 
 function addHelp() {
-  echo '<p>' . __('Manage all the listings on your site: edit, delete or block the latest listings published. You can also filter by several parameters: user, region, city, etc.') . '</p>';
+  echo '<p>' . __('Manage all listings on your site: edit, delete, block or unblock, and change status. Filter by user, category, location, status, and more.') . '</p>';
 }
 osc_add_hook('help_box','addHelp');
 
-function customPageHeader() { 
+function customPageHeader() {
   ?>
   <h1><?php _e('Listings'); ?>
     <a href="<?php echo osc_admin_base_url(true); ?>?page=items&amp;action=settings" class="btn ico ico-32 ico-engine float-right"></a>
@@ -37,7 +37,7 @@ osc_add_hook('admin_page_header','customPageHeader');
 
 
 function customPageTitle($string) {
-  return sprintf(__('Manage listings - %s'), $string);
+  return sprintf(__('%s - %s'), __('Manage listings'), $string);
 }
 osc_add_filter('admin_title', 'customPageTitle');
 
@@ -51,16 +51,19 @@ function customHead() {
       $('#filter-select').change( function () {
         var option = $(this).find('option:selected').attr('value');
         // clean values
-        $('#fPattern,#fUser,#fItemId').attr('value', '');
-        if(option == 'oPattern') {
+        $('#fPattern,#fUser,#fContactName,#fItemId').attr('value', '');
+        if(option == 'oPattern' || option == 'oCategory' || option == 'oLocation' || option == 'oPublishDate' || option == 'oExpirationDate') {
           $('#fPattern').removeClass('hide');
-          $('#fUser, #fItemId').addClass('hide');
+          $('#fUser, #fContactName, #fItemId').addClass('hide');
         } else if(option == 'oUser'){
           $('#fUser').removeClass('hide');
-          $('#fPattern, #fItemId').addClass('hide');
+          $('#fPattern, #fContactName, #fItemId').addClass('hide');
+        } else if(option == 'oContactName'){
+          $('#fContactName').removeClass('hide');
+          $('#fPattern, #fUser, #fItemId').addClass('hide');
         } else {
           $('#fItemId').removeClass('hide');
-          $('#fPattern, #fUser').addClass('hide');
+          $('#fPattern, #fUser, #fContactName').addClass('hide');
         }
       });
 
@@ -106,11 +109,11 @@ function customHead() {
       });
       // dialog bulk actions function
       $("#datatablesForm").submit(function() {
-        if( $("#bulk_actions option:selected").val() == "" ) {
+        if($("#bulk_actions option:selected").val() == "" ) {
           return false;
         }
 
-        if( $("#datatablesForm").attr('data-dialog-open') == "true" ) {
+        if($("#datatablesForm").attr('data-dialog-open') == "true" ) {
           return true;
         }
 
@@ -123,20 +126,20 @@ function customHead() {
       });
 
       var dialogWidth = 680;
-      
+
       if($(window).width() < 720) {
         dialogWidth = $(window).width() - 40;
       }
-    
+
       // dialog filters
       $('#display-filters').dialog({
         autoOpen: false,
         modal: true,
         width: dialogWidth,
         title: '<?php echo osc_esc_js( __('Filters') ); ?>',
-        dialogClass: 'item-filters'        
+        dialogClass: 'item-filters'
       });
-      
+
       $('#btn-display-filters').click(function(){
         $('#display-filters').dialog('open');
         return false;
@@ -146,7 +149,7 @@ function customHead() {
       $("#check_all").change(function(){
         var isChecked = $(this).prop("checked");
         $('.col-bulkactions input').each( function() {
-          if( isChecked == 1 ) {
+          if(isChecked == 1 ) {
             this.checked = true;
           } else {
             this.checked = false;
@@ -177,9 +180,11 @@ $sort     = Params::getParam('sort');
 $direction  = Params::getParam('direction');
 
 $columns  = $aData['aColumns'];
+$columnSources = (isset($aData['aColumnSources']) ? $aData['aColumnSources'] : array());
+$sortableColumns = (isset($aData['aSortableColumns']) ? $aData['aSortableColumns'] : array());
 $rows     = $aData['aRows'];
 
-osc_current_admin_theme_path( 'parts/header.php' ); 
+osc_current_admin_theme_path( 'parts/header.php' );
 ?>
 
 <form method="get" action="<?php echo osc_admin_base_url(true); ?>" id="display-filters" class="has-form-actions hide nocsrf">
@@ -193,7 +198,7 @@ osc_current_admin_theme_path( 'parts/header.php' );
       <div class="row-wrapper">
         <div class="form-row">
           <div class="form-label">
-            <?php _e('Pattern'); ?>
+            <?php _e('Title'); ?>
           </div>
           <div class="form-controls">
             <input type="text" name="sSearch" id="sSearch" value="<?php echo osc_esc_html(Params::getParam('sSearch')); ?>" />
@@ -237,7 +242,7 @@ osc_current_admin_theme_path( 'parts/header.php' );
       <div class="row-wrapper">
         <div class="form-row">
           <div class="form-label">
-            <?php _e('Email'); ?>
+            <?php _e('Contact email'); ?>
           </div>
           <div class="form-controls">
             <input id="user" name="user" type="text" value="<?php echo osc_esc_html(Params::getParam('user')); ?>" />
@@ -311,19 +316,19 @@ osc_current_admin_theme_path( 'parts/header.php' );
   <div id="listing-toolbar">
     <div class="float-right">
       <form method="get" action="<?php echo osc_admin_base_url(true); ?>"  class="inline nocsrf">
-        <?php foreach( Params::getParamsAsArray('get') as $key => $value ) { ?>
-        <?php if( $key != 'iDisplayLength' ) { ?>
+        <?php foreach(Params::getParamsAsArray('get') as $key => $value ) { ?>
+        <?php if($key != 'iDisplayLength' ) { ?>
         <input type="hidden" name="<?php echo osc_esc_html(strip_tags($key)); ?>" value="<?php echo osc_esc_html(strip_tags($value)); ?>" />
         <?php } } ?>
         <select name="iDisplayLength" class="select-box-extra select-box-medium float-left" onchange="this.form.submit();" >
-          <option value="10" <?php if( Params::getParam('iDisplayLength') == 10 ) echo 'selected'; ?> ><?php printf(__('%d Listings'), 10); ?></option>
-          <option value="25" <?php if( Params::getParam('iDisplayLength') == 25 ) echo 'selected'; ?> ><?php printf(__('%d Listings'), 25); ?></option>
-          <option value="50" <?php if( Params::getParam('iDisplayLength') == 50 ) echo 'selected'; ?> ><?php printf(__('%d Listings'), 50); ?></option>
-          <option value="100" <?php if( Params::getParam('iDisplayLength') == 100 ) echo 'selected'; ?> ><?php printf(__('%d Listings'), 100); ?></option>
-          <option value="500" <?php if( Params::getParam('iDisplayLength') == 500 ) echo 'selected'; ?> ><?php printf(__('%d Listings'), 500); ?></option>
+          <option value="10" <?php if(Params::getParam('iDisplayLength') == 10 ) echo 'selected'; ?> ><?php printf(__('%d Listings'), 10); ?></option>
+          <option value="25" <?php if(Params::getParam('iDisplayLength') == 25 ) echo 'selected'; ?> ><?php printf(__('%d Listings'), 25); ?></option>
+          <option value="50" <?php if(Params::getParam('iDisplayLength') == 50 ) echo 'selected'; ?> ><?php printf(__('%d Listings'), 50); ?></option>
+          <option value="100" <?php if(Params::getParam('iDisplayLength') == 100 ) echo 'selected'; ?> ><?php printf(__('%d Listings'), 100); ?></option>
+          <option value="500" <?php if(Params::getParam('iDisplayLength') == 500 ) echo 'selected'; ?> ><?php printf(__('%d Listings'), 500); ?></option>
         </select>
       </form>
-      <form method="get" action="<?php echo osc_admin_base_url(true); ?>" id="shortcut-filters" class="inline">
+      <form method="get" action="<?php echo osc_admin_base_url(true); ?>" id="shortcut-filters" class="inline nocsrf">
         <input type="hidden" name="page" value="items" />
         <input type="hidden" name="iDisplayLength" value="<?php echo $iDisplayLength;?>" />
         <?php if($withFilters) { ?>
@@ -332,26 +337,39 @@ osc_current_admin_theme_path( 'parts/header.php' );
         <a id="btn-display-filters" href="#" class="btn <?php if($withFilters) { echo 'btn-red'; } ?>"><?php _e('Show filters'); ?></a>
 
         <?php $opt = "oPattern"; if(Params::getParam('shortcut-filter') != '') { $opt = Params::getParam('shortcut-filter'); } ?>
-        <?php $classPattern = 'hide'; $classUser = 'hide'; $classItemId = 'hide'; ?>
+        <?php $classPattern = 'hide'; $classUser = 'hide'; $classContactName = 'hide'; $classItemId = 'hide'; ?>
         <?php if($opt == 'oUser') { $classUser = ''; } ?>
-        <?php if($opt == 'oPattern') { $classPattern = ''; } ?>
+        <?php if($opt == 'oContactName') { $classContactName = ''; } ?>
+        <?php if(in_array($opt, array('oPattern', 'oCategory', 'oLocation', 'oPublishDate', 'oExpirationDate'))) { $classPattern = ''; } ?>
         <?php if($opt == 'oItemId') { $classItemId = ''; } ?>
         <select id="filter-select" name="shortcut-filter" class="select-box-extra select-box-input">
-          <option value="oPattern" <?php if($opt == 'oPattern'){ echo 'selected="selected"'; } ?>><?php _e('Pattern'); ?></option>
-          <option value="oUser" <?php if($opt == 'oUser'){ echo 'selected="selected"'; } ?>><?php _e('Email'); ?></option>
-          <option value="oItemId" <?php if($opt == 'oItemId'){ echo 'selected="selected"'; } ?>><?php _e('Item ID'); ?></option>
+          <option value="oPattern" <?php if($opt == 'oPattern'){ echo 'selected="selected"'; } ?>><?php _e('Title'); ?></option>
+          <option value="oUser" <?php if($opt == 'oUser'){ echo 'selected="selected"'; } ?>><?php _e('Contact email'); ?></option>
+          <option value="oContactName" <?php if($opt == 'oContactName'){ echo 'selected="selected"'; } ?>><?php _e('Contact name'); ?></option>
+          <option value="oCategory" <?php if($opt == 'oCategory'){ echo 'selected="selected"'; } ?>><?php _e('Category'); ?></option>
+          <option value="oLocation" <?php if($opt == 'oLocation'){ echo 'selected="selected"'; } ?>><?php _e('Location'); ?></option>
+          <option value="oPublishDate" <?php if($opt == 'oPublishDate'){ echo 'selected="selected"'; } ?>><?php _e('Publish date'); ?></option>
+          <option value="oExpirationDate" <?php if($opt == 'oExpirationDate'){ echo 'selected="selected"'; } ?>><?php _e('Expiration date'); ?></option>
+          <option value="oItemId" <?php if($opt == 'oItemId'){ echo 'selected="selected"'; } ?>><?php _e('Listing ID'); ?></option>
         </select><input
           id="fPattern" type="text" name="sSearch"
           value="<?php echo osc_esc_html(Params::getParam('sSearch')); ?>"
-          class="input-text input-actions input-has-select <?php echo $classPattern; ?>"/><input
+          class="input-text input-actions input-has-select <?php echo $classPattern; ?>"
+          placeholder="<?php echo osc_esc_html(__('Search listing')); ?>"/><input
           id="fUser" name="user" type="text"
           class="fUser input-text input-actions input-has-select <?php echo $classUser; ?>"
-          value="<?php echo osc_esc_html(Params::getParam('user')); ?>" /><input
+          value="<?php echo osc_esc_html(Params::getParam('user')); ?>"
+          placeholder="<?php echo osc_esc_html(__('Search by contact email')); ?>" /><input
           id="fUserId" name="userId" type="hidden"
           value="<?php echo osc_esc_html(Params::getParam('userId')); ?>" /><input
+          id="fContactName" name="contactName" type="text"
+          value="<?php echo osc_esc_html(Params::getParam('contactName')); ?>"
+          class="input-text input-actions input-has-select <?php echo $classContactName; ?>"
+          placeholder="<?php echo osc_esc_html(__('Search by contact name')); ?>" /><input
           id="fItemId" type="text" name="itemId"
           value="<?php echo osc_esc_html(Params::getParam('itemId')); ?>"
-          class="input-text input-actions input-has-select <?php echo $classItemId; ?>"/>
+          class="input-text input-actions input-has-select <?php echo $classItemId; ?>"
+          placeholder="<?php echo osc_esc_html(__('Search by listing ID')); ?>"/>
 
         <input type="submit" class="btn submit-right" value="<?php echo osc_esc_html( __('Find') ); ?>">
       </form>
@@ -366,27 +384,29 @@ osc_current_admin_theme_path( 'parts/header.php' );
         <input type="submit" id="bulk_apply" class="btn" value="<?php echo osc_esc_html( __('Apply') ); ?>" />
       </label>
     </div>
-    <div class="table-contains-actions">
-      <table class="table" cellpadding="0" cellspacing="0">
+    <div class="table-contains-actions-wrap">
+      <table class="table table-contains-actions" cellpadding="0" cellspacing="0">
         <thead>
           <tr>
             <?php foreach($columns as $k => $v) {
-              echo '<th class="col-'.$k.' '.($sort==$k?($direction=='desc'?'sorting_desc':'sorting_asc'):'').'">'.$v.'</th>';
-            }; ?>
+              $sourceCol = (isset($columnSources[$k]) ? $columnSources[$k] : '');
+              $isSortable = ((in_array($k, $sortableColumns, true) || strpos((string)$v, 'sort=') !== false) ? 'is-sortable' : '');
+              echo '<th class="col-'.$k.' '.$isSortable.' '.($sort==$k?($direction=='desc'?'sort-desc':'sort-asc'):'').'" data-source-col="'.osc_esc_html($sourceCol).'">'.$v.'</th>';
+            } ?>
           </tr>
         </thead>
         <tbody>
-        <?php if( count($rows) > 0 ) { ?>
+        <?php if(count($rows) > 0 ) { ?>
           <?php foreach($rows as $key => $row) { ?>
             <tr class="<?php echo implode(' ', osc_apply_filter('datatable_listing_class', array(), $aRawRows[$key], $row)); ?>">
               <?php foreach($row as $k => $v) { ?>
                 <td class="col-<?php echo $k; ?>"><?php echo $v; ?></td>
-              <?php }; ?>
+              <?php } ?>
             </tr>
-          <?php }; ?>
+          <?php } ?>
         <?php } else { ?>
           <tr>
-            <td colspan="<?php echo count($columns); ?>" class="text-center">
+            <td colspan="<?php echo max(1, count($columns)); ?>" class="text-center">
             <p><?php _e('No data available in table'); ?></p>
             </td>
           </tr>
@@ -402,10 +422,26 @@ osc_current_admin_theme_path( 'parts/header.php' );
     $aData = __get("aData");
     echo '<ul class="showing-results"><li><span>'.osc_pagination_showing((Params::getParam('iPage')-1)*$aData['iDisplayLength']+1, ((Params::getParam('iPage')-1)*$aData['iDisplayLength'])+count($aData['aRows']), $aData['iTotalDisplayRecords'], $aData['iTotalRecords']).'</span></li></ul>';
   }
-  
+
   osc_add_hook('before_show_pagination_admin','showingResults');
   osc_show_pagination_admin($aData);
 ?>
+<div class="display-select-bottom">
+  <form method="get" action="<?php echo osc_admin_base_url(true); ?>" class="inline nocsrf">
+    <?php foreach(Params::getParamsAsArray('get') as $key => $value) { ?>
+      <?php if($key != 'iDisplayLength') { ?>
+        <input type="hidden" name="<?php echo osc_esc_html(strip_tags($key)); ?>" value="<?php echo osc_esc_html(strip_tags($value)); ?>" />
+      <?php } ?>
+    <?php } ?>
+    <select name="iDisplayLength" class="select-box-extra select-box-medium float-left" onchange="this.form.submit();" >
+      <option value="10" <?php if(Params::getParam('iDisplayLength') == 10) echo 'selected'; ?> ><?php printf(__('%d Listings'), 10); ?></option>
+      <option value="25" <?php if(Params::getParam('iDisplayLength') == 25) echo 'selected'; ?> ><?php printf(__('%d Listings'), 25); ?></option>
+      <option value="50" <?php if(Params::getParam('iDisplayLength') == 50) echo 'selected'; ?> ><?php printf(__('%d Listings'), 50); ?></option>
+      <option value="100" <?php if(Params::getParam('iDisplayLength') == 100) echo 'selected'; ?> ><?php printf(__('%d Listings'), 100); ?></option>
+      <option value="500" <?php if(Params::getParam('iDisplayLength') == 500) echo 'selected'; ?> ><?php printf(__('%d Listings'), 500); ?></option>
+    </select>
+  </form>
+</div>
 <form id="dialog-item-delete" method="get" action="<?php echo osc_admin_base_url(true); ?>" class="has-form-actions hide">
   <input type="hidden" name="page" value="items" />
   <input type="hidden" name="action" value="delete" />
@@ -434,4 +470,4 @@ osc_current_admin_theme_path( 'parts/header.php' );
     </div>
   </div>
 </div>
-<?php osc_current_admin_theme_path( 'parts/footer.php' ); ?>
+<?php osc_current_admin_theme_path( 'parts/footer.php' );

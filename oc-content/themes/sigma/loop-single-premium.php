@@ -21,7 +21,7 @@
 <li class="<?php osc_run_hook("highlight_class"); ?>listing-card <?php echo $class . ' premium'; ?>">
   <?php osc_run_hook('item_loop_top', true); ?>
 
-  <?php if( osc_images_enabled_at_items() ) { ?>
+  <?php if(osc_images_enabled_at_items() ) { ?>
     <?php if(osc_count_premium_resources()) { ?>
       <a class="listing-thumb" href="<?php echo osc_premium_url() ; ?>" title="<?php echo osc_esc_html(osc_premium_title()) ; ?>"><img src="<?php echo osc_resource_thumbnail_url(); ?>" title="" alt="<?php echo osc_esc_html(osc_premium_title()) ; ?>" width="<?php echo $size[0]; ?>" height="<?php echo $size[1]; ?>"></a>
     <?php } else { ?>
@@ -29,25 +29,25 @@
     <?php } ?>
   <?php } ?>
 
-  <?php 
-    if(function_exists('fi_make_favorite')) { 
+  <?php
+    if(function_exists('fi_make_favorite')) {
       echo fi_make_favorite();
     }
   ?>
-  
+
   <div class="listing-detail">
     <div class="listing-cell">
       <div class="listing-data">
         <div class="listing-basicinfo">
           <a href="<?php echo osc_premium_url() ; ?>" class="title" title="<?php echo osc_esc_html(osc_premium_title()) ; ?>"><?php echo osc_premium_title() ; ?></a>
           <?php osc_run_hook('item_loop_title', true); ?>
-          
+
           <div class="listing-attributes">
             <?php if(osc_price_enabled_at_items()  && osc_premium_category_price_enabled()) { ?><span class="currency-value"><?php echo osc_format_price(osc_premium_price(),osc_premium_currency_symbol()); ?></span><?php } ?>
 
             <div class="listing-details">
               <span class="category"><?php echo osc_premium_category() ; ?></span>
-              <span class="location"><?php echo osc_premium_city(); ?><?php if( osc_premium_region() != '' ) { ?> (<?php echo osc_premium_region(); ?>)<?php } ?></span> 
+              <span class="location"><?php echo osc_premium_city(); ?><?php if(osc_premium_region() != '' ) { ?> (<?php echo osc_premium_region(); ?>)<?php } ?></span>
               <span class="date"><?php echo osc_format_date(osc_premium_pub_date()); ?></span>
             </div>
           </div>
@@ -58,6 +58,6 @@
       </div>
     </div>
   </div>
-  
+
   <?php osc_run_hook('item_loop_bottom', true); ?>
 </li>

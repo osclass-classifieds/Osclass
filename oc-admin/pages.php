@@ -51,7 +51,7 @@ class CAdminPages extends AdminSecBaseModel {
         $this->_exportVariableToView("page", $this->pageManager->findByPrimaryKey(Params::getParam("id")));
         $this->doView("pages/frm.php");
         break;
-        
+
       case 'edit_post':
         osc_csrf_check();
         $id = Params::getParam("id");
@@ -67,26 +67,32 @@ class CAdminPages extends AdminSecBaseModel {
         $aFieldsDescription = array();
         $postParams = Params::getParamsAsArray('', false);
         $not_empty = false;
-        foreach ($postParams as $k => $v) {
+        foreach($postParams as $k => $v) {
           if(preg_match('|(.+?)#(.+)|', $k, $m)) {
-            if($m[2]=='s_title' && $v!='') { $not_empty = true; };
+            if($m[2]=='s_title' && $v!='') { $not_empty = true; }
             $aFieldsDescription[$m[1]][$m[2]] = $v;
           }
         }
-        
+
         Session::newInstance()->_setForm('aFieldsDescription',$aFieldsDescription);
 
-        if( $s_internal_name == '' ) {
+        if($s_internal_name == '' ) {
           osc_add_flash_error_message(_m('You have to set an internal name'), 'admin');
           $this->redirectTo(osc_admin_base_url(true)."?page=pages&action=edit&id=" . $id);
         }
 
-        if( !WebThemes::newInstance()->isValidPage($s_internal_name) ) {
+        if(!WebThemes::newInstance()->isValidPage($s_internal_name) ) {
           osc_add_flash_error_message(_m('You have to set a different internal name'), 'admin');
           $this->redirectTo(osc_admin_base_url(true)."?page=pages&action=edit&id=" . $id);
         }
-        
+
         Session::newInstance()->_setForm('s_internal_name',$s_internal_name);
+
+        $dt_pub_date = trim((string)Params::getParam('dt_pub_date'));
+        $i_order = Params::getParam('i_order');
+        if($i_order !== '' && $i_order !== null) {
+          Session::newInstance()->_setForm('i_order', (int)$i_order);
+        }
 
         if($not_empty) {
           foreach($aFieldsDescription as $k => $_data) {
@@ -100,23 +106,31 @@ class CAdminPages extends AdminSecBaseModel {
               $this->pageManager->updateIndex($id,$b_index);
               $this->pageManager->updateVisibility($id,$i_visibility);
             }
-            
+
+            if($dt_pub_date != '') {
+              $this->pageManager->updatePubDate($id, $dt_pub_date);
+            }
+
+            if($i_order !== '' && $i_order !== null && !$this->pageManager->isIndelible($id)) {
+              $this->pageManager->setOrder($id, (int)$i_order);
+            }
+
             osc_run_hook('edit_page', $id);
             Session::newInstance()->_clearVariables();
             osc_add_flash_ok_message(_m('The page has been updated'), 'admin');
-            
+
             //$this->redirectTo(osc_admin_base_url(true)."?page=pages");
             $this->redirectTo(osc_admin_base_url(true)."?page=pages&action=edit&id=" . $id);
           }
-          
-          osc_add_flash_error_message(_m("You can't repeat internal name"), 'admin');
+
+          osc_add_flash_error_message(_m("You cannot reuse this internal name"), 'admin');
         } else {
           osc_add_flash_error_message(_m("The page couldn't be updated, at least one title should not be empty"), 'admin');
         }
-        
+
         $this->redirectTo(osc_admin_base_url(true)."?page=pages&action=edit&id=" . $id);
         break;
-        
+
       case 'add':
         $form   = count(Session::newInstance()->_getForm());
         $keepForm = count(Session::newInstance()->_getKeepForm());
@@ -129,7 +143,7 @@ class CAdminPages extends AdminSecBaseModel {
         $this->_exportVariableToView("page", array());
         $this->doView("pages/frm.php");
         break;
-        
+
       case 'add_post':
         osc_csrf_check();
         $s_internal_name = Params::getParam("s_internal_name");
@@ -151,29 +165,43 @@ class CAdminPages extends AdminSecBaseModel {
             $aFieldsDescription[$m[1]][$m[2]] = $v;
           }
         }
-        
+
         Session::newInstance()->_setForm('aFieldsDescription',$aFieldsDescription);
 
-        if( $s_internal_name == '' ) {
+        if($s_internal_name == '' ) {
           osc_add_flash_error_message(_m('You have to set an internal name'), 'admin');
           $this->redirectTo(osc_admin_base_url(true)."?page=pages&action=add");
         }
 
-        if( !WebThemes::newInstance()->isValidPage($s_internal_name) ) {
+        if(!WebThemes::newInstance()->isValidPage($s_internal_name) ) {
           osc_add_flash_error_message(_m('You have to set a different internal name'), 'admin');
           $this->redirectTo(osc_admin_base_url(true)."?page=pages&action=add");
         }
-        
+
         $aFields = array('s_internal_name' => $s_internal_name, 'b_indelible' => '0', 's_meta' => json_encode($meta), 'b_link' => $b_link, 'b_index' => $b_index, 'i_visibility' => $i_visibility);
         Session::newInstance()->_setForm('s_internal_name',$s_internal_name);
+
+        $i_order = Params::getParam('i_order');
+        if($i_order !== '' && $i_order !== null) {
+          Session::newInstance()->_setForm('i_order', (int)$i_order);
+        }
 
         $page = $this->pageManager->findByInternalName($s_internal_name);
         if(!isset($page['pk_i_id'])) {
           if($not_empty) {
             $id = $this->pageManager->insert($aFields, $aFieldsDescription);
+            $dt_pub_date = trim((string)Params::getParam('dt_pub_date'));
+            if($id !== false && $id > 0 && $dt_pub_date != '') {
+              $this->pageManager->updatePubDate($id, $dt_pub_date);
+            }
+
+            if($id !== false && $id > 0 && $i_order !== '' && $i_order !== null) {
+              $this->pageManager->setOrder($id, (int)$i_order);
+            }
+
             Session::newInstance()->_clearVariables();
             osc_add_flash_ok_message(_m('The page has been added'), 'admin');
-            
+
             if($id !== false && $id > 0) {
               $this->redirectTo(osc_admin_base_url(true)."?page=pages&action=edit&id=" . $id);
             } else {
@@ -183,12 +211,21 @@ class CAdminPages extends AdminSecBaseModel {
             osc_add_flash_error_message(_m("The page couldn't be added, at least one title should not be empty"), 'admin');
           }
         } else {
-          osc_add_flash_error_message(_m("Oops! That internal name is already in use. We can't make the changes"), 'admin');
+          osc_add_flash_error_message(_m('Oops! That internal name is already in use. We cannot make the changes'), 'admin');
         }
-        
+
         $this->redirectTo(osc_admin_base_url(true)."?page=pages&action=add");
         break;
-        
+
+      case 'set_indexable':
+      case 'set_non_indexable':
+      case 'set_footer_visible':
+      case 'set_footer_hidden':
+        osc_csrf_check();
+        $this->bulkUpdatePageFlags(Params::getParam('id'), $this->action);
+        $this->redirectTo(osc_admin_base_url(true) . "?page=pages");
+        break;
+
       case 'delete':
         osc_csrf_check();
         $id = Params::getParam("id");
@@ -202,7 +239,7 @@ class CAdminPages extends AdminSecBaseModel {
 
         foreach($id as $_id) {
           $result = (int) $this->pageManager->deleteByPrimaryKey($_id);
-          switch ($result) {
+          switch($result) {
             case -1:
               $page_indelible++;
               break;
@@ -216,12 +253,12 @@ class CAdminPages extends AdminSecBaseModel {
 
         if($page_indelible > 0) {
           if($page_indelible == 1) {
-            osc_add_flash_error_message( _m("One page can't be deleted because it is indelible"), 'admin');
+            osc_add_flash_error_message( _m("This page cannot be deleted because it is indelible"), 'admin');
           } else {
             osc_add_flash_error_message(sprintf(_m("%s pages couldn't be deleted because they are indelible"), $page_indelible), 'admin');
           }
         }
-        
+
         if($page_deleted_error > 0) {
           if($page_deleted_error == 1) {
             osc_add_flash_error_message(_m("One page couldn't be deleted"), 'admin');
@@ -229,18 +266,18 @@ class CAdminPages extends AdminSecBaseModel {
             osc_add_flash_error_message(sprintf(_m("%s pages couldn't be deleted"), $page_deleted_error), 'admin');
           }
         }
-        
+
         if($page_deleted_correcty > 0) {
           if($page_deleted_correcty == 1) {
-            osc_add_flash_ok_message(_m('One page has been deleted correctly'), 'admin');
+            osc_add_flash_ok_message(_m('One page has been deleted'), 'admin');
           } else {
-            osc_add_flash_ok_message(sprintf(_m('%s pages have been deleted correctly'), $page_deleted_correcty), 'admin');
+            osc_add_flash_ok_message(sprintf(_m('%s pages have been deleted'), $page_deleted_correcty), 'admin');
           }
         }
-        
+
         $this->redirectTo(osc_admin_base_url(true) . "?page=pages");
         break;
-        
+
       default:
         if(Params::getParam("action")!="") {
           osc_run_hook("page_bulk_".Params::getParam("action"), Params::getParam('id'));
@@ -249,27 +286,27 @@ class CAdminPages extends AdminSecBaseModel {
         require_once osc_lib_path()."osclass/classes/datatables/PagesDataTable.php";
 
         // set default iDisplayLength
-        if( Params::getParam('iDisplayLength') != '' ) {
+        if(Params::getParam('iDisplayLength') != '' ) {
           Cookie::newInstance()->push('listing_iDisplayLength', Params::getParam('iDisplayLength'));
           Cookie::newInstance()->set();
         } else {
           // set a default value if it's set in the cookie
           $listing_iDisplayLength = (int) Cookie::newInstance()->get_value('listing_iDisplayLength');
-          if ($listing_iDisplayLength == 0) $listing_iDisplayLength = 25;
+          if($listing_iDisplayLength == 0) $listing_iDisplayLength = 25;
           Params::setParam('iDisplayLength', $listing_iDisplayLength );
         }
         $this->_exportVariableToView('iDisplayLength', Params::getParam('iDisplayLength'));
 
         // Table header order by related
-        if( Params::getParam('sort') == '') {
-          Params::setParam('sort', 'date');
+        if(Params::getParam('sort') == '') {
+          Params::setParam('sort', 'order');
         }
-        if( Params::getParam('direction') == '') {
-          Params::setParam('direction', 'desc');
+        if(Params::getParam('direction') == '') {
+          Params::setParam('direction', 'asc');
         }
 
         $page  = (int)Params::getParam('iPage');
-        if($page==0) { $page = 1; };
+        if($page==0) { $page = 1; }
         Params::setParam('iPage', $page);
 
         $params = Params::getParamsAsArray();
@@ -300,14 +337,49 @@ class CAdminPages extends AdminSecBaseModel {
 
         $bulk_options = array(
           array('value' => '', 'data-dialog-content' => '', 'label' => __('Bulk actions')),
+          array('value' => 'set_indexable', 'data-dialog-content' => '', 'label' => __('Set page to indexable')),
+          array('value' => 'set_non_indexable', 'data-dialog-content' => '', 'label' => __('Set page to non-indexable')),
+          array('value' => 'set_footer_visible', 'data-dialog-content' => '', 'label' => __('Set page to visible in footer')),
+          array('value' => 'set_footer_hidden', 'data-dialog-content' => '', 'label' => __('Set page to not visible in footer')),
           array('value' => 'delete', 'data-dialog-content' => sprintf(__('Are you sure you want to %s the selected pages?'), strtolower(__('Delete'))), 'label' => __('Delete'))
         );
-        
+
         $bulk_options = osc_apply_filter("page_bulk_filter", $bulk_options);
         $this->_exportVariableToView('bulk_options', $bulk_options);
 
         $this->doView("pages/index.php");
         break;
+    }
+  }
+
+  // Apply bulk index/footer flags to selected pages
+  private function bulkUpdatePageFlags($ids, $action) {
+    if(!is_array($ids)) {
+      $ids = array($ids);
+    }
+
+    $updated = 0;
+    foreach($ids as $id) {
+      $id = (int)$id;
+      if($id <= 0) {
+        continue;
+      }
+
+      if($action == 'set_indexable') {
+        $updated += (int)$this->pageManager->updateIndex($id, 1);
+      } else if($action == 'set_non_indexable') {
+        $updated += (int)$this->pageManager->updateIndex($id, 0);
+      } else if($action == 'set_footer_visible') {
+        $updated += (int)$this->pageManager->updateLink($id, 1);
+      } else if($action == 'set_footer_hidden') {
+        $updated += (int)$this->pageManager->updateLink($id, 0);
+      }
+    }
+
+    if($updated > 0) {
+      osc_add_flash_ok_message(_m('Selected pages have been updated'), 'admin');
+    } else {
+      osc_add_flash_error_message(_m('No pages were updated'), 'admin');
     }
   }
 

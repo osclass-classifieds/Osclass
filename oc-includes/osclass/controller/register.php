@@ -26,7 +26,7 @@ class CWebRegister extends BaseModel {
     parent::__construct();
 
     if(!osc_users_enabled()) {
-      osc_add_flash_error_message(_m('Users not enabled'));
+      osc_add_flash_error_message(_m('Users are not enabled'));
       $this->redirectTo(osc_base_url());
     }
 
@@ -38,7 +38,7 @@ class CWebRegister extends BaseModel {
     if(osc_is_web_user_logged_in()) {
       $this->redirectTo(osc_base_url());
     }
-    
+
     osc_run_hook('init_register');
   }
 
@@ -47,10 +47,10 @@ class CWebRegister extends BaseModel {
       case('register'):       // register user view
         $this->doView('user-register.php');
         break;
-        
+
       case('register_post'):  // register user action (form submitted)
         osc_csrf_check();
-        
+
         if(!osc_users_enabled()) {
           osc_add_flash_error_message(_m('Users are not enabled'));
           $this->redirectTo(osc_base_url());
@@ -59,7 +59,7 @@ class CWebRegister extends BaseModel {
         osc_run_hook('before_user_register');
 
         $banned = osc_is_banned(Params::getParam('s_email'));
-        
+
         if($banned==1) {
           osc_add_flash_error_message(_m('Your current email is not allowed'));
           $this->redirectTo(osc_register_account_url());
@@ -71,16 +71,16 @@ class CWebRegister extends BaseModel {
         require_once LIB_PATH . 'osclass/UserActions.php';
         $userActions = new UserActions(false);
         $success = $userActions->add();
-        
+
         if($success == 1) {
           osc_add_flash_ok_message(_m('The user has been created. An activation email has been sent'));
           $this->redirectTo(osc_base_url());
         } else if($success == 2) {
-          osc_add_flash_ok_message(_m('Your account has been created successfully'));
+          osc_add_flash_ok_message(_m('Your account has been created'));
           Params::setParam('action', 'login_post');
           Params::setParam('email', Params::getParam('s_email'));
           Params::setParam('password', Params::getParam('s_password', false, false));
-          
+
           require_once osc_lib_path() . 'osclass/controller/login.php';
           $do = new CWebLogin();
           $do->doModel();
@@ -88,21 +88,21 @@ class CWebRegister extends BaseModel {
           osc_add_flash_error_message($success);
           $this->redirectTo(osc_register_account_url());
         }
-        
+
         break;
-        
+
       case('validate'):     // validate account
         $id = (int) Params::getParam('id');
         $code = Params::getParam('code');
         $userManager = new User();
         $user = $userManager->findByIdSecret($id, $code);
 
-        if (!$user) {
+        if(!$user) {
           osc_add_flash_error_message(_m('The link is not valid anymore. Sorry for the inconvenience!'));
           $this->redirectTo(osc_base_url());
         }
 
-        if ($user['b_active'] == 1) {
+        if($user['b_active'] == 1) {
           osc_add_flash_error_message(_m('Your account has already been validated'));
           $this->redirectTo(osc_base_url());
         }
@@ -125,7 +125,7 @@ class CWebRegister extends BaseModel {
         } else {
           osc_add_flash_ok_message(_m('Account validation failed'));
         }
-        
+
         $this->redirectTo(osc_base_url());
         break;
     }

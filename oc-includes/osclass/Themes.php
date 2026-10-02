@@ -30,7 +30,7 @@ abstract class Themes
   protected $theme_exists;
   protected $theme_is_child;  // if child theme is active, this variable will contain name of parent theme (theme base name)
   protected $path;
-  
+
   protected $scripts;
   protected $queue;
   protected $styles;
@@ -58,7 +58,7 @@ abstract class Themes
     $this->setCurrentThemePath();
     $this->setCurrentThemeUrl();
   }
-  
+
   public function setCurrentThemeIsChild( $theme )
   {
     $this->theme_is_child = $theme;
@@ -68,7 +68,7 @@ abstract class Themes
   {
     return $this->theme;
   }
-  
+
   public function getCurrentThemeIsChild()
   {
     return $this->theme_is_child;
@@ -230,7 +230,7 @@ public function getCurrentThemeJs()
     $scripts = array();
     $this->orderScripts();
     foreach($this->resolved as $id) {
-      if( isset($this->scripts[$id]['url']) ) {
+      if(isset($this->scripts[$id]['url']) ) {
         $scripts[] = $this->scripts[$id]['url'];
       }
     }

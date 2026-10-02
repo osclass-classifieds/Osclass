@@ -18,15 +18,15 @@ if(!defined('ABS_PATH')) exit('ABS_PATH is not loaded. Direct access is not allo
 
 
 function addHelp() {
-  echo '<p>' . __("Add, edit or delete the language in which your Osclass is displayed, both the part that's viewable by users and the admin panel.") . '</p>';
+  echo '<p>' . __("Add, edit, or remove site languages for the front office and backoffice. Set locale, date format, and default currency per language.") . '</p>';
 }
 
 osc_add_hook('help_box','addHelp');
 
 
-function customPageHeader(){ 
+function customPageHeader(){
   ?>
-  <h1><?php _e('Settings'); ?>
+  <h1><?php _e('International'); ?>
     <a href="#" class="btn ico ico-32 ico-help float-right"></a>
     <a href="<?php echo osc_admin_base_url(true); ?>?page=languages&action=add" class="btn btn-green ico ico-add-white float-right" ><?php _e('Add language'); ?></a>
     <a href="<?php echo osc_admin_base_url(true); ?>?page=languages&action=sync" class="btn btn-white ico ico-sync float-right" ><?php _e('Synchronize'); ?></a>
@@ -38,155 +38,193 @@ osc_add_hook('admin_page_header','customPageHeader');
 
 
 function customPageTitle($string) {
-  return sprintf(__('Languages - %s'), $string);
+  return sprintf(__('%s - %s'), __('Manage languages'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');
 
 
-//customize Head
-function customHead() { 
+function customHead() {
   ?>
   <script type="text/javascript">
-    $(document).ready(function(){
-      // check_all bulkactions
-      $("#check_all").change(function(){
-        var isChecked = $(this).prop("checked");
-        $('.col-bulkactions input').each( function() {
-          if( isChecked == 1 ) {
-            this.checked = true;
-          } else {
-            this.checked = false;
-          }
-        });
-      });
-
-      // dialog delete
-      $("#dialog-language-delete").dialog({
-        autoOpen: false,
-        modal: true,
-        title: '<?php echo osc_esc_js( __('Delete language') ); ?>'
-      });
-
-      // dialog bulk actions
-      $("#dialog-bulk-actions").dialog({
-        autoOpen: false,
-        modal: true
-      });
-      $("#bulk-actions-submit").click(function() {
-        $("#datatablesForm").submit();
-      });
-      $("#bulk-actions-cancel").click(function() {
-        $("#datatablesForm").attr('data-dialog-open', 'false');
-        $('#dialog-bulk-actions').dialog('close');
-      });
-      // dialog bulk actions function
-      $("#datatablesForm").submit(function() {
-        if( $("#bulk_actions option:selected").val() == "" ) {
-          return false;
+  $(document).ready(function(){
+    $("#check_all").change(function(){
+      var isChecked = $(this).prop("checked");
+      $('.col-bulkactions input').each(function() {
+        if(isChecked == 1) {
+          this.checked = true;
+        } else {
+          this.checked = false;
         }
-
-        if( $("#datatablesForm").attr('data-dialog-open') == "true" ) {
-          return true;
-        }
-
-        $("#dialog-bulk-actions .form-row").html($("#bulk_actions option:selected").attr('data-dialog-content'));
-        $("#bulk-actions-submit").html($("#bulk_actions option:selected").text());
-        $("#datatablesForm").attr('data-dialog-open', 'true');
-        $("#dialog-bulk-actions").dialog('open');
-        return false;
       });
     });
 
-    // dialog delete function
-    function delete_dialog(item_id) {
-      $("#dialog-language-delete input[name='id[]']").attr('value', item_id);
-      $("#dialog-language-delete").dialog('open');
+    $("#dialog-language-delete").dialog({
+      autoOpen: false,
+      modal: true,
+      title: '<?php echo osc_esc_js(__('Delete language')); ?>'
+    });
+
+    $("#dialog-bulk-actions").dialog({
+      autoOpen: false,
+      modal: true
+    });
+    $("#bulk-actions-submit").click(function() {
+      $("#datatablesForm").submit();
+    });
+    $("#bulk-actions-cancel").click(function() {
+      $("#datatablesForm").attr('data-dialog-open', 'false');
+      $('#dialog-bulk-actions').dialog('close');
+    });
+    $("#datatablesForm").submit(function() {
+      if($("#bulk_actions option:selected").val() == "") {
+        return false;
+      }
+
+      if($("#datatablesForm").attr('data-dialog-open') == "true") {
+        return true;
+      }
+
+      $("#dialog-bulk-actions .form-row").html($("#bulk_actions option:selected").attr('data-dialog-content'));
+      $("#bulk-actions-submit").html($("#bulk_actions option:selected").text());
+      $("#datatablesForm").attr('data-dialog-open', 'true');
+      $("#dialog-bulk-actions").dialog('open');
       return false;
-    }
+    });
+  });
+
+  function delete_dialog(item_id) {
+    $("#dialog-language-delete input[name='id[]']").attr('value', item_id);
+    $("#dialog-language-delete").dialog('open');
+    return false;
+  }
   </script>
   <?php
 }
 osc_add_hook('admin_header','customHead', 10);
 
-$iDisplayLength = __get('iDisplayLength');
-$aData      = __get('aLanguages');
 
-osc_current_admin_theme_path( 'parts/header.php' );
+$aData = __get('aData');
+$aRawRows = __get('aRawRows');
+$iDisplayLength = __get('iDisplayLength');
+$sort = Params::getParam('sort');
+$direction = Params::getParam('direction');
+
+$columns = $aData['aColumns'];
+$columnSources = (isset($aData['aColumnSources']) ? $aData['aColumnSources'] : array());
+$sortableColumns = (isset($aData['aSortableColumns']) ? $aData['aSortableColumns'] : array());
+$rows = $aData['aRows'];
+$withFilters = __get('withFilters');
+
+osc_current_admin_theme_path('parts/header.php');
 ?>
 
-<div class="flashmessage flashmessage-info static-flash">
-  <p class="info"><?php echo sprintf(__('Your default language is %s. Default language cannot be removed or disabled and can be changed in %s section.'), '<b>' . osc_language() . '</b>', '<a href="' . osc_admin_base_url(true) . '?page=settings">' . __('Settings > General') . '</a>'); ?></p>
-</div>
-
-
 <h2 class="render-title">
-  <?php _e('Manage Languages'); ?> 
+  <?php _e('Manage languages'); ?>
   <a href="<?php echo osc_admin_base_url(true); ?>?page=languages&action=add" class="btn btn-mini"><?php _e('Add new'); ?></a>
 </h2>
 <div class="relative">
   <div id="language-toolbar" class="table-toolbar">
     <div class="float-right">
-
+      <form method="get" action="<?php echo osc_admin_base_url(true); ?>" class="inline nocsrf">
+        <?php foreach(Params::getParamsAsArray('get') as $key => $value) { ?>
+        <?php if($key != 'iDisplayLength') { ?>
+        <input type="hidden" name="<?php echo osc_esc_html(strip_tags($key)); ?>" value="<?php echo osc_esc_html(strip_tags($value)); ?>" />
+        <?php } } ?>
+        <select name="iDisplayLength" class="select-box-extra select-box-medium float-left" onchange="this.form.submit();" >
+          <option value="10" <?php if(Params::getParam('iDisplayLength') == 10) echo 'selected'; ?> ><?php printf(__('%d Languages'), 10); ?></option>
+          <option value="25" <?php if(Params::getParam('iDisplayLength') == 25) echo 'selected'; ?> ><?php printf(__('%d Languages'), 25); ?></option>
+          <option value="50" <?php if(Params::getParam('iDisplayLength') == 50) echo 'selected'; ?> ><?php printf(__('%d Languages'), 50); ?></option>
+          <option value="100" <?php if(Params::getParam('iDisplayLength') == 100) echo 'selected'; ?> ><?php printf(__('%d Languages'), 100); ?></option>
+        </select>
+      </form>
+      <form method="get" action="<?php echo osc_admin_base_url(true); ?>" id="shortcut-filters" class="inline nocsrf">
+        <input type="hidden" name="page" value="languages" />
+        <?php foreach(Params::getParamsAsArray('get') as $key => $value) { ?>
+        <?php if(!in_array($key, array('page', 'sSearch', 'action'), true)) { ?>
+        <input type="hidden" name="<?php echo osc_esc_html(strip_tags($key)); ?>" value="<?php echo osc_esc_html(strip_tags($value)); ?>" />
+        <?php } } ?>
+        <?php if($withFilters) { ?>
+        <a id="btn-hide-filters" href="<?php echo osc_admin_base_url(true); ?>?page=languages" class="btn"><?php _e('Reset search'); ?></a>
+        <?php } ?>
+        <input id="fLanguageSearch" name="sSearch" type="text" class="input-text input-actions" value="<?php echo osc_esc_html(Params::getParam('sSearch')); ?>" placeholder="<?php echo osc_esc_html(__('Search languages')); ?>" />
+        <input type="submit" class="btn submit-right" value="<?php echo osc_esc_html(__('Find')); ?>">
+      </form>
     </div>
   </div>
-  
+
   <form class="" id="datatablesForm" action="<?php echo osc_admin_base_url(true); ?>" method="post" data-dialog-open="false">
+    <?php echo osc_csrf_token_form(); ?>
     <input type="hidden" name="page" value="languages" />
-    
+
     <div id="bulk-actions">
       <label>
         <?php osc_print_bulk_actions('bulk_actions', 'action', __get('bulk_options'), 'select-box-extra'); ?>
-        <input type="submit" id="bulk_apply" class="btn" value="<?php echo osc_esc_html( __('Apply') ); ?>" />
+        <input type="submit" id="bulk_apply" class="btn" value="<?php echo osc_esc_html(__('Apply')); ?>" />
       </label>
     </div>
-    
+
     <div class="table-contains-actions">
       <table class="table" cellpadding="0" cellspacing="0">
         <thead>
           <tr>
-            <th>&nbsp;</th>
-            <th><?php _e('Status'); ?></th>
-            <th class="col-bulkactions"><input id="check_all" type="checkbox" /></th>
-            <th><?php _e('Name'); ?></th>
-            <th><?php _e('Short name'); ?></th>
-            <th><?php _e('Description'); ?></th>
-            <th><?php _e('Front-office'); ?></th>
-            <th><?php _e('Back-office'); ?></th>
-            <th><?php _e('Native loc.'); ?></th>
-            <th><?php _e('Direction'); ?></th>
+            <?php foreach($columns as $k => $v) {
+              $sourceCol = (isset($columnSources[$k]) ? $columnSources[$k] : '');
+              $isSortable = ((in_array($k, $sortableColumns, true) || strpos((string)$v, 'sort=') !== false) ? 'is-sortable' : '');
+              echo '<th class="col-'.$k.' '.$isSortable.' '.($sort==$k?($direction=='desc'?'sort-desc':'sort-asc'):'').'" data-source-col="' . osc_esc_html($sourceCol) . '">' . $v . '</th>';
+            } ?>
           </tr>
         </thead>
-        
+
         <tbody>
-          <?php if(count($aData['aaData'])>0) { ?>
-            <?php foreach($aData['aaData'] as $array) { ?>
-              <tr class="<?php echo $array['class']; unset($array['class']); ?>">
-                <?php foreach($array as $key => $value) { ?>
-                  <td class="col-<?php echo ($key <> '' ? $key : 'default'); ?>">
-                    <?php echo $value; ?>
-                  </td>
-                <?php } ?>
-              </tr>
-            <?php } ?>
-          <?php } else { ?>
-            <tr>
-              <td colspan="7" class="text-center">
-                <p><?php _e('No data available in table'); ?></p>
-              </td>
+        <?php if(count($rows) > 0) { ?>
+          <?php foreach($rows as $key => $row) { ?>
+            <tr class="<?php echo implode(' ', osc_apply_filter('datatable_languages_class', array(), isset($aRawRows[$key]) ? $aRawRows[$key] : array(), $row)); ?>">
+              <?php foreach($row as $k => $v) { ?>
+                <td class="col-<?php echo $k; ?>"><?php echo $v; ?></td>
+              <?php } ?>
             </tr>
           <?php } ?>
+        <?php } else { ?>
+          <tr>
+            <td colspan="<?php echo max(1, count($columns)); ?>" class="text-center">
+              <p><?php _e('No data available in table'); ?></p>
+            </td>
+          </tr>
+        <?php } ?>
         </tbody>
       </table>
-      
-      <div id="table-row-actions"></div> <!-- used for table actions -->
+
+      <div id="table-row-actions"></div>
     </div>
   </form>
 </div>
 
-<?php osc_show_pagination_admin($aData); ?>
+<?php
+  function showingResults(){
+    $aData = __get('aData');
+    echo '<ul class="showing-results"><li><span>'.osc_pagination_showing((Params::getParam('iPage')-1)*$aData['iDisplayLength']+1, ((Params::getParam('iPage')-1)*$aData['iDisplayLength'])+count($aData['aRows']), $aData['iTotalDisplayRecords'], $aData['iTotalRecords']).'</span></li></ul>';
+  }
+  osc_add_hook('before_show_pagination_admin','showingResults');
+  osc_show_pagination_admin($aData);
+?>
+<div class="display-select-bottom">
+  <form method="get" action="<?php echo osc_admin_base_url(true); ?>" class="inline nocsrf">
+    <?php foreach(Params::getParamsAsArray('get') as $key => $value) { ?>
+      <?php if($key != 'iDisplayLength') { ?>
+        <input type="hidden" name="<?php echo osc_esc_html(strip_tags($key)); ?>" value="<?php echo osc_esc_html(strip_tags($value)); ?>" />
+      <?php } ?>
+    <?php } ?>
+    <select name="iDisplayLength" class="select-box-extra select-box-medium float-left" onchange="this.form.submit();" >
+      <option value="10" <?php if(Params::getParam('iDisplayLength') == 10) echo 'selected'; ?> ><?php printf(__('%d Languages'), 10); ?></option>
+      <option value="25" <?php if(Params::getParam('iDisplayLength') == 25) echo 'selected'; ?> ><?php printf(__('%d Languages'), 25); ?></option>
+      <option value="50" <?php if(Params::getParam('iDisplayLength') == 50) echo 'selected'; ?> ><?php printf(__('%d Languages'), 50); ?></option>
+      <option value="100" <?php if(Params::getParam('iDisplayLength') == 100) echo 'selected'; ?> ><?php printf(__('%d Languages'), 100); ?></option>
+    </select>
+  </form>
+</div>
 
-<form id="dialog-language-delete" method="get" action="<?php echo osc_admin_base_url(true); ?>" class="has-form-actions hide">
+<form id="dialog-language-delete" method="get" action="<?php echo osc_admin_base_url(true); ?>" class="has-form-actions hide" title="<?php echo osc_esc_html(__('Delete language')); ?>">
   <input type="hidden" name="page" value="languages" />
   <input type="hidden" name="action" value="delete" />
   <input type="hidden" name="id[]" value="" />
@@ -196,19 +234,19 @@ osc_current_admin_theme_path( 'parts/header.php' );
     </div>
     <div class="form-actions">
       <div class="wrapper">
-      <input id="language-delete-submit" type="submit" value="<?php echo osc_esc_html( __('Delete') ); ?>" class="btn btn-submit" />
+      <input id="language-delete-submit" type="submit" value="<?php echo osc_esc_html(__('Delete')); ?>" class="btn btn-submit" />
       <a class="btn" href="javascript:void(0);" onclick="$('#dialog-language-delete').dialog('close');"><?php _e('Cancel'); ?></a>
       </div>
     </div>
   </div>
 </form>
 
-<div id="dialog-bulk-actions" title="<?php _e('Bulk actions'); ?>" class="has-form-actions hide">
+<div id="dialog-bulk-actions" title="<?php echo osc_esc_html(__('Bulk actions')); ?>" class="has-form-actions hide">
   <div class="form-horizontal">
     <div class="form-row"></div>
     <div class="form-actions">
       <div class="wrapper">
-        <a id="bulk-actions-submit" href="javascript:void(0);" class="btn btn-submit" ><?php echo osc_esc_html( __('Delete') ); ?></a>
+        <a id="bulk-actions-submit" href="javascript:void(0);" class="btn btn-submit" ><?php echo osc_esc_html(__('Delete')); ?></a>
         <a id="bulk-actions-cancel" class="btn" href="javascript:void(0);"><?php _e('Cancel'); ?></a>
         <div class="clear"></div>
       </div>
@@ -226,26 +264,26 @@ osc_current_admin_theme_path( 'parts/header.php' );
         <tbody>
           <tr class="table-first-row">
             <td><?php _e('Name'); ?></td>
-            <td><span id="market_name"><?php _e("Loading data"); ?></span></td>
+            <td><span id="market_name"><?php _e('Loading data'); ?></span></td>
           </tr>
           <tr class="even">
             <td><?php _e('Version'); ?></td>
-            <td><span id="market_version"><?php _e("Loading data"); ?></span></td>
+            <td><span id="market_version"><?php _e('Loading data'); ?></span></td>
           </tr>
           <tr>
             <td><?php _e('Date'); ?></td>
-            <td><span id="market_date"><?php _e("Loading data"); ?></span></td>
+            <td><span id="market_date"><?php _e('Loading data'); ?></span></td>
           </tr>
           <tr class="even">
             <td><?php _e('URL'); ?></td>
-            <td><span id="market_url_span"><a id="market_url" href="#"><?php _e("Download manually"); ?></a></span></td>
+            <td><span id="market_url_span"><a id="market_url" href="#"><?php _e('Download manually'); ?></a></span></td>
           </tr>
         </tbody>
       </table>
-      
+
       <div class="clear"></div>
     </div>
-    
+
     <div class="form-actions">
       <div class="wrapper">
         <button id="market_install" class="btn btn-submit" ><?php _e('Update'); ?></button>
@@ -271,9 +309,9 @@ osc_current_admin_theme_path( 'parts/header.php' );
       function(data){
         var content = '';
 
-        if(data.error == 0) { // no errors
+        if(data.error == 0) {
           content += oscEscapeHTML(data.message);
-          content += '<h3><?php echo osc_esc_js(__('Language has been downloaded correctly.')); ?></h3>';
+          content += '<h3><?php echo osc_esc_js(__('The package has been downloaded')); ?></h3>';
           content += "<p>";
           content += '<a class="btn btn-mini btn-green" href="<?php echo osc_admin_base_url(true); ?>?page=languages&marketError='+data.error+'&slug='+oscEscapeHTML(data.data['url'])+'"><?php echo osc_esc_js(__('Ok')); ?></a>';
           content += '<a class="btn btn-mini" href="javascript:location.reload(true)"><?php echo osc_esc_js(__('Close')); ?></a>';
@@ -308,16 +346,16 @@ osc_current_admin_theme_path( 'parts/header.php' );
             $("#market_date").text(data.date);
             $("#market_url").attr('href',data.url);
           }
- 
+
           var dialogWidth = 485;
-          
+
           if($(window).width() < 525) {
             dialogWidth = $(window).width() - 40;
           }
-          
+
           $('#market_installer').dialog({
             modal: true,
-            title: '<?php echo osc_esc_js( __('Update language from OsclassPoint') ); ?>',
+            title: '<?php echo osc_esc_js(__('Update language from OsclassPoint')); ?>',
             width: dialogWidth
           });
         }
@@ -328,4 +366,4 @@ osc_current_admin_theme_path( 'parts/header.php' );
   });
 </script>
 
-<?php osc_current_admin_theme_path( 'parts/footer.php' ); ?>
+<?php osc_current_admin_theme_path('parts/footer.php');

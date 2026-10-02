@@ -31,10 +31,12 @@ class CAdminSettings extends AdminSecBaseModel {
       case('optimization'):
       case('optimization_post'):
       case('optimization_clean'):
+      case('optimization_database_post'):
+      case('optimization_database_now'):
         require_once(osc_admin_base_path() . 'controller/settings/optimization.php');
         $do = new CAdminSettingsOptimization();
         break;
-        
+
       case('comments'):
       case('comments_post'):
         require_once(osc_admin_base_path() . 'controller/settings/comments.php');
@@ -76,7 +78,7 @@ class CAdminSettings extends AdminSecBaseModel {
         require_once(osc_admin_base_path() . 'controller/settings/latestsearches.php');
         $do = new CAdminSettingsLatestSearches();
         break;
-        
+
       case('breadcrumbs'):
       case('breadcrumbs_post'):
         require_once(osc_admin_base_path() . 'controller/settings/breadcrumbs.php');

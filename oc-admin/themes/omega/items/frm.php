@@ -18,6 +18,7 @@ if(!defined('ABS_PATH')) exit('ABS_PATH is not loaded. Direct access is not allo
 
 
 osc_enqueue_script('jquery-validate');
+osc_enqueue_script('jquery-validate-additional-methods');     // to support photos[] {accept: ...}
 osc_enqueue_script('php-date');
 
 if(osc_tinymce_items_enabled() == '1') {
@@ -31,7 +32,7 @@ $new_item = __get('new_item');
 function customText($return = 'title'){
   $new_item = __get('new_item');
   $text = array();
-  if( $new_item ) {
+  if($new_item ) {
     $text['title']  = __('Listing');
     $text['subtitle'] = __('Add listing');
     $text['button']   = __('Add listing');
@@ -49,7 +50,7 @@ if($new_item) {
   $options = array(-1,0,1,3,5,7,10,15,30);
 }
 
-function customPageHeader() { 
+function customPageHeader() {
   ?>
   <h1><?php echo customText('title'); ?></h1>
   <?php
@@ -96,13 +97,13 @@ function customHead() {
         while(price.indexOf('<?php echo osc_esc_js(osc_locale_thousands_sep());  ?>')!=-1) {
           price = price.replace('<?php echo osc_esc_js(osc_locale_thousands_sep());  ?>', '');
         }
-        <?php }; ?>
+        <?php } ?>
         <?php if(osc_locale_dec_point()!='') { ?>
         var tmp = price.split('<?php echo osc_esc_js(osc_locale_dec_point())?>');
         if(tmp.length>2) {
           price = tmp[0]+'<?php echo osc_esc_js(osc_locale_dec_point())?>'+tmp[1];
         }
-        <?php }; ?>
+        <?php } ?>
         $("#price").prop("value", price);
 
       });
@@ -125,7 +126,7 @@ function customHead() {
     });
   </script>
   <?php ItemForm::location_javascript('admin'); ?>
-  <?php if( osc_images_enabled_at_items() ) ItemForm::photos_javascript(); ?>
+  <?php if(osc_images_enabled_at_items() ) ItemForm::photos_javascript(); ?>
   <?php
 }
 
@@ -143,7 +144,7 @@ function customHead2() {
       language: 'en',
       theme_advanced_toolbar_align : "left",
       theme_advanced_toolbar_location : "top",
-      
+
       content_style: "body {font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen-Sans,Ubuntu,Cantarell,'Helvetica Neue',sans-serif;}",
       contextmenu: 'link linkchecker image editimage table spellchecker configurepermanentpen',
       plugins: 'paste print preview importcss searchreplace autolink autosave save directionality visualblocks visualchars fullscreen image link media code codesample table charmap emoticons hr pagebreak nonbreaking toc insertdatetime advlist lists wordcount imagetools textpattern noneditable help charmap quickbars',
@@ -153,7 +154,7 @@ function customHead2() {
       image_caption: true,
       quickbars_selection_toolbar: 'bold italic underline strikethrough | quicklink h2 h3 h4 | blockquote quickimage quicktable',
       toolbar_mode: 'wrap',
-      
+
       // plugins : [
         // "advlist autolink lists link image charmap preview anchor",
         // "searchreplace visualblocks code fullscreen",
@@ -185,17 +186,17 @@ function customHead2() {
             failure('HTTP Error: ' + xhr.status);
             return;
           }
-          
+
           json = JSON.parse(xhr.responseText);
 
           if(!json || typeof json.location != 'string') {
             failure('Invalid JSON: ' + xhr.responseText);
             return;
           }
-          
+
           success(json.location);
         };
-        
+
         formData = new FormData();
         //formData.append('file', blobInfo.blob(), fileName(blobInfo));
 
@@ -230,32 +231,32 @@ function render_offset(){
 
 osc_add_filter('render-wrapper','render_offset');
 
-osc_current_admin_theme_path( 'parts/header.php' ); 
+osc_current_admin_theme_path( 'parts/header.php' );
 ?>
 
 <div id="pretty-form">
 <div class="grid-row no-bottom-margin">
-  <div class="row-wrapper">
+  <div class="row-wrapper row-render-title-item">
     <h2 class="render-title">
       <?php echo customText('subtitle'); ?>
-      
+
        <?php if(osc_item_id() > 0) { ?>
         #<?php echo osc_item_id(); ?>
       <?php } ?>
-      
-      <span class="front-link"><a href="<?php echo osc_item_url(); ?>"><?php _e('View listing on front'); ?> <i class="fa fa-external-link"></i></a></span>
+
+      <span class="front-link"><a href="<?php echo osc_item_url(); ?>" target="_blank"><?php _e('View listing on front'); ?> <i class="fa fa-external-link"></i></a></span>
     </h2>
-    
+
     <?php osc_run_hook('admin_items_header'); ?>
   </div>
 </div>
 
 <div class="grid-row no-bottom-margin float-right">
   <div class="row-wrapper">
-    <?php if( !$new_item ) { ?>
+    <?php if(!$new_item ) { ?>
     <ul id="item-action-list">
       <?php osc_run_hook('admin_items_actions'); ?>
-    
+
       <?php foreach($actions as $aux) { ?>
         <li><?php echo $aux; ?></li>
       <?php } ?>
@@ -279,37 +280,37 @@ osc_current_admin_theme_path( 'parts/header.php' );
             <input type="hidden" name="id" value="<?php echo osc_item_id(); ?>" />
             <input type="hidden" name="secret" value="<?php echo osc_item_secret(); ?>" />
           <?php } ?>
-          
+
           <div id="left-side">
             <?php osc_run_hook('admin_items_form_left_top'); ?>
-            
+
             <?php printLocaleTitle(osc_get_locales()); ?>
-            
+
             <div class="category">
               <label><?php _e('Category'); ?> *</label>
               <?php ItemForm::category_multiple_selects(); ?>
             </div>
-            
-            
+
+
             <div class="input-dates">
               <div class="input-pub-date">
                 <label><?php _e('Publish date'); ?></label>
                 <?php ItemForm::pub_date_input_text(); ?>
               </div>
-              
-              
+
+
               <div class="input-expiration-date">
                 <label><?php _e('Expiration date'); ?></label>
                 <?php ItemForm::expiration_date_input_text(); ?>
-                
+
                 <?php if(!$new_item) { ?>
                   <div class="expire-info">
                     <span>
-                      <?php 
-                        if(!osc_item_is_premium() && osc_isExpired(osc_item_dt_expiration())) { 
+                      <?php
+                        if(!osc_item_is_premium() && osc_isExpired(osc_item_dt_expiration())) {
                           echo sprintf(__('Expired on %s'), osc_format_date(osc_item_dt_expiration(), osc_date_format() . ' ' . osc_time_format()));
-                        
-                        } else if (osc_item_dt_expiration() !== '9999-12-31 23:59:59' && osc_item_dt_expiration() !== '') { 
+
+                        } elseif(osc_item_dt_expiration() !== '9999-12-31 23:59:59' && osc_item_dt_expiration() !== '') {
                           echo sprintf(__('Expire on %s'), osc_format_date(osc_item_dt_expiration(), osc_date_format() . ' ' . osc_time_format()));
 
                         } else {
@@ -319,16 +320,16 @@ osc_current_admin_theme_path( 'parts/header.php' );
                     </span>
                   </div>
                 <?php } ?>
-                
+
                 <div class="help-box"><?php _e('Enter days from publish date, datetime in the format "yyyy-mm-dd hh:mm:ss" or keep blank to never expire.'); ?></div>
               </div>
             </div>
 
-            
+
             <div class="input-description-wide">
               <?php printLocaleDescription(osc_get_locales()); ?>
             </div>
-            
+
             <?php if(osc_price_enabled_at_items()) { ?>
               <div>
                 <label><?php _e('Price'); ?></label>
@@ -337,59 +338,59 @@ osc_current_admin_theme_path( 'parts/header.php' );
               </div>
             <?php } ?>
 
-            <?php if( osc_images_enabled_at_items() ) { ?>
+            <?php if(osc_images_enabled_at_items() ) { ?>
               <div class="photo_container">
                 <label><?php _e('Photos'); ?></label>
                 <?php ItemForm::photos(); ?>
                 <div id="photos">
-                  <?php if( osc_max_images_per_item() == 0 || ( osc_max_images_per_item() != 0 && osc_count_item_resources() < osc_max_images_per_item() ) ) { ?>
+                  <?php if(osc_max_images_per_item() == 0 || ( osc_max_images_per_item() != 0 && osc_count_item_resources() < osc_max_images_per_item() ) ) { ?>
                   <div>
                     <input type="file" name="photos[]" /> (<?php _e('optional'); ?>)
                   </div>
                   <?php } ?>
                 </div>
-                
+
                 <p><a href="#" onclick="addNewPhoto(); return false;" class="add-new-photo"><?php _e('Add new photo'); ?></a></p>
               </div>
             <?php } ?>
-            
+
             <?php osc_run_hook('admin_items_form_left_middle'); ?>
-            
+
             <?php if($new_item) { ItemForm::plugin_post_item(); } else { ItemForm::plugin_edit_item(); } ?>
           </div>
-          
+
           <div id="right-side">
             <?php osc_run_hook('admin_items_form_right_top'); ?>
-          
+
             <div class="well ui-rounded-corners">
               <h3 class="label"><?php _e('User information'); ?></h3>
-              
+
               <?php if(osc_item_user_id() > 0) { ?>
                 <div id="contact_edit">
                   <a href="<?php echo osc_admin_base_url(true); ?>?page=users&action=edit&id=<?php echo osc_item_user_id(); ?>"><?php echo sprintf(__('Edit %s\'s profile'), osc_item_contact_name()); ?></a>
                 </div>
               <?php } ?>
-              
+
               <div id="contact_info">
                 <?php if(osc_item_user_id() && osc_profile_img_users_enabled()) { ?>
                   <p class="item-user-img">
                     <img src="<?php echo osc_user_profile_img_url(osc_item_user_id()); ?>" alt="<?php echo osc_esc_html(osc_item_contact_name()); ?>"/>
                   </p>
                 <?php } ?>
-      
+
                 <div class="input-has-placeholder input-separate-top">
                   <label><?php _e('Name'); ?></label>
                   <?php ItemForm::contact_name_text(); ?>
                 </div>
                 <div class="input-has-placeholder input-separate-top">
-                  <label><?php _e('E-mail'); ?></label>
+                  <label><?php _e('Email'); ?></label>
                   <?php ItemForm::contact_email_text(); ?>
                 </div>
-                
+
                 <div class="input-separate-top">
-                  <label><?php ItemForm::show_email_checkbox(); ?><span><?php _e('Show e-mail'); ?></span></label>
+                  <label><?php ItemForm::show_email_checkbox(); ?><span><?php _e('Show email'); ?></span></label>
                 </div>
-                
+
                 <div class="input-has-placeholder input-separate-top">
                   <label><?php _e('Phone'); ?></label>
                   <?php ItemForm::contact_phone_text(); ?>
@@ -398,7 +399,7 @@ osc_current_admin_theme_path( 'parts/header.php' );
                 <div class="input-separate-top">
                   <label><?php ItemForm::show_phone_checkbox(); ?><span><?php _e('Show phone'); ?></span></label>
                 </div>
-                
+
                 <div class="input-has-placeholder input-separate-top">
                   <label><?php _e('Other contact'); ?></label>
                   <?php ItemForm::contact_other_text(); ?>
@@ -407,8 +408,8 @@ osc_current_admin_theme_path( 'parts/header.php' );
                 <?php if(!$new_item) { ?>
                 <div class="input-has-placeholder input-separate-top">
                   <label>
-                    <?php _e('Ip Address'); ?> 
-                    
+                    <?php _e('Ip Address'); ?>
+
                     <?php if(osc_item_ip() != '' && osc_ip_lookup_url(osc_item_ip()) !== false) { ?>
                       <span style="font-weight:normal;">
                         (<a target="_blank" href="<?php echo osc_ip_lookup_url(osc_item_ip()); ?>"><?php _e('Lookup IP'); ?></a>)
@@ -422,43 +423,43 @@ osc_current_admin_theme_path( 'parts/header.php' );
             </div>
 
             <div class="well ui-rounded-corners input-separate-top">
-              <h3 class="label"><?php _e('Item location'); ?></h3>
+              <h3 class="label"><?php _e('Listing location'); ?></h3>
               <div class="input-has-placeholder input-separate-top">
                 <label><?php _e('Country'); ?></label>
                 <?php ItemForm::country_select(); ?>
               </div>
-              
+
               <div class="input-has-placeholder input-separate-top">
                 <label><?php _e('Region'); ?></label>
                 <?php ItemForm::region_select(); ?>
               </div>
-              
+
               <div class="input-has-placeholder input-separate-top">
                 <label><?php _e('City'); ?></label>
                 <?php ItemForm::city_select(); ?>
               </div>
-              
+
               <div class="input-has-placeholder input-separate-top">
                 <label><?php _e('City area'); ?></label>
                 <?php ItemForm::city_area_text(); ?>
               </div>
-              
+
               <div class="input-has-placeholder input-separate-top">
                 <label><?php _e('Zip code'); ?></label>
                 <?php ItemForm::zip_text(); ?>
               </div>
-              
+
               <div class="input-has-placeholder input-separate-top">
                 <label><?php _e('Address'); ?></label>
                 <?php ItemForm::address_text(); ?>
               </div>
-              
+
               <div class="input-has-placeholder input-separate-top">
                 <div class="row50">
                   <label><?php _e('Latitude'); ?></label>
                   <?php ItemForm::latitude_text(); ?>
                 </div>
-                
+
                 <div class="row50">
                   <label><?php _e('Longitude'); ?></label>
                   <?php ItemForm::longitude_text(); ?>
@@ -467,11 +468,11 @@ osc_current_admin_theme_path( 'parts/header.php' );
             </div>
 
           </div>
-          
+
           <div class="clear"></div>
-          
+
           <div class="form-actions">
-            <?php if( !$new_item ) { ?>
+            <?php if(!$new_item ) { ?>
             <a href="javascript:history.go(-1)" class="btn"><?php _e('Cancel'); ?></a>
             <?php } ?>
             <input type="submit" value="<?php echo osc_esc_html(customText('button')); ?>" class="btn btn-submit" />
@@ -481,4 +482,4 @@ osc_current_admin_theme_path( 'parts/header.php' );
   </div>
 </div>
 </div>
-<?php osc_current_admin_theme_path( 'parts/footer.php' ); ?>
+<?php osc_current_admin_theme_path( 'parts/footer.php' );

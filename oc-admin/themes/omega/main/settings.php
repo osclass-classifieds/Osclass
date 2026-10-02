@@ -18,14 +18,15 @@ if(!defined('ABS_PATH')) exit('ABS_PATH is not loaded. Direct access is not allo
 
 
 function addHelp() {
-  echo '<p>' . __("Manage backoffice home page widgets") . '</p>';
+  echo '<p>' . __('Choose which widgets and columns appear on the backoffice dashboard home page.') . '</p>';
+  echo '<p>' . __('Statistics charts have a Hide checkbox and a column selector on the same row. Uncheck Hide to show a chart. Period charts (line, area, bar) default to column 2. Mix charts (pie, donut, stacked bar, ranked bars) default to column 3. Extra charts start hidden. Period charts use the last 30 days.') . '</p>';
 }
 
 osc_add_hook('help_box','addHelp');
 
 
 osc_add_hook('admin_page_header','customPageHeader');
-function customPageHeader(){ 
+function customPageHeader(){
   ?>
   <h1><?php _e('Backoffice widget settings'); ?>
     <a href="#" class="btn ico ico-32 ico-help float-right"></a>
@@ -34,20 +35,19 @@ function customPageHeader(){
 }
 
 function customPageTitle($string) {
-  return sprintf(__('Backoffice Widget Settings - %s'), $string);
+  return sprintf(__('%s - %s'), __('Backoffice widget settings'), $string);
 }
 osc_add_filter('admin_title', 'customPageTitle');
 
 osc_current_admin_theme_path('parts/header.php');
 
-$cols_hidden = explode(',', osc_get_preference('admindash_columns_hidden', 'osclass')); 
-$widgets_hidden = explode(',', osc_get_preference('admindash_widgets_hidden', 'osclass')); 
-
-$col1_widgets = array('glance','api','items','comments','users','links','banrules');
-$col2_widgets = array('chart-items','chart-users','chart-comments','items-category');
-$col3_widgets = array('blog','update','products','product-updates');
+osc_admin_dash_stats_seed_hidden();
+$cols_hidden = explode(',', osc_get_preference('admindash_columns_hidden', 'osclass'));
+$widgets_hidden = explode(',', osc_get_preference('admindash_widgets_hidden', 'osclass'));
+$dash_stats = osc_admin_dash_stats_widgets();
 ?>
 
+<div id="general-settings">
 <form action="<?php echo osc_admin_base_url(true); ?>" method="post">
   <input type="hidden" name="page" value="main" />
   <input type="hidden" name="action" value="settings_post" />
@@ -64,93 +64,113 @@ $col3_widgets = array('blog','update','products','product-updates');
           <label id="col_1" class="form-label-checkbox">
             <input type="checkbox" id="col_1" name="col_1" <?php echo (in_array(1, $cols_hidden) ? 'checked="checked"' : '' ); ?> value="1" />
             <?php _e('Hide this column'); ?>
-          </label> 
+          </label>
         </div>
       </div>
-      
+
       <div class="form-row">
         <div class="form-label"><?php _e('Widgets'); ?></div>
+        <div class="form-controls">
+          <label id="widget_notes-general" class="form-label-checkbox">
+            <input type="checkbox" id="widget_notes-general" name="widget_notes-general" <?php echo (in_array('notes-general', $widgets_hidden) ? 'checked="checked"' : '' ); ?> value="1" />
+            <?php echo sprintf(__('Hide "%s" widget'), __('Notes')); ?>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-row has-blank-label">
+        <div class="form-label blank">&nbsp;</div>
+        <div class="form-controls">
+          <label id="widget_notes-my" class="form-label-checkbox">
+            <input type="checkbox" id="widget_notes-my" name="widget_notes-my" <?php echo (in_array('notes-my', $widgets_hidden) ? 'checked="checked"' : '' ); ?> value="1" />
+            <?php echo sprintf(__('Hide "%s" widget'), __('My notes (only visible to you)')); ?>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-row has-blank-label">
+        <div class="form-label blank">&nbsp;</div>
         <div class="form-controls">
           <label id="widget_glance" class="form-label-checkbox">
             <input type="checkbox" id="widget_glance" name="widget_glance" <?php echo (in_array('glance', $widgets_hidden) ? 'checked="checked"' : '' ); ?> value="1" />
             <?php echo sprintf(__('Hide "%s" widget'), __('At a glance')); ?>
-          </label> 
+          </label>
         </div>
       </div>
-      
+
       <div class="form-row has-blank-label">
         <div class="form-label blank">&nbsp;</div>
         <div class="form-controls">
           <label id="widget_optimization" class="form-label-checkbox">
             <input type="checkbox" id="widget_optimization" name="widget_optimization" <?php echo (in_array('optimization', $widgets_hidden) ? 'checked="checked"' : '' ); ?> value="1" />
             <?php echo sprintf(__('Hide "%s" widget'), __('Optimization')); ?>
-          </label> 
+          </label>
         </div>
       </div>
-      
+
       <div class="form-row has-blank-label">
         <div class="form-label blank">&nbsp;</div>
         <div class="form-controls">
           <label id="widget_api" class="form-label-checkbox">
             <input type="checkbox" id="widget_api" name="widget_api" <?php echo (in_array('api', $widgets_hidden) ? 'checked="checked"' : '' ); ?> value="1" />
             <?php echo sprintf(__('Hide "%s" widget'), __('Market accessibility')); ?>
-          </label> 
+          </label>
         </div>
       </div>
-      
+
       <div class="form-row has-blank-label">
         <div class="form-label blank">&nbsp;</div>
         <div class="form-controls">
           <label id="widget_items" class="form-label-checkbox">
             <input type="checkbox" id="widget_items" name="widget_items" <?php echo (in_array('items', $widgets_hidden) ? 'checked="checked"' : '' ); ?> value="1" />
             <?php echo sprintf(__('Hide "%s" widget'), __('Listings activity')); ?>
-          </label> 
+          </label>
         </div>
       </div>
-      
+
       <div class="form-row has-blank-label">
         <div class="form-label blank">&nbsp;</div>
         <div class="form-controls">
           <label id="widget_comments" class="form-label-checkbox">
             <input type="checkbox" id="widget_comments" name="widget_comments" <?php echo (in_array('comments', $widgets_hidden) ? 'checked="checked"' : '' ); ?> value="1" />
             <?php echo sprintf(__('Hide "%s" widget'), __('Comments activity')); ?>
-          </label> 
+          </label>
         </div>
       </div>
-      
+
       <div class="form-row has-blank-label">
         <div class="form-label blank">&nbsp;</div>
         <div class="form-controls">
           <label id="widget_users" class="form-label-checkbox">
             <input type="checkbox" id="widget_users" name="widget_users" <?php echo (in_array('users', $widgets_hidden) ? 'checked="checked"' : '' ); ?> value="1" />
             <?php echo sprintf(__('Hide "%s" widget'), __('Users activity')); ?>
-          </label> 
+          </label>
         </div>
       </div>
-      
+
       <div class="form-row has-blank-label">
         <div class="form-label blank">&nbsp;</div>
         <div class="form-controls">
           <label id="widget_links" class="form-label-checkbox">
             <input type="checkbox" id="widget_links" name="widget_links" <?php echo (in_array('links', $widgets_hidden) ? 'checked="checked"' : '' ); ?> value="1" />
             <?php echo sprintf(__('Hide "%s" widget'), __('Useful links')); ?>
-          </label> 
+          </label>
         </div>
       </div>
-      
+
       <div class="form-row has-blank-label">
         <div class="form-label blank">&nbsp;</div>
         <div class="form-controls">
           <label id="widget_banrules" class="form-label-checkbox">
             <input type="checkbox" id="widget_banrules" name="widget_banrules" <?php echo (in_array('banrules', $widgets_hidden) ? 'checked="checked"' : '' ); ?> value="1" />
             <?php echo sprintf(__('Hide "%s" widget'), __('Ban Rules')); ?>
-          </label> 
+          </label>
         </div>
       </div>
-      
+
       <?php osc_run_hook('admin_dashboard_setting_col1'); ?>
-      
-      
+
+
       <!-- Column #2 setup -->
       <h2 class="render-title separate-top"><?php echo sprintf(__('Column #%s setup'), 2); ?></h2>
 
@@ -160,54 +180,23 @@ $col3_widgets = array('blog','update','products','product-updates');
           <label id="col_2" class="form-label-checkbox">
             <input type="checkbox" id="col_2" name="col_2" <?php echo (in_array(2, $cols_hidden) ? 'checked="checked"' : '' ); ?> value="1" />
             <?php _e('Hide this column'); ?>
-          </label> 
+          </label>
         </div>
       </div>
-      
+
       <div class="form-row">
         <div class="form-label"><?php _e('Widgets'); ?></div>
-        <div class="form-controls">
-          <label id="widget_chart-items" class="form-label-checkbox">
-            <input type="checkbox" id="widget_chart-items" name="widget_chart-items" <?php echo (in_array('chart-items', $widgets_hidden) ? 'checked="checked"' : '' ); ?> value="1" />
-            <?php echo sprintf(__('Hide "%s" widget'), __('Listing statistics')); ?>
-          </label> 
-        </div>
-      </div>
-      
-      <div class="form-row has-blank-label">
-        <div class="form-label blank">&nbsp;</div>
-        <div class="form-controls">
-          <label id="widget_chart-comments" class="form-label-checkbox">
-            <input type="checkbox" id="widget_chart-comments" name="widget_chart-comments" <?php echo (in_array('chart-comments', $widgets_hidden) ? 'checked="checked"' : '' ); ?> value="1" />
-            <?php echo sprintf(__('Hide "%s" widget'), __('Comments statistics')); ?>
-          </label> 
-        </div>
-      </div>
-      
-      <div class="form-row has-blank-label">
-        <div class="form-label blank">&nbsp;</div>
-        <div class="form-controls">
-          <label id="widget_chart-users" class="form-label-checkbox">
-            <input type="checkbox" id="widget_chart-users" name="widget_chart-users" <?php echo (in_array('chart-users', $widgets_hidden) ? 'checked="checked"' : '' ); ?> value="1" />
-            <?php echo sprintf(__('Hide "%s" widget'), __('User statistics')); ?>
-          </label> 
-        </div>
-      </div>
-      
-      <div class="form-row has-blank-label">
-        <div class="form-label blank">&nbsp;</div>
         <div class="form-controls">
           <label id="widget_items-category" class="form-label-checkbox">
             <input type="checkbox" id="widget_items-category" name="widget_items-category" <?php echo (in_array('items-category', $widgets_hidden) ? 'checked="checked"' : '' ); ?> value="1" />
             <?php echo sprintf(__('Hide "%s" widget'), __('Listings by category')); ?>
-          </label> 
+          </label>
         </div>
       </div>
-      
+
       <?php osc_run_hook('admin_dashboard_setting_col2'); ?>
-      
-      
-      
+
+
       <!-- Column #3 setup -->
       <h2 class="render-title separate-top"><?php echo sprintf(__('Column #%s setup'), 3); ?></h2>
 
@@ -217,58 +206,71 @@ $col3_widgets = array('blog','update','products','product-updates');
           <label id="col_3" class="form-label-checkbox">
             <input type="checkbox" id="col_3" name="col_3" <?php echo (in_array(3, $cols_hidden) ? 'checked="checked"' : '' ); ?> value="1" />
             <?php _e('Hide this column'); ?>
-          </label> 
+          </label>
         </div>
       </div>
-      
+
       <div class="form-row">
         <div class="form-label"><?php _e('Widgets'); ?></div>
         <div class="form-controls">
           <label id="widget_blog" class="form-label-checkbox">
             <input type="checkbox" id="widget_blog" name="widget_blog" <?php echo (in_array('blog', $widgets_hidden) ? 'checked="checked"' : '' ); ?> value="1" />
             <?php echo sprintf(__('Hide "%s" widget'), __('News on blog')); ?>
-          </label> 
+          </label>
         </div>
       </div>
-      
+
       <div class="form-row has-blank-label">
         <div class="form-label blank">&nbsp;</div>
         <div class="form-controls">
           <label id="widget_update" class="form-label-checkbox">
             <input type="checkbox" id="widget_update" name="widget_update" <?php echo (in_array('update', $widgets_hidden) ? 'checked="checked"' : '' ); ?> value="1" />
             <?php echo sprintf(__('Hide "%s" widget'), __('Osclass update')); ?>
-          </label> 
+          </label>
         </div>
       </div>
-      
+
       <div class="form-row has-blank-label">
         <div class="form-label blank">&nbsp;</div>
         <div class="form-controls">
           <label id="widget_products" class="form-label-checkbox">
             <input type="checkbox" id="widget_products" name="widget_products" <?php echo (in_array('products', $widgets_hidden) ? 'checked="checked"' : '' ); ?> value="1" />
             <?php echo sprintf(__('Hide "%s" widget'), __('Latest products')); ?>
-          </label> 
+          </label>
         </div>
       </div>
-      
+
       <div class="form-row has-blank-label">
         <div class="form-label blank">&nbsp;</div>
         <div class="form-controls">
           <label id="widget_product-updates" class="form-label-checkbox">
             <input type="checkbox" id="widget_product-updates" name="widget_product-updates" <?php echo (in_array('product-updates', $widgets_hidden) ? 'checked="checked"' : '' ); ?> value="1" />
             <?php echo sprintf(__('Hide "%s" widget'), __('Product updates')); ?>
-          </label> 
+          </label>
         </div>
       </div>
-      
+
       <?php osc_run_hook('admin_dashboard_setting_col3'); ?>
-      
-      
+
+
+      <h2 class="render-title separate-top"><?php _e('Statistics charts'); ?></h2>
+
+      <?php
+      $chart_i = 0;
+      $chart_help = __('Uncheck Hide to show the chart. Choose the dashboard column. Period charts (line, area, bar) default to column 2. Mix charts (pie, donut, stacked bar, ranked bars) default to column 3.');
+      foreach($dash_stats as $sid => $sw) {
+        osc_admin_dash_settings_chart_row($sid, $sw, $widgets_hidden, ($chart_i === 0), ($chart_i === 0 ? $chart_help : ''));
+        $chart_i++;
+      }
+      ?>
+
+
       <div class="form-actions">
         <input type="submit" id="save_changes" value="<?php echo osc_esc_html( __('Save changes') ); ?>" class="btn btn-submit" />
       </div>
     </div>
   </fieldset>
 </form>
+</div>
 
-<?php osc_current_admin_theme_path( 'parts/footer.php' ); ?>
+<?php osc_current_admin_theme_path( 'parts/footer.php' );

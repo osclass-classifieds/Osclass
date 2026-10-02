@@ -54,9 +54,9 @@
 
   View::newInstance()->_exportVariableToView('user', $user);
   osc_current_web_theme_path('header.php');
-  View::newInstance()->_exportVariableToView('user', $user); 
+  View::newInstance()->_exportVariableToView('user', $user);
 ?>
-  
+
 <div id="item-content">
   <div class="user-card">
     <?php if(osc_profile_img_users_enabled()) { ?>
@@ -67,22 +67,25 @@
 
     <ul id="user_data">
       <li class="name"><?php echo osc_user_name(); ?></li>
-      <?php if( osc_user_website() !== '' ) { ?>
+      <?php if(osc_user_website() !== '' ) { ?>
       <li class="website"><a href="<?php echo osc_user_website(); ?>"><?php echo osc_user_website(); ?></a></li>
       <?php } ?>
-      <?php if( $address !== '' ) { ?>
+      <?php if($address !== '' ) { ?>
       <li class="adress"><?php printf(__('<strong>Address:</strong> %1$s'), $address); ?></li>
       <?php } ?>
-      <?php if( $location !== '' ) { ?>
+      <?php if($location !== '' ) { ?>
       <li class="location"><?php printf(__('<strong>Location:</strong> %1$s'), $location); ?></li>
+      <?php } ?>
+      <?php if(function_exists('osc_can_report_user') && osc_can_report_user()) { ?>
+      <li class="report"><a rel="nofollow" href="<?php echo osc_report_user_url(osc_user_id()); ?>"><?php _e('Report user', 'sigma'); ?></a></li>
       <?php } ?>
     </ul>
   </div>
-  <?php if( osc_user_info() !== '' ) { ?>
+  <?php if(osc_user_info() !== '' ) { ?>
   <h2><?php _e('User description', 'sigma'); ?></h2>
   <?php } ?>
   <?php echo nl2br(osc_user_info()); ?>
-  <?php if( osc_count_items() > 0 ) { ?>
+  <?php if(osc_count_items() > 0 ) { ?>
   <div class="similar_ads">
     <h2><?php _e('Latest listings', 'sigma'); ?></h2>
     <?php osc_current_web_theme_path('loop.php'); ?>
@@ -91,4 +94,4 @@
   </div>
   <?php } ?>
 </div>
-<?php osc_current_web_theme_path('footer.php') ; ?>
+<?php osc_current_web_theme_path('footer.php') ;

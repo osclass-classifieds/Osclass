@@ -32,12 +32,12 @@ function customFrmText(){
   $user    = __get('user');
   $return = array();
 
-  if( isset($user['pk_i_id']) ) {
+  if(isset($user['pk_i_id']) ) {
     $return['edit']     = true;
     $return['title']    = __('Edit user');
     $return['action_frm'] = 'edit_post';
     $return['btn_text']   = __('Update user');
-    $return['alerts'] = Alerts::newInstance()->findByUser($user['pk_i_id'], true);
+    $return['alerts'] = array();
   } else {
     $return['edit']     = false;
     $return['title']    = __('Add new user');
@@ -71,6 +71,51 @@ function customHead() {
   <?php UserForm::location_javascript("admin"); ?>
 
   <?php
+  if(isset($user['pk_i_id'])) {
+    $dialogWidth = 700;
+    $dialogHeight = 540;
+    ?>
+    <script type="text/javascript">
+      $(document).ready(function(){
+        function removeOpenMessageParam() {
+          if(window.history && window.history.replaceState) {
+            var url = window.location.href;
+            var newUrl = url.replace(/([?&])open_message=1(&?)/, function(match, p1, p2) {
+              if(p1 === '?' && p2) {
+                return '?';
+              }
+              return '';
+            }).replace(/\?$/, '').replace(/\?&/, '?');
+
+            if(newUrl !== url) {
+              window.history.replaceState({}, document.title, newUrl);
+            }
+          }
+        }
+
+        $("#dialog-user-message").dialog({
+          autoOpen: false,
+          modal: true,
+          width: <?php echo (int)$dialogWidth; ?>,
+          height: <?php echo (int)$dialogHeight; ?>,
+          title: "<?php echo osc_esc_js(__('Send email to')); ?> <?php echo osc_esc_js((trim((string)$user['s_name']) != '' ? $user['s_name'] : $user['s_email']) . ' (' . $user['s_email'] . ')'); ?>",
+          close: function() {
+            removeOpenMessageParam();
+          }
+        });
+
+        $(".btn-message-user").click(function(){
+          $("#dialog-user-message").dialog("open");
+          return false;
+        });
+
+        <?php if(Params::getParam('open_message') == '1') { ?>
+          $("#dialog-user-message").dialog("open");
+        <?php } ?>
+      });
+    </script>
+    <?php
+  }
 }
 osc_add_hook('admin_header','customHead', 10);
 
@@ -86,7 +131,7 @@ function customHead2() {
       language: 'en',
       theme_advanced_toolbar_align : "left",
       theme_advanced_toolbar_location : "top",
-      
+
       content_style: "body {font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen-Sans,Ubuntu,Cantarell,'Helvetica Neue',sans-serif;}",
       contextmenu: 'link linkchecker image editimage table spellchecker configurepermanentpen',
       plugins: 'paste print preview importcss searchreplace autolink autosave save directionality visualblocks visualchars fullscreen image link media code codesample table charmap emoticons hr pagebreak nonbreaking toc insertdatetime advlist lists wordcount imagetools textpattern noneditable help charmap quickbars',
@@ -96,7 +141,7 @@ function customHead2() {
       image_caption: true,
       quickbars_selection_toolbar: 'bold italic underline strikethrough | quicklink h2 h3 h4 | blockquote quickimage quicktable',
       toolbar_mode: 'wrap',
-      
+
       // plugins : [
         // "advlist autolink lists link image charmap preview anchor",
         // "searchreplace visualblocks code fullscreen",
@@ -128,17 +173,17 @@ function customHead2() {
             failure('HTTP Error: ' + xhr.status);
             return;
           }
-          
+
           json = JSON.parse(xhr.responseText);
 
           if(!json || typeof json.location != 'string') {
             failure('Invalid JSON: ' + xhr.responseText);
             return;
           }
-          
+
           success(json.location);
         };
-        
+
         formData = new FormData();
         //formData.append('file', blobInfo.blob(), fileName(blobInfo));
 
@@ -165,7 +210,7 @@ osc_add_hook('admin_header','customHead2', 10);
 
 $aux  = customFrmText();
 
-osc_current_admin_theme_path('parts/header.php'); 
+osc_current_admin_theme_path('parts/header.php');
 ?>
 
 <?php if($aux['edit'] && count($aux['alerts'])>0) { ?>
@@ -208,7 +253,7 @@ osc_current_admin_theme_path('parts/header.php');
 
   });
   </script>
-<?php }; ?>
+<?php } ?>
 
 <script type="text/javascript">
   $(document).ready(function(){
@@ -220,7 +265,7 @@ osc_current_admin_theme_path('parts/header.php');
       },
       messages: {
         s_username: {
-          required: '<?php echo osc_esc_js(__("Username: this field is required", "modern")); ?>.'
+          required: '<?php echo osc_esc_js(sprintf(__('%s is required', 'modern'), __('Username', 'modern'))); ?>.'
         }
       },
       errorLabelContainer: "#error_list",
@@ -260,8 +305,8 @@ osc_current_admin_theme_path('parts/header.php');
 <div class="grid-row no-bottom-margin">
   <div class="row-wrapper">
     <h2 class="render-title">
-      <?php echo $aux['title']; ?> 
-      
+      <?php echo $aux['title']; ?>
+
       <?php if(isset($user['pk_i_id'])) { ?>
         #<?php echo $user['pk_i_id']; ?>
       <?php } ?>
@@ -271,13 +316,18 @@ osc_current_admin_theme_path('parts/header.php');
 
 <div class="grid-row no-bottom-margin float-right">
   <div class="row-wrapper">
-    <?php if( __get('user') != '') { 
+    <?php if(__get('user') != '') {
       $actions = __get('actions'); ?>
     <ul id="item-action-list">
       <?php foreach($actions as $action) { ?>
       <li>
         <?php echo $action; ?>
       </li>
+      <?php } ?>
+      <?php if(isset($user['pk_i_id'])) { ?>
+        <li>
+          <a href="#" class="btn float-left btn-message-user"><?php _e('Send message'); ?></a>
+        </li>
       <?php } ?>
     </ul>
     <div class="clear"></div>
@@ -289,12 +339,12 @@ osc_current_admin_theme_path('parts/header.php');
 
 <!-- add user form -->
 <div class="settings-user">
-  <?php if(osc_user_public_profile_is_enabled($user) === false) { ?>
+  <?php if($aux['edit'] && osc_user_public_profile_is_enabled($user) === false) { ?>
     <div class="flashmessage flashmessage-warning">
       <p class="info"><?php _e('Public profile for this user is not enabled and return 404 page - based on User > Settings configuration.'); ?></p>
     </div>
   <?php } ?>
-  
+
   <ul id="error_list"></ul>
   <form name="register" action="<?php echo osc_admin_base_url(true); ?>" method="post">
     <input type="hidden" name="page" value="users" />
@@ -313,7 +363,7 @@ osc_current_admin_theme_path('parts/header.php');
         <div class="form-controls">
           <div class='form-label-checkbox'>
             <?php echo sprintf(__("%s on %s"), $user['s_access_ip'], $user['dt_access_date']);?>
-            
+
             <?php if($user['s_access_ip'] != '' && osc_ip_lookup_url($user['s_access_ip']) !== false) { ?>
               <p style="font-size:13px;">
                 <a target="_blank" href="<?php echo osc_ip_lookup_url($user['s_access_ip']); ?>"><?php _e('Lookup IP'); ?></a>
@@ -322,7 +372,7 @@ osc_current_admin_theme_path('parts/header.php');
           </div>
         </div>
       </div>
-      <?php }; ?>
+      <?php } ?>
 
       <?php if($aux['edit']) { ?>
       <div class="form-row">
@@ -337,7 +387,7 @@ osc_current_admin_theme_path('parts/header.php');
           </div>
         </div>
       </div>
-      <?php }; ?>
+      <?php } ?>
 
       <?php if($aux['edit'] && osc_profile_img_users_enabled()) { ?>
         <div class="form-row">
@@ -347,14 +397,14 @@ osc_current_admin_theme_path('parts/header.php');
               <img src="<?php echo osc_user_profile_img_url($user['pk_i_id']); ?>" alt="<?php echo osc_esc_html($user['s_name']); ?>"/>
             </p>
             <?php if($user['s_profile_img'] <> '') { ?>
-              <p> 
+              <p>
                 <a href="<?php echo osc_admin_base_url(true); ?>?page=ajax&action=remove_profile_img&userId=<?php echo $user['pk_i_id']; ?>" class="btn remove-profile-img"><i class="fa fa-trash"></i> <?php _e('Remove'); ?></a>
               </p>
             <?php } ?>
           </div>
         </div>
-      <?php }; ?>
-      
+      <?php } ?>
+
       <?php if(isset($user['pk_i_id'])) { ?>
         <div class="form-row">
           <div class="form-label"><?php _e('ID'); ?></div>
@@ -363,23 +413,23 @@ osc_current_admin_theme_path('parts/header.php');
           </div>
         </div>
       <?php } ?>
-      
+
       <div class="form-row">
         <div class="form-label"><?php _e('Name'); ?></div>
         <div class="form-controls">
           <?php UserForm::name_text($user); ?>
         </div>
       </div>
-      
+
       <div class="form-row">
         <div class="form-label"><?php _e('Username'); ?></div>
         <div class="form-controls">
           <?php UserForm::username_text($user); ?> <div id="available"></div>
         </div>
       </div>
-      
+
       <div class="form-row">
-        <div class="form-label"><?php _e('E-mail'); ?> <em><?php _e('(required)'); ?></em></div>
+        <div class="form-label"><?php _e('Email'); ?> <em><?php _e('(required)'); ?></em></div>
         <div class="form-controls">
           <?php UserForm::email_text($user); ?>
         </div>
@@ -391,28 +441,28 @@ osc_current_admin_theme_path('parts/header.php');
           <?php UserForm::registration_date($user); ?>
         </div>
       </div>
-      
+
       <div class="form-row separate-top border-top">
         <div class="form-label"><?php _e('Mobile phone'); ?></div>
         <div class="form-controls">
           <?php UserForm::mobile_text($user); ?>
         </div>
       </div>
-      
+
       <div class="form-row">
         <div class="form-label"><?php _e('Land phone'); ?></div>
         <div class="form-controls">
           <?php UserForm::phone_land_text($user); ?>
         </div>
       </div>
-      
+
       <div class="form-row">
         <div class="form-label"><?php _e('Website'); ?></div>
         <div class="form-controls">
           <?php UserForm::website_text($user); ?>
         </div>
       </div>
-      
+
       <h3 class="render-title separate-top border-top"><?php _e('About you'); ?></h3>
       <div class="form-row">
         <div class="form-label"><?php _e('User type'); ?></div>
@@ -420,14 +470,14 @@ osc_current_admin_theme_path('parts/header.php');
           <?php UserForm::is_company_select($user); ?>
         </div>
       </div>
-      
+
       <div class="form-row">
         <div class="form-label"><?php _e('Additional information'); ?></div>
         <div class="form-controls additional-info">
           <?php UserForm::multilanguage_info($locales, $user); ?>
         </div>
       </div>
-      
+
       <h3 class="render-title separate-top border-top"><?php _e('Location'); ?></h3>
       <div class="form-row">
         <div class="form-label"><?php _e('Country'); ?></div>
@@ -435,28 +485,28 @@ osc_current_admin_theme_path('parts/header.php');
           <?php UserForm::country_select($countries, $user); ?>
         </div>
       </div>
-      
+
       <div class="form-row">
         <div class="form-label"><?php _e('Region'); ?></div>
         <div class="form-controls">
           <?php UserForm::region_select($regions, $user); ?>
         </div>
       </div>
-      
+
       <div class="form-row">
         <div class="form-label"><?php _e('City'); ?></div>
         <div class="form-controls">
           <?php UserForm::city_select($cities, $user); ?>
         </div>
       </div>
-      
+
       <div class="form-row">
         <div class="form-label"><?php _e('City area'); ?></div>
         <div class="form-controls">
           <?php UserForm::city_area_text($user); ?>
         </div>
       </div>
-      
+
       <div class="form-row">
         <div class="form-label"><?php _e('Zip code'); ?></div>
         <div class="form-controls">
@@ -473,7 +523,7 @@ osc_current_admin_theme_path('parts/header.php');
       <h3 class="render-title separate-top border-top"><?php _e('Additional data'); ?> (<?php _e('hooks'); ?>)</h3>
 
       <div class="form-row">
-        <?php 
+        <?php
           if(!$aux['edit']) {
             osc_run_hook('user_register_form');
           } else {
@@ -481,10 +531,10 @@ osc_current_admin_theme_path('parts/header.php');
             osc_run_hook('user_form', $user);
           }
         ?>
-        
+
         <div class="clear"></div>
       </div>
-      
+
       <h3 class="render-title separate-top border-top"><?php _e('Password'); ?></h3>
       <div class="form-row">
         <div class="form-label"><?php _e('New password'); ?><?php if(!$aux['edit']) { printf('<br/><em>%s</em>', __('(twice, required)')); } ?></div>
@@ -503,9 +553,8 @@ osc_current_admin_theme_path('parts/header.php');
       </div>
 
 
-
       <div class="clear"></div>
-      
+
       <div class="form-actions">
         <input type="submit" value="<?php echo osc_esc_html($aux['btn_text']); ?>" class="btn btn-submit" />
       </div>
@@ -515,88 +564,6 @@ osc_current_admin_theme_path('parts/header.php');
 </div>
 
 
-<?php if($aux['edit'] && count($aux['alerts'])>0) { ?>
-  <div class="settings-user">
-    <ul id="error_list"></ul>
-    <form>
-      <div class="form-horizontal">
-        <h3 class="render-title"><?php _e('Alerts'); ?></h3>
-        <div class="form-row">
-          <?php for($k=0;$k<count($aux['alerts']);$k++) { 
-            $array_conditions = (array)json_decode($aux['alerts'][$k]['s_search'], true);
-            $raw_data = osc_get_raw_search($array_conditions);
-            $new_search = new Search();
-            $new_search->setJsonAlert($array_conditions, $aux['alerts'][$k]['s_email'], $aux['alerts'][$k]['fk_i_user_id']);
-            $new_search->limit(0, 12);
-            $results = $new_search->doSearch();
-            ?>
-            <div class="form-label">
-              <?php echo sprintf(__('Alert #%d'), ($k+1)); ?>
-              <br/>
-              <?php if(isset($raw_data['sPattern']) && $raw_data['sPattern']!='') {?>
-                <?php echo sprintf(__("<b>Pattern:</b> %s"), $raw_data['sPattern']); ?><br/>
-              <?php }; ?>
-
-              <?php if(isset($raw_data['aCategories']) && !empty($raw_data['aCategories'])) {
-                $l = min(count($raw_data['aCategories']), 2);
-                $cat_array = array();
-                for($c=0;$c<$l;$c++) {
-                  $cat_array[] = $raw_data['aCategories'][$c];
-                }
-                if(count($raw_data['aCategories'])>$l) {
-                  $cat_array[] = '<a href="#" class="more-tooltip" categories="'.osc_esc_html(implode(", ", $raw_data['aCategories'])).'" >'.__("...More").'</a>';
-                }
-                ?>
-                <?php echo sprintf(__("<b>Categories:</b> %s"), implode(", ", $cat_array)); ?><br/>
-              <?php }; ?>
-              
-              <a href="javascript:delete_alert('<?php echo $aux['alerts'][$k]['pk_i_id']; ?>');" ><?php _e("Delete"); ?></a>
-              &nbsp;|&nbsp;
-              <?php if($aux['alerts'][$k]['b_active']==1) { ?>
-              <a href="<?php echo osc_admin_base_url(true)."?page=users&action=status_alerts&id[]=".$aux['alerts'][$k]['pk_i_id']."&status=0&user_id=".$user['pk_i_id']; ?>" ><?php _e("Disable"); ?></a>
-              <?php } else { ?>
-              <a href="<?php echo osc_admin_base_url(true)."?page=users&action=status_alerts&id[]=".$aux['alerts'][$k]['pk_i_id']."&status=1&user_id=".$user['pk_i_id']; ?>" ><?php _e("Enable"); ?></a>
-              <?php }; ?>
-            </div>
-            <div class="form-controls">
-              <?php if(!empty($results)) {
-                foreach($results as $r) { ?>
-                <label><b><?php echo $r['s_title']; ?></b></label>
-                <p><?php echo $r['s_description']; ?></p>
-                <?php };
-              } else { ?>
-                <label>&nbsp;</label>
-                <p>&nbsp;</p>
-              <?php }; ?>
-            </div>
-            <div class="clear"></div>
-          <?php }; ?>
-        </div>
-        <div class="clear"></div>
-      </div>
-      </fieldset>
-    </form>
-  </div>
-
-  <form id="dialog-alert-delete" method="get" action="<?php echo osc_admin_base_url(true); ?>" class="has-form-actions hide" title="<?php echo osc_esc_html(__('Delete alert')); ?>">
-    <input type="hidden" name="page" value="users" />
-    <input type="hidden" name="action" value="delete_alerts" />
-    <input type="hidden" id="alert_id" name="alert_id[]" value="" />
-    <input type="hidden" id="alert_user_id" name="alert_user_id" value="<?php echo $user['pk_i_id']; ?>" />
-    <div class="form-horizontal">
-      <div class="form-row">
-        <?php _e('Are you sure you want to delete this alert?'); ?>
-      </div>
-      <div class="form-actions">
-        <div class="wrapper">
-        <a class="btn" href="javascript:void(0);" onclick="$('#dialog-alert-delete').dialog('close');"><?php _e('Cancel'); ?></a>
-        <input id="alert-delete-submit" type="submit" value="<?php echo osc_esc_html( __('Delete') ); ?>" class="btn btn-red" />
-        </div>
-      </div>
-    </div>
-  </form>
-  <div id="more-tooltip"></div>
-<?php }; ?>
 <!-- /add user form -->
 
 <script>
@@ -621,4 +588,51 @@ $('a.btn.remove-profile-img').on('click', function(e){
 });
 </script>
 
-<?php osc_current_admin_theme_path('parts/footer.php'); ?>
+<?php if(isset($user['pk_i_id'])) { ?>
+  <?php
+    $defaultSubject = '{WEB_TITLE} - ' . __('New message from') . ' ' . osc_logged_admin_name();
+    $defaultBody = __('Hi {USER_NAME},') . "\n";
+    $defaultBody .= __('We are contacting you regarding your account on {WEB_TITLE}.') . "\n\n\n\n";
+    $defaultBody .= __('If you have any questions or need assistance, please reply to this email.') . "\n";
+    $defaultBody .= __('Thank you,') . "\n";
+    $defaultBody .= '{WEB_TITLE}';
+  ?>
+  <form id="dialog-user-message" method="post" action="<?php echo osc_admin_base_url(true); ?>" enctype="multipart/form-data" class="has-form-actions hide nocsrf" title="<?php echo osc_esc_html(__('Send message')); ?>">
+    <input type="hidden" name="page" value="users" />
+    <input type="hidden" name="action" value="message_user_post" />
+    <input type="hidden" name="id" value="<?php echo (int)$user['pk_i_id']; ?>" />
+    <?php echo osc_csrf_token_form(); ?>
+
+    <div class="form-horizontal">
+      <div class="form-row">
+        <div class="form-label"><?php _e('Email title'); ?></div>
+        <div class="form-controls">
+          <input type="text" name="message_subject" value="<?php echo osc_esc_html($defaultSubject); ?>" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-label"><?php _e('Email body'); ?></div>
+        <div class="form-controls">
+          <textarea name="message_body" rows="8"><?php echo osc_esc_html($defaultBody); ?></textarea>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-label"><?php _e('Attachment'); ?></div>
+        <div class="form-controls">
+          <input type="file" name="attachment" />
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <div class="wrapper">
+          <a class="btn" href="javascript:void(0);" onclick="$('#dialog-user-message').dialog('close');"><?php _e('Cancel'); ?></a>
+          <input type="submit" value="<?php echo osc_esc_html(__('Send message')); ?>" class="btn btn-submit" />
+        </div>
+      </div>
+    </div>
+  </form>
+<?php } ?>
+
+<?php osc_current_admin_theme_path('parts/footer.php');

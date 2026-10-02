@@ -29,8 +29,8 @@ class CAdminSettingsMailserver extends AdminSecBaseModel
         $this->doView('settings/mailserver.php');
       break;
       case('mailserver_post'):
-        if( defined('DEMO') ) {
-          osc_add_flash_warning_message( _m("This action can't be done because it's a demo site"), 'admin');
+        if(defined('DEMO') ) {
+          osc_add_flash_warning_message( _m("This action cannot be done because it is a demo site"), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=settings&action=mailserver');
         }
 
@@ -50,7 +50,7 @@ class CAdminSettingsMailserver extends AdminSecBaseModel
         $mailserverMailFrom = Params::getParam('mailserver_mail_from');
         $mailserverNameFrom = Params::getParam('mailserver_name_from');
 
-        if( !in_array($mailserverType, array('custom', 'gmail')) ) {
+        if(!in_array($mailserverType, array('custom', 'gmail')) ) {
           osc_add_flash_error_message( _m('Mail server type is incorrect'), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=settings&action=mailserver');
         }

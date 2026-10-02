@@ -18,7 +18,7 @@
 
   // meta tag robots
   osc_add_hook('header','sigma_nofollow_construct');
-  
+
   osc_enqueue_script('jquery-validate');
   //osc_enqueue_script('tabber');
 
@@ -34,7 +34,7 @@
 <?php osc_current_web_theme_path('header.php') ; ?>
 
 <?php
-  if (sigma_default_location_show_as() == 'dropdown') {
+  if(sigma_default_location_show_as() == 'dropdown') {
     ItemForm::location_javascript();
   } else {
     ItemForm::location_javascript_new();
@@ -74,7 +74,7 @@
                 <?php ItemForm::description_textarea('description',osc_current_user_locale(), osc_esc_html( sigma_item_description() )); ?>
               </div>
             </div>
-            <?php if( osc_price_enabled_at_items() ) { ?>
+            <?php if(osc_price_enabled_at_items() ) { ?>
             <div class="control-group control-group-price">
               <label class="control-label" for="price"><?php _e('Price', 'sigma'); ?></label>
               <div class="controls">
@@ -85,7 +85,7 @@
             <?php } ?>
 
             <div class="control-group img">
-            <?php if( osc_images_enabled_at_items() ) {
+            <?php if(osc_images_enabled_at_items() ) {
               ItemForm::ajax_photos();
             } ?>
             </div>
@@ -102,7 +102,7 @@
                 <label class="control-label" for="regionId"><?php _e('Region', 'sigma'); ?></label>
                 <div class="controls">
                   <?php
-                  if (sigma_default_location_show_as() == 'dropdown') {
+                  if(sigma_default_location_show_as() == 'dropdown') {
                     if($edit) {
                       ItemForm::region_select(osc_get_regions(osc_item_country_code()), osc_item());
                     } else {
@@ -128,7 +128,7 @@
                 <label class="control-label" for="region"><?php _e('Region', 'sigma'); ?></label>
                 <div class="controls">
                   <?php
-                  if (sigma_default_location_show_as() == 'dropdown') {
+                  if(sigma_default_location_show_as() == 'dropdown') {
                     if($edit) {
                       ItemForm::region_select(null, osc_item());
                     } else {
@@ -150,7 +150,7 @@
                 <label class="control-label" for="city"><?php _e('City', 'sigma'); ?></label>
                 <div class="controls">
                   <?php
-                  if (sigma_default_location_show_as() == 'dropdown') {
+                  if(sigma_default_location_show_as() == 'dropdown') {
                     if($edit) {
                       ItemForm::city_select(null, osc_item());
                     } else { // add new item
@@ -189,7 +189,7 @@
                 </div>
 
                 <div class="control-group">
-                  <label class="control-label" for="contactEmail"><?php _e('E-mail', 'sigma'); ?></label>
+                  <label class="control-label" for="contactEmail"><?php _e('Email', 'sigma'); ?></label>
                   <div class="controls">
                     <?php ItemForm::contact_email_text(); ?>
                   </div>
@@ -197,7 +197,7 @@
 
                 <div class="control-group">
                   <div class="controls checkbox">
-                    <?php ItemForm::show_email_checkbox(); ?> <label for="showEmail"><?php _e('Show e-mail on the listing page', 'sigma'); ?></label>
+                    <?php ItemForm::show_email_checkbox(); ?> <label for="showEmail"><?php _e('Show email on the listing page', 'sigma'); ?></label>
                   </div>
                 </div>
               <?php } ?>
@@ -226,7 +226,7 @@
             <div class="hooks"><?php if($edit) { ItemForm::plugin_edit_item(); } else { ItemForm::plugin_post_item(); } ?></div>
 
             <div class="control-group">
-              <?php if( osc_recaptcha_items_enabled() ) { ?>
+              <?php if(osc_recaptcha_items_enabled() ) { ?>
                 <div class="controls recpt"><?php osc_show_recaptcha(); ?></div>
               <?php }?>
 
@@ -255,16 +255,16 @@
       while(price.indexOf('<?php echo osc_esc_js(osc_locale_thousands_sep());  ?>')!=-1) {
         price = price.replace('<?php echo osc_esc_js(osc_locale_thousands_sep());  ?>', '');
       }
-      <?php }; ?>
+      <?php } ?>
       <?php if(osc_locale_dec_point()!='') { ?>
       var tmp = price.split('<?php echo osc_esc_js(osc_locale_dec_point())?>');
       if(tmp.length>2) {
         price = tmp[0]+'<?php echo osc_esc_js(osc_locale_dec_point())?>'+tmp[1];
       }
-      <?php }; ?>
+      <?php } ?>
       $("#price").prop("value", price);
     });
   });
-  <?php }; ?>
+  <?php } ?>
 </script>
-<?php osc_current_web_theme_path('footer.php'); ?>
+<?php osc_current_web_theme_path('footer.php');

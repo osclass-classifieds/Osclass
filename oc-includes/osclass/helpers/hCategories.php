@@ -23,7 +23,7 @@
  */
 function osc_get_category_row($id, $cache = true) {
   $id = (int)$id;
-  
+
   if($id <= 0) {
     return false;
   }
@@ -31,11 +31,11 @@ function osc_get_category_row($id, $cache = true) {
   if($cache === true && View::newInstance()->_exists('category_' . $id)) {
     return View::newInstance()->_get('category_' . $id);
   }
-  
+
   // If there is more categories in DB, it's not effective way
   if(OPTIMIZE_CATEGORIES === true && osc_count_categories_all() < OPTIMIZE_CATEGORIES_LIMIT) {
     $categories = osc_get_categories_flat();
-    
+
     // Search in session array with flat categories
     if(is_array($categories) && isset($categories[$id])) {
       View::newInstance()->_exportVariableToView('category_' . $id, $categories[$id]);
@@ -46,7 +46,7 @@ function osc_get_category_row($id, $cache = true) {
   // Search in database
   $category = Category::newInstance()->findByPrimaryKey($id);
   View::newInstance()->_exportVariableToView('category_' . $id, $category);
-  
+
   return $category;
 }
 
@@ -60,12 +60,12 @@ function osc_get_category_row_by_slug($slug) {
   if(View::newInstance()->_exists('category_' . $slug)) {
     return View::newInstance()->_get('category_' . $slug);
   }
-  
+
   // If there is more categories in DB, it's not effective way
   if(OPTIMIZE_CATEGORIES === true && osc_count_categories_all() < OPTIMIZE_CATEGORIES_LIMIT) {
     $id = 0;
     $slug_map = osc_get_categories_slug();
-      
+
     if(is_array($slug_map) && isset($slug_map[$id])) {
       $id = $slug_map[$id];
     }
@@ -77,7 +77,7 @@ function osc_get_category_row_by_slug($slug) {
       return $category;
     }
   }
-  
+
   $category = Category::newInstance()->findBySlug($slug);
   View::newInstance()->_exportVariableToView('category_' . $slug, $category);
 
@@ -96,7 +96,7 @@ function osc_count_categories_all() {
 
   $count = Category::newInstance()->count();
   View::newInstance()->_exportVariableToView('count_categories', (int)$count);
-  
+
   return (int)$count;
 }
 
@@ -136,10 +136,10 @@ function osc_get_categories() {
   if(!View::newInstance()->_exists('categories')) {
     $tree = Category::newInstance()->toTree();
     osc_export_categories($tree);
-    
+
     return $tree;
   }
-  
+
   return View::newInstance()->_get('categories');
 }
 
@@ -152,13 +152,13 @@ function osc_get_categories() {
 function osc_get_categories_flat($enabled = false) {
   if(!View::newInstance()->_exists('categories_flat' . (int)$enabled)) {
     $output = array();
-    
+
     if($enabled === true) {
       $categories = Category::newInstance()->listEnabled();
     } else {
       $categories = Category::newInstance()->listAll();
     }
-    
+
     // Create array in way that category ID is also key in array
     if(is_array($categories) && count($categories) > 0) {
       foreach($categories as $cat_row) {
@@ -171,10 +171,9 @@ function osc_get_categories_flat($enabled = false) {
     View::newInstance()->_exportVariableToView('categories_flat' . (int)$enabled, $output);
     return $output;
   }
-  
+
   return View::newInstance()->_get('categories_flat' . (int)$enabled);
 }
-
 
 
 /**
@@ -186,7 +185,7 @@ function osc_get_categories_slug() {
   if(!View::newInstance()->_exists('categories_slug')) {
     $output = array();
     $categories = osc_get_categories_flat();
-    
+
     // Create array in way that category ID is also key in array
     if(is_array($categories) && count($categories) > 0) {
       foreach($categories as $cat_row) {
@@ -199,7 +198,7 @@ function osc_get_categories_slug() {
     View::newInstance()->_exportVariableToView('categories_slug', $output);
     return $output;
   }
-  
+
   return View::newInstance()->_get('categories_slug');
 }
 
@@ -259,7 +258,7 @@ function osc_has_categories() {
   if(!View::newInstance()->_exists('categories')) {
     View::newInstance()->_exportVariableToView('categories', Category::newInstance()->toTree());
   }
-  
+
   return View::newInstance()->_next('categories');
 }
 
@@ -271,27 +270,27 @@ function osc_has_categories() {
  */
 function osc_count_subcategories() {
   $category = View::newInstance()->_current('categories');
-  
+
   if($category == '') {
     return - 1;
   }
-  
+
   if(!isset($category['categories'])) {
     return 0;
   }
-  
+
   if(!is_array($category['categories'])) {
     return 0;
   }
-  
+
   if(count($category['categories']) == 0) {
     return 0;
   }
-  
+
   if(!View::newInstance()->_exists('subcategories')) {
     View::newInstance()->_exportVariableToView('subcategories', $category['categories']);
   }
-  
+
   return osc_priv_count_subcategories();
 }
 
@@ -303,11 +302,11 @@ function osc_count_subcategories() {
  */
 function osc_has_subcategories() {
   $category = View::newInstance()->_current('categories');
-  
+
   if($category == '') {
     return - 1;
   }
-  
+
   if(!isset($category['categories'])) {
     return false;
   }
@@ -315,14 +314,14 @@ function osc_has_subcategories() {
   if(!View::newInstance()->_exists('subcategories')) {
     View::newInstance()->_exportVariableToView('subcategories', $category['categories']);
   }
-  
+
   $ret = View::newInstance()->_next('subcategories');
-  
+
   //we have to delete for next iteration
   if(!$ret) {
     View::newInstance()->_erase('subcategories');
   }
-  
+
   return $ret;
 }
 
@@ -336,8 +335,37 @@ function osc_category_name($locale = '') {
   if($locale == '') {
     $locale = osc_current_user_locale();
   }
-  
+
   return osc_category_field('s_name', $locale);
+}
+
+// Get category name from a model row (admin list, breadcrumb)
+function osc_category_row_name($category, $locale = '') {
+  if(!is_array($category)) {
+    return '';
+  }
+
+  if($locale == '') {
+    $locale = (defined('OC_ADMIN') && OC_ADMIN ? osc_current_admin_locale() : osc_current_user_locale());
+  }
+
+  if($locale != '' && isset($category['locale'][$locale]['s_name']) && trim((string)$category['locale'][$locale]['s_name']) != '') {
+    return (string)$category['locale'][$locale]['s_name'];
+  }
+
+  if(isset($category['s_name']) && trim((string)$category['s_name']) != '') {
+    return (string)$category['s_name'];
+  }
+
+  if(isset($category['locale']) && is_array($category['locale'])) {
+    foreach($category['locale'] as $loc) {
+      if(is_array($loc) && isset($loc['s_name']) && trim((string)$loc['s_name']) != '') {
+        return (string)$loc['s_name'];
+      }
+    }
+  }
+
+  return '';
 }
 
 /**
@@ -350,7 +378,7 @@ function osc_category_description($locale = '') {
   if($locale == '') {
     $locale = osc_current_user_locale();
   }
-  
+
   return osc_category_field('s_description', $locale);
 }
 
@@ -364,7 +392,7 @@ function osc_category_id($locale = '') {
   if($locale == '') {
     $locale = osc_current_user_locale();
   }
-  
+
   return osc_category_field('pk_i_id', $locale);
 }
 
@@ -378,7 +406,7 @@ function osc_category_slug($locale = '') {
   if($locale == '') {
     $locale = osc_current_user_locale();
   }
-  
+
   return osc_category_field('s_slug', $locale);
 }
 
@@ -478,7 +506,7 @@ function osc_get_category($by, $what) {
     return false;
   }
 
-  switch ($by) {
+  switch($by) {
     case 'slug':
       return osc_get_category_row_by_slug($what);
     break;
@@ -579,11 +607,10 @@ function osc_export_categories($categories = null) {
   if($categories==null) {
     $categories = Category::newInstance()->toTree();
   }
-  
+
   View::newInstance()->_exportVariableToView('categories', $categories);
   View::newInstance()->_exportVariableToView('categories_tree', $categories);
 }
-
 
 
 /*
@@ -597,12 +624,39 @@ function osc_export_categories($categories = null) {
  */
 function osc_get_user_item_categories($user_id = null) {
   $user_id = (int)($user_id === null ? osc_logged_user_id() : $user_id);
-  
+
   if(!View::newInstance()->_exists('user_item_categories')) {
     $categories = Category::newInstance()->listUser($user_id);
     View::newInstance()->_exportVariableToView('user_item_categories', $categories);
     return $categories;
   }
-  
+
   return View::newInstance()->_get('user_item_categories');
+}
+
+// Build admin categories list URL preserving list state params
+function osc_categories_admin_list_url($extra = array()) {
+  $url = osc_admin_base_url(true) . '?page=categories';
+  $keep = array('parent', 'iDisplayLength', 'sort', 'direction', 'iPage', 'sSearch');
+
+  foreach($keep as $key) {
+    if(is_array($extra) && array_key_exists($key, $extra)) {
+      continue;
+    }
+    $value = Params::getParam($key);
+    if($value !== '' && $value !== null) {
+      $url .= '&' . rawurlencode($key) . '=' . rawurlencode((string)$value);
+    }
+  }
+
+  if(is_array($extra)) {
+    foreach($extra as $key => $value) {
+      if($value === '' || $value === null) {
+        continue;
+      }
+      $url .= '&' . rawurlencode($key) . '=' . rawurlencode((string)$value);
+    }
+  }
+
+  return $url;
 }

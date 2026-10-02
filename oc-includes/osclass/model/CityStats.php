@@ -47,7 +47,7 @@ class CityStats extends DAO
    */
   public static function newInstance()
   {
-    if( !self::$instance instanceof self ) {
+    if(!self::$instance instanceof self ) {
       self::$instance = new self;
     }
     return self::$instance;
@@ -103,7 +103,7 @@ class CityStats extends DAO
     $result = $this->dao->get();
     $cityStat = $result->row();
 
-    if( isset( $cityStat['i_num_items'] ) ) {
+    if(isset( $cityStat['i_num_items'] ) ) {
       $this->dao->from( $this->getTableName() );
       $this->dao->set( 'i_num_items', 'i_num_items - 1', false );
       $this->dao->where( 'i_num_items > 0' );
@@ -173,13 +173,13 @@ class CityStats extends DAO
     $key = md5(osc_base_url().'CityStats::listCities'.(string)$region.(string)$zero.(string)$order);
     $found = null;
     $cache = osc_cache_get($key, $found);
-    
+
     if($cache===false) {
       $this->dao->select($this->getTableName().'.fk_i_city_id as city_id, '.$this->getTableName().'.i_num_items as items, '.DB_TABLE_PREFIX.'t_city.s_name as city_name, '.DB_TABLE_PREFIX.'t_city.s_name_native as city_name_native, '.DB_TABLE_PREFIX.'t_city.s_slug as city_slug');
       $this->dao->from( $this->getTableName() );
       $this->dao->join(DB_TABLE_PREFIX.'t_city', $this->getTableName().'.fk_i_city_id = '.DB_TABLE_PREFIX.'t_city.pk_i_id', 'LEFT');
       $this->dao->where('i_num_items '.$zero.' 0' );
-      
+
       if($region > 0) {
         $this->dao->where(DB_TABLE_PREFIX.'t_city.fk_i_region_id = '.$region);
       }
@@ -209,15 +209,14 @@ class CityStats extends DAO
       } else {
         $output = $return;
       }
-      
+
       osc_cache_set($key, $output, OSC_CACHE_TTL);
       return $output;
     } else {
       return $cache;
     }
   }
-  
-  
+
 
   /**
    * Return a list of cities and count items.
@@ -228,20 +227,20 @@ class CityStats extends DAO
     $key = md5(osc_base_url().'CityStats::listCitiesLimit'.(string)$country_code.(string)$region_id.(string)$order.(string)$limit.(string)$min_items.(string)$custom_condition);
     $found = null;
     $cache = osc_cache_get($key, $found);
-    
+
     if($cache===false) {
       $this->dao->select('c.*, coalesce(s.i_num_items, 0) as i_num_items');
       $this->dao->from(DB_TABLE_PREFIX.'t_city as c');
       $this->dao->join($this->getTableName() . ' as s', 'c.pk_i_id = s.fk_i_city_id', 'LEFT');
-      
+
       if($min_items > 0) {
         $this->dao->where('i_num_items >= ' . $min_items);
       }
-      
+
       if($country_code <> '' && strlen((string)$country_code) == 2) {
         $this->dao->where('c.fk_c_country_code', $country_code);
       }
-      
+
       if($region_id > 0) {
         $this->dao->where('c.fk_i_region_id', $region_id);
       }
@@ -249,11 +248,11 @@ class CityStats extends DAO
       if(trim((string)$custom_condition) != '') {
         $this->dao->where($custom_condition);
       }
-      
+
       if($limit > 0) {
         $this->dao->limit($limit);
       }
-      
+
       $this->dao->orderBy($order);
 
       $rs = $this->dao->get();
@@ -264,7 +263,7 @@ class CityStats extends DAO
 
       $return = $rs->result();
       $output = array();
-      
+
       if(count($return) > 0 && osc_get_current_user_locations_native() == 1) {
         foreach($return as $r) {
           $row = $r;
@@ -281,7 +280,7 @@ class CityStats extends DAO
       } else {
         $output = $return;
       }
-      
+
       osc_cache_set($key, $output, OSC_CACHE_TTL);
       return $output;
     } else {

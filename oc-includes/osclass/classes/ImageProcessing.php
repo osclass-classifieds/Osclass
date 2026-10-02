@@ -48,11 +48,11 @@ class ImageProcessing {
     }
 
     if(!is_readable($imagePath)) {
-    throw new RuntimeException(sprintf(__('%s is not readable!'), $imagePath));
+      throw new RuntimeException(sprintf(__('%s is not readable!'), $imagePath));
     }
 
     if(filesize($imagePath) == 0) {
-    throw new RuntimeException(sprintf(__('%s is corrupt or broken!'), $imagePath));
+      throw new RuntimeException(sprintf(__('%s is corrupt or broken!'), $imagePath));
     }
 
     $this->image_info = @getimagesize($imagePath);
@@ -70,7 +70,7 @@ class ImageProcessing {
           break;
         }
       }
-      
+
       // remove exif data except ICC profile
       $profiles = $this->im->getImageProfiles('icc', true);
       $this->im->stripImage();
@@ -78,11 +78,11 @@ class ImageProcessing {
       if(!empty($profiles) && isset($profiles['icc'])) {
         $this->im->profileImage('icc', $profiles['icc']);
       }
-    
+
       $geometry = $this->im->getImageGeometry();
       $this->_width = $geometry['width'];
       $this->_height = $geometry['height'];
-      
+
     } else {
       $content = file_get_contents($imagePath);
       $this->im = imagecreatefromstring($content);
@@ -90,38 +90,54 @@ class ImageProcessing {
       $this->_height = imagesy($this->im);
 
       $this->_exif = array();
-      
+
       if(@$this->image_info['mime'] === 'image/jpeg' && function_exists('exif_read_data')) {
         $this->_exif = @exif_read_data($imagePath);
       }
     }
 
-    switch (@$this->image_info['mime']) {
+    switch(@$this->image_info['mime']) {
       case 'image/gif':
       case 'image/png':
         $this->ext = 'png';
         $this->mime = 'image/png';
         break;
-        
+
+      case 'image/webp':
+        $this->ext = 'webp';
+        $this->mime = 'image/webp';
+        break;
+
+      case 'image/avif':
+        $this->ext = 'avif';
+        $this->mime = 'image/avif';
+        break;
+
+      case 'image/heif':
+      case 'image/heic':
+        $this->ext = 'heif';
+        $this->mime = 'image/heif';
+        break;
+
       default:
         $this->ext = 'jpg';
         $this->mime = 'image/jpeg';
-        
+
         if(!$this->_use_imagick) {
           $bg = imagecreatetruecolor($this->_width, $this->_height);
           imagefill($bg, 0, 0, $this->imageColor($bg));
           imagesavealpha($bg, true);
           imagealphablending($bg, true);
           imagecopy($bg, $this->im, 0, 0, 0, 0, $this->_width, $this->_height);
-          
+
           if(PHP_VERSION_ID < 80500) {
             imagedestroy($this->im);
           }
-          
+
           $this->im = null;
           $this->im = $bg;
         }
-        
+
         break;
     }
 
@@ -145,7 +161,7 @@ class ImageProcessing {
       if(PHP_VERSION_ID < 80500) {
         imagedestroy($this->im);
       }
-      
+
       $this->im = null;
     }
   }
@@ -204,7 +220,7 @@ class ImageProcessing {
       } else {
         $newW = ($this->_width > $width) ? $width : $this->_width;
       }
-      
+
       $newH = ceil($this->_height * ($newW / $this->_width));
       if($force_aspect) {
         $height = $newH;
@@ -223,7 +239,7 @@ class ImageProcessing {
 
     if($this->_use_imagick) {
       $bg = new Imagick();
-      if($this->ext === 'jpg') {
+      if($this->ext === 'jpg' || $this->ext === 'jpeg') {
         $bg->newImage($width, $height, osc_canvas_background());  // white or black
       } else {
         $bg->newImage($width, $height, 'none');
@@ -262,25 +278,25 @@ class ImageProcessing {
         }
 
         imagecopyresampled($newIm, $this->im, floor(0 - ($new_width - $target_width) / 2), floor(0 - ($new_height - $target_height) / 2), 0, 0, $new_width, $new_height, $w, $h);
-       
+
       } else {
         $newIm = imagecreatetruecolor($width, $height);
         imagealphablending($newIm, false);
         $colorTransparent = $this->imageColor($newIm);
         imagefill($newIm, 0, 0, $colorTransparent);
         imagesavealpha($newIm, true);
-        
+
         imagecopyresampled($newIm, $this->im, floor(($width - $newW) / 2), floor(($height - $newH) / 2), 0, 0, $newW, $newH, $this->_width, $this->_height);
       }
 
       if(PHP_VERSION_ID < 80500) {
         imagedestroy($this->im);
       }
-      
+
       $this->im = null;
       $this->im = $newIm;
     }
-    
+
     $this->_width = $width;
     $this->_height = $height;
 
@@ -294,7 +310,7 @@ class ImageProcessing {
     } else if(osc_canvas_background() == 'black') {
       return imagecolorallocatealpha($im, 0, 0, 0, 127);
     }
-    
+
     return imagecolorallocatealpha($im, 255, 255, 255, 127);
   }
 
@@ -313,17 +329,17 @@ class ImageProcessing {
       $resize_w = $new_w;
       $resize_h = $h * $new_w / $w;
     }
-    
+
     // Convert to integer values
     $resize_w = intval($resize_w);
     $resize_h = intval($resize_h);
     $new_w = intval($new_w);
     $new_h = intval($new_h);
-   
+
 
     $image->resizeImage($resize_w, $resize_h, Imagick::FILTER_LANCZOS, 0.9);
 
-    switch ($focus) {
+    switch($focus) {
       case 'northwest':
         $image->cropImage($new_w, $new_h, 0, 0);
         break;
@@ -362,7 +378,15 @@ class ImageProcessing {
       $ext = $this->ext;
     }
 
-    if($ext !== 'png' && $ext !== 'gif') {
+    $ext = strtolower(trim((string)$ext));
+
+    if($ext === 'jpg') {
+      $ext = 'jpeg';
+    }
+
+    $native_formats = array('png', 'gif', 'jpeg', 'webp', 'avif', 'heif');
+
+    if(!in_array($ext, $native_formats, true)) {
       $ext = 'jpeg';
     }
 
@@ -375,24 +399,40 @@ class ImageProcessing {
         $this->im = $bg;
         $this->ext = 'jpeg';
       }
-      
+
       $this->im->setImageDepth(8);
       $this->im->setImageFilename($imagePath);
       $this->im->setImageFormat($ext);
       $this->im->writeImage($imagePath);
-      
+
     } else {
-      switch ($ext) {
+      switch($ext) {
         case 'gif':
         case 'png':
           imagepng($this->im, $imagePath, 0);
           break;
-          
+
+        case 'webp':
+          if(function_exists('imagewebp')) {
+            imagewebp($this->im, $imagePath, 80);
+          } else {
+            imagejpeg($this->im, $imagePath);
+          }
+          break;
+
+        case 'avif':
+          if(function_exists('imageavif')) {
+            imageavif($this->im, $imagePath, 80);
+          } else {
+            imagejpeg($this->im, $imagePath);
+          }
+          break;
+
         default:
           if(($ext === 'jpeg' && ($this->ext !== 'jpeg' && $this->ext !== 'jpg')) || $this->_watermarked) {
             $this->ext = 'jpeg';
           }
-          
+
           imagejpeg($this->im, $imagePath);
           break;
       }
@@ -412,7 +452,7 @@ class ImageProcessing {
    */
   public function autoRotate() {
     if($this->_use_imagick) {
-      switch ($this->im->getImageOrientation()) {
+      switch($this->im->getImageOrientation()) {
         case imagick::ORIENTATION_TOPRIGHT:
           $this->im->flopImage();
           break;
@@ -443,33 +483,33 @@ class ImageProcessing {
         case imagick::ORIENTATION_LEFTBOTTOM:
           $this->im->rotateimage(new ImagickPixel('none'), - 90); // rotate 90 degrees CCW
           break;
-          
+
         default:
           // DO NOTHING, THE IMAGE IS OK OR WE DON'T KNOW IF IT'S ROTATED
           break;
       }
-      
+
     } else {
       if(isset($this->_exif['Orientation'])) {
-        switch ($this->_exif['Orientation']) {
+        switch($this->_exif['Orientation']) {
           case 1:
           default:
             // DO NOTHING, THE IMAGE IS OK OR WE DON'T KNOW IF IT'S ROTATED
             break;
-            
+
           case 2:
             imageflip($this->im, IMG_FLIP_HORIZONTAL);
             break;
-            
+
           case 3:
             $this->im = imagerotate($this->im, 180, 0);
             break;
-            
+
           case 4:
             $this->im = imagerotate($this->im, 180, 0);
             imageflip($this->im, IMG_FLIP_HORIZONTAL);
             break;
-            
+
           case 5:
             $this->im = imagerotate($this->im, 270, 0);
             imageflip($this->im, IMG_FLIP_HORIZONTAL);
@@ -477,14 +517,14 @@ class ImageProcessing {
             $this->_height = $this->_width;
             $this->_width = $aux;
             break;
-            
+
           case 6:
             $this->im = imagerotate($this->im, - 90, 0);
             $aux = $this->_height;
             $this->_height = $this->_width;
             $this->_width = $aux;
             break;
-            
+
           case 7:
             $this->im = imagerotate($this->im, 90, 0);
             imageflip($this->im, IMG_FLIP_HORIZONTAL);
@@ -492,7 +532,7 @@ class ImageProcessing {
             $this->_height = $this->_width;
             $this->_width = $aux;
             break;
-            
+
           case 8:
             $this->im = imagerotate($this->im, 90, 0);
             $aux = $this->_height;
@@ -500,7 +540,7 @@ class ImageProcessing {
             $this->_width = $aux;
             break;
           }
-          
+
         $this->_exif['Orientation'] = 1;
       }
     }
@@ -512,15 +552,33 @@ class ImageProcessing {
   public function show() {
     header('Content-Disposition: Attachment;filename=image.' . $this->ext);
     header('Content-type: ' . $this->mime);
-    
+
     if($this->_use_imagick) {
+      $this->im->setImageFormat($this->ext);
+      echo $this->im->getImagesBlob();
     } else {
       switch($this->ext) {
         case 'gif':
         case 'png':
           imagepng($this->im);
           break;
-          
+
+        case 'webp':
+          if(function_exists('imagewebp')) {
+            imagewebp($this->im);
+          } else {
+            imagejpeg($this->im);
+          }
+          break;
+
+        case 'avif':
+          if(function_exists('imageavif')) {
+            imageavif($this->im);
+          } else {
+            imagejpeg($this->im);
+          }
+          break;
+
         default:
           imagejpeg($this->im);
           break;
@@ -541,52 +599,52 @@ class ImageProcessing {
     $this->_font = osc_apply_filter('watermark_font_path', LIB_PATH . 'osclass/assets/fonts/Arial.ttf');
     $text = osc_apply_filter('watermark_text_value', $text);
     $fontsize = osc_apply_filter('watermark_font_size', $fontsize);
-    
+
     if($this->_use_imagick) {
       $draw = new ImagickDraw();
       $draw->setFillColor('#' . $color);
       $draw->setFont($this->_font);
       $draw->setFontSize($fontsize);
       $metrics = $this->im->queryFontMetrics($draw, $text);
-      
-      switch (osc_watermark_place()) {
+
+      switch(osc_watermark_place()) {
         case 'tl':
         $offset['x'] = 1;
         $offset['y'] = $metrics['ascender'] + 1;
         break;
-        
+
         case 'tr':
         $offset['x'] = $this->_width - $metrics['textWidth'] - 1;
         $offset['y'] = $metrics['ascender'] + 1;
         break;
-        
+
         case 'bl':
         $offset['x'] = 1;
         $offset['y'] = $this->_height - 1;
         break;
-        
+
         case 'br':
         $offset['x'] = $this->_width - $metrics['textWidth'] - 1;
         $offset['y'] = $this->_height - 1;
         break;
-        
+
         default:
         $offset['x'] = ($this->_width / 2) - ($metrics['textWidth'] / 2);
         $offset['y'] = ($this->_height / 2) - ($metrics['ascender'] / 2);
         break;
       }
-      
+
       $this->im->annotateImage($draw, $offset['x'], $offset['y'], 0, $text);
-      
+
     } else {
       imagealphablending($this->im, true);
       imagesavealpha($this->im, true);
-      
+
       if($this->ext !== 'jpg') {
         $white = $this->imageColor($this->im);
         imagefill($this->im, 0, 0, $white);
       }
-      
+
       $color = $this->_imageColorAllocateHex($color);
       $offset = $this->_calculateOffset($text);
       imagettftext($this->im, 20, 0, $offset['x'], $offset['y'], $color, $this->_font, html_entity_decode($text, null, 'UTF-8'));
@@ -619,27 +677,27 @@ class ImageProcessing {
     $offset = array ('x' => 0, 'y' => 0);
     $bbox = $this->_calculateBBox($text);
 
-    switch (osc_watermark_place()) {
+    switch(osc_watermark_place()) {
     case 'tl':
       $offset['x'] = $bbox['height'];
       $offset['y'] = $bbox['height'] * 1.5;
       break;
-      
+
     case 'tr':
       $offset['x'] = $this->_width - ($bbox['width'] + $bbox['height']);
       $offset['y'] = $bbox['height'] * 1.5;
       break;
-      
+
     case 'bl':
       $offset['x'] = $bbox['height'];
       $offset['y'] = $this->_height - $bbox['height'];
       break;
-      
+
     case 'br':
       $offset['x'] = $this->_width - ($bbox['width'] + $bbox['height']);
       $offset['y'] = $this->_height - $bbox['height'];
       break;
-      
+
     default:
       $offset['x'] = ($this->_width / 2) - ($bbox['top_right']['x'] / 2);
       $offset['y'] = ($this->_height / 2) - ($bbox['top_right']['y'] / 2);
@@ -695,32 +753,32 @@ class ImageProcessing {
   public function doWatermarkImage() {
     $this->_watermarked = true;
     $path_watermark = osc_uploads_path() . 'watermark.png';
-    
+
     if($this->_use_imagick) {
       $wm = new Imagick($path_watermark);
       $wgeo = $wm->getImageGeometry();
 
-      switch (osc_watermark_place()) {
+      switch(osc_watermark_place()) {
         case 'tl':
         $dest_x = 0;
         $dest_y = 0;
         break;
-        
+
         case 'tr':
         $dest_x = $this->_width - $wgeo['width'];
         $dest_y = 0;
         break;
-        
+
         case 'bl':
         $dest_x = 0;
         $dest_y = $this->_height - $wgeo['height'];
         break;
-        
+
         case 'br':
         $dest_x = $this->_width - $wgeo['width'];
         $dest_y = $this->_height - $wgeo['height'];
         break;
-        
+
         default:
         $dest_x = ($this->_width - $wgeo['width']) / 2;
         $dest_y = ($this->_height - $wgeo['height']) / 2;
@@ -735,27 +793,27 @@ class ImageProcessing {
       $watermark_width = imagesx($watermark);
       $watermark_height = imagesy($watermark);
 
-      switch (osc_watermark_place()) {
+      switch(osc_watermark_place()) {
         case 'tl':
         $dest_x = 0;
         $dest_y = 0;
         break;
-        
+
         case 'tr':
         $dest_x = $this->_width - $watermark_width;
         $dest_y = 0;
         break;
-        
+
         case 'bl':
         $dest_x = 0;
         $dest_y = $this->_height - $watermark_height;
         break;
-        
+
         case 'br':
         $dest_x = $this->_width - $watermark_width;
         $dest_y = $this->_height - $watermark_height;
         break;
-        
+
         default:
         $dest_x = ($this->_width - $watermark_width) / 2;
         $dest_y = ($this->_height - $watermark_height) / 2;
@@ -763,11 +821,11 @@ class ImageProcessing {
       }
 
       $this->_imagecopymerge_alpha($this->im, $watermark, $dest_x, $dest_y, 0, 0, $watermark_width, $watermark_height, 100);
-      
+
       if(PHP_VERSION_ID < 80500) {
         imagedestroy($watermark);
       }
-      
+
       unset($watermark);
     }
 
@@ -800,17 +858,17 @@ class ImageProcessing {
     $src_y = max($src_y, 0);
     $dst_x = max($dst_x, 0);
     $dst_y = max($dst_y, 0);
-    
+
     if($dst_x + $src_w > $dst_w) {
       $src_w = $dst_w - $dst_x;
     }
-    
+
     if($dst_y + $src_h > $dst_h) {
       $src_h = $dst_h - $dst_y;
     }
 
-    for ($x_offset = 0; $x_offset < $src_w; $x_offset ++) {
-      for ($y_offset = 0; $y_offset < $src_h; $y_offset ++) {
+    for($x_offset = 0; $x_offset < $src_w; $x_offset ++) {
+      for($y_offset = 0; $y_offset < $src_h; $y_offset ++) {
         $srccolor = imagecolorsforindex($src_im, imagecolorat($src_im, $src_x + $x_offset, $src_y + $y_offset));
         $dstcolor = imagecolorsforindex($dst_im, imagecolorat($dst_im, $dst_x + $x_offset, $dst_y + $y_offset));
 
@@ -819,7 +877,7 @@ class ImageProcessing {
           // blend
           $src_a = 127 - $src_a;
           $dst_a = 127 - $dstcolor['alpha'];
-          
+
           // Update os812 to convert values into integer
           $dst_r = intval(($srccolor['red'] * $src_a + $dstcolor['red'] * $dst_a * (127 - $src_a) / 127) / 127);
           $dst_g = intval(($srccolor['green'] * $src_a + $dstcolor['green'] * $dst_a * (127 - $src_a) / 127) / 127);
@@ -830,7 +888,7 @@ class ImageProcessing {
           if(!imagesetpixel($dst_im, $dst_x + $x_offset, $dst_y + $y_offset, $color)) {
             return false;
           }
-          
+
           imagecolordeallocate($dst_im, $color);
         }
       }
@@ -855,30 +913,30 @@ if(!function_exists('imageflip')) {
     if($width < 1) {
       $width = imagesx($image);
     }
-    
+
     if($height < 1) {
       $height = imagesy($image);
     }
-    
+
     // Truecolor provides better results, if possible.
     if(function_exists('imageistruecolor') && imageistruecolor($image)) {
       $tmp = imagecreatetruecolor(1, $height);
     } else {
       $tmp = imagecreate(1, $height);
     }
-    
+
     $x2 = $x + $width - 1;
-    
+
     for($i = (int) floor(($width - 1) / 2); $i >= 0; $i --) {
       imagecopy($tmp, $image, 0, 0, $x2 - $i, $y, 1, $height);              // Backup right stripe.
       imagecopy($image, $image, $x2 - $i, $y, $x + $i, $y, 1, $height);     // Copy left stripe to the right.
       imagecopy($image, $tmp, $x + $i, $y, 0, 0, 1, $height);               // Copy backuped right stripe to the left.
     }
-    
+
     if(PHP_VERSION_ID < 80500) {
       imagedestroy($tmp);
     }
-    
+
     unset($tmp);
 
     return $image;

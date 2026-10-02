@@ -33,94 +33,121 @@ class CWebAjax extends BaseModel {
   //Business Layer...
   public function doModel() {
     //specific things for this class
-    switch ($this->action){
+    switch($this->action){
       case 'bulk_actions':
         break;
-        
+
       case 'regions': //Return regions given a countryId
         $regions = Region::newInstance()->findByCountry(Params::getParam('countryId'));
         echo json_encode($regions);
         break;
-      
+
       case 'cities': //Returns cities given a regionId
         $cities = City::newInstance()->findByRegion(Params::getParam('regionId'));
         echo json_encode($cities);
         break;
-        
+
       case 'location': // This is the autocomplete AJAX
         $cities = City::newInstance()->ajax(Params::getParam('term'));
         foreach($cities as $k => $city) {
           $cities[$k]['label'] = $city['label'] . ' (' . $city['region'] . ')';
         }
-        
+
         echo json_encode($cities);
         break;
-        
+
       case 'location_countries': // This is the autocomplete AJAX
         $countries = Country::newInstance()->ajax(Params::getParam('term'));
         echo json_encode($countries);
         break;
-        
+
       case 'location_regions': // This is the autocomplete AJAX
         $regions = Region::newInstance()->ajax(Params::getParam('term'), Params::getParam('country'));
         echo json_encode($regions);
         break;
-        
+
       case 'location_cities': // This is the autocomplete AJAX
         $cities = City::newInstance()->ajax(Params::getParam('term'), Params::getParam('region'));
         echo json_encode($cities);
         break;
-        
+
       case 'rotate_image': // Rotate image via AJAX
         header('Content-type: image/jpeg');
 
-        $degrees = -90; 
+        $degrees = -90;
         $filename = Params::getParam('file_name');
         $filesrc = osc_content_path().'uploads/temp/'.$filename;
 
-        $ext = pathinfo($filename, PATHINFO_EXTENSION);
+        $ext = strtolower((string)pathinfo($filename, PATHINFO_EXTENSION));
         $success = false;
+        $source = null;
+        $rotate = null;
 
-        if(strtolower($ext) == 'jpg' || strtolower($ext) == 'jpeg') {
+        if($ext == 'jpg' || $ext == 'jpeg') {
           $source = imagecreatefromjpeg($filesrc);
           $rotate = imagerotate($source, $degrees, 0);
 
           // save
-          $success = imagejpeg($rotate, $filesrc); 
+          $success = imagejpeg($rotate, $filesrc);
 
-        } else if(strtolower($ext) == 'png') {
+        } else if($ext == 'png') {
           $source = imagecreatefrompng($filesrc);
           $rotate = imagerotate($source, $degrees, 0);
 
           // save
-          $success = imagepng($rotate, $filesrc); 
+          $success = imagepng($rotate, $filesrc);
 
-        } else if(strtolower($ext) == 'gif') {
+        } else if($ext == 'gif') {
           $source = imagecreatefromgif($filesrc);
           $rotate = imagerotate($source, $degrees, 0);
 
           // save
-          $success = imagegif($rotate, $filesrc); 
+          $success = imagegif($rotate, $filesrc);
+
+        } else if($ext == 'webp' && function_exists('imagecreatefromwebp') && function_exists('imagewebp')) {
+          $source = imagecreatefromwebp($filesrc);
+          $rotate = imagerotate($source, $degrees, 0);
+          $success = imagewebp($rotate, $filesrc, 80);
+
+        } else if($ext == 'avif' && function_exists('imagecreatefromavif') && function_exists('imageavif')) {
+          $source = imagecreatefromavif($filesrc);
+          $rotate = imagerotate($source, $degrees, 0);
+          $success = imageavif($rotate, $filesrc, 80);
+
+        } else if(($ext == 'heif' || $ext == 'heic') && extension_loaded('imagick') && osc_use_imagick()) {
+          try {
+            $im = new Imagick($filesrc);
+            $im->rotateImage(new ImagickPixel('none'), $degrees);
+            $success = $im->writeImage($filesrc);
+            $im->destroy();
+          } catch(Exception $e) {
+            $success = false;
+          }
         }
 
         if(PHP_VERSION_ID < 80500) {
-          @imagedestroy($source);
-          @imagedestroy($rotate);
+          if((is_resource($source) || (is_object($source) && class_exists('GdImage', false) && $source instanceof GdImage)) && function_exists('imagedestroy')) {
+            @imagedestroy($source);
+          }
+
+          if((is_resource($rotate) || (is_object($rotate) && class_exists('GdImage', false) && $rotate instanceof GdImage)) && function_exists('imagedestroy')) {
+            @imagedestroy($rotate);
+          }
         } else {
           unset($source);
           unset($rotate);
         }
-        
+
         echo json_encode(
           array(
             'success' => $success ,
-            'msg' => _m($success ? 'The selected photo has been successfully rotated' : "The selected photo couldn't be rotated")
+            'msg' => _m($success ? 'The selected photo has been rotated' : "The selected photo couldn't be rotated")
           )
         );
 
         return false;
         break;
-      
+
       case 'delete_image': // Delete images via AJAX
         $ajax_photo = Params::getParam('ajax_photo');
         $id = Params::getParam('id');
@@ -129,12 +156,24 @@ class CWebAjax extends BaseModel {
         $secret = Params::getParam('secret');
         $json = array();
 
-        if($ajax_photo!='') {
+        if(osc_apply_filter('item_delete_image', true, $ajax_photo, $id, $item, $code, $secret) === false) {
+          // Flash message from plugin/filter
+          $msg = Session::newInstance()->_get('item_delete_image_msg');
+
+          echo json_encode(array(
+            'success' => false,
+            'msg' => _m($msg == '' ?  "The selected photo couldn't be deleted" : $msg)
+          ));
+
+          return false;
+        }
+
+        if($ajax_photo != '') {
           $files = Session::newInstance()->_get('ajax_files');
           $success = false;
 
           foreach($files as $uuid => $file) {
-            if($file==$ajax_photo) {
+            if($file == $ajax_photo) {
               $filename = $files[$uuid];
               unset($files[$uuid]);
               Session::newInstance()->_set('ajax_files', $files);
@@ -143,12 +182,10 @@ class CWebAjax extends BaseModel {
             }
           }
 
-          echo json_encode(
-            array(
-              'success' => $success ,
-              'msg' => _m($success ? 'The selected photo has been successfully deleted' : "The selected photo couldn't be deleted")
-            )
-          );
+          echo json_encode(array(
+            'success' => $success,
+            'msg' => _m($success ? 'The selected photo has been deleted' : "The selected photo couldn't be deleted")
+          ));
 
           return false;
         }
@@ -171,7 +208,7 @@ class CWebAjax extends BaseModel {
 
         try {
           $aItem = osc_get_item_row($item);
-        } catch (Exception $e) {
+        } catch(Exception $e) {
         }
 
         // Check if the item exists
@@ -203,7 +240,7 @@ class CWebAjax extends BaseModel {
         // Does id & code combination exist?
         $result = ItemResource::newInstance()->existResource($id, $code);
 
-        if ($result > 0) {
+        if($result > 0) {
           $resource = ItemResource::newInstance()->findByPrimaryKey($id);
 
           if($resource['fk_i_item_id']==$item) {
@@ -215,10 +252,10 @@ class CWebAjax extends BaseModel {
               osc_deleteResource($id, false);
               Log::newInstance()->insertLog('ajax', 'deleteimage', $id, $id, 'user', osc_logged_user_id());
             }
-            
+
             ItemResource::newInstance()->delete(array('pk_i_id' => $id, 'fk_i_item_id' => $item, 's_name' => $code));
 
-            $json['msg'] =  _m('The selected photo has been successfully deleted');
+            $json['msg'] =  _m('The selected photo has been deleted');
             $json['success'] = 'true';
           } else {
             $json['msg'] = _m('The selected photo does not belong to you');
@@ -232,99 +269,149 @@ class CWebAjax extends BaseModel {
         echo json_encode($json);
         return true;
         break;
-        
+
       case 'alerts': // Allow to register to an alert given (not sure it's used on admin)
-        $encoded_alert = Params::getParam('alert');
-        $alert_json = osc_decrypt_alert(base64_decode($encoded_alert));
-        $alert_arr = @json_decode($alert_json, true);
+        $alert_version = (int)Params::getParam('alert_version');
+        if($alert_version <= 0) {
+          $alert_version = 1;
+        }
+
+        $alert_response_format = trim(strtolower((string)Params::getParam('alert_response_format')));
+        $json_reply = ($alert_version > 1 || $alert_response_format === 'json');
+
+        if(!osc_alerts_enabled()) {
+          if($json_reply) {
+            echo json_encode(array('status' => 'ERROR', 'code' => 'ALERTS_DISABLED', 'message' => _m('Alerts are disabled'), 'data' => null));
+            exit;
+          }
+
+          echo '-4';
+          return false;
+        }
+
+        $encoded_alert = (string)Params::getParam('alert');
+        $decoded_alert = base64_decode($encoded_alert, true);
+        $alert_decrypted = osc_decrypt_alert($decoded_alert !== false ? $decoded_alert : '');
+
+        $alert_arr = json_decode((string)$alert_decrypted, true);
+        if(!is_array($alert_arr)) {
+          $alert_arr = array();
+        }
+
         $alert_params = (isset($alert_arr['params']) && is_array($alert_arr['params'])) ? $alert_arr['params'] : array();
-        $alert_sql = isset($alert_arr['sql']) ? $alert_arr['sql'] : '';
-        
-        // Remove sql and params from original array
-        unset($alert_arr['params']);
-        unset($alert_arr['sql']);
-        
+        $alert_sql = (isset($alert_arr['sql']) ? $alert_arr['sql'] : '');
+
+        unset($alert_arr['params'], $alert_arr['sql']);
+
         $alert_json = json_encode($alert_arr);
         $alert_json_params = json_encode($alert_params);
 
         // check alert integrity / signature
-        $stringToSign = osc_get_alert_public_key() . $encoded_alert;
-        $signature = hex2b64(hmacsha1(osc_get_alert_private_key(), $stringToSign));
+        $string_to_sign = osc_get_alert_public_key() . $encoded_alert;
+        $signature = hex2b64(hmacsha1(osc_get_alert_private_key(), $string_to_sign));
         $server_signature = Session::newInstance()->_get('alert_signature');
 
         if($server_signature != $signature) {
+          if($json_reply) {
+            echo json_encode(array('status' => 'ERROR', 'code' => 'INVALID_SIGNATURE', 'message' => _m('Alert integrity check failed'), 'data' => null));
+            exit;
+          }
+
           echo '-2';
           return false;
         }
 
         $email = osc_esc_html(Params::getParam('email'));
-        $userid = osc_esc_html(Params::getParam('userid'));
+        $user_id = osc_esc_html(Params::getParam('userid'));
 
         if(osc_is_web_user_logged_in()) {
-          $userid = osc_logged_user_id();
-          //$user = User::newInstance()->findByPrimaryKey($userid);
+          $user_id = osc_logged_user_id();
           $user = osc_logged_user();
           $email = $user['s_email'];
-          
+
         } else {
           $user = User::newInstance()->findByEmail($email);
-          $userid = (@$user['pk_i_id'] > 0 ? $user['pk_i_id'] : $userid);
+          $user_id = ((isset($user['pk_i_id']) && (int)$user['pk_i_id'] > 0) ? $user['pk_i_id'] : $user_id);
         }
 
-        if($alert_json != '' && $email != '') {
-          if(osc_validate_email($email)) {
-            $secret = osc_genRandomPassword();
-            $alert = osc_apply_filter('alert_pre_save', $alert_json, $alert_json, $userid, $email);
-            $params = osc_apply_filter('alert_pre_save_params', $alert_json_params, $alert_json, $userid, $email);
-            $sql = osc_apply_filter('alert_pre_save_sql', $alert_sql, $alert_json, $userid, $email);
-            
-            $type = 'DAILY';
-            $type = osc_apply_filter('alert_pre_save_type', $type, $alert_json, $userid, $email);
-
-            $name = osc_generate_alert_name($alert_json, 3, false);
-            $name = osc_apply_filter('alert_pre_save_name', $name, $alert_json, $userid, $email, $type);
-            
-            $alertID = Alerts::newInstance()->createAlert($userid, $email, $name, $alert, $secret, $type, $params, $sql);
-            
-            osc_run_hook('alert_created', $alertID, $alert, $userid, $email, $secret);
-            
-            if($alertID !== false) {
-              if((int)$userid > 0 && isset($user['pk_i_id'])) {
-                //$user = User::newInstance()->findByPrimaryKey($userid);
-
-                if($user['b_active'] == 1 && $user['b_enabled'] == 1) {
-                  Alerts::newInstance()->activate($alertID);
-                  echo '1';     // alert created
-                  return true;
-                  
-                } else {
-                  echo '-1';   // alert not created, reason: user blocked or not validated
-                  return false;
-                }
-                
-              } else {
-                $aAlert = Alerts::newInstance()->findByPrimaryKey($alertID);
-                osc_run_hook('hook_email_alert_validation', $aAlert, $email, $secret);      // user not found (not registered)
-              }
-
-              echo '1';  // alert created, but require email validation
-              
-            } else {
-              echo '0';  // alert not created, same alert most probably already exists with same user ID or email
-            }
-            
-            return true;
-            
-          } else {
-            echo '-1';   // alert not created, email is invalid
-            return false;
+        if($alert_json == '' || $email == '') {
+          if($json_reply) {
+            echo json_encode(array('status' => 'ERROR', 'code' => 'MISSING_PARAMS', 'message' => _m('Missing email or alert'), 'data' => null));
+            exit;
           }
+
+          echo '-3';
+          return false;
         }
-        
-        echo '-3';  // alert not created, missing email or search pattern
-        return false;
+
+        if(!osc_validate_email($email)) {
+          if($json_reply) {
+            echo json_encode(array('status' => 'ERROR', 'code' => 'INVALID_EMAIL', 'message' => _m('Email is invalid'), 'data' => null));
+            exit;
+          }
+
+          echo '-1';
+          return false;
+        }
+
+        $secret = osc_genRandomPassword();
+        $alert = osc_apply_filter('alert_pre_save', $alert_json, $alert_json, $user_id, $email);
+        $alert_params_save = osc_apply_filter('alert_pre_save_params', $alert_json_params, $alert_json, $user_id, $email);
+        $alert_sql_save = osc_apply_filter('alert_pre_save_sql', $alert_sql, $alert_json, $user_id, $email);
+
+        $type = 'DAILY';
+        $type = osc_apply_filter('alert_pre_save_type', $type, $alert_json, $user_id, $email);
+
+        $name = osc_generate_alert_name($alert_json, 3, false);
+        $name = osc_apply_filter('alert_pre_save_name', $name, $alert_json, $user_id, $email, $type);
+
+        $alert_id = Alerts::newInstance()->createAlert($user_id, $email, $name, $alert, $secret, $type, $alert_params_save, $alert_sql_save);
+        osc_run_hook('alert_created', $alert_id, $alert, $user_id, $email, $secret);
+
+        if($alert_id === false) {
+          if($json_reply) {
+            echo json_encode(array('status' => 'ERROR', 'code' => 'ALERT_EXISTS', 'message' => _m('Alert already exists'), 'data' => null));
+            exit;
+          }
+
+          echo '0';
+          return true;
+        }
+
+        if((int)$user_id > 0 && isset($user['pk_i_id'])) {
+          if($user['b_active'] == 1 && $user['b_enabled'] == 1) {
+            Alerts::newInstance()->activate($alert_id);
+
+            if($json_reply) {
+              echo json_encode(array('status' => 'OK', 'code' => 'SUCCESS', 'message' => _m('Alert created'), 'data' => array('alert_id' => (int)$alert_id)));
+              exit;
+            }
+
+            echo '1';
+            return true;
+          }
+
+          if($json_reply) {
+            echo json_encode(array('status' => 'ERROR', 'code' => 'USER_BLOCKED', 'message' => _m('Alert was created but cannot be activated for this user'), 'data' => array('alert_id' => (int)$alert_id)));
+            exit;
+          }
+
+          echo '-1';
+          return false;
+        }
+
+        $alert_row = Alerts::newInstance()->findByPrimaryKey($alert_id);
+        osc_run_hook('hook_email_alert_validation', $alert_row, $email, $secret);      // user not found (not registered)
+
+        if($json_reply) {
+          echo json_encode(array('status' => 'OK', 'code' => 'SUCCESS_VALIDATION_REQUIRED', 'message' => _m('Alert created. Please confirm it via email'), 'data' => array('alert_id' => (int)$alert_id)));
+          exit;
+        }
+
+        echo '1';
+        return true;
         break;
-      
+
       case 'runhook': // run hooks
         $hook = Params::getParam('hook');
 
@@ -337,11 +424,11 @@ class CWebAjax extends BaseModel {
           case 'item_form':
             osc_run_hook('item_form', Params::getParam('catId'));
             break;
-            
+
           case (substr($hook, 0, 10) == 'item_form_'):          // new versatile publish/edit hooks (v820)
             osc_run_hook($hook, Params::getParam('catId'));
             break;
-            
+
           case 'item_edit':
             $catId = Params::getParam('catId');
             $itemId = Params::getParam('itemId');
@@ -353,20 +440,20 @@ class CWebAjax extends BaseModel {
             $itemId = Params::getParam('itemId');
             osc_run_hook($hook, $catId, $itemId);
             break;
-            
+
           default:
             osc_run_hook('ajax_' . $hook);
             break;
         }
-        
+
         break;
-        
+
       case 'custom': // Execute via AJAX custom file
         if(Params::existParam('route')) {
           $routes = Rewrite::newInstance()->getRoutes();
           $rid = osc_esc_html(Params::getParam('route'));
           $file = '../';
-          
+
           if(isset($routes[$rid]) && isset($routes[$rid]['file'])) {
             $file = $routes[$rid]['file'];
           }
@@ -396,7 +483,7 @@ class CWebAjax extends BaseModel {
         }
 
         break;
-        
+
       case 'check_username_availability':
         $username = osc_sanitize_username(Params::getParam('s_username'));
         if(!osc_is_username_blacklisted($username)) {
@@ -409,25 +496,25 @@ class CWebAjax extends BaseModel {
         } else {
           echo json_encode(array('exists' => 1, 's_username' => $username));
         }
-        
+
         break;
-        
+
       case 'ajax_upload':
         // Include the uploader class
         require_once LIB_PATH . 'AjaxUploader.php';
         $uploader = new AjaxUploader();
         $original = pathinfo($uploader->getOriginalName());
-        
+
         if(osc_image_upload_library() == '') {
           $filename = uniqid('qqfile_', false) . '.' . $original['extension'];
         } else {
           $filename = uniqid('uppyfile_', false) . '.' . $original['extension'];
         }
-        
+
         $result = $uploader->handleUpload(osc_content_path().'uploads/temp/'.$filename);
-        
+
         if(isset($result['error'])) {
-          
+
           if(OSC_DEBUG) {
             if(osc_image_upload_library() == 'UPPY') {
               http_response_code(401);
@@ -437,7 +524,7 @@ class CWebAjax extends BaseModel {
               echo $result['error'];
             }
           }
-          
+
           error_log($result['error']);
           exit;
         }
@@ -452,40 +539,40 @@ class CWebAjax extends BaseModel {
 
           $result['uploadName'] = 'auto_' . $filename;
           $result['uploadUrl'] = osc_content_url() . 'uploads/temp/auto_' . $filename;
-          
+
           echo htmlspecialchars(json_encode($result), ENT_NOQUOTES);
-          
-        } catch (Exception $e) {
+
+        } catch(Exception $e) {
           if(OSC_DEBUG) {
             echo $e->getMessage();
           } else {
             echo '';
           }
         }
-        
+
         break;
-        
+
       case 'ajax_validate':
         $id = Params::getParam('id');
-        
-        if(!is_numeric($id)) { 
-          echo json_encode(array('success' => false)); 
+
+        if(!is_numeric($id)) {
+          echo json_encode(array('success' => false));
           die();
         }
-        
+
         $secret = Params::getParam('secret');
-        
+
         if($id > 0) {
           try {
             $item = Item::newInstance()->findByPrimaryKey($id);
-          } catch (Exception $e) {
+          } catch(Exception $e) {
           }
-          
+
           if(!isset($item['s_secret']) || $item['s_secret'] != $secret) {
             echo json_encode(array('success' => false));
             die();
           }
-        
+
           $nResources = ItemResource::newInstance()->countResources($id);
           $result = array('success' => $nResources < osc_max_images_per_item() , 'count' => $nResources);
           echo json_encode($result);
@@ -493,30 +580,29 @@ class CWebAjax extends BaseModel {
           $result = array('success' => true , 'count' => 0);
           echo json_encode($result);
         }
-        
+
         break;
-        
+
       case 'delete_ajax_upload':
         $files = Session::newInstance()->_get('ajax_files');
         $success = false;
         $filename = '';
-        
+
         if(isset($files[Params::getParam('qquuid')]) && $files[Params::getParam('qquuid')]!='') {
           $filename = $files[Params::getParam('qquuid')];
           unset($files[Params::getParam('qquuid')]);
           Session::newInstance()->_set('ajax_files', $files);
           $success = @unlink(osc_content_path().'uploads/temp/'.$filename);
         }
-        
+
         echo json_encode(array('success' => $success, 'uploadName' => $filename));
         break;
 
 
-
-      case 'upload_profile_img': 
+      case 'upload_profile_img':
         $user_id = osc_logged_user_id();
 
-        if($user_id > 0) { 
+        if($user_id > 0) {
           $user = osc_get_user_row($user_id);
 
           if($user['s_profile_img'] <> '') {
@@ -541,7 +627,7 @@ class CWebAjax extends BaseModel {
             echo htmlspecialchars(json_encode(array('error' => __('File is empty'))), ENT_NOQUOTES);
             exit;
           }
-          
+
           if($file_size > $max_file_size) {
             http_response_code(401);
             echo htmlspecialchars(json_encode(array('error' => __('File is too large'))), ENT_NOQUOTES);
@@ -553,7 +639,7 @@ class CWebAjax extends BaseModel {
             echo htmlspecialchars(json_encode(array('error' => __('File extension not allowed'))), ENT_NOQUOTES);
             exit;
           }
-          
+
           if($file['error'] != UPLOAD_ERR_OK) {
             http_response_code(401);
             echo htmlspecialchars(json_encode(array('error' => __('File upload error'))), ENT_NOQUOTES);
@@ -562,47 +648,47 @@ class CWebAjax extends BaseModel {
 
           // Validate that user refined image to required size
           list($img_width, $img_height) = getimagesize($file['tmp_name']);
-        
+
           $dim = osc_profile_img_dimensions();
           $dim = ($dim == '' ? '240x240' : $dim);
           $dim_ = explode('x', $dim);
 
           $def_width = (int)$dim_[0];
           $def_height = (int)$dim_[1];
-        
+
           if(($img_width > 0 && $def_width > 0 && $img_width > $def_width) || ($img_height > 0 && $def_height > 0 && $img_height > $def_height)) {
             http_response_code(401);
             echo htmlspecialchars(json_encode(array('error' => sprintf(__('Image dimension does not match. Refine/crop your image before uploading. Expected image dimension is %spx.'), $dim))), ENT_NOQUOTES);
             exit;
           }
-          
 
-          $image_name = osc_logged_user_id() . '_' . osc_generate_rand_string(5) . '_' . date('Ymd') . '.' . $extension; 
+
+          $image_name = osc_logged_user_id() . '_' . osc_generate_rand_string(5) . '_' . date('Ymd') . '.' . $extension;
           $image_url = osc_content_url() . 'uploads/user-images/' . $image_name;
           $image_path = osc_content_path() . 'uploads/user-images/' . $image_name;
-          
+
           $res = move_uploaded_file($file['tmp_name'], $image_path);
-          
+
           if(!$res) {
             http_response_code(401);
             echo htmlspecialchars(json_encode(array('error' => __('File could not be processed'))), ENT_NOQUOTES);
             exit;
           }
-          
+
           User::newInstance()->updateProfileImg(osc_logged_user_id(), $image_name);
-          
+
           echo htmlspecialchars(json_encode(array('success' => true, 'uploadName' => $image_name, 'uploadUrl' => $image_url)), ENT_NOQUOTES);
-          exit;          
+          exit;
         }
-        
+
         http_response_code(401);
         echo htmlspecialchars(json_encode(array('error' => __('You must be logged in'))), ENT_NOQUOTES);
         break;
 
-      case 'remove_profile_img': 
+      case 'remove_profile_img':
         $user_id = osc_logged_user_id();
 
-        if($user_id > 0) { 
+        if($user_id > 0) {
           $user = osc_get_user_row($user_id);
 
           if($user['s_profile_img'] <> '') {
@@ -616,12 +702,70 @@ class CWebAjax extends BaseModel {
 
         echo json_encode(array('error' => 0, 'message' => osc_user_profile_img_url($user_id)));
         break;
-        
-        
+
+
       case 'custom_hook':   // Custom code execution via hook
         osc_run_hook('ajax_custom');
         break;
-      
+
+      case 'item_stats':
+        osc_csrf_check();
+        $item_id = (int)Params::getParam('itemId');
+        $one = Params::getParam('measure');
+        $measures = ($one != '' ? array($one) : array());
+
+        $out = array('error' => 1, 'msg' => __('Invalid request'), 'values' => array());
+        $item = ($item_id > 0 ? osc_get_item_row($item_id) : false);
+        if(!$item || !osc_visitor_is_real_user() || osc_is_admin_user_logged_in()) {
+          echo json_encode($out);
+          exit;
+        }
+        if((int)$item['b_active'] != 1 || (int)$item['b_enabled'] != 1 || (int)$item['b_spam'] == 1) {
+          echo json_encode($out);
+          exit;
+        }
+        if(osc_is_web_user_logged_in() && (int)$item['fk_i_user_id'] == (int)osc_logged_user_id()) {
+          echo json_encode($out);
+          exit;
+        }
+
+        $values = array();
+        $ok = false;
+        foreach($measures as $measure) {
+          $key = osc_item_stats_normalize_key($measure);
+          if($key == '' || !osc_item_stats_enabled($key) || !osc_item_stats_ajax_allowed($key)) {
+            continue;
+          }
+          if(in_array($key, array('custom1', 'custom2', 'custom3'), true)) {
+            $col = osc_item_stats_column($key);
+            if($col == '' || osc_is_item_viewed_in_session($item_id, $col)) {
+              continue;
+            }
+          }
+          if($key == 'view_minutes') {
+            $sess = osc_session_seen_inc('view_minutes', $item_id, 120);
+            if($sess <= 0) {
+              continue;
+            }
+            if(osc_increase_item_stat('view_minutes', $item_id, 1)) {
+              $ok = true;
+              $values['view_minutes'] = $sess;
+            }
+            continue;
+          }
+          if(osc_increase_item_stat($key, $item_id, 1)) {
+            $ok = true;
+            $values[$key] = 1;
+          }
+        }
+
+        echo json_encode(array(
+          'error' => ($ok ? 0 : 1),
+          'msg' => ($ok ? '' : __('Could not update statistics')),
+          'values' => $values
+        ));
+        exit;
+
       default:
         echo json_encode(array('error' => __('no action defined')));
         break;

@@ -28,6 +28,7 @@ CREATE TABLE /*TABLE_PREFIX*/t_currency (
   pk_c_code CHAR(3) NOT NULL,
   s_name VARCHAR(40) NOT NULL,
   s_description VARCHAR(80) NULL,
+  d_exchange_rate DECIMAL(20,10) NULL DEFAULT 1.0000000000,
   b_enabled TINYINT(1) NOT NULL DEFAULT 1,
 
   PRIMARY KEY (pk_c_code),
@@ -112,11 +113,28 @@ CREATE TABLE /*TABLE_PREFIX*/t_city_area (
 CREATE TABLE /*TABLE_PREFIX*/t_widget (
   pk_i_id INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
   s_description VARCHAR(40) NOT NULL,
-  s_location VARCHAR(40) NOT NULL,
+  s_internal_name VARCHAR(50) NOT NULL,
+  s_location VARCHAR(64) NOT NULL,
   e_kind ENUM('TEXT', 'HTML') NOT NULL,
-  s_content MEDIUMTEXT NOT NULL,
+  s_code MEDIUMTEXT NULL,
+  s_device_visibility VARCHAR(10) NOT NULL DEFAULT 'all',
+  s_css TEXT NULL,
+  i_order INT(10) NOT NULL DEFAULT 0,
+  b_single_locale TINYINT(1) NOT NULL DEFAULT 0,
 
-  PRIMARY KEY (pk_i_id)
+  PRIMARY KEY (pk_i_id),
+  UNIQUE KEY uk_s_internal_name (s_internal_name),
+  INDEX idx_s_location (s_location, i_order)
+) ENGINE=InnoDB DEFAULT CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_unicode_ci';
+
+CREATE TABLE /*TABLE_PREFIX*/t_widget_description (
+  fk_i_widget_id INT(10) UNSIGNED NOT NULL,
+  fk_c_locale_code CHAR(5) NOT NULL,
+  s_content MEDIUMTEXT NULL,
+
+  PRIMARY KEY (fk_i_widget_id, fk_c_locale_code),
+  FOREIGN KEY (fk_i_widget_id) REFERENCES /*TABLE_PREFIX*/t_widget (pk_i_id),
+  FOREIGN KEY (fk_c_locale_code) REFERENCES /*TABLE_PREFIX*/t_locale (pk_c_code)
 ) ENGINE=InnoDB DEFAULT CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_unicode_ci';
 
 CREATE TABLE /*TABLE_PREFIX*/t_admin (
@@ -321,12 +339,31 @@ CREATE TABLE /*TABLE_PREFIX*/t_item_location (
 CREATE TABLE /*TABLE_PREFIX*/t_item_stats (
   fk_i_item_id INT(10) UNSIGNED NOT NULL,
   i_num_views INT(10) UNSIGNED NOT NULL DEFAULT 0,
-  i_num_spam INT(10) UNSIGNED NOT NULL DEFAULT 0,
-  i_num_repeated INT(10) UNSIGNED NOT NULL DEFAULT 0,
-  i_num_bad_classified INT(10) UNSIGNED NOT NULL DEFAULT 0,
-  i_num_offensive INT(10) UNSIGNED NOT NULL DEFAULT 0,
-  i_num_expired INT(10) UNSIGNED NOT NULL DEFAULT 0,
   i_num_premium_views INT(10) UNSIGNED NOT NULL DEFAULT 0,
+  i_num_views_engaged INT(10) UNSIGNED NOT NULL DEFAULT 0,
+  i_num_views_search INT(10) UNSIGNED NOT NULL DEFAULT 0,
+  i_num_views_logged INT(10) UNSIGNED NOT NULL DEFAULT 0,
+  i_num_views_home INT(10) UNSIGNED NOT NULL DEFAULT 0,
+  i_num_view_minutes INT(10) UNSIGNED NOT NULL DEFAULT 0,
+  i_num_phone_clicks INT(10) UNSIGNED NOT NULL DEFAULT 0,
+  i_num_contactother_clicks INT(10) UNSIGNED NOT NULL DEFAULT 0,
+  i_num_favorites INT(10) UNSIGNED NOT NULL DEFAULT 0,
+  i_num_contactforms INT(10) UNSIGNED NOT NULL DEFAULT 0,
+  i_num_contacts INT(10) UNSIGNED NOT NULL DEFAULT 0,
+  i_num_orders INT(10) UNSIGNED NOT NULL DEFAULT 0,
+  i_num_offers INT(10) UNSIGNED NOT NULL DEFAULT 0,
+  i_num_promotions INT(10) UNSIGNED NOT NULL DEFAULT 0,
+  i_num_reports INT(10) UNSIGNED NOT NULL DEFAULT 0,
+  i_num_tops INT(10) UNSIGNED NOT NULL DEFAULT 0,
+  i_num_renews INT(10) UNSIGNED NOT NULL DEFAULT 0,
+  i_num_repubs INT(10) UNSIGNED NOT NULL DEFAULT 0,
+  i_num_alerts_sent INT(10) UNSIGNED NOT NULL DEFAULT 0,
+  i_num_shares INT(10) UNSIGNED NOT NULL DEFAULT 0,
+  i_num_comments INT(10) UNSIGNED NOT NULL DEFAULT 0,
+  i_num_rated_comments INT(10) UNSIGNED NOT NULL DEFAULT 0,
+  i_num_custom1 INT(10) UNSIGNED NOT NULL DEFAULT 0,
+  i_num_custom2 INT(10) UNSIGNED NOT NULL DEFAULT 0,
+  i_num_custom3 INT(10) UNSIGNED NOT NULL DEFAULT 0,
   dt_date DATE NOT NULL,
 
   PRIMARY KEY (fk_i_item_id, dt_date),
@@ -368,6 +405,49 @@ CREATE TABLE /*TABLE_PREFIX*/t_item_comment (
   INDEX fk_i_item_id (fk_i_item_id),
   FOREIGN KEY (fk_i_item_id) REFERENCES /*TABLE_PREFIX*/t_item (pk_i_id),
   FOREIGN KEY (fk_i_user_id) REFERENCES /*TABLE_PREFIX*/t_user (pk_i_id)
+) ENGINE=InnoDB DEFAULT CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_unicode_ci';
+
+CREATE TABLE /*TABLE_PREFIX*/t_report (
+  pk_i_id INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  fk_i_reporter_user_id INT(10) UNSIGNED NOT NULL,
+  fk_i_user_id INT(10) UNSIGNED NULL,
+  fk_i_item_id INT(10) UNSIGNED NULL,
+  i_reported_id INT(10) UNSIGNED NULL,
+  fk_c_locale_code CHAR(5) NULL,
+  s_type VARCHAR(20) NOT NULL DEFAULT 'item',
+  s_reason VARCHAR(30) NULL,
+  s_status VARCHAR(30) NOT NULL DEFAULT 'submitted',
+  s_source VARCHAR(30) NOT NULL DEFAULT 'osclass',
+  s_comment VARCHAR(2000) NULL,
+  s_admin_comment VARCHAR(2000) NULL,
+  s_file VARCHAR(80) NULL,
+  b_open TINYINT(1) NOT NULL DEFAULT 1,
+  dt_status_date DATETIME NULL,
+  dt_update_date DATETIME NULL,
+  dt_create_date DATETIME NOT NULL,
+
+  PRIMARY KEY (pk_i_id),
+  INDEX idx_s_status (s_status),
+  INDEX idx_s_type (s_type),
+  INDEX idx_b_open (b_open),
+  INDEX idx_reporter_date (fk_i_reporter_user_id, dt_create_date),
+  INDEX fk_i_user_id (fk_i_user_id),
+  INDEX fk_i_item_id (fk_i_item_id)
+) ENGINE=InnoDB DEFAULT CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_unicode_ci';
+
+CREATE TABLE /*TABLE_PREFIX*/t_report_comment (
+  pk_i_id INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  fk_i_report_id INT(10) UNSIGNED NOT NULL,
+  fk_i_user_id INT(10) UNSIGNED NULL,
+  fk_i_admin_id INT(10) UNSIGNED NULL,
+  s_comment VARCHAR(2000) NOT NULL,
+  b_admin_seen TINYINT(1) NOT NULL DEFAULT 0,
+  dt_date DATETIME NOT NULL,
+
+  PRIMARY KEY (pk_i_id),
+  INDEX fk_i_report_id (fk_i_report_id),
+  INDEX fk_i_user_id (fk_i_user_id),
+  INDEX idx_b_admin_seen (b_admin_seen)
 ) ENGINE=InnoDB DEFAULT CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_unicode_ci';
 
 CREATE TABLE /*TABLE_PREFIX*/t_preference (
@@ -432,6 +512,7 @@ CREATE TABLE /*TABLE_PREFIX*/t_alerts (
   e_type enum('INSTANT','HOURLY','DAILY','WEEKLY','CUSTOM') NOT NULL,
   i_num_trigger INT(10) DEFAULT 0,
   dt_date DATETIME NULL,
+  dt_expire_date DATETIME NULL DEFAULT NULL,
   dt_unsub_date DATETIME NULL DEFAULT NULL,
 
   PRIMARY KEY (pk_i_id)

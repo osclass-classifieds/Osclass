@@ -43,7 +43,7 @@ class UserActions {
   public function add() {
     $error = array();
     $flash_error = '';
-    
+
     if((osc_recaptcha_enabled() && osc_recaptcha_private_key() != '') && !$this->is_admin && !osc_check_recaptcha()) {
       $flash_error .= _m('The reCAPTCHA was not entered correctly') . PHP_EOL;
       $error[] = 4;
@@ -55,7 +55,7 @@ class UserActions {
     }
 
     if(Params::getParam('s_password', false, false) != Params::getParam('s_password2', false, false)) {
-      $flash_error .= _m("Passwords don't match") . PHP_EOL;
+      $flash_error .= _m('The passwords do not match') . PHP_EOL;
       $error[] = 7;
     }
 
@@ -74,7 +74,7 @@ class UserActions {
     $email_taken = $this->manager->findByEmail($input['s_email']);
     if($email_taken != false) {
       osc_run_hook('register_email_taken', $input['s_email']);
-      $flash_error .= _m('The specified e-mail is already in use') . PHP_EOL;
+      $flash_error .= _m('This email is already in use') . PHP_EOL;
       $error[] = 3;
     }
 
@@ -114,17 +114,17 @@ class UserActions {
       if(osc_username_generator() == 'SLUG') {
         $generate_username = osc_sanitize_username($input['s_name']);
         $username_taken = $this->manager->findByUsername($generate_username);
-        
+
         if($username_taken != false) {
           $generate_username .= $userId;
-          
+
           $username_taken = $this->manager->findByUsername($generate_username);
-          
+
           if($username_taken != false) {
             $generate_username = $userId;
           }
         }
-        
+
         if(osc_is_username_blacklisted($generate_username)) {
           $generate_username = $userId;
         }
@@ -139,7 +139,7 @@ class UserActions {
       $pinfo = (osc_tinymce_users_enabled() == '1' ? Params::getParam('s_info', false, false) : Params::getParam('s_info'));   // update 420
       $pinfo = osc_apply_filter('user_update_description', $pinfo);
 
-      foreach ($pinfo as $key => $value) {
+      foreach($pinfo as $key => $value) {
         $this->manager->updateDescription($userId, $key, $value);
       }
     }
@@ -154,7 +154,7 @@ class UserActions {
     if(osc_user_validation_enabled() && !$this->is_admin) {
       osc_run_hook('hook_email_user_validation', $user, $input);
       $success = 1;
-      
+
     } else {
       $this->manager->update(array('b_active' => '1'), array('pk_i_id' => $userId));
 
@@ -165,6 +165,8 @@ class UserActions {
       }
       // update alerts user id with the same email
       Alerts::newInstance()->update(array('fk_i_user_id' => $userId), array('s_email' => $input['s_email']));
+      // link existing listing reports to this user
+      Report::newInstance()->assignOwnerByContactEmail($userId, $input['s_email']);
 
       $success = 2;
     }
@@ -190,7 +192,7 @@ class UserActions {
     if($this->is_admin) {
       $user_email = $this->manager->findByEmail($input['s_email']);
       if(isset($user_email['pk_i_id']) && $user_email['pk_i_id'] != $userId) {
-        $flash_error .= sprintf(_m('The specified e-mail is already used by %s'), $user_email['s_username']) . PHP_EOL;
+        $flash_error .= sprintf(_m('This email is already used by %s'), $user_email['s_username']) . PHP_EOL;
         $error[] = 3;
       }
     }
@@ -202,7 +204,7 @@ class UserActions {
 
     if($this->is_admin){
       if(Params::getParam('s_password', false, false) != Params::getParam('s_password2', false, false)) {
-        $flash_error .= _m("Passwords don't match") . PHP_EOL;
+        $flash_error .= _m('The passwords do not match') . PHP_EOL;
         $error[] = 7;
       }
     }
@@ -238,8 +240,8 @@ class UserActions {
 
     if(is_array(Params::getParam('s_info'))) {
       $pinfo = (osc_tinymce_users_enabled() == '1' ? Params::getParam('s_info', false, false) : Params::getParam('s_info'));   // update 420
-      
-      foreach ($pinfo as $key => $value) {
+
+      foreach($pinfo as $key => $value) {
         $this->manager->updateDescription($userId, $key, $value);
       }
     }
@@ -285,7 +287,7 @@ class UserActions {
 
     $code = osc_genRandomPassword(30);
     $date = date('Y-m-d H:i:s');
-    
+
     User::newInstance()->update(
       array('s_pass_code' => $code, 's_pass_date' => $date, 's_pass_ip' => osc_get_ip()),
       array('pk_i_id' => $user['pk_i_id'])
@@ -314,7 +316,7 @@ class UserActions {
       $input['s_access_ip'] = osc_get_ip(); //Params::getServerParam('REMOTE_ADDR');
     } else {
       $input['dt_mod_date'] = date('Y-m-d H:i:s');
-      
+
       if(Params::getParam('dt_reg_date') != '') {
         $input['dt_reg_date'] = Params::getParam('dt_reg_date');
       }
@@ -328,7 +330,7 @@ class UserActions {
       if(Params::getParam('s_password', false, false) != '') {
         $input['s_password'] = osc_hash_password(Params::getParam('s_password', false, false));
       }
-      
+
       $input['s_username'] = osc_sanitize_username(Params::getParam('s_username'));
     }
 
@@ -340,7 +342,7 @@ class UserActions {
     if(stripos($input['s_website'], 'http') !== 0) {
       $input['s_website'] = 'http://'.$input['s_website'];
     }
-    
+
     $input['s_website'] = osc_sanitize_url($input['s_website']);
 
     if(osc_validate_url($input['s_website']) === false) {   // url is not valid, update 321
@@ -353,7 +355,7 @@ class UserActions {
     if(!isset($country['pk_c_code'])) {
       $country = Country::newInstance()->findByName(Params::getParam('country'));
     }
-    
+
     if(isset($country['pk_c_code'])) {
       $countryId = $country['pk_c_code'];
       $countryName = $country['s_name'];
@@ -449,9 +451,11 @@ class UserActions {
     if($items_updated!==false && $items_updated>0) {
       User::newInstance()->update('i_items = i_items + '. (int)$items_updated, array('pk_i_id' => $user_id));
     }
-    
+
     // update alerts user id with the same email
     Alerts::newInstance()->update(array('fk_i_user_id' => $user_id), array('s_email' => $user['s_email']));
+    // link existing listing reports to this user
+    Report::newInstance()->assignOwnerByContactEmail($user_id, $user['s_email']);
 
     osc_run_hook('activate_user', $user);
 

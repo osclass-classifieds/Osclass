@@ -38,7 +38,7 @@ class CWebCustom extends BaseModel
       $routes = Rewrite::newInstance()->getRoutes();
       $rid = Params::getParam('route');
       $file = '../';
-      
+
       if(isset($routes[$rid]) && isset($routes[$rid]['file'])) {
         $file = $routes[$rid]['file'];
         $user_menu = $routes[$rid]['user_menu'];
@@ -50,7 +50,7 @@ class CWebCustom extends BaseModel
     }
 
     // valid file?
-    if( strpos($file, '../') !== false || strpos($file, '..\\') !==false || stripos($file, '/admin/') !== false ) { //If the file is inside an "admin" folder, it should NOT be opened in frontend
+    if(strpos($file, '../') !== false || strpos($file, '..\\') !==false || stripos($file, '/admin/') !== false ) { //If the file is inside an "admin" folder, it should NOT be opened in frontend
       $this->do404();
       return;
     }
@@ -64,16 +64,16 @@ class CWebCustom extends BaseModel
     osc_run_hook('custom_controller');
 
     $this->_exportVariableToView('file', $file);
-    
+
     if($user_menu) {
       if(osc_is_web_user_logged_in()) {
         Params::setParam('in_user_menu', true);
         $this->doView('user-custom.php');
-        
+
       } else {
         $this->redirectTo(osc_user_login_url());
       }
-      
+
     } else {
       $this->doView('custom.php');
     }

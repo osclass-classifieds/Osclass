@@ -32,12 +32,12 @@ function customHead(){
   foreach($perms as $k => $v) {
     @chmod($k, $v);
   }
-  if( $ok ) {
+  if($ok ) {
   ?>
     $(function() {
       var steps_div = document.getElementById('steps_div');
       steps_div.style.display = '';
-      var steps = document.getElementById('steps'); 
+      var steps = document.getElementById('steps');
       var version = <?php echo osc_version(); ?>;
       var fileToUnzip = '';
       steps.innerHTML += '<br/><strong class="one"><?php echo osc_esc_js(__('Checking for updates...')); ?></strong>';
@@ -74,10 +74,10 @@ function customHead(){
                     $('.load-div').hide(0);
                     steps.innerHTML += '<div class="one"><?php echo osc_esc_js( __('Upgrade has failed with following error:')); ?> <div class="upgr-errors">' + oscEscapeHTML(data.message) + '</div></div>';
                   }
-                } catch (e) {
+                } catch(e) {
                   steps.innerHTML += '<div class="one"><?php echo osc_esc_js( __('Upgrade has failed with following error:')); ?> <div class="upgr-errors">' + oscEscapeHTML(data) + '</div></div>';
                 }
-              }, 
+              },
               error: function(xhr, status){
                 console.log(status);
                 $('.load-div').hide(0);
@@ -115,7 +115,7 @@ osc_add_hook('help_box','addHelp');
 
 
 osc_add_hook('admin_page_header','customPageHeader');
-function customPageHeader() { 
+function customPageHeader() {
   ?>
   <h1><?php _e('Tools'); ?>
     <a href="#" class="btn ico ico-32 ico-help float-right"></a>
@@ -124,31 +124,38 @@ function customPageHeader() {
 }
 
 function customPageTitle($string) {
-  return sprintf(__('Upgrade - %s'), $string);
+  return sprintf(__('%s - %s'), __('Upgrade'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');
 
 
-osc_current_admin_theme_path( 'parts/header.php' ); 
+osc_current_admin_theme_path( 'parts/header.php' );
 ?>
 
 <div id="backup-setting">
   <!-- settings form -->
     <div id="backup-settings">
-      <h2 class="render-title"><?php _e('Upgrade'); ?></h2>
+      <h2 class="render-title"><?php _e('Upgrade'); ?>
+        <?php if(defined('OSC_DEBUG') && OSC_DEBUG) {
+          $rerun = (int)str_replace('.', '', OSCLASS_VERSION);
+          if($rerun > 800) { ?>
+            <a class="btn btn-mini float-right" href="<?php echo osc_admin_base_url(true); ?>?page=upgrade&amp;action=upgrade-funcs&amp;rerun=<?php echo $rerun; ?>" onclick="return confirm('<?php echo osc_esc_js(sprintf(__('Re-run the %s upgrade now?'), OSCLASS_VERSION)); ?>');"><?php echo sprintf(__('Rerun %s upgrade'), OSCLASS_VERSION); ?></a>
+        <?php }
+        } ?>
+      </h2>
       <form>
         <fieldset>
         <div class="form-horizontal">
         <div class="form-row">
           <div class="tools upgrade">
-          <?php if( $ok ) { ?>
+          <?php if($ok ) { ?>
             <p class="text">
               <?php echo sprintf(__('Your Osclass installation can be auto-upgraded. Please, back up your database and the folder "%s" before attempting to upgrade your Osclass installation. You can also upgrade Osclass manually, more information in the %s'), OC_CONTENT_FOLDER, '<a href="https://docs.osclass-classifieds.com/">Documentation</a>'); ?>.
             </p>
           <?php } else { ?>
             <p class="text">
-              <?php _e("Your Osclass installation can't be auto-upgraded. Files and folders need to be writable. You can apply write permissions via SSH with the command \"chmod -R a+w *\" (without quotes) or via an FTP client, it depends on the program so we can not provide more information. You can also upgrade Osclass by downloading the upgrade package, unzipping it and replacing the files on your server with the ones in the package."); ?>
+              <?php _e('Your Osclass installation cannot be auto-upgraded. Files and folders need to be writable. You can apply write permissions via SSH with the command "chmod -R a+w *" (without quotes) or via an FTP client, it depends on the program so we cannot provide more information. You can also upgrade Osclass by downloading the upgrade package, unzipping it and replacing the files on your server with the ones in the package.'); ?>
             </p>
           <?php } ?>
             <div id="steps_div">
@@ -164,4 +171,4 @@ osc_current_admin_theme_path( 'parts/header.php' );
   </div>
   <!-- /settings form -->
 </div>
-<?php osc_current_admin_theme_path( 'parts/footer.php' ); ?>
+<?php osc_current_admin_theme_path( 'parts/footer.php' );

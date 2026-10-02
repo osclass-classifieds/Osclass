@@ -28,7 +28,7 @@ function addHelp() {
 osc_add_hook('help_box','addHelp');
 
 
-function customPageHeader() { 
+function customPageHeader() {
   ?>
   <h1><?php _e('Settings'); ?>
     <a href="#" class="btn ico ico-32 ico-help float-right"></a>
@@ -40,12 +40,12 @@ osc_add_hook('admin_page_header','customPageHeader');
 
 
 function customPageTitle($string) {
-  return sprintf(__('Spam and bots - %s'), $string);
+  return sprintf(__('%s - %s'), __('Spam and bots'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');
 
-osc_current_admin_theme_path( 'parts/header.php' ); 
+osc_current_admin_theme_path( 'parts/header.php' );
 ?>
 
 <div id="spam-setting">
@@ -116,7 +116,7 @@ osc_current_admin_theme_path( 'parts/header.php' );
               </div>
             </div>
           </div>
-          
+
           <div class="form-row">
             <div class="form-label"><?php _e('Site Key'); ?></div>
             <div class="form-controls">
@@ -129,18 +129,18 @@ osc_current_admin_theme_path( 'parts/header.php' );
               <input type="password" class="input-large" size="60" name="recaptchaPrivKey" value="<?php echo (osc_recaptcha_private_key(true) ? osc_esc_html( osc_recaptcha_private_key(true) ) : ''); ?>" />
             </div>
           </div>
-          
+
           <?php if(osc_recaptcha_enabled() && osc_recaptcha_public_key() != '') { ?>
             <div class="form-row">
               <div class="form-label"><?php _e('ReCaptcha Validation'); ?></div>
               <div class="form-controls">
                 <?php osc_show_recaptcha(); ?>
-                
+
                 <span class="help-box"><?php _e('If you see the ReCaptcha form without error or warning, it means that you have correctly entered the API keys'); ?></span>
               </div>
             </div>
           <?php } ?>
-          
+
           <div class="form-actions">
             <input type="submit" id="submit_recaptcha" value="<?php echo osc_esc_html( __('Save changes') ); ?>" class="btn btn-submit" />
           </div>
@@ -149,4 +149,4 @@ osc_current_admin_theme_path( 'parts/header.php' );
     </form>
   </div>
 </div>
-<?php osc_current_admin_theme_path( 'parts/footer.php' ); ?>
+<?php osc_current_admin_theme_path( 'parts/footer.php' );

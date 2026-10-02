@@ -62,20 +62,20 @@ if($section=='plugins' || $section=='themes') { ?>
     <?php if($section=='plugins' || $section=='themes') { ?>
         <span class="wrapper_market_categories">
             <select id="market_categories">
-                <option value="<?php echo $categories['value'] ?>" <?php if(Params::getParam('sCategory')==$categories['value']) {echo 'selected="selected"'; }; ?>><?php echo $categories['label']; ?></option>
+                <option value="<?php echo $categories['value'] ?>" <?php if(Params::getParam('sCategory')==$categories['value']) {echo 'selected="selected"'; } ?>><?php echo $categories['label']; ?></option>
                 <?php foreach($categories['categories'] as $c) { ?>
-                    <option value="<?php echo $c['value'] ?>" <?php if(Params::getParam('sCategory')==$c['value']) {echo 'selected="selected"'; }; ?>>&nbsp;&nbsp;<?php echo $c['label']; ?></option>
-                <?php }; ?>
+                    <option value="<?php echo $c['value'] ?>" <?php if(Params::getParam('sCategory')==$c['value']) {echo 'selected="selected"'; } ?>>&nbsp;&nbsp;<?php echo $c['label']; ?></option>
+                <?php } ?>
             </select>
         </span>
-    <?php }; ?>
+    <?php } ?>
     </h2>
     <?php
 
     // if there are data to be shown
     if(isset($array[$section]) ) {
         if(isset($array['total']) && (int)$array['total']>0) {
-            foreach ($array[$section] as $item) {
+            foreach($array[$section] as $item) {
                 drawMarketItem($item, $colors[array_rand($colors)]);
             }
             echo '<div class="clear"></div><div class="has-pagination">' . $pagination . '</div>';
@@ -91,4 +91,4 @@ if($section=='plugins' || $section=='themes') { ?>
     </div>
     <?php } ?>
 </div>
-<?php osc_current_admin_theme_path( 'parts/footer.php' ); ?>
+<?php osc_current_admin_theme_path( 'parts/footer.php' );

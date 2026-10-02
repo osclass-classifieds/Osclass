@@ -26,7 +26,7 @@ class CAdminLogin extends AdminBaseModel
 
   //Business Layer...
   function doModel() {
-    switch( $this->action ) {
+    switch($this->action ) {
       case('login_post'):   //post execution for the login
         osc_csrf_check();
         osc_run_hook('before_login_admin');
@@ -38,7 +38,7 @@ class CAdminLogin extends AdminBaseModel
         if((defined('DEMO_PLUGINS') && DEMO_PLUGINS === true) || (defined('DEMO_THEMES') && DEMO_THEMES === true) || (defined('DEMO') && DEMO === true)) {
           $is_demo = true;
         }
-        
+
         if(preg_match('|[\?&]page=([^&]+)|', $url_redirect . '&', $match)) {
           $page_redirect = $match[1];
         }
@@ -47,12 +47,12 @@ class CAdminLogin extends AdminBaseModel
           $url_redirect = osc_admin_base_url();
         }
 
-        if( Params::getParam('user') == '' ) {
+        if(Params::getParam('user') == '' ) {
           osc_add_flash_error_message( _m('The username field is empty'), 'admin');
           $this->redirectTo( osc_admin_base_url(true)."?page=login" );
         }
 
-        if( Params::getParam('password', false, false) == '' ) {
+        if(Params::getParam('password', false, false) == '' ) {
           osc_add_flash_error_message( _m('The password field is empty'), 'admin');
           $this->redirectTo( osc_admin_base_url(true)."?page=login" );
         }
@@ -92,11 +92,11 @@ class CAdminLogin extends AdminBaseModel
         }
 
 
-        if( !$admin ) {
+        if(!$admin ) {
           osc_add_flash_error_message( sprintf(_m('Sorry, incorrect username. <a href="%s">Have you lost your password?</a>'), osc_admin_base_url(true) . '?page=login&amp;action=recover' ), 'admin');
           $this->redirectTo( osc_admin_base_url(true)."?page=login" );
         }
-        
+
         if($is_demo === true && $admin['s_username'] === 'demo') {
           // demo admin login without need to check password
         } else if(!osc_verify_password($password, $admin['s_password'])) {
@@ -104,9 +104,9 @@ class CAdminLogin extends AdminBaseModel
           osc_add_flash_error_message( sprintf(_m('Sorry, incorrect password. <a href="%s">Have you lost your password?</a>'), osc_admin_base_url(true) . '?page=login&amp;action=recover' ), 'admin');
           $this->redirectTo( osc_admin_base_url(true)."?page=login" );
         } else {
-          if (@$admin['s_password']!='') {
-            if (preg_match('|\$2y\$([0-9]{2})\$|', $admin['s_password'], $cost)) {
-              if ($cost[1] != BCRYPT_COST) {
+          if(@$admin['s_password']!='') {
+            if(preg_match('|\$2y\$([0-9]{2})\$|', $admin['s_password'], $cost)) {
+              if($cost[1] != BCRYPT_COST) {
                 Admin::newInstance()->update(array( 's_password' => osc_hash_password($password)), array( 'pk_i_id' => $admin['pk_i_id'] ) );
               }
             } else {
@@ -115,7 +115,7 @@ class CAdminLogin extends AdminBaseModel
           }
         }
 
-        if( Params::getParam('remember') ) {
+        if(Params::getParam('remember') ) {
           // disabled, otherwise you could not keep login from different devices
           // currently it only updates secret if it is blank
           if($admin['s_secret'] == '') {
@@ -124,7 +124,7 @@ class CAdminLogin extends AdminBaseModel
             Admin::newInstance()->update(array('s_secret' => $secret), array('pk_i_id' => $admin['pk_i_id']));
             $admin['s_secret'] = $secret;
           }
-          
+
           // Cookie::newInstance()->set_expires(osc_time_cookie());
           Cookie::newInstance()->push('oc_adminId', $admin['pk_i_id']);
           Cookie::newInstance()->push('oc_adminSecret', $admin['s_secret']);
@@ -153,8 +153,8 @@ class CAdminLogin extends AdminBaseModel
         break;
 
       case('recover_post'):
-        if( defined('DEMO') ) {
-          osc_add_flash_warning_message( _m("This action can't be done because it's a demo site"), 'admin');
+        if(defined('DEMO') ) {
+          osc_add_flash_warning_message( _m("This action cannot be done because it is a demo site"), 'admin');
           $this->redirectTo( osc_admin_base_url() );
         }
         osc_csrf_check();
@@ -164,10 +164,10 @@ class CAdminLogin extends AdminBaseModel
         if(!isset($admin['pk_i_id'])) {
           $admin = Admin::newInstance()->findByUsername(Params::getParam('email'));
         }
-        
-        if( isset($admin['pk_i_id']) ) {
+
+        if(isset($admin['pk_i_id']) ) {
           if(osc_recaptcha_enabled() && osc_recaptcha_private_key() != '') {
-            if( !osc_check_recaptcha() ) {
+            if(!osc_check_recaptcha() ) {
               osc_add_flash_error_message( _m('Recaptcha validation has failed'), 'admin');
               $this->redirectTo( osc_admin_base_url(true).'?page=login&action=recover' );
               return false; // BREAK THE PROCESS, THE RECAPTCHA IS WRONG
@@ -186,13 +186,13 @@ class CAdminLogin extends AdminBaseModel
           osc_run_hook('hook_email_user_forgot_password', $admin, $password_url);
         }
 
-        osc_add_flash_ok_message( _m('A new password has been sent to your e-mail'), 'admin');
+        osc_add_flash_ok_message( _m('A new password has been sent to your email'), 'admin');
         $this->redirectTo(osc_admin_base_url(true) . '?page=login');
         break;
 
       case('forgot'):     // form to recover the password (in this case we have the form in /gui/)
         $admin = Admin::newInstance()->findByIdSecret(Params::getParam('adminId'), Params::getParam('code'));
-        if( !$admin ) {
+        if(!$admin ) {
           osc_add_flash_error_message( _m('Sorry, the link is not valid'), 'admin');
           $this->redirectTo( osc_admin_base_url() );
         }
@@ -203,12 +203,12 @@ class CAdminLogin extends AdminBaseModel
       case('forgot_post'):
         osc_csrf_check();
         $admin = Admin::newInstance()->findByIdSecret(Params::getParam('adminId'), Params::getParam('code'));
-        if( !$admin ) {
+        if(!$admin ) {
           osc_add_flash_error_message( _m('Sorry, the link is not valid'), 'admin');
           $this->redirectTo( osc_admin_base_url() );
         }
 
-        if( Params::getParam('new_password', false, false) == Params::getParam('new_password2', false, false) ) {
+        if(Params::getParam('new_password', false, false) == Params::getParam('new_password2', false, false) ) {
           Admin::newInstance()->update(
             array('s_secret' => osc_genRandomPassword()
               , 's_password' => osc_hash_password(Params::getParam('new_password', false, false))
@@ -216,9 +216,9 @@ class CAdminLogin extends AdminBaseModel
           );
           osc_add_flash_ok_message( _m('The password has been changed'), 'admin');
           $this->redirectTo(osc_admin_base_url(true) . '?page=login');
-          
+
         } else {
-          osc_add_flash_error_message( _m("Error, the passwords don't match"), 'admin');
+          osc_add_flash_error_message( _m("The passwords do not match"), 'admin');
           $this->redirectTo(osc_forgot_admin_password_confirm_url(Params::getParam('adminId'), Params::getParam('code')));
         }
         break;

@@ -57,7 +57,7 @@ class Page extends DAO {
       'i_order',
       's_meta'
     );
-    
+
     $this->setFields($array_fields);
   }
 
@@ -86,22 +86,7 @@ class Page extends DAO {
 
     $row = $result->row();
 
-    // page_description
-    $this->dao->select();
-    $this->dao->from($this->getDescriptionTableName());
-    $this->dao->where('fk_i_pages_id', $id);
-    if (null !== $locale) {
-      $this->dao->where('fk_c_locale_code', $locale);
-    }
-    $result   = $this->dao->get();
-    $aRows = $result->result();
-
-    $row['locale'] = array();
-    foreach($aRows as $r) {
-      $row['locale'][$r['fk_c_locale_code']] = $r;
-    }
-
-    return $row;
+    return $this->extendDescription($row, $locale);
   }
 
   /**
@@ -145,12 +130,12 @@ class Page extends DAO {
   public function findByOrder($order, $locale = null) {
     $this->dao->select();
     $this->dao->from($this->getTableName());
-    
+
     $array_where = array(
       'i_order' => $order,
       'b_indelible' => 0
     );
-    
+
     $this->dao->where($array_where);
     $result = $this->dao->get();
 
@@ -187,33 +172,33 @@ class Page extends DAO {
     $key = md5(osc_base_url().'Page::listAll' . (string)$indelible . (string)$b_link . (string)$locale . (string)$start . (string)$limit . (string)$b_index . (string)osc_current_user_locale());
     $found = null;
     $cache = (OC_ADMIN ? false : osc_cache_get($key, $found));
-    
+
     if(OC_ADMIN || $cache_enabled === false || $cache === false) {
       $this->dao->select();
       $this->dao->from($this->getTableName());
-      
+
       if($indelible !== null) {
         $this->dao->where('b_indelible', $indelible);
       }
-      
+
       if($b_link !== null) {
         $this->dao->where('b_link', $b_link);
       }
-      
+
       if($b_index !== null) {
         $this->dao->where('b_index', $b_index);
       }
-      
+
       $this->dao->orderBy('i_order', 'ASC');
-      
+
       if($limit !== null) {
         $this->dao->limit($limit, $start);
       }
 
       osc_run_hook('static_pages_list_all', $this);
-      
+
       $result = $this->dao->get();
-      
+
       if($result) {
         $aPages = $result->result();
 
@@ -222,50 +207,50 @@ class Page extends DAO {
         }
 
         $resultPages = array();
-        
+
         foreach($aPages as $aPage) {
           if(!osc_is_backoffice()) {
             $visibility = (isset($aPage['i_visibility']) ? $aPage['i_visibility'] : 0);
-            
+
             if($visibility > 0) {
               $logged_user = osc_logged_user();
-              
+
               if($aPage['i_visibility'] == 1 && !osc_is_web_user_logged_in()) {
                 continue;
-              } else if ($aPage['i_visibility'] == 2 && (!osc_is_web_user_logged_in() || !isset($logged_user['b_company']) || $logged_user['b_company'] == 1)) {
+              } elseif($aPage['i_visibility'] == 2 && (!osc_is_web_user_logged_in() || !isset($logged_user['b_company']) || $logged_user['b_company'] == 1)) {
                 continue;
-              } else if ($aPage['i_visibility'] == 3 && (!osc_is_web_user_logged_in() || !isset($logged_user['b_company']) || $logged_user['b_company'] == 0)) {
+              } elseif($aPage['i_visibility'] == 3 && (!osc_is_web_user_logged_in() || !isset($logged_user['b_company']) || $logged_user['b_company'] == 0)) {
                 continue;
-              } else if ($aPage['i_visibility'] == 4 && !osc_is_admin_user_logged_in()) {
+              } elseif($aPage['i_visibility'] == 4 && !osc_is_admin_user_logged_in()) {
                 continue;
-              } else if ($aPage['i_visibility'] == 5) {
+              } elseif($aPage['i_visibility'] == 5) {
                 continue;
               }
             }
           }
-          
+
           $data = $this->extendDescription($aPage, $locale);
-          
+
           if(count($data) > 0) {
             $resultPages[] = $data;
           }
-          
+
           unset($data);
         }
 
         $output = $resultPages;
-        
+
       } else {
         $output = array();
       }
-      
+
       if(!OC_ADMIN && $cache_enabled === true) {
         osc_cache_set($key, $output, OSC_CACHE_TTL);
       }
-      
+
       return $output;
     }
-    
+
     return $cache;
   }
 
@@ -280,13 +265,13 @@ class Page extends DAO {
   public function count($indelible = null) {
     $this->dao->select('count(*) as total');
     $this->dao->from($this->getTableName());
-    
+
     if($indelible !== null) {
       $this->dao->where('b_indelible', $indelible);
     }
 
     $result = $this->dao->get();
-    
+
     if($result) {
       $aPages = $result->result();
       return $aPages[0]['total'];
@@ -309,17 +294,17 @@ class Page extends DAO {
     $this->dao->select();
     $this->dao->from($this->getDescriptionTableName());
     $this->dao->where('fk_i_pages_id', $aPage['pk_i_id']);
-    
-    if ($locale !== null) {
+
+    if($locale !== null) {
       $this->dao->where('fk_c_locale_code', $locale);
     }
-    
+
     $results = $this->dao->get();
-    
+
     if($results === false) {
-      return array(); 
+      return array();
     }
-    
+
     $aDescriptions = $results->result();
 
     if(count($aDescriptions) == 0) {
@@ -331,6 +316,29 @@ class Page extends DAO {
       if(!empty($description['s_title']) || !empty($description['s_text'])) {
         $aPage['locale'][$description['fk_c_locale_code']] = $description;
       }
+    }
+
+    if(OC_ADMIN) {
+      $prefLocale = osc_current_admin_locale();
+    } else {
+      $prefLocale = osc_current_user_locale();
+    }
+
+    if(isset($aPage['locale'][$prefLocale])) {
+      $aPage['s_title'] = $aPage['locale'][$prefLocale]['s_title'];
+      $aPage['s_text'] = $aPage['locale'][$prefLocale]['s_text'];
+    } else {
+      $data = current($aPage['locale']);
+
+      if($data !== false && is_array($data)) {
+        $aPage['s_title'] = $data['s_title'];
+        $aPage['s_text'] = $data['s_text'];
+      } else {
+        $aPage['s_title'] = '';
+        $aPage['s_text'] = '';
+      }
+
+      unset($data);
     }
 
     return $aPage;
@@ -380,7 +388,7 @@ class Page extends DAO {
   private function reOrderPages($order) {
     $aPages = $this->listAll(false);
     $arows = 0;
-    
+
     foreach($aPages as $page){
       if($page['i_order'] > $order){
         $new_order = $page['i_order']-1;
@@ -458,20 +466,23 @@ class Page extends DAO {
    * @return bool True if the insert has been done well and false if not.
    */
   public function insert($aFields, $aFieldsDescription = null) {
-    $this->dao->select('MAX(i_order) as o');
-    $this->dao->from($this->tableName);
-    $results = $this->dao->get();
-    $lastPage = $results->row();
-
-    $order = $lastPage['o'];
-    if (null === $order) {
-      $order = -1;
+    $order = 0;
+    if((int)$aFields['b_indelible'] === 0) {
+      $this->dao->select('MAX(i_order) as o');
+      $this->dao->from($this->tableName);
+      $this->dao->where('b_indelible', 0);
+      $results = $this->dao->get();
+      $lastPage = $results->row();
+      $order = (isset($lastPage['o']) ? (int)$lastPage['o'] : 0);
+      if($order < 0) {
+        $order = 0;
+      }
     }
 
     if(!isset($aFields['b_link'])) {
       $aFields['b_link'] = 0;
     }
-    
+
     if(!isset($aFields['i_visibility'])) {
       $aFields['i_visibility'] = 0;
     }
@@ -479,7 +490,7 @@ class Page extends DAO {
     if($aFields['b_indelible'] == 1) {
       $aFields['i_visibility'] = 0;
     }
-    
+
     if($aFields['b_link'] == '') {
       if($aFields['b_indelible'] == 1) {
         $aFields['b_link'] = 0;
@@ -591,7 +602,7 @@ class Page extends DAO {
   public function existDescription($conditions){
     $this->dao->select('COUNT(*) as total');
     $this->dao->from($this->getDescriptionTableName());
-    
+
     foreach($conditions as $key => $value) {
       $this->dao->where($key, $value);
     }
@@ -665,7 +676,7 @@ class Page extends DAO {
 
     return $this->dao->update($this->tableName, $fields, $where);
   }
-  
+
   /**
    * It change the meta field of a page.
    *
@@ -680,6 +691,192 @@ class Page extends DAO {
     $where = array('pk_i_id' => $id);
 
     return $this->dao->update($this->tableName, $fields, $where);
+  }
+
+  // Update publish date
+  public function updatePubDate($id, $pubDate) {
+    $pubDate = trim((string)$pubDate);
+    if($pubDate == '') {
+      return 0;
+    }
+
+    $time = strtotime($pubDate);
+    if($time === false) {
+      return 0;
+    }
+
+    $fields = array('dt_pub_date' => date('Y-m-d H:i:s', $time), 'dt_mod_date' => date('Y-m-d H:i:s'));
+    $where = array('pk_i_id' => $id);
+
+    return $this->dao->update($this->tableName, $fields, $where);
+  }
+
+  // Count static pages that use position ordering (b_indelible = 0, not email templates)
+  public function countPositionable() {
+    $this->dao->select('COUNT(*) as total');
+    $this->dao->from($this->tableName);
+    $this->dao->where('b_indelible', 0);
+    $result = $this->dao->get();
+
+    if($result) {
+      $row = $result->row();
+      return (int)$row['total'];
+    }
+
+    return 0;
+  }
+
+  // Highest valid position for orderable static pages (= count when sequence is normalized)
+  public function getMaxPositionableOrder() {
+    $count = $this->countPositionable();
+    return ($count > 0 ? $count : 1);
+  }
+
+  // Next position when adding a new orderable static page
+  public function getNextPositionableOrder() {
+    return max(1, $this->countPositionable() + 1);
+  }
+
+  // List id/position pairs for orderable static pages only
+  public function listOrderRows() {
+    $this->dao->select('pk_i_id, i_order');
+    $this->dao->from($this->tableName);
+    $this->dao->where('b_indelible', 0);
+    $this->dao->orderBy('i_order', 'ASC');
+    $this->dao->orderBy('pk_i_id', 'ASC');
+    $result = $this->dao->get();
+
+    if($result) {
+      return $result->result();
+    }
+
+    return array();
+  }
+
+  // Persist position values for orderable pages only
+  private function savePageOrders($items) {
+    if(!is_array($items) || count($items) == 0) {
+      return 0;
+    }
+
+    require_once osc_lib_path() . 'osclass/classes/PositionOrder.php';
+
+    $items = PositionOrder::normalize($items, 'pk_i_id', 'i_order', 1);
+    $rows = 0;
+    $modDate = date('Y-m-d H:i:s');
+
+    foreach($items as $item) {
+      $pos = (int)$item['i_order'];
+      if($pos < 1) {
+        $pos = 1;
+      }
+
+      $rows += (int)$this->dao->update(
+        $this->tableName,
+        array('i_order' => $pos, 'dt_mod_date' => $modDate),
+        array('pk_i_id' => (int)$item['pk_i_id'], 'b_indelible' => 0)
+      );
+    }
+
+    return $rows;
+  }
+
+  // Move page position up/down and normalize sequence (orderable pages only)
+  public function moveOrder($id, $direction) {
+    $id = (int)$id;
+    if($id <= 0 || ($direction !== 'up' && $direction !== 'down')) {
+      return false;
+    }
+
+    $page = $this->findByPrimaryKey($id);
+    if(empty($page) || (int)$page['b_indelible'] !== 0) {
+      return false;
+    }
+
+    require_once osc_lib_path() . 'osclass/classes/PositionOrder.php';
+
+    $items = $this->listOrderRows();
+    if(count($items) == 0) {
+      return false;
+    }
+
+    $before = json_encode($items);
+    $items = PositionOrder::move($items, $id, $direction, 'pk_i_id', 'i_order', 1);
+    if($before === json_encode($items)) {
+      return false;
+    }
+
+    $this->savePageOrders($items);
+
+    return true;
+  }
+
+  // Re-sequence orderable page positions to 1..n (fixes gaps like 1,2,3,64 -> 1,2,3,4)
+  public function normalizeOrders() {
+    $items = $this->listOrderRows();
+    if(count($items) == 0) {
+      return 0;
+    }
+
+    return $this->savePageOrders($items);
+  }
+
+  // Set position for one orderable static page and re-sequence neighbors
+  public function setOrder($id, $position) {
+    $id = (int)$id;
+    $position = (int)$position;
+    if($id <= 0 || $position < 1) {
+      return false;
+    }
+
+    $page = $this->findByPrimaryKey($id);
+    if(empty($page) || (int)$page['b_indelible'] !== 0) {
+      return false;
+    }
+
+    $items = $this->listOrderRows();
+    if(count($items) == 0) {
+      return false;
+    }
+
+    require_once osc_lib_path() . 'osclass/classes/PositionOrder.php';
+
+    $items = PositionOrder::normalize($items, 'pk_i_id', 'i_order', 1);
+    $max = count($items);
+    if($position > $max) {
+      $position = $max;
+    }
+
+    $currentIndex = -1;
+    foreach($items as $i => $item) {
+      if((int)$item['pk_i_id'] === $id) {
+        $currentIndex = $i;
+        break;
+      }
+    }
+
+    if($currentIndex < 0) {
+      return false;
+    }
+
+    if((int)$items[$currentIndex]['i_order'] === $position) {
+      return true;
+    }
+
+    $row = $items[$currentIndex];
+    unset($items[$currentIndex]);
+    $items = array_values($items);
+    array_splice($items, $position - 1, 0, array($row));
+
+    $pos = 1;
+    foreach($items as $i => $item) {
+      $items[$i]['i_order'] = $pos;
+      $pos++;
+    }
+
+    $this->savePageOrders($items);
+
+    return true;
   }
 
   /**
@@ -721,8 +918,8 @@ class Page extends DAO {
   public function getDescriptionTableName() {
     return $this->getTablePrefix() . 't_pages_description';
   }
-  
-  
+
+
   // Delete duplicated templates (by internal name)
   /*
   public function deleteDuplicatedEmailTemplates() {
@@ -731,7 +928,7 @@ class Page extends DAO {
 
     $res1 = $this->dao->query($query1);
     $res2 = $this->dao->query($query2);
-    
+
     return $res2;
   }
   */
@@ -746,7 +943,7 @@ class Page extends DAO {
     $this->dao->orderBy('s_internal_name ASC, pk_i_id DESC');
 
     $results = $this->dao->get();
-    
+
     if($results == false) {
       return array();
     }
@@ -754,16 +951,16 @@ class Page extends DAO {
     if($results->numRows() == 0) {
       return array();
     }
-    
+
     return $results->result();
   }
 
-  
+
   // Smart delete for duplicated email templates
   public function deleteDuplicatedInternalNames() {
     $data = $this->getDuplicatedInternalNames();
     $ok_data = array();
-    
+
     if(is_array($data) && count($data) > 0) {
       // Identify OK pages
       foreach($data as $i => $row) {
@@ -773,7 +970,7 @@ class Page extends DAO {
           }
         }
       }
-      
+
       // Remove other pages
       foreach($data as $i => $row) {
         if(!in_array($row['pk_i_id'], $ok_data)) {

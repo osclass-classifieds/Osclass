@@ -49,27 +49,27 @@ class CAdminSettingsBreadcrumbs extends AdminSecBaseModel
         $hideCustom = implode(',', array_filter(array_unique(array_map('trim', explode(',', $hideCustom)))));
 
         $params = Params::getParamsAsArray();
-        
+
         $hide_list = array();
         if(count($params) > 0) {
           foreach($params as $name => $value) {
             $key = explode('-', $name);
-            
+
             if(isset($key[0]) && $key[0] == 'bchide') {
               if($value == 'on' || $value == '1') {
                 $location = trim(isset($key[1]) ? $key[1] : '');
                 $section = trim(isset($key[2]) ? $key[2] : '');
-                
+
                 $loc_sec = $location . '-' . $section;
                 $hide_list[] = $loc_sec;
               }
             }
           }
         }
-        
+
         $hide_list = array_filter(array_unique($hide_list));
         $hide_string = implode(',', $hide_list);
-     
+
         $iUpdated += osc_set_preference('breadcrumbs_item_country', $itemCountry);
         $iUpdated += osc_set_preference('breadcrumbs_item_region', $itemRegion);
         $iUpdated += osc_set_preference('breadcrumbs_item_city', $itemCity);
@@ -80,11 +80,11 @@ class CAdminSettingsBreadcrumbs extends AdminSecBaseModel
         $iUpdated += osc_set_preference('breadcrumbs_hide_custom', $hideCustom);
 
         if($iUpdated > 0) {
-          osc_add_flash_ok_message( _m("Breadcrumbs settings have been updated"), 'admin');
+          osc_add_flash_ok_message( _m("Settings have been updated"), 'admin');
         } else {
-          osc_add_flash_ok_message( _m("No changes has been done"), 'admin');
+          osc_add_flash_ok_message( _m("No changes were made"), 'admin');
         }
-        
+
         $this->redirectTo(osc_admin_base_url(true) . '?page=settings&action=breadcrumbs');
       break;
     }

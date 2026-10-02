@@ -36,11 +36,11 @@ class CAdminMedia extends AdminSecBaseModel {
     switch($this->action) {
       case('bulk_actions'):
         osc_csrf_check();
-        
-        switch ( Params::getParam('bulk_actions') ) {
+
+        switch(Params::getParam('bulk_actions') ) {
           case 'delete':
             $ids = Params::getParam("id");
-            if( is_array($ids) ) {
+            if(is_array($ids) ) {
               foreach($ids as $id) {
                 osc_deleteResource( $id , true);
               }
@@ -48,9 +48,9 @@ class CAdminMedia extends AdminSecBaseModel {
               Log::newInstance()->insertLog('media', 'delete bulk', $log_ids, $log_ids, 'admin', osc_logged_admin_id());
               $this->resourcesManager->deleteResourcesIds($ids);
             }
-            osc_add_flash_ok_message( _m('Resource deleted'), 'admin');
+            osc_add_flash_ok_message( _m('The media file has been deleted'), 'admin');
             break;
-            
+
           default:
             if(Params::getParam("bulk_actions")!="") {
               osc_run_hook("media_bulk_".Params::getParam("bulk_actions"), Params::getParam('id'));
@@ -64,49 +64,84 @@ class CAdminMedia extends AdminSecBaseModel {
       case('delete'):
         osc_csrf_check();
         $ids = Params::getParam('id');
-        if( is_array($ids) ) {
+        if(is_array($ids) ) {
           foreach($ids as $id) {
             osc_deleteResource( $id , true);
           }
-          
+
           $log_ids = substr(implode(",",$ids),0, 250);
           Log::newInstance()->insertLog('media', 'delete', $log_ids, $log_ids, 'admin', osc_logged_admin_id());
           $this->resourcesManager->deleteResourcesIds($ids);
         }
-        
-        osc_add_flash_ok_message( _m('Resource deleted'), 'admin' );
+
+        osc_add_flash_ok_message( _m('The media file has been deleted'), 'admin' );
         $this->redirectTo( osc_admin_base_url(true) . '?page=media' );
+        break;
+
+      case('delete_item_media'):
+        osc_csrf_check();
+        $itemId = (int)Params::getParam('itemId');
+        $deleted = 0;
+
+        if($itemId > 0) {
+          $resources = $this->resourcesManager->getAllResourcesFromItem($itemId);
+          $ids = array();
+
+          if(is_array($resources) && count($resources) > 0) {
+            foreach($resources as $resource) {
+              if(isset($resource['pk_i_id']) && (int)$resource['pk_i_id'] > 0) {
+                $id = (int)$resource['pk_i_id'];
+                $ids[] = $id;
+                osc_deleteResource($id, true);
+              }
+            }
+
+            if(count($ids) > 0) {
+              $this->resourcesManager->deleteResourcesIds($ids);
+              $deleted = count($ids);
+              Log::newInstance()->insertLog('media', 'delete item media', $itemId, implode(',', $ids), 'admin', osc_logged_admin_id());
+            }
+          }
+        }
+
+        if($deleted > 0) {
+          osc_add_flash_ok_message(sprintf(_m('%d media files deleted'), $deleted), 'admin');
+        } else {
+          osc_add_flash_warning_message(_m('No media files found for selected item'), 'admin');
+        }
+
+        $this->redirectTo(osc_admin_base_url(true) . '?page=media');
         break;
 
       default:
         require_once osc_lib_path()."osclass/classes/datatables/MediaDataTable.php";
 
         // set default iDisplayLength
-        if( Params::getParam('iDisplayLength') != '' ) {
+        if(Params::getParam('iDisplayLength') != '' ) {
           Cookie::newInstance()->push('listing_iDisplayLength', Params::getParam('iDisplayLength'));
           Cookie::newInstance()->set();
         } else {
           // set a default value if it's set in the cookie
-          if( Cookie::newInstance()->get_value('listing_iDisplayLength') != '' ) {
+          if(Cookie::newInstance()->get_value('listing_iDisplayLength') != '' ) {
             Params::setParam('iDisplayLength', Cookie::newInstance()->get_value('listing_iDisplayLength'));
           } else {
             Params::setParam('iDisplayLength', 25 );
           }
         }
-        
+
         $this->_exportVariableToView('iDisplayLength', Params::getParam('iDisplayLength'));
 
         // Table header order by related
-        if( Params::getParam('sort') == '') {
-          Params::setParam('sort', 'date');
+        if(Params::getParam('sort') == '') {
+          Params::setParam('sort', 'id');
         }
-        
-        if( Params::getParam('direction') == '') {
+
+        if(Params::getParam('direction') == '') {
           Params::setParam('direction', 'desc');
         }
 
         $page  = (int)Params::getParam('iPage');
-        if($page==0) { $page = 1; };
+        if($page==0) { $page = 1; }
         Params::setParam('iPage', $page);
 
         $params = Params::getParamsAsArray();
@@ -140,7 +175,7 @@ class CAdminMedia extends AdminSecBaseModel {
           array('value' => '', 'data-dialog-content' => '', 'label' => __('Bulk actions')),
           array('value' => 'delete', 'data-dialog-content' => sprintf(__('Are you sure you want to %s the selected media files?'), strtolower(__('Delete'))), 'label' => __('Delete'))
         );
-        
+
         $bulk_options = osc_apply_filter("media_bulk_filter", $bulk_options);
         $this->_exportVariableToView('bulk_options', $bulk_options);
 

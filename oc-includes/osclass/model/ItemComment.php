@@ -73,7 +73,7 @@ class ItemComment extends DAO {
       'fk_i_user_id',
       'fk_i_reply_id'
    );
-    
+
     $this->setFields($array_fields);
   }
 
@@ -93,7 +93,7 @@ class ItemComment extends DAO {
     if(!is_numeric($id) || $id == null || $id <= 0) {
       return false;
     }
-    
+
     $this->dao->select('c.*, h.i_reply_count');
     $this->dao->from($this->getTableName().' c');
     $this->dao->join('(SELECT count(pk_i_id) as i_reply_count FROM ' . DB_TABLE_PREFIX.'t_item_comment WHERE fk_i_reply_id = ' . $id . ') h', '1=1', 'INNER');
@@ -111,13 +111,13 @@ class ItemComment extends DAO {
 
     $comment = $result->row();
 
-    if ($comment !== null) {
+    if($comment !== null) {
       return $comment;
     }
-    
+
     return false;
   }
-  
+
   /**
    * Searches for comments information, given an item id.
    *
@@ -153,10 +153,10 @@ class ItemComment extends DAO {
    */
   public function findByItemID($id, $page = null, $commentsPerPage = null) {
     $result = array();
-    if($page == null) { 
+    if($page == null) {
       $page = osc_item_comments_page();
     }
-    
+
     if($page == '') {
       $page = 0;
     }
@@ -169,7 +169,7 @@ class ItemComment extends DAO {
     $this->dao->from($this->getTableName());
     $conditions = array('fk_i_item_id' => $id, 'b_active' => 1, 'b_enabled' => 1);
     $this->dao->where($conditions);
-    
+
     if(osc_enable_comment_reply()) {
       $this->dao->where('fk_i_reply_id is null');
     }
@@ -186,21 +186,21 @@ class ItemComment extends DAO {
 
     $data = $result->result();
     $output = array();
-    
+
     if(osc_enable_comment_reply()) {
       if(is_array($data) && count($data) > 0) {
         foreach($data as $d) {
           $replies = $this->findByReplyId($d['pk_i_id']);
           $d['replies'] = $replies;
           $d['i_reply_count'] = (is_array($replies) ? count($replies) : 0);
-          
+
           $output[] = $d;
         }
       }
-      
+
       return $output;
     }
-    
+
     return $data;
   }
 
@@ -230,11 +230,11 @@ class ItemComment extends DAO {
     $this->dao->select('count(pk_i_id) as total');
     $this->dao->from($this->getTableName());
     $conditions = array('fk_i_item_id' => $id, 'b_active' => 1, 'b_enabled' => 1);
-    
+
     if(osc_enable_comment_reply()) {
       $this->dao->where('fk_i_reply_id is null');
     }
-    
+
     $this->dao->where($conditions);
     $this->dao->groupBy('fk_i_item_id');
     $result = $this->dao->get();
@@ -248,8 +248,8 @@ class ItemComment extends DAO {
       return $total['total'];
     }
   }
-  
-  
+
+
   /**
    * Return average rating, given an item id. (active & enabled)
    *
@@ -295,13 +295,13 @@ class ItemComment extends DAO {
     $conditions = array('fk_i_item_id' => $item_id);
     $this->dao->where($conditions);
     $this->dao->where('i_rating is not null');
-    
+
     if($user_id > 0) {
       $this->dao->where('fk_i_user_id', $user_id);
     } else {
       $this->dao->where('s_author_email', $user_email);
     }
-    
+
     $result = $this->dao->get();
 
     if($result == false) {
@@ -350,7 +350,7 @@ class ItemComment extends DAO {
     $this->dao->from($this->getTableName());
     $conditions = array('fk_i_reply_id' => $id, 'b_active' => 1, 'b_enabled' => 1);
     $this->dao->where($conditions);
-    
+
     $this->dao->orderBy('dt_pub_date', 'ASC');
 
     $result = $this->dao->get();
@@ -361,7 +361,7 @@ class ItemComment extends DAO {
 
     return $result->result();
   }
-  
+
   /**
    * Searches for comments information, given an user id.
    *
@@ -376,18 +376,18 @@ class ItemComment extends DAO {
     $this->dao->from(DB_TABLE_PREFIX.'t_item i');
 
     $conditions = array('i.pk_i_id' => $itemId, 'c.fk_i_item_id' => $itemId);
-    if ($itemId === NULL) {
+    if($itemId === NULL) {
       $conditions = 'c.fk_i_item_id = i.pk_i_id';
     }
 
     $this->dao->where($conditions);
     $this->dao->orderBy('c.dt_pub_date','DESC');
     $aux = $this->dao->get();
-    
+
     if($aux == false) {
       return array();
     }
-    
+
     $comments = $aux->result();
 
     return $this->extendData($comments);
@@ -404,7 +404,7 @@ class ItemComment extends DAO {
    * @return array|bool
    */
   public function getLastComments($num) {
-    if (!(int) $num) {
+    if(!(int) $num) {
       return false;
     }
 
@@ -421,7 +421,7 @@ class ItemComment extends DAO {
     if($result == false) {
       return array();
     }
-    
+
     return $result->result();
   }
 
@@ -480,7 +480,7 @@ class ItemComment extends DAO {
    *    which not display at frontend
    * @return array
    */
-  public function search($itemId = null, $start = 0, $limit = 10, $order_by = 'c.pk_i_id', $order = 'DESC', $all = true, $replyId = null) {
+  public function search($itemId = null, $start = 0, $limit = 10, $order_by = 'c.pk_i_id', $order = 'DESC', $all = true, $replyId = null, $keyword = '', $userId = null) {
     $this->dao->select('c.*, r.s_title as reply_title, h.i_reply_count');
     $this->dao->from($this->getTableName().' c');
     $this->dao->join(DB_TABLE_PREFIX.'t_item i', 'i.pk_i_id = c.fk_i_item_id');
@@ -488,7 +488,7 @@ class ItemComment extends DAO {
     $this->dao->join('(SELECT fk_i_reply_id, count(pk_i_id) as i_reply_count FROM ' . DB_TABLE_PREFIX.'t_item_comment WHERE fk_i_reply_id IS NOT NULL GROUP BY fk_i_reply_id) h', 'h.fk_i_reply_id = c.pk_i_id', 'LEFT OUTER');
 
     $conditions = array('i.pk_i_id' => $itemId, 'c.fk_i_item_id' => $itemId);
-    if ($itemId === null) {
+    if($itemId === null) {
       $conditions = 'c.fk_i_item_id = i.pk_i_id';
     }
 
@@ -497,17 +497,29 @@ class ItemComment extends DAO {
     if($replyId !== null) {
       $this->dao->where('c.fk_i_reply_id', $replyId);
     }
-    
+
+    if($userId !== null) {
+      $this->dao->where('c.fk_i_user_id', $userId);
+    }
+
     if(!$all) {
       $auxCond = '(c.b_enabled = 0 OR c.b_active = 0 OR c.b_spam = 1)';
       $this->dao->where($auxCond);
+    }
+
+    if(trim((string)$keyword) != '') {
+      $kw = $this->dao->escapeStr(str_replace('*', '%', $keyword));
+      if(strpos($kw, '%') === false) {
+        $kw = '%' . $kw . '%';
+      }
+      $this->dao->where("(CAST(c.pk_i_id AS CHAR) LIKE '" . $kw . "' OR c.s_title LIKE '" . $kw . "' OR c.s_body LIKE '" . $kw . "' OR c.s_author_name LIKE '" . $kw . "' OR c.s_author_email LIKE '" . $kw . "' OR CAST(c.fk_i_item_id AS CHAR) LIKE '" . $kw . "')");
     }
 
     $this->dao->orderBy($order_by, $order);
     $this->dao->limit($start, $limit);
 
     $aux = $this->dao->get();
-    
+
     if($aux == false) {
       return array();
     }
@@ -521,27 +533,43 @@ class ItemComment extends DAO {
    *
    * @return array|int
    */
-  public function count($itemId = null, $replyId = null) {
+  public function count($itemId = null, $replyId = null, $all = true, $keyword = '', $userId = null) {
     $this->dao->select('COUNT(*) AS numrows');
     $this->dao->from($this->getTableName().' c');
     $this->dao->from(DB_TABLE_PREFIX.'t_item i');
 
     $conditions = array('i.pk_i_id' => $itemId, 'c.fk_i_item_id' => $itemId);
-    if ($itemId === null) {
+    if($itemId === null) {
       $conditions = 'c.fk_i_item_id = i.pk_i_id';
     }
-    
-    if ($replyId !== null) {
+
+    if($replyId !== null) {
       $this->dao->where('c.fk_i_reply_id', $replyId);
+    }
+
+    if($userId !== null) {
+      $this->dao->where('c.fk_i_user_id', $userId);
+    }
+
+    if(!$all) {
+      $this->dao->where('(c.b_enabled = 0 OR c.b_active = 0 OR c.b_spam = 1)');
+    }
+
+    if(trim((string)$keyword) != '') {
+      $kw = $this->dao->escapeStr(str_replace('*', '%', $keyword));
+      if(strpos($kw, '%') === false) {
+        $kw = '%' . $kw . '%';
+      }
+      $this->dao->where("(CAST(c.pk_i_id AS CHAR) LIKE '" . $kw . "' OR c.s_title LIKE '" . $kw . "' OR c.s_body LIKE '" . $kw . "' OR c.s_author_name LIKE '" . $kw . "' OR c.s_author_email LIKE '" . $kw . "' OR CAST(c.fk_i_item_id AS CHAR) LIKE '" . $kw . "')");
     }
 
     $this->dao->where($conditions);
     $aux = $this->dao->get();
-    
+
     if($aux == false) {
       return array();
     }
-    
+
     $row = $aux->row();
     return $row['numrows'];
   }
@@ -557,10 +585,10 @@ class ItemComment extends DAO {
     $this->dao->from(DB_TABLE_PREFIX.'t_item i');
 
     $this->dao->where('c.fk_i_item_id = i.pk_i_id');
-    if ($aConditions !== null) {
+    if($aConditions !== null) {
       $this->dao->where($aConditions);
     }
-    
+
     $result = $this->dao->get();
 
     if($result == false) {

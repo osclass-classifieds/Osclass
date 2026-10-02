@@ -51,7 +51,7 @@ class View {
   public function _set($key, $value = '') {
     $this->_exportVariableToView($key, $value);
   }
-  
+
   //to get the exported variables for the view
 
   /**
@@ -72,7 +72,7 @@ class View {
   public function _all() {
     return $this->aExported;
   }
-  
+
   //only for debug
   /**
    * @param null $key
@@ -143,7 +143,7 @@ class View {
       $this->_reset($key);
       for($k = 0;$k<=$position;$k++) {
         $res = $this->_next($key);
-        
+
         if(!$res) {
           return false;
         }

@@ -63,4 +63,4 @@ if(Params::getParam('ShowAs') == 'gallery'){
     <?php echo osc_pagination_items(array(), Params::getParam('itemType')); ?>
   </div>
 <?php } ?>
-<?php osc_current_web_theme_path('footer.php') ; ?>
+<?php osc_current_web_theme_path('footer.php') ;

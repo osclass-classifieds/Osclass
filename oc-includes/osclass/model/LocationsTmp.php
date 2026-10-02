@@ -47,7 +47,7 @@ class LocationsTmp extends DAO
   */
   public static function newInstance()
   {
-    if (!self::$instance instanceof self) {
+    if(!self::$instance instanceof self) {
       self::$instance = new self;
     }
     return self::$instance;
@@ -72,10 +72,12 @@ class LocationsTmp extends DAO
   {
     $this->dao->select();
     $this->dao->from($this->getTableName());
+    $this->dao->orderBy("FIELD(e_type, 'COUNTRY', 'REGION', 'CITY')", 'ASC');
+    $this->dao->orderBy('id_location', 'ASC');
     $this->dao->limit($max);
     $rs = $this->dao->get();
 
-    if ($rs === false) {
+    if($rs === false) {
       return array();
     }
     return $rs->result();
@@ -99,7 +101,7 @@ class LocationsTmp extends DAO
    */
   public function batchInsert($ids, $type)
   {
-    if (!empty($ids)) {
+    if(!empty($ids)) {
       return $this->dao->query(sprintf("INSERT INTO %s (id_location, e_type) VALUES (%s, '%s')", $this->getTableName(), implode(",'".$type."'),(", $ids), $type));
     }
     return false;

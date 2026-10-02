@@ -130,7 +130,7 @@ class User extends DAO {
     if($id <= 0) {
       return array();
     }
-    
+
     $this->dao->select();
     $this->dao->from($this->getTableName());
     $this->dao->where($this->getPrimaryKey(), $id);
@@ -159,7 +159,7 @@ class User extends DAO {
    * @return array|bool
    */
   public function findByEmail($email, $locale = null) {
-    if(trim((string)$email) == '') { return array(); }    
+    if(trim((string)$email) == '') { return array(); }
     $this->dao->select();
     $this->dao->from($this->getTableName());
     $this->dao->where('s_email', $email);
@@ -213,7 +213,7 @@ class User extends DAO {
 */
   public function findByCredentials($email, $password, $locale = null) {
     $user = $this->findByEmail($email);
-    if (isset($user['s_password']) && osc_verify_password($password , $user['s_password'])) {
+    if(isset($user['s_password']) && osc_verify_password($password , $user['s_password'])) {
       return $this->extendData($user , $locale);
     }
     return array ();
@@ -296,7 +296,7 @@ class User extends DAO {
     $this->dao->select();
     $this->dao->from(DB_TABLE_PREFIX.'t_user_description');
     $this->dao->where('fk_i_user_id', $user['pk_i_id']);
-    if (null !== $locale) {
+    if(null !== $locale) {
       $this->dao->where('fk_c_locale_code', $locale);
     }
     $result = $this->dao->get();
@@ -343,13 +343,13 @@ class User extends DAO {
       if($user['s_profile_img'] <> '') {
         @unlink(osc_content_path() . 'uploads/user-images/' . $user['s_profile_img']);
       }
-      
+
       $this->dao->delete(DB_TABLE_PREFIX.'t_user_email_tmp', array('fk_i_user_id' => $id));
       $this->dao->delete(DB_TABLE_PREFIX.'t_user_description', array('fk_i_user_id' => $id));
       $this->dao->delete(DB_TABLE_PREFIX.'t_alerts', array('fk_i_user_id' => $id));
       $deleted = $this->dao->delete($this->getTableName(), array('pk_i_id' => $id));
-      
-       
+
+
       if($deleted===1) {
         osc_run_hook('after_delete_user', $id);
         return true;
@@ -416,7 +416,7 @@ class User extends DAO {
     if($date == '') {
       $date = date('Y-m-d H:i:s');
     }
-    
+
     if($login_fails_count <= 0) {
       $date = null;
     }
@@ -436,7 +436,7 @@ class User extends DAO {
   public function updateProfileImg($user_id, $img = '') {
     return $this->dao->update($this->getTableName(), array('s_profile_img' => $img), array('pk_i_id' => $user_id));
   }
-  
+
   /**
    * Update user default locale code
    *
@@ -535,13 +535,42 @@ class User extends DAO {
     $users['total_results'] = 0;
     $users['users']     = array();
 
+    $allowed_sort = array(
+      'pk_i_id',
+      's_email',
+      'COALESCE(s_email, \'\')',
+      's_username',
+      'COALESCE(s_username, \'\')',
+      's_name',
+      'COALESCE(s_name, \'\')',
+      'i_items',
+      'COALESCE(i_items, 0)',
+      'dt_mod_date',
+      'dt_reg_date',
+      'dt_access_date',
+      'COALESCE(dt_mod_date, dt_reg_date)',
+      'COALESCE(s_phone_mobile, s_phone_land)'
+    );
+    if(!in_array($order_column, $allowed_sort)) {
+      $order_column = 'pk_i_id';
+    }
+
+    $order_direction = strtoupper($order_direction);
+    if(!in_array($order_direction, array('ASC', 'DESC'))) {
+      $order_direction = 'DESC';
+    }
+
     $this->dao->select('SQL_CALC_FOUND_ROWS *');
     $this->dao->from($this->getTableName());
     $this->dao->orderBy($order_column, $order_direction);
     $this->dao->limit($start, $end);
 
     foreach($fields as $k => $v) {
-      $this->dao->where($k, $v);
+      if($v === null) {
+        $this->dao->where($k);
+      } else {
+        $this->dao->where($k, $v);
+      }
     }
 
     $rs = $this->dao->get();
@@ -646,7 +675,7 @@ class User extends DAO {
     $sql = sprintf('UPDATE %s SET i_items = i_items - 1 WHERE pk_i_id = %d', $this->getTableName(), $id);
     return $this->dao->query($sql);
   }
-  
+
   /**
    * Refresh number of items on each user records
    *
@@ -659,7 +688,7 @@ class User extends DAO {
     $sql = sprintf('UPDATE %s as u SET u.i_items = (SELECT count(*) FROM %s as i WHERE i.fk_i_user_id = u.pk_i_id AND i.b_enabled = 1 AND i.b_spam = 0 AND i.b_active = 1 AND (i.b_premium = 1 || i.dt_expiration >= "%s")) WHERE u.b_active = 1', $this->getTableName(), DB_TABLE_PREFIX . 't_item', date('Y-m-d H:i:s'));
     return $this->dao->query($sql);
   }
-  
+
   /**
    * Refresh number of comments on each user records
    *
@@ -683,7 +712,7 @@ class User extends DAO {
     $key = md5(osc_base_url().'listUsersLimit'.(string)$order.(string)$limit.(string)$min_items.(string)$active.(string)$real_username.(string)$custom_condition);
     $found = null;
     $cache = osc_cache_get($key, $found);
-    
+
     if($cache===false) {
       $this->dao->select('pk_i_id, s_name, s_username, i_items');
       $this->dao->from($this->getTableName());
@@ -692,11 +721,11 @@ class User extends DAO {
         $this->dao->where('b_active', 1);
         $this->dao->where('b_enabled', 1);
       }
-      
+
       if($real_username === true) {
         $this->dao->where('s_username <> pk_i_id');
       }
-      
+
       if($min_items > 0) {
         $this->dao->where('i_items >= ' . $min_items);
       }
@@ -704,11 +733,11 @@ class User extends DAO {
       if($limit > 0) {
         $this->dao->limit($limit);
       }
-      
+
       if(trim((string)$custom_condition) != '') {
         $this->dao->where($custom_condition);
       }
-      
+
       $this->dao->orderBy($order);
 
       $rs = $this->dao->get();
@@ -719,7 +748,7 @@ class User extends DAO {
 
       $return = $rs->result();
       $output = array();
-      
+
       if(count($return) > 0 && osc_get_current_user_locations_native() == 1) {
         foreach($return as $r) {
           $row = $r;
@@ -736,7 +765,7 @@ class User extends DAO {
       } else {
         $output = $return;
       }
-      
+
       osc_cache_set($key, $output, OSC_CACHE_TTL);
       return $output;
     } else {
@@ -772,7 +801,7 @@ class User extends DAO {
     if(isset($data['s_name']) && $data['s_name'] != '') {
       return $data['s_name'];
     }
-    
+
     return false;
   }
 

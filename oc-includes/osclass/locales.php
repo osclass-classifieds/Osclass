@@ -26,9 +26,9 @@ function osc_listLocales() {
   foreach($codes as $code) {
     $path = sprintf('%s%s/index.php', osc_translations_path(), $code);
     $fxName = sprintf('locale_%s_info', $code);
-    if (file_exists($path)) {
+    if(file_exists($path)) {
       require_once $path;
-      if (function_exists($fxName)) {
+      if(function_exists($fxName)) {
         $languages[$code]     = $fxName();
         $languages[$code]['code'] = $code;
       }
@@ -70,7 +70,7 @@ function osc_checkLocales($loop_all = false) {
         'b_enabled' => 0,
         'b_enabled_bo' => 1
       );
-      
+
       $result = OSCLocale::newInstance()->insert($values);
 
       // Unsuccessful
@@ -84,14 +84,14 @@ function osc_checkLocales($loop_all = false) {
 
       // inserting e-mail translations
       $path = sprintf('%s%s/mail.sql', osc_translations_path(), $locale['code']);
-      
-      if (file_exists($path)) {
+
+      if(file_exists($path)) {
         $sql = file_get_contents($path);
         $conn = DBConnectionClass::newInstance();
         $c_db = $conn->getOsclassDb();
         $comm = new DBCommandClass($c_db);
         $result = $comm->importSQL($sql);
-        
+
         // Unsuccessful
         if(!$result) {
           if($loop_all === true) {
@@ -120,13 +120,13 @@ function osc_checkLocales($loop_all = false) {
 function osc_listLanguageCodes() {
   $codes = array();
   $dir = opendir(osc_translations_path());
-  
-  while ($file = readdir($dir)) {
-    if (preg_match('/^[a-z_]+$/i', $file)) {
+
+  while($file = readdir($dir)) {
+    if(preg_match('/^[a-z_]+$/i', $file)) {
       $codes[] = $file;
     }
   }
-  
+
   closedir($dir);
 
   return $codes;

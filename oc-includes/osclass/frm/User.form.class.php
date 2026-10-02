@@ -24,14 +24,14 @@ class UserForm extends Form {
   }
 
   static public function name_text($user = null) {
-    if( Session::newInstance()->_getForm('user_s_name') != '' ) {
+    if(Session::newInstance()->_getForm('user_s_name') != '' ) {
       $user['s_name'] = Session::newInstance()->_getForm('user_s_name');
     }
     parent::generic_input_text("s_name", isset($user['s_name'])? $user['s_name'] : '', null, false);
   }
 
   static public function username_text($user = null) {
-    if( Session::newInstance()->_getForm('user_s_username') != '' ) {
+    if(Session::newInstance()->_getForm('user_s_username') != '' ) {
       $user['s_username'] = Session::newInstance()->_getForm('user_s_username');
     }
     parent::generic_input_text("s_username", isset($user['s_username'])? $user['s_username'] : '', null, false);
@@ -62,7 +62,7 @@ class UserForm extends Form {
   }
 
   static public function email_text($user = null) {
-    if( Session::newInstance()->_getForm('user_s_email') != '' ) {
+    if(Session::newInstance()->_getForm('user_s_email') != '' ) {
       $user['s_email'] = Session::newInstance()->_getForm('user_s_email');
     }
     parent::generic_input_text("s_email", isset($user['s_email'])? $user['s_email'] : '', null, false);
@@ -77,14 +77,14 @@ class UserForm extends Form {
   }
 
   static public function mobile_text($user = null) {
-    if( Session::newInstance()->_getForm('user_s_phone_mobile') != '' ) {
+    if(Session::newInstance()->_getForm('user_s_phone_mobile') != '' ) {
       $user['s_phone_mobile'] = Session::newInstance()->_getForm('user_s_phone_mobile');
     }
     parent::generic_input_text("s_phone_mobile", isset($user['s_phone_mobile'])? $user['s_phone_mobile'] : '', null, false);
   }
 
   static public function phone_land_text($user = null) {
-    if( Session::newInstance()->_getForm('user_s_phone_land') != '' ) {
+    if(Session::newInstance()->_getForm('user_s_phone_land') != '' ) {
       $user['s_phone_land'] = Session::newInstance()->_getForm('user_s_phone_land');
     }
     parent::generic_input_text("s_phone_land", isset($user['s_phone_land'])? $user['s_phone_land'] : '', null, false);
@@ -98,20 +98,20 @@ class UserForm extends Form {
     $num_locales = count($locales);
     if($num_locales > 1) { echo '<div class="tabber">'; }
     foreach($locales as $locale) {
-      if($num_locales>1) { echo '<div class="tabbertab">'; };
+      if($num_locales>1) { echo '<div class="tabbertab">'; }
         if($num_locales > 1) { echo '<h2>' . $locale['s_name'] . '</h2>'; }
         $info = '';
-        if( is_array($user) ) {
-          if( isset($user['locale'][$locale['pk_c_code']])) {
+        if(is_array($user) ) {
+          if(isset($user['locale'][$locale['pk_c_code']])) {
             if(isset($user['locale'][$locale['pk_c_code']]['s_info'])) {
               $info = $user['locale'][$locale['pk_c_code']]['s_info'];
             }
           }
         }
         self::info_textarea('s_info', $locale['pk_c_code'], $info);
-      if($num_locales>1) { echo '</div>'; };
+      if($num_locales>1) { echo '</div>'; }
     }
-    if($num_locales>1) { echo '</div>'; };
+    if($num_locales>1) { echo '</div>'; }
   }
 
   static public function country_select($countries, $user = null) {
@@ -181,7 +181,7 @@ class UserForm extends Form {
     <script type="text/javascript">
     $(document).ready(function(){
       <?php osc_run_hook('user_form_validation_top'); ?>
-      
+
       // Code for form validation
       $("form[name=register]").validate({
         rules: {
@@ -200,26 +200,28 @@ class UserForm extends Form {
             required: true,
             minlength: 5,
             equalTo: "#s_password"
-          }
+          },
+
           <?php osc_run_hook('user_form_validation_rules'); ?>
         },
         messages: {
           s_name: {
-            required: "<?php _e("Name: this field is required"); ?>."
+            required: "<?php echo sprintf(__('%s is required'), __('Name')); ?>."
           },
           s_email: {
-            required: "<?php _e("Email: this field is required"); ?>.",
-            email: "<?php _e("Invalid email address"); ?>."
+            required: "<?php echo sprintf(__('%s is required'), __('Email')); ?>.",
+            email: "<?php _e("The email is not valid"); ?>."
           },
           s_password: {
-            required: "<?php _e("Password: this field is required"); ?>.",
+            required: "<?php echo sprintf(__('%s is required'), __('Password')); ?>.",
             minlength: "<?php _e("Password: enter at least 5 characters"); ?>."
           },
           s_password2: {
-            required: "<?php _e("Second password: this field is required"); ?>.",
+            required: "<?php echo sprintf(__('%s is required'), __('Second password')); ?>.",
             minlength: "<?php _e("Second password: enter at least 5 characters"); ?>.",
-            equalTo: "<?php _e("Passwords don't match"); ?>."
-          }
+            equalTo: "<?php _e('The passwords do not match'); ?>."
+          },
+
           <?php osc_run_hook('user_form_validation_messages'); ?>
         },
         <?php osc_run_hook('user_form_validation_attributes'); ?>
@@ -263,23 +265,23 @@ class UserForm extends Form {
 
     function checkForm() {
       var num_errors = 0;
-      if( $('#s_name').val() == '' ) {
+      if($('#s_name').val() == '' ) {
         $('#s_name').css('border', '1px solid red');
         num_errors = num_errors + 1;
       }
-      if( $('#s_email').val() == '' ) {
+      if($('#s_email').val() == '' ) {
         $('#s_email').css('border', '1px solid red');
         num_errors = num_errors + 1;
       }
-      if( $('#s_password').val() != $('#s_password2').val() ) {
+      if($('#s_password').val() != $('#s_password2').val() ) {
         $('#password-error').css('display', 'block');
         num_errors = num_errors + 1;
       }
-      if( $('#s_password').val() == '' ) {
+      if($('#s_password').val() == '' ) {
         $('#s_password').css('border', '1px solid red');
         num_errors = num_errors + 1;
       }
-      if( $('#s_password2').val() == '' ) {
+      if($('#s_password2').val() == '' ) {
         $('#s_password2').css('border', '1px solid red');
         num_errors = num_errors + 1;
       }
@@ -299,7 +301,7 @@ class UserForm extends Form {
     <script type="text/javascript">
     $(document).ready(function(){
       <?php osc_run_hook('user_form_validation_top'); ?>
-      
+
       // Code for form validation
       $("form[name=register]").validate({
         rules: {
@@ -316,24 +318,26 @@ class UserForm extends Form {
           s_password2: {
             minlength: 5,
             equalTo: "#s_password"
-          }
+          },
+
           <?php osc_run_hook('user_form_validation_rules'); ?>
         },
         messages: {
           s_name: {
-            required: "<?php _e("Name: this field is required"); ?>."
+            required: "<?php echo sprintf(__('%s is required'), __('Name')); ?>."
           },
           s_email: {
-            required: "<?php _e("Email: this field is required"); ?>.",
-            email: "<?php _e("Invalid email address"); ?>."
+            required: "<?php echo sprintf(__('%s is required'), __('Email')); ?>.",
+            email: "<?php _e("The email is not valid"); ?>."
           },
           s_password: {
             minlength: "<?php _e("Password: enter at least 5 characters"); ?>."
           },
           s_password2: {
             minlength: "<?php _e("Second password: enter at least 5 characters"); ?>.",
-            equalTo: "<?php _e("Passwords don't match"); ?>."
-          }
+            equalTo: "<?php _e('The passwords do not match'); ?>."
+          },
+
           <?php osc_run_hook('user_form_validation_messages'); ?>
         },
         <?php osc_run_hook('user_form_validation_attributes'); ?>
@@ -342,7 +346,7 @@ class UserForm extends Form {
         invalidHandler: function(form, validator) {
           $('html,body').animate({ scrollTop: $('h1').offset().top }, { duration: 250, easing: 'swing'});
         },
-        
+
         submitHandler: function(form){
           $('button[type=submit], input[type=submit]').attr('disabled', 'disabled');
           form.submit();
@@ -359,7 +363,7 @@ class UserForm extends Form {
   ?>
   <script type="text/javascript">
     var current_user_location_native = '<?php echo osc_get_current_user_locations_native(); ?>';
-    
+
     $(document).ready(function(){
       $('body').on('change', '#countryId', function(){
         var pk_c_code = $(this).val();
@@ -374,7 +378,7 @@ class UserForm extends Form {
         if(pk_c_code != '') {
           $("#regionId").attr('disabled', false);
           $("#cityId").attr('disabled', true);
-          
+
           $.ajax({
             type: "POST",
             url: url,
@@ -384,14 +388,14 @@ class UserForm extends Form {
                 result += '<option value=""><?php _e("Select a region..."); ?></option>';
                 for(key in data) {
                   var name = data[key].s_name;
-                  
+
                   if(current_user_location_native == '1' && data[key].s_name_native != '') {
                     name = data[key].s_name_native;
                   }
-                  
+
                   result += '<option value="' + data[key].pk_i_id + '">' + name + '</option>';
                 }
-                
+
                 $("#region").before('<select name="regionId" id="regionId" ></select>');
                 $("#region").remove();
 
@@ -406,7 +410,7 @@ class UserForm extends Form {
                 $("#cityId").before('<input type="text" name="city" id="city"/>');
                 $("#cityId").remove();
               }
-              
+
               $("#regionId").html(result);
               $("#cityId").html('<option selected value=""><?php _e("Select a city..."); ?></option>');
             }
@@ -422,15 +426,15 @@ class UserForm extends Form {
 
           if($("#regionId").length > 0 ){
              $("#regionId").html('<option value=""><?php _e("Select a region..."); ?></option>');
-             
+
           } else {
              $("#region").before('<select name="regionId" id="regionId" ><option value=""><?php _e("Select a region..."); ?></option></select>');
              $("#region").remove();
           }
-           
+
           if($("#cityId").length > 0){
              $("#cityId").html('<option value=""><?php _e("Select a city..."); ?></option>');
-             
+
           } else {
              $("#city").before('<select name="cityId" id="cityId" ><option value=""><?php _e("Select a city..."); ?></option></select>');
              $("#city").remove();
@@ -455,40 +459,40 @@ class UserForm extends Form {
 
         if(pk_c_code != '') {
           $("#cityId").attr('disabled', false);
-          
+
           $.ajax({
             type: "POST",
             url: url,
             dataType: 'json',
             success: function(data){
               var length = data.length;
-              
+
               if(length > 0) {
                 result += '<option selected value=""><?php _e("Select a city..."); ?></option>';
-                
+
                 for(key in data) {
                   var name = data[key].s_name;
-                  
+
                   if(current_user_location_native == '1' && data[key].s_name_native != '') {
                     name = data[key].s_name_native;
                   }
-                  
+
                   result += '<option value="' + data[key].pk_i_id + '">' + name + '</option>';
                 }
-                
+
                 $("#city").before('<select name="cityId" id="cityId"></select>');
                 $("#city").remove();
-                
+
               } else {
                 result += '<option value=""><?php _e('No results'); ?></option>';
                 $("#cityId").before('<input type="text" name="city" id="city" />');
                 $("#cityId").remove();
               }
-              
+
               $("#cityId").html(result);
             }
           });
-           
+
         } else {
           $("#cityId").attr('disabled',true);
         }
@@ -519,7 +523,7 @@ class UserForm extends Form {
       } else if(osc_profile_picture_library() == 'UPPY') {
         osc_enqueue_script('uppy');
         osc_enqueue_style('uppy', osc_assets_url('css/uppy.min.css'));
-      } 
+      }
     }
   }
 
@@ -530,11 +534,11 @@ class UserForm extends Form {
     <?php if(osc_profile_picture_library() == 'UPPY') { ?>
       <?php
         $is_debug = false;
-        
+
         if(defined('OSC_DEBUG') && OSC_DEBUG === true) {
           $is_debug = true;
         }
-      
+
         $dim = osc_profile_img_dimensions();
 
         if($dim == '') {
@@ -548,7 +552,7 @@ class UserForm extends Form {
         $aspect = round($def_width/$def_height, 2);
 
         $aExt = explode(',', osc_allowed_extension());
-        
+
         foreach($aExt as $key => $val) {
           $aExt[$key] = "'image/" . $val . "'";
         }
@@ -559,7 +563,7 @@ class UserForm extends Form {
         $note_extensions = '.' . implode(', .', explode(',', osc_allowed_extension()));
         $note_message = sprintf(__('Allowed image extensions: %s. Max. image size: %skb.'), $note_extensions, osc_max_size_kb());
       ?>
-      
+
       <a href="#" class="btn btn-primary start-image-upload"><?php _e('Upload new picture'); ?></a>
       <a href="#" class="btn btn-secondary btn-next remove-profile-picture"><?php _e('Remove'); ?></a>
 
@@ -569,21 +573,21 @@ class UserForm extends Form {
       .img-preview {overflow:hidden;width:180px!important;height:<?php echo 180*(1/$aspect); ?>px!important;background:#ddd;display:flex;}
       .img-preview img {max-width:100%;max-height:100%;width:auto;height:auto;margin:auto;}
       </style>
-      
+
       <?php osc_image_uploader_js_locale('UPPY'); ?>
 
       <script type="text/javascript">
-        const uppy = new Uppy.Uppy({ 
+        const uppy = new Uppy.Uppy({
           locale: osLocale,
           autoProceed: false,
           restrictions: {
-            maxFileSize: <?php echo $images_size_limit; ?>,   
-            maxTotalFileSize: <?php echo $images_size_limit; ?>,   
+            maxFileSize: <?php echo $images_size_limit; ?>,
+            maxTotalFileSize: <?php echo $images_size_limit; ?>,
             maxNumberOfFiles: 1,
             allowedFileTypes: [<?php echo $allowed_extensions; ?>]
           },
- 
-        }).use(Uppy.Dashboard, { 
+
+        }).use(Uppy.Dashboard, {
           inline: false,
           trigger: '.start-image-upload',
           showProgressDetails: true,
@@ -592,8 +596,8 @@ class UserForm extends Form {
           singleFileFullScreen: true,
           closeAfterFinish: true,
           autoOpenFileEditor: true
-          
-        }).use(Uppy.ImageEditor, { 
+
+        }).use(Uppy.ImageEditor, {
           target: Uppy.Dashboard,
           actions: {
             cropWidescreen: false,
@@ -608,9 +612,9 @@ class UserForm extends Form {
               height: <?php echo $def_height; ?>,
               imageSmoothingEnabled: true,
               imageSmoothingQuality: 'high'
-            } 
+            }
           }
-          
+
         }).use(Uppy.XHRUpload, {
           endpoint: '<?php echo osc_base_url(true) . '?page=ajax&action=upload_profile_img'; ?>',
           method: 'post',
@@ -621,15 +625,15 @@ class UserForm extends Form {
             console.log('[getResponseError] ' + JSON.parse(responseText).error);
             return new Error(JSON.parse(responseText).error);
           }
-          
-        }).use(Uppy.Webcam, { 
+
+        }).use(Uppy.Webcam, {
           target: Uppy.Dashboard,
           modes: ['picture'],
           countdown: 3
-          
+
         }).use(Uppy.Compressor, {
           quality: 0.8
-          
+
         }).on('upload-success', (file, response) => {
           $('.img-preview img').attr('src', response.uploadURL);
 
@@ -638,7 +642,7 @@ class UserForm extends Form {
         }).on('complete', (result) => {
           uppy.cancelAll();
         });
-        
+
 
         // Remove profile picture
         $('.btn.remove-profile-picture').on('click', function(e) {
@@ -656,7 +660,7 @@ class UserForm extends Form {
               }
             }
           });
-        });  
+        });
       </script>
     <?php } else { ?>
       <?php
@@ -690,8 +694,8 @@ class UserForm extends Form {
       </style>
 
 
-      <input type="file" name="image" class="upload-image" style="display:none;" accept=".jpg,.jpeg,.png,.gif"/>  
-      <input type="hidden" name="pp_blob"/>  
+      <input type="file" name="image" class="upload-image" style="display:none;" accept=".jpg,.jpeg,.png,.gif"/>
+      <input type="hidden" name="pp_blob"/>
 
       <div class="pp-uploader" style="display:none;">
         <div class="img-container">
@@ -721,7 +725,7 @@ class UserForm extends Form {
         //$('input.upload-image').change(function(event){
         $('body').on('change', 'input.upload-image', function(event){
           var fileExtension = ['jpeg', 'jpg', 'png', 'gif'];
-          if ($.inArray($(this).val().split('.').pop().toLowerCase(), fileExtension) == -1) {
+          if($.inArray($(this).val().split('.').pop().toLowerCase(), fileExtension) == -1) {
             alert('<?php echo osc_esc_js(__('Only formats are allowed')); ?>: '+fileExtension.join(', '));
             return false;
           }
@@ -730,7 +734,7 @@ class UserForm extends Form {
             cropper = new Cropper(image, {
               aspectRatio: <?php echo $aspect; ?>,
               viewMode: 2,
-              preview:'.img-preview' 
+              preview:'.img-preview'
             });
           }
 
@@ -742,8 +746,8 @@ class UserForm extends Form {
             $('.pp-uploader').show(0);
             $('.start-image-upload, .remove-profile-picture').hide(0);
 
-            cropper.replace(image.src);   
-            $('.img-preview img').attr('src', image.src);   
+            cropper.replace(image.src);
+            $('.img-preview img').attr('src', image.src);
           };
 
           if(files && files.length > 0) {
@@ -751,7 +755,7 @@ class UserForm extends Form {
             reader.onload = function(event) {
             done(reader.result);
             };
-            
+
             reader.readAsDataURL(files[0]);
           }
         });
@@ -765,7 +769,7 @@ class UserForm extends Form {
           e.preventDefault();
           $('input.upload-image').val('');
           $('.start-image-upload, .remove-profile-picture').show(0);
-          $('.pp-uploader').hide(0); 
+          $('.pp-uploader').hide(0);
           cropper.destroy();
           cropper = null;
 
@@ -820,86 +824,91 @@ class UserForm extends Form {
               }
             }
           });
-        });  
+        });
       });
       </script>
       <?php
     }
   }
-  
-  
+
+
   /*
     USER ITEMS SEARCH SELECTS/INPUTS
   */
 
   // Pattern search
   static public function search_pattern_text($params = null) {
-    $selected = ((isset($params['sPattern'])) ? $params['sPattern'] : Params::getParam('sPattern'));
+    $selected = ((isset($params['sPattern'])) ? $params['sPattern'] : Params::getParam('sPattern', false, false));
+    if(is_array($selected)) {
+      $selected = '';
+    }
+    $selected = html_entity_decode(trim((string)$selected), ENT_QUOTES, 'UTF-8');
+    $selected = preg_replace('/<\/?[a-zA-Z][^>]*>/', '', $selected);
 
     parent::generic_input_text('sPattern', $selected, null, false, false, -1, 'text', __('ie. iPhone'));
   }
-  
-  
+
+
   // Category search - only categories where user has items
   static public function search_category_select($user_id = null, $params = null, $categories = null) {
     $user_id = osc_resolve_user_id($user_id);
     $selected = ((isset($params['sCategory'])) ? $params['sCategory'] : Params::getParam('sCategory'));
-    
+
     if($categories === NULL) {
       $categories = osc_get_user_item_categories($user_id);
     }
-    
+
     if(!is_array($categories)) {
       $categories = array();
     }
 
     parent::generic_select('sCategory', $categories, 'pk_i_id', 's_name', __('All categories'), $selected);
   }
-  
-  
+
+
   // Country search - only countries where user has items
   static public function search_country_select($user_id = null, $params = null, $countries = null) {
     $user_id = osc_resolve_user_id($user_id);
     $selected = ((isset($params['sCountry'])) ? $params['sCountry'] : Params::getParam('sCountry'));
-    
+
     if($countries === NULL) {
       $countries = osc_get_user_item_countries($user_id);
     }
-    
+
     if(!is_array($countries)) {
       $countries = array();
     }
 
     parent::generic_select('sCountry', $countries, 'pk_c_code', 's_name', __('All countries'), $selected);
   }
-  
-  
+
+
   // Region search - only regions where user has items
   static public function search_region_select($user_id = null, $params = null, $regions = null) {
     $user_id = osc_resolve_user_id($user_id);
     $selected = ((isset($params['sRegion'])) ? $params['sRegion'] : Params::getParam('sRegion'));
-    
+
     if($regions === NULL) {
       $regions = osc_get_user_item_regions($user_id);
     }
-    
+
     if(!is_array($regions)) {
       $regions = array();
     }
 
     parent::generic_select('sRegion', $regions, 'pk_i_id', 's_name', __('All regions'), $selected);
   }
-  
-  
+
+
   // City search - only cities where user has items
   static public function search_city_select($user_id = null, $params = null, $cities = null) {
     $user_id = osc_resolve_user_id($user_id);
     $selected = ((isset($params['sCity'])) ? $params['sCity'] : Params::getParam('sCity'));
-    
+
     if($cities === NULL) {
       $cities = osc_get_user_item_cities($user_id);
     }
-    
+
     if(!is_array($cities)) {
       $cities = array();
     }
@@ -908,7 +917,6 @@ class UserForm extends Form {
   }
 
 
-  
   // Item type search
   static public function search_item_type_select($user_id = null, $params = null) {
     $user_id = osc_resolve_user_id($user_id);
@@ -917,21 +925,21 @@ class UserForm extends Form {
     if($selected == '') {
       $selected = ((isset($params['itemType'])) ? $params['itemType'] : Params::getParam('itemType'));
     }
-    
+
     $types = array(
       array('pk_i_id' => 'active', 's_name' => __('Active')),
       array('pk_i_id' => 'pending_validate', 's_name' => __('Pending validation')),
       array('pk_i_id' => 'premium', 's_name' => __('Premium')),
       array('pk_i_id' => 'expired', 's_name' => __('Expired'))
     );
-    
+
     $types = osc_apply_filter('search_item_types', $types, $user_id, $params);
-    
+
     if(!is_array($types)) {
       $types = array();
     }
 
-    parent::generic_select('sItemType', $types, 'pk_i_id', 's_name', __('All items'), $selected);
+    parent::generic_select('sItemType', $types, 'pk_i_id', 's_name', __('All listings'), $selected);
   }
 }
 

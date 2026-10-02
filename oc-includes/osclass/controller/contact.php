@@ -32,10 +32,10 @@ class CWebContact extends BaseModel {
     switch($this->action) {
       case('contact_post'):   //contact_post
         if(osc_web_contact_form_disabled()) {
-          osc_add_flash_warning_message(_m('Sorry, contact form is disabled.'));
+          osc_add_flash_warning_message(_m('Sorry, the contact form is disabled'));
           $this->redirectTo(osc_base_url());
         }
-        
+
         osc_csrf_check();
         $yourName = Params::getParam('yourName');
         $yourEmail = Params::getParam('yourEmail');
@@ -49,7 +49,7 @@ class CWebContact extends BaseModel {
             Session::newInstance()->_setForm('yourEmail', $yourEmail);
             Session::newInstance()->_setForm('subject', $subject);
             Session::newInstance()->_setForm('message_body', $message);
-            
+
             $this->redirectTo(osc_contact_url());
             return false; // BREAK THE PROCESS, THE RECAPTCHA IS WRONG
           }
@@ -59,21 +59,21 @@ class CWebContact extends BaseModel {
         if($banned == 1) {
           osc_add_flash_error_message(_m('Your current email is not allowed'));
           $this->redirectTo(osc_contact_url());
-          
+
         } else if($banned == 2) {
           osc_add_flash_error_message(_m('Your current IP is not allowed'));
           $this->redirectTo(osc_contact_url());
         }
 
         $user = User::newInstance()->findByEmail($yourEmail);
-        
+
         if(isset($user['b_active']) && ($user['b_active']==0 || $user['b_enabled']==0)) {
           osc_add_flash_error_message(_m('Your current email is not allowed'));
           $this->redirectTo(osc_contact_url());
         }
 
-        if (!osc_validate_email($yourEmail)) {
-          osc_add_flash_error_message(_m('Please enter a correct email'));
+        if(!osc_validate_email($yourEmail)) {
+          osc_add_flash_error_message(_m('The email is not valid'));
           Session::newInstance()->_setForm('yourName', $yourName);
           Session::newInstance()->_setForm('subject', $subject);
           Session::newInstance()->_setForm('message_body', $message);
@@ -102,11 +102,14 @@ MESSAGE;
           'to_name' => osc_page_title(),
           'reply_to' => $yourEmail,
           'subject' => '[' . osc_page_title() . '] ' . __('Contact') . ' - ' . $subject,
-          'body' => nl2br($message)
+          'body' => nl2br($message),
+          'yourName' => $yourName,
+          'yourEmail' => $yourEmail,
+          'contact_subject' => $subject
         );
 
         $error = false;
-        
+
         if(osc_contact_attachment()) {
           $attachment = Params::getFiles('attachment');
 
@@ -125,26 +128,26 @@ MESSAGE;
               finfo_close($finfo);
 
               $output = explode('; ', $output);
-              
+
               if(is_array($output)) {
                 $output = $output[0];
               }
-              
+
               $resourceType = $output;
             }
-          
+
             // Check mime file - make sure it's not executable
             if(in_array($resourceType, osc_allowed_mime_types())) {
               $emailAttachment = array('path' => $tmpName, 'name' => $resourceName);
               $error = false;
-              
+
             } else {
               $error = true;      // wrong mime type
             }
           }
         }
-        
-        
+
+
         if(!$error) {
           if(isset($emailAttachment)) {
             $params['attachment'] = $emailAttachment;
@@ -152,27 +155,30 @@ MESSAGE;
 
           osc_run_hook('pre_contact_post', $params);
 
-          osc_sendMail(osc_apply_filter('contact_params', $params));
+          if(osc_apply_filter('contact_send_mail', true, $params)) {
+            osc_sendMail(osc_apply_filter('contact_params', $params));
+            osc_add_flash_ok_message(_m('Your email has been sent. Thank you for contacting us!'));
+          } else if(osc_report_web_contact_created()) {
+            osc_add_flash_ok_message(_m('Your message has been sent properly. Thank you for contacting us!'));
+          }
 
           if(isset($tmpName)) {
             @unlink($tmpName);
           }
 
-          osc_add_flash_ok_message(_m('Your email has been sent properly. Thank you for contacting us!'));
-          
         } else {
           osc_add_flash_error_message(_m('Error: Attachment has incorrect extension or mime type'));
         }
 
         $this->redirectTo(osc_contact_url());
         break;
-      
+
       default:        //contact
         if(osc_web_contact_form_disabled()) {
-          osc_add_flash_warning_message(_m('Sorry, contact form is disabled.'));
+          osc_add_flash_warning_message(_m('Sorry, the contact form is disabled'));
           $this->redirectTo(osc_base_url());
         }
-        
+
         $this->doView('contact.php');
     }
   }

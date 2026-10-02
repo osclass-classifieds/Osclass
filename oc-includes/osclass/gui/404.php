@@ -31,4 +31,4 @@ osc_current_web_theme_path('header.php') ;
     <a href="<?php echo osc_base_url(); ?>" class="btn btn-secondary"><?php _e('Take me home', 'sigma'); ?></a>
   </div>
 </div>
-<?php osc_current_web_theme_path('footer.php') ; ?>
+<?php osc_current_web_theme_path('footer.php') ;

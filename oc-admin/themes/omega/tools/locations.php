@@ -27,7 +27,7 @@ function render_offset(){
 
 function customHead() {
   $all = osc_get_preference('location_todo');
-  if( $all == '' ) $all = 0;
+  if($all == '' ) $all = 0;
   $worktodo   = LocationsTmp::newInstance()->count();
   ?>
   <script type="text/javascript">
@@ -66,7 +66,7 @@ function customHead() {
 osc_add_hook('admin_header','customHead', 10);
 
 
-function customPageHeader(){ 
+function customPageHeader(){
   ?>
   <h1><?php _e('Tools'); ?></h1>
   <?php
@@ -76,12 +76,12 @@ osc_add_hook('admin_page_header','customPageHeader');
 
 
 function customPageTitle($string) {
-  return sprintf(__('Location stats - %s'), $string);
+  return sprintf(__('%s - %s'), __('Location stats'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');
 
-osc_current_admin_theme_path( 'parts/header.php' ); 
+osc_current_admin_theme_path( 'parts/header.php' );
 ?>
 
 <div id="locations-stats-setting">
@@ -110,4 +110,4 @@ osc_current_admin_theme_path( 'parts/header.php' );
   </div>
   <!-- /settings form -->
 </div>
-<?php osc_current_admin_theme_path( 'parts/footer.php' ); ?>
+<?php osc_current_admin_theme_path( 'parts/footer.php' );

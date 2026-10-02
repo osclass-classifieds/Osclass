@@ -24,7 +24,7 @@ function addHelp() {
 osc_add_hook('help_box','addHelp');
 
 
-function customPageHeader(){ 
+function customPageHeader(){
   ?>
   <h1><?php _e('Appearance'); ?>
     <a href="#" class="btn ico ico-32 ico-help float-right"></a>
@@ -36,13 +36,13 @@ osc_add_hook('admin_page_header','customPageHeader');
 
 
 function customPageTitle($string) {
-  return sprintf(__('Add theme - %s'), $string);
+  return sprintf(__('%s - %s'), __('Add theme'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');
 
 
-osc_current_admin_theme_path('parts/header.php'); 
+osc_current_admin_theme_path('parts/header.php');
 ?>
 
 <!-- themes list -->
@@ -50,7 +50,7 @@ osc_current_admin_theme_path('parts/header.php');
   <h2 class="render-title"><?php _e('Add new theme'); ?></h2>
   <div id="upload-themes" class="ui-osc-tabs-panel">
     <div class="form-horizontal">
-      <?php if( is_writable( osc_themes_path() ) ) { ?>
+      <?php if(is_writable( osc_themes_path() ) ) { ?>
         <div class="flashmessage flashmessage-info flashmessage-inline" style="display: block;">
           <p class="info"><?php printf( __('You can download and install new themes directly in %s section.'), '<a href="' . osc_admin_base_url(true) . '?page=market&action=themes" target="_blank">' . __('Market > Themes') . '</a>'); ?></p>
         </div>
@@ -70,10 +70,10 @@ osc_current_admin_theme_path('parts/header.php');
       <?php } else { ?>
         <div class="flashmessage flashmessage-error">
           <a class="btn ico btn-mini ico-close" href="#">×</a>
-          <p><?php _e("Can't install a new theme"); ?></p>
+          <p><?php _e("Cannot install this package"); ?></p>
         </div>
         <p class="text">
-          <?php _e("The theme folder is not writable on your server so you can't upload themes from the administration panel. Please make the theme folder writable and try again."); ?>
+          <?php _e('The theme folder is not writable on your server so you cannot upload themes from the administration panel. Please make the theme folder writable and try again.'); ?>
         </p>
         <p class="text">
           <?php _e('To make the directory writable under UNIX execute this command from the shell:'); ?>
@@ -119,4 +119,4 @@ osc_current_admin_theme_path('parts/header.php');
   </div>
 </div>
 <!-- /themes list -->
-<?php osc_current_admin_theme_path('parts/footer.php'); ?>
+<?php osc_current_admin_theme_path('parts/footer.php');

@@ -29,7 +29,7 @@ $locales = OSCLocale::newInstance()->listAllEnabled();
 function customFrmText($return = 'title') {
   $page = __get('page');
   $text = array();
-  
+
   if(isset($page['pk_i_id'])) {
     $text['edit'] = true;
     $text['title'] = __('Edit page');
@@ -57,7 +57,7 @@ osc_add_filter('admin_title', 'customPageTitle');
 
 
 //customize Head
-function customHead() { 
+function customHead() {
   ?>
   <script type="text/javascript">
     tinyMCE.init({
@@ -75,7 +75,7 @@ function customHead() {
       image_caption: true,
       quickbars_selection_toolbar: 'bold italic underline strikethrough | quicklink h2 h3 h4 | blockquote quickimage quicktable',
       toolbar_mode: 'wrap',
-      
+
       theme_advanced_toolbar_align : "left",
       theme_advanced_toolbar_location : "top",
       // plugins : [
@@ -107,17 +107,17 @@ function customHead() {
             failure('HTTP Error: ' + xhr.status);
             return;
           }
-          
+
           json = JSON.parse(xhr.responseText);
 
           if(!json || typeof json.location != 'string') {
             failure('Invalid JSON: ' + xhr.responseText);
             return;
           }
-          
+
           success(json.location);
         };
-        
+
         formData = new FormData();
         //formData.append('file', blobInfo.blob(), fileName(blobInfo));
 
@@ -141,7 +141,7 @@ function customHead() {
 }
 osc_add_hook('admin_header','customHead',9);
 
-osc_current_admin_theme_path('parts/header.php'); 
+osc_current_admin_theme_path('parts/header.php');
 ?>
 
 <h2 class="render-title"><?php echo customFrmText('title'); ?></h2>
@@ -152,11 +152,11 @@ osc_current_admin_theme_path('parts/header.php');
     <input type="hidden" name="action" value="<?php echo customFrmText('action_frm'); ?>" />
     <?php PageForm::primary_input_hidden($page); ?>
     <?php printLocaleTitlePage($locales, $page); ?>
-    
+
     <div>
       <label><?php _e('Internal name'); ?></label>
       <?php PageForm::internal_name_input_text($page); ?>
-      
+
       <div class="flashmessage flashmessage-warning flashmessage-inline">
         <p><?php _e('Used to quickly identify this page'); ?></p>
       </div>
@@ -167,23 +167,29 @@ osc_current_admin_theme_path('parts/header.php');
       <label><?php _e('Visibility'); ?></label>
       <?php PageForm::visibility_select($page); ?>
     </div>
-    
+
     <?php if(count($templates)>0) { ?>
       <div>
         <label><?php _e('Page template'); ?></label>
         <select name="meta[template]">
-          <option value="default" <?php if($template_selected=='default') { echo 'selected="selected"'; }; ?>><?php _e('Default template'); ?></option>
+          <option value="default" <?php if($template_selected=='default') { echo 'selected="selected"'; } ?>><?php _e('Default template'); ?></option>
           <?php foreach($templates as $template) { ?>
-            <option value="<?php echo $template?>" <?php if($template_selected==$template) { echo 'selected="selected"'; }; ?>><?php echo $template; ?></option>
-          <?php }; ?>
+            <option value="<?php echo $template?>" <?php if($template_selected==$template) { echo 'selected="selected"'; } ?>><?php echo $template; ?></option>
+          <?php } ?>
         </select>
       </div>
-    <?php }; ?>
-    
+    <?php } ?>
+
     <div class="input-description-wide">
       <?php printLocaleDescriptionPage($locales, $page); ?>
     </div>
-    
+
+    <div>
+      <label><?php _e('Publish date'); ?></label>
+      <?php PageForm::pub_date_input_text($page); ?>
+      <span class="help-inline"><?php _e('Format: yyyy-mm-dd hh:mm:ss'); ?></span>
+    </div>
+
     <div class="form-controls">
       <div class="form-label-checkbox">
         <label><?php PageForm::link_checkbox($page); ?> <?php _e('Add link to footer in front-office'); ?></label>
@@ -193,12 +199,25 @@ osc_current_admin_theme_path('parts/header.php');
         <label><?php PageForm::index_checkbox($page); ?> <?php _e('Allow search engines to index this page'); ?></label>
       </div>
     </div>
-    
+
     <div><?php osc_run_hook('page_meta'); ?></div>
     <div class="clear"></div>
-    
+
+    <?php if(!isset($page['b_indelible']) || (int)$page['b_indelible'] === 0) {
+      $isNewPage = !customFrmText('edit');
+      $pageOrderManager = Page::newInstance();
+      $pagePosMin = 1;
+      $pagePosMax = ($isNewPage ? $pageOrderManager->getNextPositionableOrder() : max(1, $pageOrderManager->getMaxPositionableOrder()));
+    ?>
+    <div>
+      <label><?php _e('Position'); ?></label>
+      <?php PageForm::order_input_text($page, $isNewPage); ?>
+      <span class="help-inline"><?php printf(__('Valid range: %d to %d'), $pagePosMin, $pagePosMax); ?></span>
+    </div>
+    <?php } ?>
+
     <div class="form-actions">
-      <?php if( customFrmText('edit') ) { ?>
+      <?php if(customFrmText('edit') ) { ?>
       <a href="javascript:history.go(-1)" class="btn"><?php _e('Cancel'); ?></a>
       <?php } ?>
       <input type="submit" value="<?php echo osc_esc_html(customFrmText('btn_text')); ?>" class="btn btn-submit" />
@@ -206,4 +225,4 @@ osc_current_admin_theme_path('parts/header.php');
   </form>
 </div>
 
-<?php osc_current_admin_theme_path('parts/footer.php'); ?>
+<?php osc_current_admin_theme_path('parts/footer.php');

@@ -31,7 +31,7 @@ $list = isset($updates['updates']) ? $updates['updates'] : array();
 ?>
 
 <?php if(!is_array($list) || count($list) <= 0) { ?>
-  <div class="empty"><?php _e('No updates has been found'); ?></div>
+  <div class="empty"><?php _e('No updates have been found'); ?></div>
 <?php } else { ?>
   <?php foreach($list as $u) { ?>
     <?php
@@ -48,10 +48,10 @@ $list = isset($updates['updates']) ? $updates['updates'] : array();
           $osc_comp = sprintf(__('osclass %s to %s'), $u['s_osc_version_from'], $u['s_osc_version_to']);
         }
       }
-      
+
       $va = explode('.', $u['i_version']);
     ?>
-    
+
     <div class="row" title="<?php echo osc_esc_html(sprintf(__('Updated on %s, compatible with %s'), date('Y-m-d', strtotime($u['dt_date'])), $osc_comp)); ?>">
       <div class="tit">
         <em class="ver v<?php echo @$va[0]; ?> sv<?php echo @$va[1]; ?>"><?php echo $u['i_version']; ?></em>

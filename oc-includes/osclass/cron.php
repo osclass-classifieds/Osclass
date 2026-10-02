@@ -3,9 +3,8 @@ if(!defined('ABS_PATH')) exit('ABS_PATH is not loaded. Direct access is not allo
 
 /*
   TESTING CRON:
-  .../index.php?page=cron&force=1&type=daily&print=1
-  .../index.php?page=cron&force=1&type=hourly&print=1
-
+  .../index.php?page=cron&force=1&type=daily&print=1&forceLastExec=1
+  .../index.php?page=cron&force=1&type=hourly&print=1&forceLastExec=2
 */
 
 
@@ -42,8 +41,24 @@ $start_time = microtime(true);
 
 // In order to manually execute cron no matter it's last run, use /index.php?page=cron&type=daily&force=1&print=1
 $force = (Params::getParam('force') == 1 ? osc_is_admin_user_logged_in() : false);
+
+// For alerts, get last exec date - start date for publish date
+// 1 - all items, 2 - today's items, 3 - from yesterday, 4 - from start of this week, 5 - from start of this month, 6 - from start of this year, 7 - from start of last year
+$force_last_exec = ((osc_is_admin_user_logged_in() && Params::getParam('forceLastExec') != '') ? osc_esc_html(trim((string)Params::getParam('forceLastExec'))) : '');
+$force_last_exec = ($force_last_exec == 1 ? '0000-00-00 00:00:00' : $force_last_exec);
+$force_last_exec = ($force_last_exec == 2 ? date('Y-m-d 00:00:00') : $force_last_exec);
+$force_last_exec = ($force_last_exec == 3 ? date('Y-m-d 00:00:00', strtotime('yesterday')) : $force_last_exec);
+$force_last_exec = ($force_last_exec == 4 ? date('Y-m-d 00:00:00', strtotime('monday this week')) : $force_last_exec);
+$force_last_exec = ($force_last_exec == 5 ? date('Y-m-01 00:00:00') : $force_last_exec);
+$force_last_exec = ($force_last_exec == 6 ? date('Y-01-01 00:00:00') : $force_last_exec);
+$force_last_exec = ($force_last_exec == 7 ? date('Y-01-01 00:00:00', strtotime('last year')) : $force_last_exec);
+
+
 $print = (Params::getParam('print') == 1 ? osc_is_admin_user_logged_in() : false);
 $type = strtolower(osc_esc_html(Params::getParam('cron-type') <> '' ? Params::getParam('cron-type') : Params::getParam('type')));      // minutely, hourly, daily, weekly, monthly, yearly
+$type = ($type == '' ? 'daily' : $type);
+$purge = osc_purge_latest_searches();  // 'hour','day','week','month','year' or integer
+$purge_date = date('Y-m-d H:i:s', strtotime("-1 $purge"));
 
 $all_hooks = Plugins::getActive();
 
@@ -53,10 +68,11 @@ if(!defined('CLI')) {
   define('CLI', PHP_SAPI === 'cli');
 }
 
-
+$messages[] = str_repeat('=', 100);
 $messages[] = sprintf(__('Starting cron at %s'), $d_now);
 $messages[] = str_repeat('-', 100);
 $messages[] = ' > ' . sprintf(__('Cron params: %s'), json_encode(Params::getParamsAsArray()));
+$messages[] = ' > ' . sprintf(__('Last execution date (alerts - items pub date) is set to: %s'), $force_last_exec);
 
 
 // Intitiate theme to get cron functions defined by theme - os812
@@ -67,21 +83,45 @@ WebThemes::newInstance();
 $cron = Cron::newInstance()->getCronByType('MINUTELY');
 
 if(is_array($cron)) {
-  $i_next = strtotime($cron['d_next_exec']);
+  $i_next = (isset($cron['d_next_exec']) && $cron['d_next_exec'] !== '' ? (strtotime($cron['d_next_exec']) ?: 0) : 0);
+  $i_last = (isset($cron['d_last_exec']) && $cron['d_last_exec'] !== '' ? (strtotime($cron['d_last_exec']) ?: 0) : 0);
+  // auto_cron=1: parent claimed d_next_exec; still require last run older than ~5 min (blocks forced re-entry)
+  $from_auto_cron = (!CLI && Params::getParam('auto_cron') == 1 && ($i_now - $i_last + $shift_seconds_minutely) >= (5 * 60));
 
-  if(
-    (CLI && $type === 'minutely') 
-    || ($force && $type === 'minutely') 
+  if((CLI && $type === 'minutely')
+    || ($force && $type === 'minutely')
+    || $from_auto_cron
     || (!CLI && ($i_now - $i_next + $shift_seconds_minutely) >= 0)
   ) {
-    // update the next execution time in t_cron
+    // Update t_cron first, then run work (avoids re-entry if PHP fatals mid-job)
     $d_next = date('Y-m-d H:i:s', $i_now_truncated + (5 * 60));  // once per 5 minutes
-    
+    $d_last_exec = ($force_last_exec != '' ? $force_last_exec : (isset($cron['d_last_exec']) ? $cron['d_last_exec'] : ''));
     Cron::newInstance()->update(array('d_last_exec' => $d_now, 'd_next_exec' => $d_next), array('e_type' => 'MINUTELY'));
-    
-    osc_runAlert('INSTANT', $cron['d_last_exec']);
+
+    $messages[] = str_repeat('-', 100);
+    $messages[] = ' > ' . sprintf(__('Starting cron type "%s", last run: %s, next run at %s'), 'MINUTELY', ($cron['d_last_exec'] ?? '-'), $d_next);
+
+    osc_runAlert('INSTANT', $d_last_exec);
+    $messages[] = ' >>> ' . sprintf(__('Executed explicit function "%s"'), 'osc_runAlert(INSTANT)');
+
     osc_run_hook('cron_minutely');
-    
+
+    if($print === true) {
+      if(isset($all_hooks['cron_minutely']) && is_array($all_hooks['cron_minutely']) && count($all_hooks['cron_minutely']) > 0) {
+        $messages[] = ' > ' . sprintf(__('Starting to run functions of "%s"'), 'cron_minutely');
+
+        foreach($all_hooks['cron_minutely'] as $priority => $cron_functions) {
+          if(is_array($cron_functions) && count($cron_functions) > 0) {
+            foreach($cron_functions as $cfunc) {
+              if(is_string($cfunc)) {
+                $messages[] = ' >>> ' . sprintf(__('Executed cron function "%s" with priority %s'), $cfunc, $priority);
+              }
+            }
+          }
+        }
+      }
+    }
+
     $messages[] = ' > ' . sprintf(__('Cron type "%s" finished at %s'), 'MINUTELY', date('Y-m-d H:i:s'));
   }
 }
@@ -91,41 +131,50 @@ if(is_array($cron)) {
 $cron = Cron::newInstance()->getCronByType('HOURLY');
 
 if(is_array($cron)) {
-  $i_next = strtotime($cron['d_next_exec']);
+  $i_next = (isset($cron['d_next_exec']) && $cron['d_next_exec'] !== '' ? (strtotime($cron['d_next_exec']) ?: 0) : 0);
 
-  if(
-    (CLI && $type === 'hourly') 
-    || ($force && ($type === 'hourly' || $type === 'all')) 
+  if((CLI && $type === 'hourly')
+    || ($force && ($type === 'hourly' || $type === 'all'))
     || (!CLI && ($i_now - $i_next + $shift_seconds_minutely) >= 0)
   ) {
-    // update the next execution time in t_cron
+    // Update the next execution time in t_cron
     $d_next = date('Y-m-d H:i:s', $i_now_truncated + 3600);
+    $d_last_exec = ($force_last_exec != '' ? $force_last_exec : ($cron['d_last_exec'] ?? ''));
+
+    $messages[] = str_repeat('-', 100);
+    $messages[] = ' > ' . sprintf(__('Starting cron type "%s", last run: %s, next run at %s'), 'HOURLY', ($cron['d_last_exec'] ?? '-'), $d_next);
+
     Cron::newInstance()->update(array('d_last_exec' => $d_now, 'd_next_exec' => $d_next), array('e_type' => 'HOURLY'));
-    
-    osc_runAlert('HOURLY', $cron['d_last_exec']);
-    
+
+    osc_runAlert('HOURLY', $d_last_exec);
+    $messages[] = ' >>> ' . sprintf(__('Executed explicit function "%s"'), 'osc_runAlert(HOURLY)');
+
     // Run cron AFTER updating the next execution time to avoid double run of cron
-    $purge = osc_purge_latest_searches();
-    
-    if($purge === 'hour') {
-      LatestSearches::newInstance()->purgeDate(date('Y-m-d H:i:s', time() - 3600));
+    if($purge == 'hour') {
+      LatestSearches::newInstance()->purgeDate($purge_date);
+      $messages[] = ' >>> ' . sprintf(__('Executed explicit function "%s" (%s)'), 'osc_purge_latest_searches', $purge);
     }
-    
+
     osc_update_location_stats(true, 'auto');
+    $messages[] = ' >>> ' . sprintf(__('Executed explicit function "%s"'), 'osc_update_location_stats');
 
     // WARN EXPIRATION EACH HOUR (COMMENT TO DISABLE)
     // NOTE: IF THIS IS ENABLE, SAME CODE SHOULD BE DISABLE ON CRON DAILY
     if(is_numeric(osc_warn_expiration()) && osc_warn_expiration() >= 0) {
       $items = Item::newInstance()->findItemsWarnExpiration('HOURLY', osc_warn_expiration(), 1);
-      
+
       if(is_array($items) && count($items) > 0) {
         foreach($items as $item) {
           osc_run_hook('hook_email_warn_expiration', $item);
         }
+
+        $messages[] = ' >>> ' . sprintf(__('Executed explicit function "%s"'), 'hook_email_warn_expiration');
       }
     }
 
+
     osc_clean_temp_images();
+    $messages[] = ' >>> ' . sprintf(__('Executed explicit function "%s"'), 'osc_clean_temp_images');
 
     osc_run_hook('cron_hourly');
 
@@ -144,7 +193,7 @@ if(is_array($cron)) {
         }
       }
     }
-    
+
     $messages[] = ' > ' . sprintf(__('Cron type "%s" finished at %s'), 'HOURLY', date('Y-m-d H:i:s'));
   }
 }
@@ -154,52 +203,45 @@ if(is_array($cron)) {
 $cron = Cron::newInstance()->getCronByType('DAILY');
 
 if(is_array($cron)) {
-  $i_next = strtotime($cron['d_next_exec']);
+  $i_next = (isset($cron['d_next_exec']) && $cron['d_next_exec'] !== '' ? (strtotime($cron['d_next_exec']) ?: 0) : 0);
 
-  if(
-    (CLI && $type === 'daily') 
-    || ($force && ($type === 'daily' || $type === 'all')) 
+  if((CLI && $type === 'daily')
+    || ($force && ($type === 'daily' || $type === 'all'))
     || (!CLI && ($i_now - $i_next + $shift_seconds_minutely) >= 0)
   ) {
-    // update the next execution time in t_cron
+    // Update the next execution time in t_cron
     $d_next = date('Y-m-d H:i:s', $i_now_truncated + (24 * 3600));
+    $d_last_exec = ($force_last_exec != '' ? $force_last_exec : ($cron['d_last_exec'] ?? ''));
+
+    $messages[] = str_repeat('-', 100);
+    $messages[] = ' > ' . sprintf(__('Starting cron type "%s", last run: %s, next run at %s'), 'DAILY', ($cron['d_last_exec'] ?? '-'), $d_next);
+
     Cron::newInstance()->update(array('d_last_exec' => $d_now, 'd_next_exec' => $d_next), array('e_type' => 'DAILY'));
 
-    // upgrade osclass if there are new updates
+    // Upgrade osclass if there are new updates
     osc_do_auto_upgrade();
+    $messages[] = ' >>> ' . sprintf(__('Executed explicit function "%s"'), 'osc_do_auto_upgrade');
 
-    osc_runAlert('DAILY', $cron['d_last_exec']);
+    osc_runAlert('DAILY', $d_last_exec);
+    $messages[] = ' >>> ' . sprintf(__('Executed explicit function "%s"'), 'osc_runAlert(DAILY)');
 
-    // Run cron AFTER updating the next execution time to avoid double run of cron
-    $purge = osc_purge_latest_searches();
+    if(in_array($purge, ['hour','day','week','month','year'])) {
+      LatestSearches::newInstance()->purgeDate($purge_date);
+      $messages[] = ' >>> ' . sprintf(__('Executed explicit function "%s" (%s)'), 'osc_purge_latest_searches', $purge);
 
-    if($purge === 'hour') {
-      LatestSearches::newInstance()->purgeDate(date('Y-m-d H:i:s', strtotime('- 1 hour')));
-      
-    } else if($purge === 'day') {
-      LatestSearches::newInstance()->purgeDate(date('Y-m-d H:i:s', strtotime('- 1 day')));
-
-    } else if ($purge == 'week') {
-      LatestSearches::newInstance()->purgeDate(date('Y-m-d H:i:s', strtotime('- 1 week')));
-      
-    } else if ($purge == 'month') {
-      LatestSearches::newInstance()->purgeDate(date('Y-m-d H:i:s', strtotime('- 1 month')));
-
-    } else if ($purge == 'year') {
-      LatestSearches::newInstance()->purgeDate(date('Y-m-d H:i:s', strtotime('- 1 year')));
-
-    // } else if(!in_array($purge, array('forever', 'day', 'week', 'month', 'year'))) {
-    } else {
+    } else if($purge > 0) {
       LatestSearches::newInstance()->purgeNumber((int)$purge);
+      $messages[] = ' >>> ' . sprintf(__('Executed explicit function "%s" (%s)'), 'osc_purge_latest_searches', $purge);
     }
-    
+
     osc_update_cat_stats();
+    $messages[] = ' >>> ' . sprintf(__('Executed explicit function "%s"'), 'osc_update_cat_stats');
 
     // WARN EXPIRATION EACH DAY (UNCOMMENT TO ENABLE)
     // NOTE: IF THIS IS ENABLE, SAME CODE SHOULD BE DISABLE ON CRON HOURLY
     /*if(is_numeric(osc_warn_expiration()) && osc_warn_expiration()>=0) {
       $items = Item::newInstance()->findItemsWarnExpiration('DAILY', osc_warn_expiration(), 24);
-      
+
       if(is_array($items) && count($items) > 0) {
         foreach($items as $item) {
           osc_run_hook('hook_email_warn_expiration', $item);
@@ -208,6 +250,7 @@ if(is_array($cron)) {
     }*/
 
     osc_clean_temp_images();
+    $messages[] = ' >>> ' . sprintf(__('Executed explicit function "%s"'), 'osc_clean_temp_images');
 
     osc_run_hook('cron_daily');
 
@@ -226,7 +269,7 @@ if(is_array($cron)) {
         }
       }
     }
-    
+
     $messages[] = ' > ' . sprintf(__('Cron type "%s" finished at %s'), 'DAILY', date('Y-m-d H:i:s'));
   }
 }
@@ -234,41 +277,33 @@ if(is_array($cron)) {
 
 // Weekly crons
 $cron = Cron::newInstance()->getCronByType('WEEKLY');
-if(is_array($cron)) {
-  $i_next = strtotime($cron['d_next_exec']);
 
-  if(
-    (CLI && $type === 'weekly') 
-    || ($force && ($type === 'weekly' || $type === 'all')) 
+if(is_array($cron)) {
+  $i_next = (isset($cron['d_next_exec']) && $cron['d_next_exec'] !== '' ? (strtotime($cron['d_next_exec']) ?: 0) : 0);
+
+  if((CLI && $type === 'weekly')
+    || ($force && ($type === 'weekly' || $type === 'all'))
     || (!CLI && ($i_now - $i_next + $shift_seconds_minutely) >= 0)
   ) {
-    // update the next execution time in t_cron
+    // Update the next execution time in t_cron
     $d_next = date('Y-m-d H:i:s', $i_now_truncated + (7 * 24 * 3600));
+    $d_last_exec = ($force_last_exec != '' ? $force_last_exec : ($cron['d_last_exec'] ?? ''));
+
+    $messages[] = str_repeat('-', 100);
+    $messages[] = ' > ' . sprintf(__('Starting cron type "%s", last run: %s, next run at %s'), 'WEEKLY', ($cron['d_last_exec'] ?? '-'), $d_next);
+
     Cron::newInstance()->update(array('d_last_exec' => $d_now, 'd_next_exec' => $d_next), array('e_type' => 'WEEKLY'));
-    
-    osc_runAlert('WEEKLY', $cron['d_last_exec']);
-    
-    // Run cron AFTER updating the next execution time to avoid double run of cron
-    $purge = osc_purge_latest_searches();
 
-    if($purge === 'hour') {
-      LatestSearches::newInstance()->purgeDate(date('Y-m-d H:i:s', strtotime('- 1 hour')));
-      
-    } else if($purge === 'day') {
-      LatestSearches::newInstance()->purgeDate(date('Y-m-d H:i:s', strtotime('- 1 day')));
+    osc_runAlert('WEEKLY', $d_last_exec);
+    $messages[] = ' >>> ' . sprintf(__('Executed explicit function "%s"'), 'osc_runAlert(WEEKLY)');
 
-    } else if ($purge == 'week') {
-      LatestSearches::newInstance()->purgeDate(date('Y-m-d H:i:s', strtotime('- 1 week')));
-      
-    } else if ($purge == 'month') {
-      LatestSearches::newInstance()->purgeDate(date('Y-m-d H:i:s', strtotime('- 1 month')));
+    if(in_array($purge, ['hour','day','week','month','year'])) {
+      LatestSearches::newInstance()->purgeDate($purge_date);
+      $messages[] = ' >>> ' . sprintf(__('Executed explicit function "%s" (%s)'), 'osc_purge_latest_searches', $purge);
 
-    } else if ($purge == 'year') {
-      LatestSearches::newInstance()->purgeDate(date('Y-m-d H:i:s', strtotime('- 1 year')));
-
-    // } else if(!in_array($purge, array('forever', 'day', 'week', 'month', 'year'))) {
-    } else {
+    } else if($purge > 0) {
       LatestSearches::newInstance()->purgeNumber((int)$purge);
+      $messages[] = ' >>> ' . sprintf(__('Executed explicit function "%s" (%s)'), 'osc_purge_latest_searches', $purge);
     }
 
     osc_run_hook('cron_weekly');
@@ -288,7 +323,7 @@ if(is_array($cron)) {
         }
       }
     }
-    
+
     $messages[] = ' > ' . sprintf(__('Cron type "%s" finished at %s'), 'WEEKLY', date('Y-m-d H:i:s'));
 
   }
@@ -299,41 +334,28 @@ if(is_array($cron)) {
 $cron = Cron::newInstance()->getCronByType('MONTHLY');
 
 if(is_array($cron)) {
-  $i_next = strtotime($cron['d_next_exec']);
+  $i_next = (isset($cron['d_next_exec']) && $cron['d_next_exec'] !== '' ? (strtotime($cron['d_next_exec']) ?: 0) : 0);
 
-  if(
-    (CLI && $type === 'monthly') 
-    || ($force && ($type === 'monthly' || $type === 'all')) 
+  if((CLI && $type === 'monthly')
+    || ($force && ($type === 'monthly' || $type === 'all'))
     || (!CLI && ($i_now - $i_next + $shift_seconds_minutely) >= 0)
   ) {
-    // update the next execution time in t_cron
+    // Update the next execution time in t_cron
     //$d_next = date('Y-m-d H:i:s', $i_now_truncated + (30 * 24 * 3600));
     $d_next = date('Y-m-d H:i:s', strtotime('next month', $i_now_truncated));
 
+    $messages[] = str_repeat('-', 100);
+    $messages[] = ' > ' . sprintf(__('Starting cron type "%s", last run: %s, next run at %s'), 'MONTHLY', ($cron['d_last_exec'] ?? '-'), $d_next);
+
     Cron::newInstance()->update(array('d_last_exec' => $d_now, 'd_next_exec' => $d_next), array('e_type' => 'MONTHLY'));
-    
-    
-    // Run cron AFTER updating the next execution time to avoid double run of cron
-    $purge = osc_purge_latest_searches();
 
-    if($purge === 'hour') {
-      LatestSearches::newInstance()->purgeDate(date('Y-m-d H:i:s', strtotime('- 1 hour')));
-      
-    } else if($purge === 'day') {
-      LatestSearches::newInstance()->purgeDate(date('Y-m-d H:i:s', strtotime('- 1 day')));
+    if(in_array($purge, ['hour','day','week','month','year'])) {
+      LatestSearches::newInstance()->purgeDate($purge_date);
+      $messages[] = ' >>> ' . sprintf(__('Executed explicit function "%s" (%s)'), 'osc_purge_latest_searches', $purge);
 
-    } else if ($purge == 'week') {
-      LatestSearches::newInstance()->purgeDate(date('Y-m-d H:i:s', strtotime('- 1 week')));
-      
-    } else if ($purge == 'month') {
-      LatestSearches::newInstance()->purgeDate(date('Y-m-d H:i:s', strtotime('- 1 month')));
-
-    } else if ($purge == 'year') {
-      LatestSearches::newInstance()->purgeDate(date('Y-m-d H:i:s', strtotime('- 1 year')));
-
-    // } else if(!in_array($purge, array('forever', 'day', 'week', 'month', 'year'))) {
-    } else {
+    } else if($purge > 0) {
       LatestSearches::newInstance()->purgeNumber((int)$purge);
+      $messages[] = ' >>> ' . sprintf(__('Executed explicit function "%s" (%s)'), 'osc_purge_latest_searches', $purge);
     }
 
     osc_run_hook('cron_monthly');
@@ -353,7 +375,7 @@ if(is_array($cron)) {
         }
       }
     }
-    
+
     $messages[] = ' > ' . sprintf(__('Cron type "%s" finished at %s'), 'MONTHLY', date('Y-m-d H:i:s'));
   }
 }
@@ -362,42 +384,28 @@ if(is_array($cron)) {
 // Yearly crons
 $cron = Cron::newInstance()->getCronByType('YEARLY');
 if(is_array($cron)) {
-  $i_next = strtotime($cron['d_next_exec']);
+  $i_next = (isset($cron['d_next_exec']) && $cron['d_next_exec'] !== '' ? (strtotime($cron['d_next_exec']) ?: 0) : 0);
 
-  if(
-    (CLI && $type === 'yearly') 
-    || ($force && ($type === 'yearly' || $type === 'all')) 
+  if((CLI && $type === 'yearly')
+    || ($force && ($type === 'yearly' || $type === 'all'))
     || (!CLI && ($i_now - $i_next + $shift_seconds_minutely) >= 0)
   ) {
-    // update the next execution time in t_cron
+    // Update the next execution time in t_cron
     $d_next = date('Y-m-d H:i:s', strtotime('+1 year', $i_now_truncated));
+
+    $messages[] = str_repeat('-', 100);
+    $messages[] = ' > ' . sprintf(__('Starting cron type "%s", last run: %s, next run at %s'), 'YEARLY', ($cron['d_last_exec'] ?? '-'), $d_next);
 
     Cron::newInstance()->update(array('d_last_exec' => $d_now, 'd_next_exec' => $d_next), array('e_type' => 'YEARLY'));
 
+    if(in_array($purge, ['hour','day','week','month','year'])) {
+      LatestSearches::newInstance()->purgeDate($purge_date);
+      $messages[] = ' >>> ' . sprintf(__('Executed explicit function "%s" (%s)'), 'osc_purge_latest_searches', $purge);
 
-    // Run cron AFTER updating the next execution time to avoid double run of cron
-    $purge = osc_purge_latest_searches();
-
-    if($purge === 'hour') {
-      LatestSearches::newInstance()->purgeDate(date('Y-m-d H:i:s', strtotime('- 1 hour')));
-      
-    } else if($purge === 'day') {
-      LatestSearches::newInstance()->purgeDate(date('Y-m-d H:i:s', strtotime('- 1 day')));
-
-    } else if ($purge == 'week') {
-      LatestSearches::newInstance()->purgeDate(date('Y-m-d H:i:s', strtotime('- 1 week')));
-      
-    } else if ($purge == 'month') {
-      LatestSearches::newInstance()->purgeDate(date('Y-m-d H:i:s', strtotime('- 1 month')));
-
-    } else if ($purge == 'year') {
-      LatestSearches::newInstance()->purgeDate(date('Y-m-d H:i:s', strtotime('- 1 year')));
-
-    // } else if(!in_array($purge, array('forever', 'day', 'week', 'month', 'year'))) {
-    } else {
+    } else if($purge > 0) {
       LatestSearches::newInstance()->purgeNumber((int)$purge);
+      $messages[] = ' >>> ' . sprintf(__('Executed explicit function "%s" (%s)'), 'osc_purge_latest_searches', $purge);
     }
-
 
     osc_run_hook('cron_yearly');
 
@@ -416,12 +424,13 @@ if(is_array($cron)) {
         }
       }
     }
-    
+
     $messages[] = ' > ' . sprintf(__('Cron type "%s" finished at %s'), 'YEARLY', date('Y-m-d H:i:s'));
   }
 }
 
 
+$messages[] = ' > ' . sprintf(__('Starting to run functions of "%s"'), 'cron');
 osc_run_hook('cron');
 
 $exec_time =  microtime(true) - $start_time;
@@ -429,6 +438,8 @@ $exec_time =  microtime(true) - $start_time;
 $messages[] = str_repeat('-', 100);
 $messages[] = sprintf(__('Cron finished at %s'), date('Y-m-d H:i:s'));
 $messages[] = sprintf(__('Execution time: %s sec'), number_format($exec_time, 4));
+$messages[] = str_repeat('=', 100);
+$messages[] = '';
 
 
 // Print report
@@ -438,6 +449,6 @@ if($print === true) {
   foreach($messages as $m) {
     echo $m . PHP_EOL;
   }
-  
+
   echo '</pre>';
 }

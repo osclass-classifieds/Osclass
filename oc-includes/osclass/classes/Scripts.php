@@ -18,8 +18,8 @@ if(!defined('ABS_PATH')) exit('ABS_PATH is not loaded. Direct access is not allo
  * warranties or conditions of any kind, either express or implied. Do not remove
  * this NOTICE section as it contains license information and copyrights.
  */
- 
- 
+
+
 /**
  * Scripts enqueue class.
  *
@@ -94,7 +94,7 @@ class Scripts extends Dependencies {
     $scripts = array();
     parent::order();
     foreach($this->resolved as $id) {
-      if( isset($this->registered[$id]['url']) ) {
+      if(isset($this->registered[$id]['url']) ) {
         $scripts[$id] = $this->registered[$id]['url'];   // update 420, $scripts[] -> $scripts[$id]
       }
     }
@@ -106,7 +106,7 @@ class Scripts extends Dependencies {
    */
   public function getScriptAttributes($id) {
     $attributes = '';
-    
+
     if(isset($this->registered[$id]['attributes'])) {
       if(is_array($this->registered[$id]['attributes'])) {
         $attributes = implode(' ', array_filter($this->registered[$id]['attributes']));
@@ -114,9 +114,9 @@ class Scripts extends Dependencies {
         $attributes = trim($this->registered[$id]['attributes']);
       }
     }
-    
+
     return trim($attributes) != '' ? ' ' . $attributes : '';
-  }  
+  }
 
   /**
    *  Print the HTML tags to load the scripts
@@ -125,7 +125,7 @@ class Scripts extends Dependencies {
   {
     $compress = osc_js_minify();
     $minifier = new Minify\JS('');
-    $banned_pages = array_filter(array_map('strtolower', array_map('trim', explode(',', osc_js_banned_pages())))); 
+    $banned_pages = array_filter(array_map('strtolower', array_map('trim', explode(',', osc_js_banned_pages()))));
     $current_page = strtolower(osc_get_osclass_location() == '' ? 'home' : osc_get_osclass_location());
     $current_page .= (osc_get_osclass_section() <> '' ? '-' . strtolower(osc_get_osclass_section()) : '');
 
@@ -133,7 +133,7 @@ class Scripts extends Dependencies {
       $name = '';
       $content = '';
       $internal = array();
-      $banned_words = array_filter(array_map('trim', explode(',', osc_js_banned_words()))); 
+      $banned_words = array_filter(array_map('trim', explode(',', osc_js_banned_words())));
 
       // first collect internal names and check if file exists
       foreach($this->getScripts() as $id => $url) {
@@ -141,24 +141,24 @@ class Scripts extends Dependencies {
           if(strpos($url, '?v=') !== false) {
             $url = substr($url, 0, strpos($url, '?v='));
           }
-          
+
           // If local file, update oc-content & oc-includes folders if changed
           if(strpos($url, osc_base_url()) !== false) {
             $url = str_replace('/oc-content/', '/' . osc_content_folder() . '/', $url);
             $url = str_replace('/oc-includes/', '/' . osc_includes_folder() . '/', $url);
           }
-        
+
           $path = str_replace(osc_base_url(), osc_base_path(), $url);
-          
+
           if(strpos($url, osc_base_url()) !== false && !osc_string_contains_array($url, $banned_words)) {
             $internal[] = $id;
-            
+
             if(is_file($path) && is_readable($path)){
               $modtime = filemtime($path);
             } else {
               $modtime = date('YmdHis');
             }
-            
+
             $name .= $id . '_' . $modtime . ';';
           }
         }
@@ -182,10 +182,10 @@ class Scripts extends Dependencies {
                 $url = str_replace('/oc-content/', '/' . osc_content_folder() . '/', $url);
                 $url = str_replace('/oc-includes/', '/' . osc_includes_folder() . '/', $url);
               }
-              
+
               $path = str_replace(osc_base_url(), osc_base_path(), $url);
-              
-              if (strpos($url, osc_base_url()) !== false && !osc_string_contains_array($url, $banned_words)) {
+
+              if(strpos($url, osc_base_url()) !== false && !osc_string_contains_array($url, $banned_words)) {
                 if($compress) {
                   $minifier->add($path);
                 } else {
@@ -203,7 +203,7 @@ class Scripts extends Dependencies {
           file_put_contents($save_path . $name, $content);
         }
       }
-     
+
       // print merged, it should contain all dependencies
       echo '<script type="text/javascript" src="' . osc_apply_filter('theme_url', $save_url . $name) . '"></script>' . PHP_EOL;
 
@@ -213,7 +213,7 @@ class Scripts extends Dependencies {
             echo '<script type="text/javascript" src="' . osc_apply_filter('theme_url', $script) . '"' . osc_apply_filter('theme_attributes', $this->getScriptAttributes($id)) . '></script>' . PHP_EOL;
           }
         }
-      }      
+      }
     } else {
       foreach($this->getScripts() as $id => $script) {
         if($script !== '') {

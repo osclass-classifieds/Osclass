@@ -17,7 +17,7 @@ if(!defined('ABS_PATH')) exit('ABS_PATH is not loaded. Direct access is not allo
  */
 
 
-function customPageHeader(){ 
+function customPageHeader(){
   ?>
   <h1><?php _e('Tools'); ?></h1>
   <?php
@@ -37,7 +37,7 @@ osc_add_filter('admin_title', 'customPageTitle');
 function customHead(){ ?>
   <script type="text/javascript">
     $(document).ready(function(){
-      if (typeof $.uniform != 'undefined') {
+      if(typeof $.uniform != 'undefined') {
         $('textarea, button,select, input:file').uniform();
       }
 
@@ -55,7 +55,7 @@ function customHead(){ ?>
           error: function(jqXHR, textStatus, errorThrown){
             console.log(textStatus);
             console.log(jqXHR);
-           
+
             $('.upgr-load-box').hide();
             $('#result').append("<?php echo osc_esc_html(sprintf(__('There was problem with upgrade, %s has resulted with error.'), osc_admin_base_url(true) . '?page=upgrade&action=upgrade-funcs')); ?>");
           }
@@ -67,7 +67,7 @@ function customHead(){ ?>
 
 osc_add_hook('admin_header','customHead', 10);
 
-osc_current_admin_theme_path( 'parts/header.php' ); 
+osc_current_admin_theme_path( 'parts/header.php' );
 ?>
 
 <div id="backup-settings">
@@ -79,10 +79,10 @@ osc_current_admin_theme_path( 'parts/header.php' );
         <span><?php _e('Upgrading your Osclass installation (this could take a while)', 'admin'); ?></span>
       </p>
     </div>
-    
+
     <div id="tohide" class="tohide">
       <p><?php _e('You have uploaded a new version of Osclass, you need to upgrade Osclass for it to work correctly.'); ?></p>
-      
+
       <?php if(defined('DEMO')) { ?>
         <p><strong><?php _e('This action cannot be done because it is a demo site. Disable demo mode in config.php to continue with upgrade.'); ?></strong></p>
         <a class="btn btn-submit upgrade-now-btn disabled" disabled href="#" onclick="return false;"><?php _e('Upgrade now'); ?></a>
@@ -93,4 +93,4 @@ osc_current_admin_theme_path( 'parts/header.php' );
     </div>
   </div>
 </div>
-<?php osc_current_admin_theme_path( 'parts/footer.php' ); ?>
+<?php osc_current_admin_theme_path( 'parts/footer.php' );

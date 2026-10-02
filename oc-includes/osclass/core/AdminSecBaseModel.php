@@ -24,6 +24,8 @@ class AdminSecBaseModel extends SecBaseModel
   {
     parent::__construct();
 
+    $this->trimGetParams();
+
     $admin = Admin::newInstance()->findByPrimaryKey(osc_logged_admin_id());
 
     $moderator_access = array();
@@ -32,8 +34,7 @@ class AdminSecBaseModel extends SecBaseModel
     }
 
     // check if is moderator and can enter to this page
-    if ( 
-      $this->isModerator()
+    if($this->isModerator()
       && !in_array( $this->page , osc_apply_filter( 'moderator_access', array('items','comments','media','login','admins','ajax','stats','main','')))
       && !($this->page == 'plugins' && in_array(Params::getParam('file'), $moderator_access))
       && !($this->page == 'plugins' && in_array(Params::getParam('route'), $moderator_access))
@@ -43,23 +44,23 @@ class AdminSecBaseModel extends SecBaseModel
       $url = (@$_SERVER['HTTP_REFERER'] <> '' ? $_SERVER['HTTP_REFERER'] : osc_admin_base_url());
       $this->redirectTo($url);
     }
-    
+
     osc_run_hook( 'init_admin' );
 
     $config_version = str_replace('.', '', OSCLASS_VERSION);
     $config_version = preg_replace('|-.*|', '', $config_version);
 
-    if( $config_version > osc_get_preference('version')) {
-      if( get_class($this) === 'CAdminTools') {
+    if($config_version > osc_get_preference('version')) {
+      if(get_class($this) === 'CAdminTools') {
       } else {
-        if ( get_class( $this ) !== 'CAdminUpgrade' ) {
+        if(get_class( $this ) !== 'CAdminUpgrade' ) {
         $this->redirectTo( osc_admin_base_url( true ) . '?page=upgrade' );
         }
       }
     }
 
     // show donation successful
-    if( Params::getParam('donation') === 'successful' ) {
+    if(Params::getParam('donation') === 'successful' ) {
       osc_add_flash_ok_message(_m('Thank you very much for your donation'), 'admin');
     }
 
@@ -107,11 +108,11 @@ class AdminSecBaseModel extends SecBaseModel
 
   public function showAuthFailPage()
   {
-    if( Params::getParam('page') === 'ajax') {
+    if(Params::getParam('page') === 'ajax') {
       echo json_encode(array('error' => 1, 'msg' => __('Session timed out')));
       exit;
     } else {
-      // Session::newInstance()->session_start(); 
+      // Session::newInstance()->session_start();
       // Session::newInstance()->_setReferer(osc_base_url() . preg_replace('|^' . REL_WEB_URL . '|', '', Params::getServerParam('REQUEST_URI', false, false)));
 
       Cookie::newInstance()->_setRefererHistory();
@@ -134,6 +135,37 @@ class AdminSecBaseModel extends SecBaseModel
     osc_current_admin_theme_path($file);
     Session::newInstance()->_clearVariables();
     osc_run_hook( 'after_admin_html' );
+  }
+
+  // Trim leading and trailing whitespace on GET params used by admin filters and ajax.
+  private function trimGetParams()
+  {
+    if(!is_array($_GET) || empty($_GET)) {
+      return;
+    }
+
+    foreach($_GET as $key => $value) {
+      $trimmed = $this->trimGetValue($value);
+      $_GET[$key] = $trimmed;
+      if(!isset($_POST[$key])) {
+        Params::setParam($key, $trimmed);
+      }
+    }
+  }
+
+  // Recursively trim string values, including nested GET arrays.
+  private function trimGetValue($value)
+  {
+    if(is_array($value)) {
+      foreach($value as $k => $v) {
+        $value[$k] = $this->trimGetValue($v);
+      }
+      return $value;
+    }
+    if(is_string($value)) {
+      return trim($value);
+    }
+    return $value;
   }
 }
 

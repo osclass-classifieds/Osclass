@@ -18,27 +18,14 @@
 ?>
 <div id="sidebar">
   <?php osc_run_hook('item_sidebar_top'); ?>
-  
+
   <?php if(osc_price_enabled_at_items() && osc_item_category_price_enabled()) { ?><div class="price isDesktop isTablet"><?php echo osc_item_formated_price(); ?></div><?php } ?>
 
-  <?php if(!osc_item_mark_disable() && (!osc_is_web_user_logged_in() || osc_logged_user_id()!=osc_item_user_id())) { ?>
-    <form action="<?php echo osc_base_url(true); ?>" method="post" name="mask_as_form" id="mask_as_form">
-      <input type="hidden" name="id" value="<?php echo osc_item_id(); ?>" />
-      <input type="hidden" name="as" value="spam" />
-      <input type="hidden" name="action" value="mark" />
-      <input type="hidden" name="page" value="item" />
-      <select name="as" id="as" class="mark_as">
-          <option><?php _e("Mark as...", 'sigma'); ?></option>
-          <option value="spam"><?php _e("Mark as spam", 'sigma'); ?></option>
-          <option value="badcat"><?php _e("Mark as misclassified", 'sigma'); ?></option>
-          <option value="repeated"><?php _e("Mark as duplicated", 'sigma'); ?></option>
-          <option value="expired"><?php _e("Mark as expired", 'sigma'); ?></option>
-          <option value="offensive"><?php _e("Mark as offensive", 'sigma'); ?></option>
-      </select>
-    </form>
+  <?php if(function_exists('osc_can_report_item') && osc_can_report_item()) { ?>
+    <p class="report_item"><a rel="nofollow" href="<?php echo osc_report_item_url(); ?>" title="<?php echo osc_esc_html(__('Report this listing', 'sigma')); ?>"><?php _e('Report this listing', 'sigma'); ?></a></p>
   <?php } ?>
 
-  <?php if( osc_get_preference('sidebar-300x250', 'sigma') != '') {?>
+  <?php if(osc_get_preference('sidebar-300x250', 'sigma') != '') {?>
   <!-- sidebar ad 350x250 -->
   <div class="ads_300">
     <?php echo osc_get_preference('sidebar-300x250', 'sigma'); ?>
@@ -54,25 +41,28 @@
         <img src="<?php echo osc_user_profile_img_url(osc_item_user_id()); ?>" alt="<?php echo osc_esc_html(osc_item_contact_name()); ?>"/>
       </p>
     <?php } ?>
-    
-    <?php if( osc_item_user_id() != null ) { ?>
+
+    <?php if(osc_item_user_id() != null ) { ?>
       <p class="name bld"><span><?php _e('Name', 'sigma') ?>:</span> <a href="<?php echo osc_user_public_profile_url( osc_item_user_id() ); ?>" ><?php echo osc_item_contact_name(); ?></a> <?php echo (osc_user_is_online(osc_item_user_id()) ? '<span class="is-online">(' . __('online', 'sigma') . ')</span>' : ''); ?></p>
     <?php } else { ?>
       <p class="name bld"><span><?php _e('Name', 'sigma'); ?>:</span> <?php echo osc_item_contact_name(); ?></p>
     <?php } ?>
 
-    <?php if( osc_item_show_email() ) { ?>
-      <p class="email bld"><span><?php _e('E-mail', 'sigma'); ?>:</span> <a href="mailto:<?php echo osc_item_contact_email(); ?>"><?php echo osc_item_contact_email(); ?></a></p>
+    <?php if(osc_item_show_email() ) { ?>
+      <p class="email bld"><span><?php _e('Email', 'sigma'); ?>:</span> <a href="mailto:<?php echo osc_item_contact_email(); ?>"><?php echo osc_item_contact_email(); ?></a></p>
     <?php } ?>
 
-    <?php if ( osc_item_contact_phone() != '' && osc_item_show_phone()) { ?>
+    <?php if(osc_item_contact_phone() != '' && osc_item_show_phone()) { ?>
       <p class="phone bld"><span><?php _e('Phone', 'sigma'); ?>:</span> <?php echo '<a href="tel:' . osc_item_contact_phone(true) . '">' . osc_item_contact_phone(false) . '</a>'; ?></p>
     <?php } ?>
 
-    <?php if ( osc_item_contact_other() != '' ) { ?>
+    <?php if(osc_item_contact_other() != '' ) { ?>
       <p class="other bld"><span><?php _e('Other', 'sigma'); ?>:</span> <?php echo osc_item_contact_other(); ?></p>
     <?php } ?>
-    
+
+    <?php osc_run_hook('item_sidebar_user'); ?>
+
+
     <a href="#contact-in" class="resp-toogle btn btn-secondary show-contact-btn"><?php _e('Contact seller', 'sigma'); ?></a>
 
 
@@ -81,15 +71,15 @@
 
       <?php if(osc_item_contact_form_disabled()) { ?>
         <!-- Contact form disabled -->
-      <?php } else if( osc_item_is_expired () ) { ?>
+      <?php } else if(osc_item_is_expired () ) { ?>
         <p class="problem expired">
-          <?php _e("The listing is expired. You can't contact the publisher.", 'sigma'); ?>
+          <?php _e('The listing is expired. You cannot contact the publisher.', 'sigma'); ?>
         </p>
-      <?php } else if( ( osc_logged_user_id() == osc_item_user_id() ) && osc_logged_user_id() != 0 ) { ?>
+      <?php } else if(( osc_logged_user_id() == osc_item_user_id() ) && osc_logged_user_id() != 0 ) { ?>
         <p class="problem own">
-          <?php _e("It's your own listing, you can't contact the publisher.", 'sigma'); ?>
+          <?php _e("It's your own listing, you cannot contact the publisher.", 'sigma'); ?>
         </p>
-      <?php } else if( osc_reg_user_can_contact() && !osc_is_web_user_logged_in() ) { ?>
+      <?php } else if(osc_reg_user_can_contact() && !osc_is_web_user_logged_in() ) { ?>
         <p class="problem unlogged">
           <?php _e("You must log in or register a new account in order to contact the advertiser", 'sigma'); ?>
         </p>
@@ -126,7 +116,7 @@
               <label class="control-label" for="attachment"><?php _e('Attachment', 'sigma'); ?>:</label>
               <div class="controls"><?php ContactForm::your_attachment(); ?></div>
             </div>
-          <?php }; ?>
+          <?php } ?>
 
           <div class="control-group">
             <div class="controls">
@@ -152,6 +142,6 @@
       <li><?php _e('This site is never involved in any transaction, and does not handle payments, shipping, guarantee transactions, provide escrow services, or offer "buyer protection" or "seller certification"', 'sigma'); ?></li>
     </ul>
   </div>
-  
+
   <?php osc_run_hook('item_sidebar_bottom'); ?>
 </div><!-- /sidebar -->

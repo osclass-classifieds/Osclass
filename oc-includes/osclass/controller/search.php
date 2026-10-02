@@ -162,7 +162,6 @@ class CWebSearch extends BaseModel {
             $custom_rule_id = $p_sParams_arr[0];      // Letter: a-z
             $custom_rule = $custom_rules[$custom_rule_id];
 
-
             //******************* testing   ***********
             /*
             $pattern = '#^/([a-z])/(.+?)/(.+?)(?:/|$)#';
@@ -180,7 +179,6 @@ class CWebSearch extends BaseModel {
 
             */
             // *********************************************
-      
       
             unset($p_sParams_arr[0]);
             $rule_params = osc_custom_search_rule_params($custom_rule);
@@ -277,12 +275,6 @@ class CWebSearch extends BaseModel {
     
     $search_url = osc_search_url($uri_params);
 
-
-// print_r($uri_params);
-
-    // echo $search_url;
-    // exit;
-
     if($this->uri !== 'feed') {
       $current_search_url = WEB_PATH . $this->uri;
       
@@ -376,11 +368,15 @@ class CWebSearch extends BaseModel {
     $p_sLocale = is_array($p_sLocale) ? $p_sLocale : ($p_sLocale == '' ? '' : explode(',', $p_sLocale));
 
 
-    $p_sPattern = osc_apply_filter('search_pattern', trim(strip_tags(Params::getParam('sPattern'))));
+    $p_sPattern = Params::getParam('sPattern', false, false);
+    $p_sPattern = (is_array($p_sPattern) ? '' : trim((string)$p_sPattern));
+    $p_sPattern = html_entity_decode($p_sPattern, ENT_QUOTES, 'UTF-8');
+    $p_sPattern = preg_replace('/<\/?[a-zA-Z][^>]*>/', '', $p_sPattern);
+    $p_sPattern = osc_apply_filter('search_pattern', $p_sPattern);
 
     // ADD TO THE LIST OF LAST SEARCHES
     if(osc_save_latest_searches() && (!Params::existParam('iPage') || Params::getParam('iPage')==1)) {
-      $savePattern = osc_apply_filter('save_latest_searches_pattern', $p_sPattern);
+      $savePattern = osc_apply_filter('save_latest_searches_pattern', $p_sPattern, osc_current_user_locale());
       
       if($savePattern != '') {
         LatestSearches::newInstance()->insert(array('s_search' => $savePattern, 'd_date' => date('Y-m-d H:i:s')));
@@ -672,6 +668,7 @@ class CWebSearch extends BaseModel {
     }
     
     $aItems = osc_apply_filter('pre_show_items', $aItems);
+    osc_item_stats_record_impressions($aItems, 'views_search');
 
     $iStart = $p_iPage * $p_iPerPage;
     $iEnd = min(($p_iPage+1) * $p_iPerPage, $iTotalItems);
@@ -830,7 +827,7 @@ class CWebSearch extends BaseModel {
     // Run RSS code
     if(!Params::existParam('sFeed')) {
       $this->doView('search.php');
-      
+
     } else if(osc_rss_enabled()) {
       if($p_sFeed == '' || $p_sFeed=='rss') {
         header('Content-type: text/xml; charset=utf-8');

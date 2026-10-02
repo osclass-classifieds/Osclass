@@ -88,7 +88,7 @@ class DB {
    */
   public function osc_dbConnect() {
     $this->db = @new mysqli($this->dbHost, $this->dbUser, $this->dbPassword, $this->dbName);
-    if ($this->db->connect_error) {
+    if($this->db->connect_error) {
       if(!defined('OSC_INSTALLING')) {
         require_once LIB_PATH . 'osclass/helpers/hErrors.php';
         $title   = 'Osclass &raquo; Error connecting to database';
@@ -107,7 +107,7 @@ class DB {
    * Close the database connection.
    */
   public function osc_dbClose() {
-    if (!@$this->db->close()) {
+    if(!@$this->db->close()) {
       $this->debug('Error releasing the connection to \'' . $this->dbName . '\'', false);
     }
 
@@ -126,7 +126,7 @@ class DB {
       case 1: $sql = $argv[0]; break;
       default:
         $format = array_shift($argv);
-        foreach ($argv as &$arg) {
+        foreach($argv as &$arg) {
         $arg = $this->db->real_escape_string($arg);
         }
         unset($arg);
@@ -194,7 +194,7 @@ class DB {
 
     if($qry = $this->db->query($sql)) {
       $this->debug($sql);
-      while ($result = $qry->fetch_array()) {
+      while($result = $qry->fetch_array()) {
       $results[] = $result[ 0 ];
       }
       $qry->free();
@@ -253,7 +253,7 @@ class DB {
 
     if($qry = $this->db->query($sql)) {
       $this->debug($sql);
-      while ($result = $qry->fetch_assoc()) {
+      while($result = $qry->fetch_assoc()) {
       $results[] = $result;
       }
       $qry->free();
@@ -382,14 +382,14 @@ class DB {
     $tables = $this->osc_dbFetchResults('SHOW TABLES');
     foreach($tables as $v) {
       $table = current($v);
-      if (array_key_exists(strtolower($table), $struct_queries) && preg_match('|\((.*)\)|ms', $struct_queries[ strtolower($table) ], $match)) {
+      if(array_key_exists(strtolower($table), $struct_queries) && preg_match('|\((.*)\)|ms', $struct_queries[ strtolower($table) ], $match)) {
       $fields = explode("\n", trim($match[ 1 ]));
 
       // Detect if it's a "normal field definition" or a index one
       $normal_fields = $indexes = array ();
-      foreach ($fields as $field) {
-        if (preg_match('|([^ ]+)|', trim($field), $field_name)) {
-          switch (strtolower($field_name[ 1 ])) {
+      foreach($fields as $field) {
+        if(preg_match('|([^ ]+)|', trim($field), $field_name)) {
+          switch(strtolower($field_name[ 1 ])) {
             case '':
             case 'on':
             case 'foreign':
@@ -410,19 +410,19 @@ class DB {
 
       // Take fields from the DB (already installed)
       $tbl_fields = $this->osc_dbFetchResults('DESCRIBE ' . $table);
-      foreach ($tbl_fields as $tbl_field) {
+      foreach($tbl_fields as $tbl_field) {
         //Every field should we on the definition, so else SHOULD never happen, unless a very aggressive plugin modify our tables
-        if (array_key_exists(strtolower($tbl_field[ 'Field' ]), $normal_fields)) {
+        if(array_key_exists(strtolower($tbl_field[ 'Field' ]), $normal_fields)) {
         // Take the type of the field
-        if (preg_match('|' . $tbl_field[ 'Field' ] . " (ENUM\s*\(([^\)]*)\))|i", $normal_fields[ strtolower($tbl_field[ 'Field' ]) ], $match) || preg_match('|' . $tbl_field[ 'Field' ] . ' ([^ ]*(unsigned)?)|i', $normal_fields[ strtolower($tbl_field[ 'Field' ]) ], $match)) {
+        if(preg_match('|' . $tbl_field[ 'Field' ] . " (ENUM\s*\(([^\)]*)\))|i", $normal_fields[ strtolower($tbl_field[ 'Field' ]) ], $match) || preg_match('|' . $tbl_field[ 'Field' ] . ' ([^ ]*(unsigned)?)|i', $normal_fields[ strtolower($tbl_field[ 'Field' ]) ], $match)) {
           $field_type = $match[ 1 ];
           // Are they the same?
-          if (strtolower($field_type) != strtolower($tbl_field[ 'Type' ]) && str_replace(' ', '', strtolower($field_type)) != str_replace(' ', '', strtolower($tbl_field[ 'Type' ]))) {
+          if(strtolower($field_type) != strtolower($tbl_field[ 'Type' ]) && str_replace(' ', '', strtolower($field_type)) != str_replace(' ', '', strtolower($tbl_field[ 'Type' ]))) {
           $struct_queries[] = 'ALTER TABLE ' . $table . ' CHANGE COLUMN ' . $tbl_field[ 'Field' ] . ' ' . $normal_fields[ strtolower($tbl_field[ 'Field' ]) ];
           }
         }
         // Have we changed the default value?
-        if (preg_match("| DEFAULT '(.*)'|i", $normal_fields[ strtolower($tbl_field[ 'Field' ]) ], $default_match)) {
+        if(preg_match("| DEFAULT '(.*)'|i", $normal_fields[ strtolower($tbl_field[ 'Field' ]) ], $default_match)) {
           $struct_queries[] = 'ALTER TABLE ' . $table . ' ALTER COLUMN ' . $tbl_field[ 'Field' ] . ' SET DEFAULT ' . $default_match[ 1 ];
         }
         // Remove it from the list, so it will not be added
@@ -430,26 +430,26 @@ class DB {
         }
       }
       // For the rest of normal fields (they are not in the table) we add them.
-      foreach ($normal_fields as $k => $v) {
+      foreach($normal_fields as $k => $v) {
         $struct_queries[] = 'ALTER TABLE ' . $table . ' ADD COLUMN ' . $v;
       }
 
       // Go for the index part
       $tbl_indexes = $this->osc_dbFetchResults('SHOW INDEX FROM ' . $table);
-      if ($tbl_indexes) {
+      if($tbl_indexes) {
         unset($indexes_array);
-        foreach ($tbl_indexes as $tbl_index) {
+        foreach($tbl_indexes as $tbl_index) {
         $indexes_array[ $tbl_index[ 'Key_name' ] ][ 'columns' ][] = array (
           'fieldname' => $tbl_index[ 'Column_name' ],
           'subpart'   => $tbl_index[ 'Sub_part' ]
        );
         $indexes_array[ $tbl_index[ 'Key_name' ] ][ 'unique' ]  = $tbl_index[ 'Non_unique' ] == 0;
         }
-        foreach ($indexes_array as $k => $v) {
+        foreach($indexes_array as $k => $v) {
         $string = '';
-        if ($k === 'PRIMARY') {
+        if($k === 'PRIMARY') {
           $string .= 'PRIMARY KEY ';
-        } else if ($v[ 'unique' ]) {
+        } elseif($v[ 'unique' ]) {
           $string .= 'UNIQUE KEY ';
         } else {
           $string .= 'INDEX ';
@@ -457,32 +457,32 @@ class DB {
 
         $columns = '';
         // For each column in the index
-        foreach ($v[ 'columns' ] as $column) {
-          if ($columns != '') {
+        foreach($v[ 'columns' ] as $column) {
+          if($columns != '') {
           $columns .= ', ';
           }
           // Add the field to the column list string
           $columns .= $column[ 'fieldname' ];
-          if ($column[ 'subpart' ] != '') {
+          if($column[ 'subpart' ] != '') {
           $columns .= '(' . $column[ 'subpart' ] . ')';
           }
         }
         // Add the column list to the index create string
         $string .= '(' . $columns . ')';
         $var_index = array_search($string, $indexes);
-        if (! ($var_index === false)) {
+        if(! ($var_index === false)) {
           unset($indexes[ $var_index ]);
         } else {
           $var_index = array_search(str_replace(', ', ',', $string), $indexes);
-          if (! ($var_index === false)) {
+          if(! ($var_index === false)) {
           unset($indexes[ $var_index ]);
           }
         }
         }
       }
       // For the rest of the indexes (they are in the new definition but not in the table installed
-      foreach ($indexes as $index) {
-        if (0 !== stripos(trim($index), 'on')) {// && strtolower(substr(trim($index),0,7))!='foreign') {
+      foreach($indexes as $index) {
+        if(0 !== stripos(trim($index), 'on')) {// && strtolower(substr(trim($index),0,7))!='foreign') {
         $struct_queries[] = 'ALTER TABLE ' . $table . ' ADD ' . $index;
         //} else {
         //$struct_queries[] = "ALTER TABLE ".$table." ".$index;
@@ -509,7 +509,6 @@ class DB {
 }
 
 
-
 /**
  * @param null $dbHost
  * @param null $dbUser
@@ -523,16 +522,16 @@ function getConnection($dbHost = null, $dbUser = null, $dbPassword = null, $dbNa
 {
   static $instance;
 
-  if (defined('DB_HOST') && $dbHost == null) {
+  if(defined('DB_HOST') && $dbHost == null) {
   $dbHost = osc_db_host();
   }
-  if (defined('DB_USER') && $dbUser == null) {
+  if(defined('DB_USER') && $dbUser == null) {
   $dbUser = osc_db_user();
   }
-  if (defined('DB_PASSWORD') && $dbPassword == null) {
+  if(defined('DB_PASSWORD') && $dbPassword == null) {
   $dbPassword = osc_db_password();
   }
-  if (defined('DB_NAME') && $dbName == null) {
+  if(defined('DB_NAME') && $dbName == null) {
   $dbName = osc_db_name();
   }
 

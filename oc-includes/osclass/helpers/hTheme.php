@@ -39,16 +39,16 @@ function osc_render_file($file = '') {
   // Clean $file to prevent hacking of some
   osc_sanitize_url($file);
   $file = str_replace(array("..\\" , '../') , '' , str_replace( '://' , '' , preg_replace( '|http([s]*)|' , '' , $file)));
-  
+
   if(file_exists(osc_themes_path() . osc_theme() . '/plugins/' . $file)) {
     include osc_themes_path() . osc_theme() . '/plugins/' . $file;
 
   } else if(file_exists(osc_themes_path() . osc_theme() . '/custom/' . $file)) {
     include osc_themes_path() . osc_theme() . '/custom/' . $file;
-    
+
   } else if(file_exists(osc_themes_path() . osc_theme() . '/' . $file)) {
     include osc_themes_path() . osc_theme() . '/' . $file;
-    
+
   } else if(file_exists(osc_plugins_path() . $file)) {
     include osc_plugins_path() . $file;
   }
@@ -87,15 +87,15 @@ function osc_theme_get_info($theme) {
  */
 function osc_resend_flash_messages($section = 'pubMessages' ) {
   $messages = Session::newInstance()->_getMessage($section);
-  if (is_array($messages)) {
+  if(is_array($messages)) {
 
-    foreach ($messages as $message) {
-  
+    foreach($messages as $message) {
+
       $message = Session::newInstance()->_getMessage($section);
       if(isset($message['msg'])) {
-        if( isset($message[ 'type' ]) && $message[ 'type' ] === 'info' ) {
+        if(isset($message[ 'type' ]) && $message[ 'type' ] === 'info' ) {
           osc_add_flash_info_message($message['msg'], $section);
-        } else if( isset($message[ 'type' ]) && $message[ 'type' ] === 'ok' ) {
+        } else if(isset($message[ 'type' ]) && $message[ 'type' ] === 'ok' ) {
           osc_add_flash_ok_message($message['msg'], $section);
         } else {
           osc_add_flash_error_message($message['msg'], $section);
@@ -148,7 +148,7 @@ function osc_unregister_script($id) {
  */
 function osc_load_scripts() {
   Scripts::newInstance()->printScripts();
-  if( OC_ADMIN ) {
+  if(OC_ADMIN ) {
     osc_run_hook('admin_scripts_loaded');
   } else {
     osc_run_hook('scripts_loaded');
@@ -194,7 +194,7 @@ function osc_print_bulk_actions( $id , $name , $options , $class = '' ) {
     $opt = '';
     $label = '';
     foreach($o as $k => $v) {
-      if( $k !== 'label') {
+      if($k !== 'label') {
         $opt .= $k.'="'.$v.'" ';
       } else {
         $label = $v;

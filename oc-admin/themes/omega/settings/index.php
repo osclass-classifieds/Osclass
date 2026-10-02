@@ -29,7 +29,7 @@ $admin_color_scheme = (osc_get_preference('admin_color_scheme') <> '' ? osc_get_
 $color_schemes = omg_color_schemes();
 
 //customize Head
-function customHead() { 
+function customHead() {
   ?>
   <script type="text/javascript">
   $(document).ready(function(){
@@ -37,7 +37,7 @@ function customHead() {
     $('body').on('change keypress keyup', 'input[name="osclasspoint_api_key"]', function(e) {
       $('a.btn.validate').addClass('disabled').addClass('is-changed').prop('disabled', true).attr('href', '#');
     });
-    
+
     $('.btn.validate').on('click', function(e) {
       if($(this).hasClass('disabled') && $(this).hasClass('is-changed')) {
         e.preventDefault();
@@ -45,24 +45,24 @@ function customHead() {
         return false;
       }
     });
-    
+
     // Color scheme selector
     $('body').on('click', '.form-ts .color-scheme', function(e) {
       e.preventDefault();
       var scheme = $(this).find('input[type="radio"]').val();
-      
+
       $('.form-ts .color-scheme').removeClass('selected');
       $(this).addClass('selected');
       $(this).find('input[type="radio"]').prop('checked', true);
-      
+
       $('body').attr('class', function(i, c){
         return c.replace(/(^|\s)scheme-\S+/g, '');
       });
-      
+
       $('body').addClass('scheme-' + scheme);
     });
-    
-    
+
+
     // Code for form validation
     $("form[name=settings_form]").validate({
       rules: {
@@ -89,33 +89,33 @@ function customHead() {
       },
       messages: {
         pageTitle: {
-          required: '<?php echo osc_esc_js(__("Page title: this field is required")); ?>.',
-          minlength: '<?php echo osc_esc_js(__("Page title: this field is required")); ?>.'
+          required: '<?php echo osc_esc_js(sprintf(__('%s is required'), __('Page title'))); ?>.',
+          minlength: '<?php echo osc_esc_js(sprintf(__('%s is required'), __('Page title'))); ?>.'
         },
         contactEmail: {
-          required: '<?php echo osc_esc_js(__("Email: this field is required")); ?>.',
-          email: '<?php echo osc_esc_js(__("Invalid email address")); ?>.'
+          required: '<?php echo osc_esc_js(sprintf(__('%s is required'), __('Email'))); ?>.',
+          email: '<?php echo osc_esc_js(__('The email is not valid')); ?>.'
         },
         num_rss_items: {
-          required: '<?php echo osc_esc_js(__("Listings shown in RSS feed: this field is required")); ?>.',
-          digits: '<?php echo osc_esc_js(__("Listings shown in RSS feed: this field must only contain numeric characters")); ?>.'
+          required: '<?php echo osc_esc_js(sprintf(__('%s is required'), __('Listings shown in RSS feed'))); ?>.',
+          digits: '<?php echo osc_esc_js(__('Listings shown in RSS feed: this field must only contain numeric characters')); ?>.'
         },
         max_latest_items_at_home: {
-          required: '<?php echo osc_esc_js(__("Latest listings shown: this field is required")); ?>.',
-          digits: '<?php echo osc_esc_js(__("Latest listings shown: this field must only contain numeric characters")); ?>.'
+          required: '<?php echo osc_esc_js(sprintf(__('%s is required'), __('Latest listings shown'))); ?>.',
+          digits: '<?php echo osc_esc_js(__('Latest listings shown: this field must only contain numeric characters')); ?>.'
         },
         default_results_per_page: {
-          required: '<?php echo osc_esc_js(__("The search page shows: this field is required")); ?>.',
-          digits: '<?php echo osc_esc_js(__("The search page shows: this field must only contain numeric characters")); ?>.'
+          required: '<?php echo osc_esc_js(sprintf(__('%s is required'), __('The search page shows'))); ?>.',
+          digits: '<?php echo osc_esc_js(__('The search page shows: this field must only contain numeric characters')); ?>.'
         }
       },
-      
+
       wrapper: "li",
       errorLabelContainer: "#error_list",
       invalidHandler: function(form, validator) {
         $('html,body').animate({ scrollTop: $('h1').offset().top }, { duration: 250, easing: 'swing'});
       },
-      
+
       submitHandler: function(form){
         $('button[type=submit], input[type=submit]').attr('disabled', 'disabled');
         form.submit();
@@ -168,7 +168,7 @@ function addHelp() {
 osc_add_hook('help_box','addHelp');
 
 
-function customPageHeader(){ 
+function customPageHeader(){
   ?>
   <h1><?php _e('Settings'); ?>
     <a href="#" class="btn ico ico-32 ico-help float-right"></a>
@@ -180,37 +180,37 @@ osc_add_hook('admin_page_header','customPageHeader');
 
 
 function customPageTitle($string) {
-  return sprintf(__('General Settings - %s'), $string);
+  return sprintf(__('%s - %s'), __('General settings'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');
 
-osc_current_admin_theme_path('parts/header.php'); 
+osc_current_admin_theme_path('parts/header.php');
 ?>
 
 <div id="general-setting">
   <!-- settings form -->
   <div id="general-settings">
-    <h2 class="render-title"><?php _e('General Settings'); ?></h2>
+    <h2 class="render-title"><?php _e('General settings'); ?></h2>
       <ul id="error_list"></ul>
       <form name="settings_form" action="<?php echo osc_admin_base_url(true); ?>" method="post">
         <input type="hidden" name="page" value="settings"/>
         <input type="hidden" name="action" value="update"/>
-        
+
         <fieldset>
           <div class="form-horizontal">
           <div class="form-row">
             <div class="form-label"><?php _e('Page title'); ?></div>
             <div class="form-controls"><input type="text" class="xlarge" name="pageTitle" value="<?php echo osc_esc_html(osc_page_title()); ?>"/></div>
           </div>
-          
+
           <div class="form-row">
             <div class="form-label"><?php _e('Page description'); ?></div>
             <div class="form-controls"><input type="text" class="xlarge" name="pageDesc" value="<?php echo osc_esc_html(osc_page_description()); ?>"/></div>
           </div>
-          
+
           <div class="form-row">
-            <div class="form-label"><?php _e('Contact e-mail'); ?></div>
+            <div class="form-label"><?php _e('Contact email'); ?></div>
             <div class="form-controls"><input type="text" class="large" name="contactEmail" value="<?php echo osc_esc_html(osc_contact_email()); ?>"/></div>
           </div>
 
@@ -226,7 +226,7 @@ osc_current_admin_theme_path('parts/header.php');
               </select>
             </div>
           </div>
-          
+
           <div class="form-row form-ts">
             <div class="form-label"><?php _e('Backoffice Color Scheme'); ?></div>
             <div class="form-controls">
@@ -234,7 +234,7 @@ osc_current_admin_theme_path('parts/header.php');
                 <div class="color-scheme <?php if($admin_color_scheme == $scheme['id']) { ?>selected<?php } ?>" data-id="<?php echo $scheme['id']; ?>">
                   <input type="radio" name="admin_color_scheme" id="admin_color_scheme_<?php echo $scheme['id']; ?>" value="<?php echo $scheme['id']; ?>" <?php if($admin_color_scheme == $scheme['id']) { ?>checked<?php } ?>/>
                   <label for="admin_color_scheme_<?php echo $scheme['id']; ?>"><?php echo $scheme['name']; ?></label>
-                  
+
                   <div class="bars">
                     <?php foreach($scheme['colors'] as $c) { ?>
                       <div class="bar" style="background:<?php echo $c; ?>;width:<?php echo floor(100/count($scheme['colors'])); ?>%"></div>
@@ -244,7 +244,7 @@ osc_current_admin_theme_path('parts/header.php');
               <?php } ?>
             </div>
           </div>
-          
+
           <div class="form-row">
             <div class="form-label"><?php _e('jQuery Version'); ?></div>
             <div class="form-controls">
@@ -252,11 +252,11 @@ osc_current_admin_theme_path('parts/header.php');
                 <option value="1" <?php echo ((osc_jquery_version() == '1') ? 'selected="selected"' : ''); ?>>1.x.x</option>
                 <option value="3" <?php echo ((osc_jquery_version() == '3') ? 'selected="selected"' : ''); ?>>3.x.x</option>
               </select>
-              
+
               <span class="help-box"><?php _e('jQuery 3.x.x may not be compatible with your theme or plugins, make sure to do proper testing before using it in production website!'); ?></span>
             </div>
           </div>
-          
+
           <div class="form-row">
             <div class="form-label"><?php _e('Structured data'); ?></div>
             <div class="form-controls">
@@ -268,7 +268,7 @@ osc_current_admin_theme_path('parts/header.php');
               </div>
             </div>
           </div>
-          
+
           <div class="form-row">
             <div class="form-label"><?php _e('Generator tag'); ?></div>
             <div class="form-controls">
@@ -299,7 +299,7 @@ osc_current_admin_theme_path('parts/header.php');
               <div class="form-label-checkbox">
                 <label>
                   <input type="checkbox" <?php echo (osc_enhance_canonical_url_enabled() ? 'checked="checked"' : ''); ?> name="enhance_canonical_url_enabled" value="1"/>
-                  <?php _e('Improve canonical tags by removing redundant parameters (sort, pagination, ...) and using default language code in canonical URLs'); ?>
+                  <?php _e('Improve canonical tags by removing redundant parameters (sort, pagination, ...)'); ?>
                 </label>
               </div>
             </div>
@@ -316,7 +316,7 @@ osc_current_admin_theme_path('parts/header.php');
               </div>
             </div>
           </div>
-          
+
           <div class="form-row separate-top">
             <div class="form-label"><?php _e('Week starts on'); ?></div>
             <div class="form-controls">
@@ -331,7 +331,7 @@ osc_current_admin_theme_path('parts/header.php');
               </select>
             </div>
           </div>
-          
+
           <div class="form-row">
             <div class="form-label"><?php _e('Timezone'); ?></div>
             <div class="form-controls">
@@ -339,13 +339,13 @@ osc_current_admin_theme_path('parts/header.php');
               <select name="timezone" id="timezone">
               <?php $selected_tz = osc_timezone(); ?>
               <option value="" selected="selected"><?php _e('Select a timezone...'); ?></option>
-              <?php foreach ($timezone as $tz) { ?>
+              <?php foreach($timezone as $tz) { ?>
               <option value="<?php echo $tz; ?>" <?php if($selected_tz == $tz) { ?> selected="selected" <?php } ?>><?php echo $tz; ?></option>
               <?php } ?>
               </select>
             </div>
           </div>
-          
+
           <div class="form-row">
             <div class="form-label"><?php _e('Date & time format'); ?></div>
             <div class="form-controls">
@@ -364,7 +364,7 @@ osc_current_admin_theme_path('parts/header.php');
                       <?php echo date($df); ?>
                     </div>
                     <?php } ?>
-                  
+
                     <input type="radio" name="df" id="df_custom" value="df_custom" <?php echo ($custom_checked ? 'checked="checked"' : ''); ?>/>
                     <input type="text" name="df_custom_text" id="df_custom_text" class="input-medium" <?php echo ($custom_checked ? 'value="' . osc_esc_html(osc_date_format()) . '"' : ''); ?> onchange="javascript:document.getElementById('dateFormat').value = this.value;" onkeyup="javascript:custom_date(this.value);"/>
 
@@ -373,7 +373,7 @@ osc_current_admin_theme_path('parts/header.php');
                     <span id="custom_date"></span>
                     <input type="hidden" name="dateFormat" id="dateFormat" value="<?php echo osc_date_format(); ?>"/>
                   </div>
-                  
+
                   <div id="time">
                     <?php
                       $custom_checked = true;
@@ -389,11 +389,11 @@ osc_current_admin_theme_path('parts/header.php');
                         <?php echo date($tf); ?>
                       </div>
                     <?php } ?>
-                  
+
                   <input type="radio" name="tf" id="tf_custom" value="tf_custom" <?php echo ($custom_checked ? 'checked="checked"' : ''); ?>/>
                   <input type="text" class="input-medium" <?php echo ($custom_checked ? 'value="' . osc_esc_html(osc_time_format()) . '"' : ''); ?> onchange="javascript:document.getElementById('timeFormat').value = this.value;" onkeyup="javascript:custom_time(this.value);"/>
                   <br/>
-                  
+
                   <span id="custom_time"></span>
                   <input type="hidden" name="timeFormat" id="timeFormat" value="<?php echo osc_esc_html(osc_time_format()); ?>"/>
                 </div>
@@ -412,7 +412,7 @@ osc_current_admin_theme_path('parts/header.php');
               <?php _e('at most'); ?>
             </div>
           </div>
-          
+
           <div class="form-row">
             <div class="form-label"><?php _e('Search page shows'); ?></div>
             <div class="form-controls">
@@ -433,7 +433,7 @@ osc_current_admin_theme_path('parts/header.php');
               </div>
             </div>
           </div>
-          
+
           <div class="form-row">
             <div class="form-label"><?php _e('RSS shows'); ?></div>
             <div class="form-controls">
@@ -444,7 +444,7 @@ osc_current_admin_theme_path('parts/header.php');
 
 
           <h2 class="render-title separate-top"><?php _e('Localization settings'); ?></h2>
-          
+
           <div class="form-row">
             <div class="form-label"><?php _e('Default language'); ?></div>
             <div class="form-controls">
@@ -465,12 +465,12 @@ osc_current_admin_theme_path('parts/header.php');
                   <?php _e('Add language code into base URL (domain.com/xx/)'); ?>
                 </label>
               </div>
-              
+
               <span class="help-box"><?php _e('Only works with Friendly URLs enabled!'); ?></span>
             </div>
           </div>
-          
-          
+
+
           <div class="form-row">
             <div class="form-label"><?php _e('Language code type'); ?></div>
             <div class="form-controls">
@@ -478,7 +478,7 @@ osc_current_admin_theme_path('parts/header.php');
                 <option value="" <?php if(osc_locale_to_base_url_type() == '') { ?>selected="selected"<?php } ?>><?php _e('Compact format (xx)'); ?></option>
                 <option value="LONG" <?php if(osc_locale_to_base_url_type() == 'LONG') { ?>selected="selected"<?php } ?>><?php _e('Long format (xx-yy)'); ?></option>
               </select>
-              
+
               <span class="help-box"><?php echo sprintf(__('Add language code into base URL and change it to (based on your locale): %s'), osc_base_url() . osc_base_url_locale_slug(osc_current_admin_locale()) . '/'); ?></span>
             </div>
           </div>
@@ -503,13 +503,12 @@ osc_current_admin_theme_path('parts/header.php');
                   <?php _e('Generate hreflang tags and add them to header to define alternative site locales'); ?>
                 </label>
               </div>
-              
+
               <span class="help-box"><?php _e('Only works with "Language based subdomains" or "Language code in URL" features'); ?></span>
             </div>
           </div>
-          
-          
-          
+
+
           <h2 class="render-title separate-top"><?php _e('Search settings'); ?></h2>
           <div class="form-row">
             <div class="form-label"><?php _e('Pattern filter method'); ?></div>
@@ -521,7 +520,7 @@ osc_current_admin_theme_path('parts/header.php');
               </select>
             </div>
           </div>
-          
+
           <div class="form-row">
             <div class="form-label"><?php _e('Restrict by locale'); ?></div>
             <div class="form-controls">
@@ -533,8 +532,8 @@ osc_current_admin_theme_path('parts/header.php');
               </div>
             </div>
           </div>
-          
-          
+
+
           <h2 class="render-title separate-top"><?php _e('Category settings'); ?></h2>
           <div class="form-row">
             <div class="form-label"><?php _e('Parent categories'); ?></div>
@@ -547,7 +546,7 @@ osc_current_admin_theme_path('parts/header.php');
               </div>
             </div>
           </div>
-          
+
           <div class="form-row">
             <div class="form-label"><?php _e('Category nesting'); ?></div>
             <div class="form-controls">
@@ -555,9 +554,27 @@ osc_current_admin_theme_path('parts/header.php');
               <?php _e('levels at most'); ?>
             </div>
           </div>
-          
-          
-          <h2 class="render-title separate-top"><?php _e('Contact Settings'); ?></h2>
+
+          <div class="form-row">
+            <div class="form-label"><?php _e('Bulk expiration options'); ?></div>
+            <div class="form-controls">
+              <?php
+                $categoryBulkExpDefs = osc_category_bulk_expiration_option_defs();
+                $categoryBulkExpSelected = osc_category_bulk_expiration_options_array();
+              ?>
+              <select name="category_bulk_expiration_options[]" multiple="multiple" style="min-width:360px;height:170px;">
+                <?php foreach($categoryBulkExpDefs as $expKey => $expDef) { ?>
+                <option value="<?php echo osc_esc_html($expKey); ?>" <?php echo (in_array($expKey, $categoryBulkExpSelected, true) ? 'selected="selected"' : ''); ?>><?php echo osc_esc_html(osc_category_bulk_expiration_option_label($expKey)); ?></option>
+                <?php } ?>
+              </select>
+              <span class="help-box"><?php _e('These options appear in Categories bulk actions when setting listing expiration. Hold Ctrl/Cmd to select multiple entries. Defaults: 14 days, 1 month, 3 months.'); ?></span>
+            </div>
+          </div>
+
+          <?php osc_run_hook('admin_settings_category_form'); ?>
+
+
+          <h2 class="render-title separate-top"><?php _e('Contact settings'); ?></h2>
           <div class="form-row">
             <div class="form-label"><?php _e('Disable contact form'); ?></div>
             <div class="form-controls">
@@ -569,7 +586,20 @@ osc_current_admin_theme_path('parts/header.php');
               </div>
             </div>
           </div>
-          
+
+          <div class="form-row">
+            <div class="form-label"><?php _e('Create report'); ?></div>
+            <div class="form-controls">
+              <div class="form-label-checkbox">
+                <label>
+                  <input type="checkbox" <?php echo (osc_web_contact_create_report() ? 'checked="checked"' : ''); ?> name="web_contact_create_report" value="1"/>
+                  <?php _e('Create report instead of sending email from web contact form'); ?>
+                </label>
+              </div>
+              <span class="help-box"><?php _e('The contact form does not send email. Messages are stored as reports. Who can submit follows the contact form, not report login or daily limits.'); ?></span>
+            </div>
+          </div>
+
           <div class="form-row">
             <div class="form-label"><?php _e('Attachments'); ?></div>
             <div class="form-controls">
@@ -581,8 +611,8 @@ osc_current_admin_theme_path('parts/header.php');
               </div>
             </div>
           </div>
-          
-          <h2 class="render-title separate-top"><?php _e('Cron Settings'); ?></h2>
+
+          <h2 class="render-title separate-top"><?php _e('Cron settings'); ?></h2>
           <div class="form-row">
             <div class="form-label"><?php _e('Automatic cron process'); ?></div>
             <div class="form-controls">
@@ -595,17 +625,17 @@ osc_current_admin_theme_path('parts/header.php');
               <span class="help-box"><?php _e('<b>For testing purpose only!</b> On live/production websites never use this feature and setup cron via cron panel on your hosting.'); ?></span>
             </div>
           </div>
-          
+
           <div class="form-row">
             <div class="form-label"><?php _e('Cron execution history (last/next)'); ?></div>
             <div class="form-controls cron-exec">
-              <?php 
-                $cron_minutely = Cron::newInstance()->getCronByType('MINUTELY'); 
-                $cron_hourly = Cron::newInstance()->getCronByType('HOURLY'); 
-                $cron_daily = Cron::newInstance()->getCronByType('DAILY'); 
-                $cron_weekly = Cron::newInstance()->getCronByType('WEEKLY'); 
-                $cron_monthly = Cron::newInstance()->getCronByType('MONTHLY'); 
-                $cron_yearly = Cron::newInstance()->getCronByType('YEARLY'); 
+              <?php
+                $cron_minutely = Cron::newInstance()->getCronByType('MINUTELY');
+                $cron_hourly = Cron::newInstance()->getCronByType('HOURLY');
+                $cron_daily = Cron::newInstance()->getCronByType('DAILY');
+                $cron_weekly = Cron::newInstance()->getCronByType('WEEKLY');
+                $cron_monthly = Cron::newInstance()->getCronByType('MONTHLY');
+                $cron_yearly = Cron::newInstance()->getCronByType('YEARLY');
               ?>
 
               <p>
@@ -613,13 +643,13 @@ osc_current_admin_theme_path('parts/header.php');
                 <span class="last"><?php echo (@$cron_minutely['d_last_exec'] != null ? osc_format_date($cron_minutely['d_last_exec'], osc_date_format() . ' ' . osc_time_format()) : __('Never')); ?> / </span>
                 <span class="next"><?php echo (@$cron_minutely['d_next_exec'] != null ? osc_format_date($cron_minutely['d_next_exec'], osc_date_format() . ' ' . osc_time_format()) : __('Never')); ?></span>
               </p>
-              
+
               <p>
                 <span class="type-id"><?php _e('Hourly'); ?>:</span>
                 <span class="last"><?php echo (@$cron_hourly['d_last_exec'] != null ? osc_format_date($cron_hourly['d_last_exec'], osc_date_format() . ' ' . osc_time_format()) : __('Never')); ?> / </span>
                 <span class="next"><?php echo (@$cron_hourly['d_next_exec'] != null ? osc_format_date($cron_hourly['d_next_exec'], osc_date_format() . ' ' . osc_time_format()) : __('Never')); ?></span>
               </p>
-            
+
               <p>
                 <span class="type-id"><?php _e('Daily'); ?>:</span>
                 <span class="last"><?php echo (@$cron_daily['d_last_exec'] != null ? osc_format_date($cron_daily['d_last_exec'], osc_date_format() . ' ' . osc_time_format()) : __('Never')); ?> / </span>
@@ -631,13 +661,13 @@ osc_current_admin_theme_path('parts/header.php');
                 <span class="last"><?php echo (@$cron_weekly['d_last_exec'] != null ? osc_format_date($cron_weekly['d_last_exec'], osc_date_format() . ' ' . osc_time_format()) : __('Never')); ?> / </span>
                 <span class="next"><?php echo (@$cron_weekly['d_next_exec'] != null ? osc_format_date($cron_weekly['d_next_exec'], osc_date_format() . ' ' . osc_time_format()) : __('Never')); ?></span>
               </p>
-              
+
               <p>
                 <span class="type-id"><?php _e('Monthly'); ?>:</span>
                 <span class="last"><?php echo (@$cron_monthly['d_last_exec'] != null ? osc_format_date($cron_monthly['d_last_exec'], osc_date_format() . ' ' . osc_time_format()) : __('Never')); ?> / </span>
                 <span class="next"><?php echo (@$cron_monthly['d_next_exec'] != null ? osc_format_date($cron_monthly['d_next_exec'], osc_date_format() . ' ' . osc_time_format()) : __('Never')); ?></span>
               </p>
-              
+
               <p>
                 <span class="type-id"><?php _e('Yearly'); ?>:</span>
                 <span class="last"><?php echo (@$cron_yearly['d_last_exec'] != null ? osc_format_date($cron_yearly['d_last_exec'], osc_date_format() . ' ' . osc_time_format()) : __('Never')); ?> / </span>
@@ -646,7 +676,7 @@ osc_current_admin_theme_path('parts/header.php');
             </div>
           </div>
 
-          
+
           <h2 class="render-title separate-top"><?php _e('Software updates'); ?></h2>
 
           <div class="form-row">
@@ -663,7 +693,7 @@ osc_current_admin_theme_path('parts/header.php');
               <span class="help-box" style="padding-bottom:0;"><?php echo sprintf(__('You can find your API key at %s section'), '<a href="https://osclasspoint.com/user/profile" target="_blank">' . __('OsclassPoint > Account > My profile') . '</a>'); ?></span>
             </div>
           </div>
-          
+
           <div class="form-row">
             <div class="form-label"><?php _e('Core updates'); ?></div>
             <div class="form-controls">
@@ -687,7 +717,7 @@ osc_current_admin_theme_path('parts/header.php');
               </div>
             </div>
           </div>
-          
+
           <div class="form-row">
             <div class="form-label"><?php _e('Theme updates'); ?></div>
             <div class="form-controls">
@@ -711,7 +741,7 @@ osc_current_admin_theme_path('parts/header.php');
               </div>
             </div>
           </div>
-          
+
           <div class="form-row">
             <div class="form-label"><?php _e('Content folder updates'); ?></div>
             <div class="form-controls">
@@ -721,7 +751,7 @@ osc_current_admin_theme_path('parts/header.php');
                   <?php _e('Allow updates of oc-content folder'); ?>
                 </label>
               </div>
-              
+
               <span class="help-box"><?php _e('Include update of default theme (sigma), languages folder (replace en_US) etc. Applicable for manual & auto update.'); ?></span>
             </div>
           </div>
@@ -743,19 +773,19 @@ osc_current_admin_theme_path('parts/header.php');
           <div class="form-row">
             <div class="form-label"></div>
             <div class="form-controls">
-              <?php 
-                if(osc_get_preference('last_version_check') > 0) { 
-                echo sprintf(__('Last checked on %s'), date('Y-m-d H:i:s', osc_get_preference('last_version_check'))); 
+              <?php
+                if(osc_get_preference('last_version_check') > 0) {
+                echo sprintf(__('Last checked on %s'), date('Y-m-d H:i:s', osc_get_preference('last_version_check')));
                 } else {
                 echo __('Never checked');
                 }
-              ?> 
+              ?>
               <a class="btn btn-mini check" href="<?php echo osc_admin_base_url(true); ?>?page=settings&action=check_updates"><?php _e('Check updates');?></a>
             </div>
           </div>
-          
 
-          <h2 class="render-title separate-top"><?php _e('Logging Settings'); ?></h2>
+
+          <h2 class="render-title separate-top"><?php _e('Logging settings'); ?></h2>
           <div class="form-row">
             <div class="form-label"><?php _e('Logs'); ?></div>
             <div class="form-controls">
@@ -765,7 +795,7 @@ osc_current_admin_theme_path('parts/header.php');
                   <?php _e('Enable logs'); ?>
                 </label>
               </div>
-              
+
               <span class="help-box"><?php _e('Osclass automatically generates logs for various actions, including publishing items, editing items, updating user profiles, and more.'); ?></span>
             </div>
           </div>
@@ -779,11 +809,11 @@ osc_current_admin_theme_path('parts/header.php');
                   <?php _e('Automatically purge outdated logs'); ?>
                 </label>
               </div>
-              
+
               <span class="help-box"><?php _e('Based on your retention policy, old logs are automatically purged daily by a cron job.'); ?></span>
             </div>
           </div>
-          
+
           <div class="form-row">
             <div class="form-label"><?php _e('Retention policy'); ?></div>
             <div class="form-controls has-intext-input">
@@ -792,19 +822,50 @@ osc_current_admin_theme_path('parts/header.php');
               <?php _e('months'); ?>
             </div>
           </div>
-          
-          
-          
+
+          <h2 class="render-title separate-top"><?php _e('Automatic cleanup settings'); ?></h2>
+
+          <div class="form-row">
+            <div class="form-label"><?php _e('Threshold'); ?></div>
+            <div class="form-controls has-intext-input">
+              <?php _e('Remove records older than'); ?>
+              <input type="number" class="input-small in-text" name="cleanup_threshold_days" min=0 value="<?php echo osc_esc_html(osc_cleanup_threshold_days()); ?>"/>
+              <?php _e('days'); ?>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-label"><?php _e('Cleanup sections'); ?></div>
+            <div class="form-controls">
+              <?php $cleanupSelected = osc_cleanup_auto_types_array(); ?>
+              <select name="cleanup_auto_types[]" multiple="multiple" style="min-width:360px;height:170px;">
+                <option value="items_inactive" <?php echo (in_array('items_inactive', $cleanupSelected, true) ? 'selected="selected"' : ''); ?>><?php _e('Inactive listings'); ?></option>
+                <option value="items_blocked_spam" <?php echo (in_array('items_blocked_spam', $cleanupSelected, true) ? 'selected="selected"' : ''); ?>><?php _e('Blocked & Spam listings'); ?></option>
+                <option value="items_expired" <?php echo (in_array('items_expired', $cleanupSelected, true) ? 'selected="selected"' : ''); ?>><?php _e('Expired listings'); ?></option>
+                <option value="users_inactive" <?php echo (in_array('users_inactive', $cleanupSelected, true) ? 'selected="selected"' : ''); ?>><?php _e('Inactive users'); ?></option>
+                <option value="users_blocked" <?php echo (in_array('users_blocked', $cleanupSelected, true) ? 'selected="selected"' : ''); ?>><?php _e('Blocked users'); ?></option>
+                <option value="comments_inactive" <?php echo (in_array('comments_inactive', $cleanupSelected, true) ? 'selected="selected"' : ''); ?>><?php _e('Inactive comments'); ?></option>
+                <option value="comments_blocked" <?php echo (in_array('comments_blocked', $cleanupSelected, true) ? 'selected="selected"' : ''); ?>><?php _e('Blocked comments'); ?></option>
+                <option value="unsubscribed_alerts" <?php echo (in_array('unsubscribed_alerts', $cleanupSelected, true) ? 'selected="selected"' : ''); ?>><?php _e('Unsubscribed alerts'); ?></option>
+                <option value="expired_alerts" <?php echo (in_array('expired_alerts', $cleanupSelected, true) ? 'selected="selected"' : ''); ?>><?php _e('Expired alerts'); ?></option>
+                <option value="expired_ban_rules" <?php echo (in_array('expired_ban_rules', $cleanupSelected, true) ? 'selected="selected"' : ''); ?>><?php _e('Expired ban rules'); ?></option>
+              </select>
+
+              <span class="help-box"><?php _e('Selected sections are automatically cleaned once per day by cron_daily. Set threshold to 0 to disable this feature. Hold Ctrl/Cmd to select multiple entries.'); ?></span>
+            </div>
+          </div>
+
+
           <div class="clear"></div>
-          
+
           <div class="form-actions">
             <input type="submit" id="save_changes" value="<?php echo osc_esc_html(__('Save changes')); ?>" class="btn btn-submit"/>
           </div>
-          
+
         </div>
       </fieldset>
     </form>
   </div>
   <!-- /settings form -->
 </div>
-<?php osc_current_admin_theme_path('parts/footer.php'); ?>
+<?php osc_current_admin_theme_path('parts/footer.php');

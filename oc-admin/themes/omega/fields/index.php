@@ -1,319 +1,284 @@
 <?php
 if(!defined('ABS_PATH')) exit('ABS_PATH is not loaded. Direct access is not allowed.');
 /*
- * Copyright 2020 OsclassPoint.com
+ * Copyright 2014 Osclass
+ * Copyright 2026 Osclass by OsclassPoint.com
  *
  * Osclass maintained & developed by OsclassPoint.com
- * you may not use this file except in compliance with the License.
+ * You may not use this file except in compliance with the License.
  * You may download copy of Osclass at
- * 
+ *
  *     https://osclass-classifieds.com/download
  *
- * Software is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * Do not edit or add to this file if you wish to upgrade Osclass to newer
+ * versions in the future. Software is distributed on an "AS IS" basis, without
+ * warranties or conditions of any kind, either express or implied. Do not remove
+ * this NOTICE section as it contains license information and copyrights.
  */
 
 
-osc_enqueue_script('jquery-treeview');
-osc_enqueue_script('jquery-ui-backoffice');
-
-$fields   = __get('fields');
-$categories = __get('categories');
-$selected   = __get('default_selected');
-
 function addHelp() {
-  echo '<p>' . __('Create new fields for users to fill out when they publish a listing. You can require extra  information such as the number of bedrooms in real estate listings or fuel type in car listings, for example.') . '</p>';
+  echo '<p>' . __('Manage custom fields for the publish form. Use Quick management for drag-and-drop reordering.') . '</p>';
 }
 osc_add_hook('help_box','addHelp');
 
-function customPageHeader(){ 
+function customPageHeader() {
+  $addUrl = osc_admin_base_url(true) . '?page=custom_fields&amp;action=add';
   ?>
-  <h1><?php _e('Listings'); ?>
+  <h1><?php _e('Custom fields'); ?>
     <a href="#" class="btn ico ico-32 ico-help float-right"></a>
-    <a href="#" class="btn btn-green ico ico-add-white float-right" id="add-button"><?php _e('Add custom field'); ?></a>
+    <a href="<?php echo osc_esc_html($addUrl); ?>" class="btn btn-green ico ico-add-white float-right"><?php _e('Add custom field'); ?></a>
+    <a href="<?php echo osc_esc_html(osc_admin_base_url(true) . '?page=custom_fields&amp;action=reorder'); ?>" class="btn btn-white float-right"><?php _e('Quick management'); ?></a>
   </h1>
   <?php
 }
-
 osc_add_hook('admin_page_header','customPageHeader');
 
-
-//customize Head
-function customHead() {
-  $csrf_token = osc_csrf_token_url(); 
-  ?>
-
-<script type="text/javascript">
-  $(function() {
-    var list_original = '';
-
-    $('.sortable').sortable({
-      axis: "y",
-      forcePlaceholderSize: true,
-      handle: '.handle',
-      helper: 'clone',
-      items: 'li',
-      opacity: .8,
-      placeholder: 'placeholder',
-      revert: 100,
-      tabSize: 5,
-      tolerance: 'intersect',
-      start: function(event, ui) {
-        list_original = $(this).sortable('serialize');
-      },
-      stop: function (event, ui) {
-        $(".jsMessage").fadeIn("fast");
-        $(".jsMessage p").attr('class', '');
-        $(".jsMessage p").html('<img height="16" width="16" src="<?php echo osc_current_admin_theme_url('images/loading.gif');?>"> <?php echo osc_esc_js(__('This action could take a while.')); ?>');
-
-        var c_list_original = $(this).sortable('serialize');
-
-        if(list_original != c_list_original) {
-          $.ajax({
-            url: "<?php echo osc_admin_base_url(true) . '?page=ajax&action=cfields_order&' . osc_csrf_token_url(); ?>",
-            type: "POST",
-            data: c_list_original,
-            success: function(res){
-              var ret = eval( "(" + res + ")");
-              var message = "";
-              if( ret.error ) {
-                $(".jsMessage p").attr('class', 'error');
-                message += ret.error;
-              }
-              if( ret.ok ){
-                $(".jsMessage p").attr('class', 'ok');
-                message += ret.ok;
-              }
-
-              $(".jsMessage").show();
-              $(".jsMessage p").html(message);
-            },
-            error: function(){
-              $(".jsMessage").fadeIn("fast");
-              $(".jsMessage p").attr('class', '');
-              $(".jsMessage p").html('<?php echo osc_esc_js(__('Ajax error, please try again.')); ?>');
-            }
-          });
-        }
-      }
-    });
-
-    list_original = $('.sortable').sortable('serialize');   // may not be needed 
-  });
-
-    
-  function show_iframe(class_name, id) {
-    if($('.content_list_'+id+' .custom-field-frame').length == 0){
-      $('.custom-field-frame').remove();
-      var name = 'frame_'+ id;
-      var id_  = 'frame_'+ id;
-      var url  = '<?php echo osc_admin_base_url(true); ?>?page=ajax&action=field_categories_iframe&<?php echo $csrf_token; ?>&id=' + id;
-      $.ajax({
-        url: url,
-        context: document.body,
-        success: function(res){
-          $('div.'+class_name).html(res);
-          $('div.'+class_name).fadeIn("fast");
-        }
-      });
-    } else {
-      $('.custom-field-frame').remove();
-    }
-    return false;
-  }
-
-  function delete_field(id) {
-    $("#dialog-delete-field").attr('data-field-id', id);
-    $("#dialog-delete-field").dialog('open');
-    return false;
-  }
-
-   // check all the categories
-  function checkAll(id, check) {
-    aa = $('#' + id + ' input[type=checkbox]').each(function() {
-      $(this).prop('checked', check);
-    });
-  }
-  function checkCat(id, check) {
-    aa = $('#cat' + id + ' input[type=checkbox]').each(function() {
-      $(this).prop('checked', check);
-    });
-  }
-
-  $(document).ready(function() {
-    $('.cfield-div').on('mouseenter',function(){
-      $(this).addClass('cfield-hover');
-    }).on('mouseleave',function(){
-      $(this).removeClass('cfield-hover');
-    });
-
-    // dialog delete
-    $("#dialog-delete-field").dialog({
-      autoOpen: false,
-      modal: true
-    });
-    
-    $("#field-delete-submit").click(function() {
-      var id  = $("#dialog-delete-field").attr('data-field-id');
-      var url = '<?php echo osc_admin_base_url(true); ?>?page=ajax&action=delete_field&<?php echo $csrf_token; ?>&id=' + id;
-      $.ajax({
-        url: url,
-        context: document.body,
-        success: function(res){
-          var ret = eval( "(" + res + ")");
-          var message = "";
-          if(ret.error) {
-            message += ret.error;
-          }
-          if(ret.ok){
-            message += ret.ok;
-
-            $('#list_'+id).fadeOut("slow");
-            $('#list_'+id).remove();
-          }
-
-          $(".jsMessage").css('display', 'block');
-          $(".jsMessage p").html(message);
-        },
-        error: function(){
-          $(".jsMessage").css('display', 'block');
-          $(".jsMessage p").html('<?php echo osc_esc_js( __("Ajax error, try again.") ); ?>');
-        }
-      });
-      $('#dialog-delete-field').dialog('close');
-      return false;
-    });
-
-    $("#add-button, .add-button").bind('click', function() {
-      $.ajax({
-        url: '<?php echo osc_admin_base_url(true); ?>?page=ajax&action=add_field&<?php echo $csrf_token; ?>',
-        context: document.body,
-        success: function(res){
-          var ret = eval( "(" + res + ")");
-          if(ret.error==0) {
-            var html = '';
-            html += '<li id="list_'+ret.field_id+'" class="field_li even">';
-              html += '<div class="cfield-div" field_id="'+ret.field_id+'" >';
-                html += '<div class="handle ico ico-32 ico-droppable"></div>';
-                html += '<div class="name-edit-cfield" id="quick_edit_'+ret.field_id+'">';
-                  html += ret.field_name;
-                html += '</div>';
-                html += '<div class="actions-edit-cfield">';
-                  html += '<a href="javascript:void(0);"  onclick="show_iframe(\'content_list_'+ret.field_id+'\',\''+ret.field_id+'\');"><?php echo osc_esc_js(__('Edit')); ?></a>';
-                  html += ' &middot; ';
-                  html += '<a href="javascript:void(0);"  onclick="delete_field(\''+ret.field_id+'\');"><?php echo osc_esc_js(__('Delete')); ?></a>';
-                html += '</div>';
-                html += '<div class="edit content_list_'+ret.field_id+'"></div>';
-              html += '</div>';
-            html += '</li>';
-            $("#fields-empty").remove();
-            $("#ul_fields").append(html);
-            show_iframe('content_list_'+ret.field_id, ret.field_id);
-          } else {
-            var message = "";
-            message += '<?php echo osc_esc_js(__('Custom field could not be added')); ?>'
-            $(".jsMessage").fadeIn('fast');
-            $(".jsMessage p").html(message);
-          }
-        }
-      });
-      return false;
-    });
-
-    $("#new_cat_tree").treeview({
-      animated: "fast",
-      collapsed: true
-    });
-
-    $("select[name='field_type_new']").bind('change', function() {
-      if( $(this).attr('value') == 'DROPDOWN' || $(this).attr('value') == 'RADIO' ) {
-        $('#div_field_options').show();
-      } else {
-        $('#div_field_options').hide();
-      }
-    });
-
-    var field_type_new_value = $("select[name='field_type_new']").attr('value');
-    if(
-      field_type_new_value == 'TEXT' 
-      || field_type_new_value == 'NUMBER' 
-      || field_type_new_value == 'TEL' 
-      || field_type_new_value == 'EMAIL' 
-      || field_type_new_value == 'COLOR' 
-      || field_type_new_value == 'TEXTAREA' 
-      || field_type_new_value == 'CHECKBOX' 
-      || field_type_new_value == 'URL'
-    ) {
-      $('#div_field_options').hide();
-    }
-  });
-</script>
-
-  <?php
-}
-
-osc_add_hook('admin_header','customHead', 10);
-
 function customPageTitle($string) {
-  return sprintf(__('Custom fields - %s'), $string);
+  return sprintf(__('%s - %s'), __('Manage custom fields'), $string);
 }
 osc_add_filter('admin_title', 'customPageTitle');
 
-osc_current_admin_theme_path('parts/header.php');
+function customHead() {
+  ?>
+  <script type="text/javascript">
+    function fieldsReloadAfterReorder(id) {
+      var url = window.location.href.split('#')[0];
+      url = url.replace(/([?&])reorderId=\d+/g, '$1').replace(/[?&]$/, '');
+      var sep = (url.indexOf('?') >= 0 ? '&' : '?');
+      window.location.href = url + sep + 'reorderId=' + parseInt(id, 10);
+    }
+
+    function order_up(id) {
+      $('#datatables_list_processing').show();
+      $.ajax({
+        url: "<?php echo osc_admin_base_url(true); ?>?page=ajax&action=order_field&id="+id+"&order=up&<?php echo osc_csrf_token_url(); ?>",
+        success: function(res) {
+          fieldsReloadAfterReorder(id);
+        },
+        error: function(){
+          $('#datatables_list_processing').hide();
+        }
+      });
+    }
+
+    function order_down(id) {
+      $('#datatables_list_processing').show();
+      $.ajax({
+        url: "<?php echo osc_admin_base_url(true); ?>?page=ajax&action=order_field&id="+id+"&order=down&<?php echo osc_csrf_token_url(); ?>",
+        success: function(res) {
+          fieldsReloadAfterReorder(id);
+        },
+        error: function(){
+          $('#datatables_list_processing').hide();
+        }
+      });
+    }
+
+    $(document).ready(function(){
+      var $reorderedRow = $('.table tr.row-reordered');
+      if($reorderedRow.length) {
+        setTimeout(function() {
+          $reorderedRow.removeClass('row-reordered');
+          var url = window.location.href.split('#')[0];
+          url = url.replace(/([?&])reorderId=\d+/g, '$1').replace(/[?&]$/, '');
+          if(window.history && window.history.replaceState) {
+            window.history.replaceState({}, document.title, url);
+          }
+        }, 3000);
+      }
+
+      $("#check_all").change(function(){
+        var isChecked = $(this).prop("checked");
+        $('.col-bulkactions input').each(function() {
+          this.checked = (isChecked == 1);
+        });
+      });
+
+      $("#dialog-field-delete").dialog({ autoOpen: false, modal: true });
+      $("#dialog-bulk-actions").dialog({ autoOpen: false, modal: true });
+      $("#bulk-actions-submit").click(function() { $("#datatablesForm").submit(); });
+      $("#bulk-actions-cancel").click(function() {
+        $("#datatablesForm").attr('data-dialog-open', 'false');
+        $('#dialog-bulk-actions').dialog('close');
+      });
+      $("#datatablesForm").submit(function() {
+        if($("#bulk_actions option:selected").val() == "") {
+          return false;
+        }
+        if($("#datatablesForm").attr('data-dialog-open') == "true") {
+          return true;
+        }
+        $("#dialog-bulk-actions .form-row").html($("#bulk_actions option:selected").attr('data-dialog-content'));
+        $("#bulk-actions-submit").html($("#bulk_actions option:selected").text());
+        $("#datatablesForm").attr('data-dialog-open', 'true');
+        $("#dialog-bulk-actions").dialog('open');
+        return false;
+      });
+    });
+
+    function delete_dialog(id) {
+      $("#dialog-field-delete input[name='id']").val(id);
+      $("#dialog-field-delete").dialog('open');
+      return false;
+    }
+
+    function checkAll(id, check) {
+      $('#' + id + ' input[type=checkbox]').each(function() {
+        $(this).prop('checked', check);
+      });
+    }
+  </script>
+  <?php
+}
+osc_add_hook('admin_header','customHead', 10);
+
+$aData = __get('aData');
+$aRawRows = __get('aRawRows');
+$listUrl = __get('list_url');
+if($listUrl == '') {
+  $listUrl = osc_admin_base_url(true) . '?page=custom_fields';
+}
+$sort = Params::getParam('sort');
+$direction = Params::getParam('direction');
+$reorderId = (int)Params::getParam('reorderId');
+$columns = $aData['aColumns'];
+$columnSources = (isset($aData['aColumnSources']) ? $aData['aColumnSources'] : array());
+$sortableColumns = (isset($aData['aSortableColumns']) ? $aData['aSortableColumns'] : array());
+$rows = $aData['aRows'];
+$withFilters = __get('withFilters');
+$resetUrl = osc_admin_base_url(true) . '?page=custom_fields';
 ?>
 
-<div class="flashmessage flashmessage-info">
-  <p class="info"><?php _e('Drag & drop the custom fields to reorder them the way you like. Click on edit link to edit the custom field'); ?></p>
-</div>
+<?php osc_current_admin_theme_path('parts/header.php'); ?>
 
-<div class="header_title">
-  <h2 class="render-title"><?php _e('Custom fields'); ?> <a href="javascript:void(0);" class="btn btn-mini add-button"><?php _e('Add new'); ?></a></h2>
-</div>
+<h2 class="render-title"><?php _e('Manage custom fields'); ?> <a href="<?php echo osc_esc_html(osc_admin_base_url(true) . '?page=custom_fields&amp;action=add'); ?>" class="btn btn-mini"><?php _e('Add new'); ?></a></h2>
 
-<!-- custom fields -->
-<div class="custom-fields">
-  <!-- list fields -->
-  <div class="list-fields">
-    <ul id="ul_fields" class="sortable">
-    <?php $even = true;
-    if( count($fields) == 0 ) { ?>
-      <span id="fields-empty"><?php _e("You don't have any custom fields yet"); ?></span>
-    <?php } else {
-      foreach($fields as $field) { ?>
-        <li id="list_<?php echo $field['pk_i_id']; ?>" class="field_li <?php echo ( $even ? 'even' : 'odd' ); ?>">
-          <div class="cfield-div" field_id="<?php echo $field['pk_i_id']; ?>" >
-            <div class="handle ico ico-32 ico-droppable"></div>
-            <div class="name-edit-cfield" id="<?php echo "quick_edit_" . $field['pk_i_id']; ?>">
-              <?php echo $field['s_name']; ?>
-            </div>
-            <div class="actions-edit-cfield">
-              <a href="javascript:void(0);" onclick="javascript:show_iframe('content_list_<?php echo $field['pk_i_id']; ?>','<?php echo $field['pk_i_id']; ?>');"><?php _e('Edit'); ?></a>
-               &middot;
-              <a href="javascript:void(0);" onclick="javascript:delete_field('<?php echo $field['pk_i_id']; ?>');"><?php _e('Delete'); ?></a>
-            </div>
-            <div class="edit content_list_<?php echo $field['pk_i_id']; ?>"></div>
-          </div>
-        </li>
-        <?php $even = !$even; }
-    } ?>
-    </ul>
+<div class="relative">
+  <div id="fields-toolbar" class="table-toolbar">
+    <div class="float-right">
+      <form method="get" action="<?php echo osc_admin_base_url(true); ?>" class="inline nocsrf">
+        <?php foreach(Params::getParamsAsArray('get') as $key => $value) { ?>
+        <?php if($key != 'iDisplayLength' && $key != 'reorderId') { ?>
+        <input type="hidden" name="<?php echo osc_esc_html(strip_tags($key)); ?>" value="<?php echo osc_esc_html(strip_tags($value)); ?>" />
+        <?php } } ?>
+        <select name="iDisplayLength" class="select-box-extra select-box-medium float-left" onchange="this.form.submit();">
+          <option value="10" <?php if(Params::getParam('iDisplayLength') == 10) echo 'selected'; ?>><?php printf(__('%d fields'), 10); ?></option>
+          <option value="25" <?php if(Params::getParam('iDisplayLength') == 25) echo 'selected'; ?>><?php printf(__('%d fields'), 25); ?></option>
+          <option value="50" <?php if(Params::getParam('iDisplayLength') == 50) echo 'selected'; ?>><?php printf(__('%d fields'), 50); ?></option>
+          <option value="100" <?php if(Params::getParam('iDisplayLength') == 100) echo 'selected'; ?>><?php printf(__('%d fields'), 100); ?></option>
+        </select>
+      </form>
+      <form method="get" action="<?php echo osc_admin_base_url(true); ?>" id="shortcut-filters" class="inline nocsrf">
+        <input type="hidden" name="page" value="custom_fields" />
+        <?php foreach(Params::getParamsAsArray('get') as $key => $value) { ?>
+        <?php if(!in_array($key, array('page', 'sSearch', 'action', 'reorderId'), true)) { ?>
+        <input type="hidden" name="<?php echo osc_esc_html(strip_tags($key)); ?>" value="<?php echo osc_esc_html(strip_tags($value)); ?>" />
+        <?php } } ?>
+        <?php if($withFilters) { ?>
+        <a id="btn-hide-filters" href="<?php echo osc_esc_html($resetUrl); ?>" class="btn btn-hide-filters"><?php _e('Reset filters'); ?></a>
+        <?php } ?>
+        <input name="sSearch" type="text" class="input-text input-actions" value="<?php echo osc_esc_html(Params::getParam('sSearch')); ?>" placeholder="<?php echo osc_esc_html(__('Search custom fields')); ?>" />
+        <input type="submit" class="btn submit-right" value="<?php echo osc_esc_html(__('Find')); ?>">
+      </form>
+    </div>
   </div>
-  <!-- /list fields -->
+
+  <form id="datatablesForm" action="<?php echo osc_admin_base_url(true); ?>" method="post">
+    <?php echo osc_csrf_token_form(); ?>
+    <input type="hidden" name="page" value="custom_fields" />
+    <?php if(Params::getParam('iDisplayLength') != '') { ?><input type="hidden" name="iDisplayLength" value="<?php echo (int)Params::getParam('iDisplayLength'); ?>" /><?php } ?>
+    <?php if(Params::getParam('sort') != '') { ?><input type="hidden" name="sort" value="<?php echo osc_esc_html(Params::getParam('sort')); ?>" /><?php } ?>
+    <?php if(Params::getParam('direction') != '') { ?><input type="hidden" name="direction" value="<?php echo osc_esc_html(Params::getParam('direction')); ?>" /><?php } ?>
+    <?php if(Params::getParam('iPage') != '') { ?><input type="hidden" name="iPage" value="<?php echo (int)Params::getParam('iPage'); ?>" /><?php } ?>
+    <?php if(Params::getParam('sSearch') != '') { ?><input type="hidden" name="sSearch" value="<?php echo osc_esc_html(Params::getParam('sSearch')); ?>" /><?php } ?>
+    <?php if(Params::getParam('e_type') != '') { ?><input type="hidden" name="e_type" value="<?php echo osc_esc_html(Params::getParam('e_type')); ?>" /><?php } ?>
+
+    <div id="bulk-actions">
+      <label>
+        <?php osc_print_bulk_actions('bulk_actions', 'action', __get('bulk_options'), 'select-box-extra'); ?>
+        <input type="submit" id="bulk_apply" class="btn" value="<?php echo osc_esc_html(__('Apply')); ?>" />
+      </label>
+    </div>
+
+    <div class="table-contains-actions">
+      <table class="table" cellpadding="0" cellspacing="0">
+        <thead>
+          <tr>
+            <?php foreach($columns as $k => $v) {
+              $sourceCol = (isset($columnSources[$k]) ? $columnSources[$k] : '');
+              $isSortable = ((in_array($k, $sortableColumns, true) || strpos((string)$v, 'sort=') !== false) ? 'is-sortable' : '');
+              echo '<th class="col-'.$k.' '.$isSortable.' '.($sort==$k?($direction=='desc'?'sort-desc':'sort-asc'):'').'" data-source-col="' . osc_esc_html($sourceCol) . '">' . $v . '</th>';
+            } ?>
+          </tr>
+        </thead>
+        <tbody>
+        <?php if(count($rows) > 0) { ?>
+          <?php foreach($rows as $key => $row) {
+            $rowId = (isset($aRawRows[$key]['pk_i_id']) ? (int)$aRawRows[$key]['pk_i_id'] : 0);
+            $rowClass = osc_apply_filter('datatable_fields_class', array(), isset($aRawRows[$key]) ? $aRawRows[$key] : array(), $row);
+            if($reorderId > 0 && $rowId === $reorderId) {
+              $rowClass[] = 'row-reordered';
+            }
+            $rowClassAttr = trim(implode(' ', $rowClass));
+          ?>
+            <tr<?php if($rowClassAttr != '') { echo ' class="' . osc_esc_html($rowClassAttr) . '"'; } ?> data-row-id="<?php echo $rowId; ?>">
+              <?php foreach($row as $k => $v) { ?>
+                <td class="col-<?php echo $k; ?>"><?php echo $v; ?></td>
+              <?php } ?>
+            </tr>
+          <?php } ?>
+        <?php } else { ?>
+          <tr>
+            <td colspan="<?php echo max(1, count($columns)); ?>" class="text-center"><p><?php _e('No data available in table'); ?></p></td>
+          </tr>
+        <?php } ?>
+        </tbody>
+      </table>
+      <div id="table-row-actions"></div>
+    </div>
+  </form>
 </div>
-<!-- /custom fields -->
 
-<div class="clear"></div>
+<?php
+function showingResults(){
+  $aData = __get('aData');
+  echo '<ul class="showing-results"><li><span>'.osc_pagination_showing((Params::getParam('iPage')-1)*$aData['iDisplayLength']+1, ((Params::getParam('iPage')-1)*$aData['iDisplayLength'])+count($aData['aRows']), $aData['iTotalDisplayRecords'], $aData['iTotalRecords']).'</span></li></ul>';
+}
+osc_add_hook('before_show_pagination_admin','showingResults');
+osc_show_pagination_admin($aData);
+?>
 
-<div id="dialog-delete-field" title="<?php echo osc_esc_html(__('Delete custom field')); ?>" class="has-form-actions hide" data-field-id="">
+<form id="dialog-field-delete" method="get" action="<?php echo osc_admin_base_url(true); ?>" class="has-form-actions hide" title="<?php echo osc_esc_html(__('Delete custom field')); ?>">
+  <input type="hidden" name="page" value="custom_fields" />
+  <input type="hidden" name="action" value="delete" />
+  <input type="hidden" name="id" value="" />
+  <?php echo osc_csrf_token_form(); ?>
+  <?php if(Params::getParam('iDisplayLength') != '') { ?><input type="hidden" name="iDisplayLength" value="<?php echo (int)Params::getParam('iDisplayLength'); ?>" /><?php } ?>
+  <?php if(Params::getParam('sort') != '') { ?><input type="hidden" name="sort" value="<?php echo osc_esc_html(Params::getParam('sort')); ?>" /><?php } ?>
+  <?php if(Params::getParam('direction') != '') { ?><input type="hidden" name="direction" value="<?php echo osc_esc_html(Params::getParam('direction')); ?>" /><?php } ?>
+  <?php if(Params::getParam('iPage') != '') { ?><input type="hidden" name="iPage" value="<?php echo (int)Params::getParam('iPage'); ?>" /><?php } ?>
+  <?php if(Params::getParam('sSearch') != '') { ?><input type="hidden" name="sSearch" value="<?php echo osc_esc_html(Params::getParam('sSearch')); ?>" /><?php } ?>
+  <?php if(Params::getParam('e_type') != '') { ?><input type="hidden" name="e_type" value="<?php echo osc_esc_html(Params::getParam('e_type')); ?>" /><?php } ?>
   <div class="form-horizontal">
     <div class="form-row"><?php _e('Are you sure you want to delete this custom field?'); ?></div>
     <div class="form-actions">
       <div class="wrapper">
-        <a id="field-delete-submit" href="javascript:void(0);" class="btn btn-submit" ><?php echo osc_esc_html( __('Delete') ); ?></a>
-        <a class="btn" href="javascript:void(0);" onclick="$('#dialog-delete-field').dialog('close');"><?php _e('Cancel'); ?></a>
+        <input type="submit" class="btn btn-red" value="<?php echo osc_esc_html(__('Delete')); ?>" />
+        <a class="btn" href="javascript:void(0);" onclick="$('#dialog-field-delete').dialog('close');"><?php _e('Cancel'); ?></a>
       </div>
+    </div>
+  </div>
+</form>
+
+<div id="dialog-bulk-actions" title="<?php _e('Bulk actions'); ?>" class="has-form-actions hide">
+  <div class="form-horizontal">
+    <div class="form-row"></div>
+    <div class="form-actions">
+      <a id="bulk-actions-submit" href="javascript:void(0);" class="btn btn-submit"><?php echo osc_esc_html(__('Apply')); ?></a>
+      <a id="bulk-actions-cancel" class="btn" href="javascript:void(0);"><?php _e('Cancel'); ?></a>
     </div>
   </div>
 </div>
 
-<?php osc_current_admin_theme_path('parts/footer.php'); ?>
+<?php osc_current_admin_theme_path('parts/footer.php');

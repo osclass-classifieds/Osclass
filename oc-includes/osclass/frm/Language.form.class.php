@@ -125,12 +125,12 @@ class LanguageForm extends Form {
   * @return bool
   */
   public static function def_currency_select($locale = null, $currencies = null) {
-    if($currencies == null || !is_array($currencies) || empty($currencies)) { 
-      $currencies = osc_get_currencies(); 
+    if($currencies == null || !is_array($currencies) || empty($currencies)) {
+      $currencies = osc_get_currencies();
     }
-    
+
     $default_key = osc_get_preference('currency');
-    
+
     if(isset($locale['fk_c_currency_code']) && $locale['fk_c_currency_code'] !== '') {
       $default_key = $locale['fk_c_currency_code'];
     }
@@ -139,7 +139,7 @@ class LanguageForm extends Form {
 
     return true;
   }
-  
+
   /**
   * @param null $locale
   *
@@ -169,7 +169,7 @@ class LanguageForm extends Form {
     parent::generic_input_checkbox('b_locations_native', '1', $locale['b_locations_native'] == 1);
     return true;
   }
-  
+
   /**
   * @param null $locale
   *
@@ -225,36 +225,36 @@ class LanguageForm extends Form {
         },
         messages: {
           s_name: {
-            required: "<?php _e('Name: this field is required'); ?>.",
-            minlength: "<?php _e('Name: this field is required'); ?>."
+            required: "<?php echo sprintf(__('%s is required'), __('Name')); ?>.",
+            minlength: "<?php echo sprintf(__('%s is required'), __('Name')); ?>."
           },
           s_short_name: {
-            required: "<?php _e('Short name: this field is required'); ?>.",
-            minlength: "<?php _e('Short name: this field is required'); ?>."
+            required: "<?php echo sprintf(__('%s is required'), __('Short name')); ?>.",
+            minlength: "<?php echo sprintf(__('%s is required'), __('Short name')); ?>."
           },
           s_description: {
-            required: "<?php _e('Description: this field is required'); ?>.",
-            minlength: "<?php _e('Description: this field is required'); ?>."
+            required: "<?php echo sprintf(__('%s is required'), __('Description')); ?>.",
+            minlength: "<?php echo sprintf(__('%s is required'), __('Description')); ?>."
           },
           s_currency_format: {
-            required: "<?php _e('Currency format: this field is required'); ?>.",
-            minlength: "<?php _e('Currency format: this field is required'); ?>."
+            required: "<?php echo sprintf(__('%s is required'), __('Currency format')); ?>.",
+            minlength: "<?php echo sprintf(__('%s is required'), __('Currency format')); ?>."
           },
           i_num_dec: {
-            required: "<?php _e('Number of decimals: this field is required'); ?>.",
+            required: "<?php echo sprintf(__('%s is required'), __('Number of decimals')); ?>.",
             digits: "<?php _e('Number of decimals: this field must only contain numeric characters'); ?>."
           },
           s_dec_point: {
-            required: "<?php _e('Decimal point: this field is required'); ?>.",
-            minlength: "<?php _e('Decimal point: this field is required'); ?>."
+            required: "<?php echo sprintf(__('%s is required'), __('Decimal point')); ?>.",
+            minlength: "<?php echo sprintf(__('%s is required'), __('Decimal point')); ?>."
           },
           s_thousand_sep: {
-            required: "<?php _e('Thousands separator: this field is required'); ?>.",
-            minlength: "<?php _e('Thousands separator: this field is required'); ?>."
+            required: "<?php echo sprintf(__('%s is required'), __('Thousands separator')); ?>.",
+            minlength: "<?php echo sprintf(__('%s is required'), __('Thousands separator')); ?>."
           },
           s_date_format: {
-            required: "<?php _e('Date format: this field is required'); ?>.",
-            minlength: "<?php _e('Date format: this field is required'); ?>."
+            required: "<?php echo sprintf(__('%s is required'), __('Date format')); ?>.",
+            minlength: "<?php echo sprintf(__('%s is required'), __('Date format')); ?>."
           }
         },
         wrapper: "li",

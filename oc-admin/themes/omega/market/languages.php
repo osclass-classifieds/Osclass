@@ -29,7 +29,7 @@ function addHelp() {
 }
 osc_add_hook('help_box','addHelp');
 
-function customPageHeader2(){ 
+function customPageHeader2(){
   ?>
   <h1>
     <?php echo sprintf(__('%s on market'), __('Languages')); ?>
@@ -58,7 +58,7 @@ $lang_all = OSCLocale::newInstance()->listAll();
 $lang_enabled_fo = OSCLocale::newInstance()->listAllEnabled(false, true);
 $lang_enabled_bo = OSCLocale::newInstance()->listAllEnabled(true, true);
 
-osc_current_admin_theme_path( 'market/header.php' ); 
+osc_current_admin_theme_path( 'market/header.php' );
 ?>
 
 <div id="market-block" class="<?php echo osc_esc_html($action); ?>">
@@ -74,9 +74,9 @@ osc_current_admin_theme_path( 'market/header.php' );
         <input type="text" name="pattern" class="input-text" value="<?php echo Params::getParam('pattern'); ?>" placeholder="<?php echo osc_esc_html(__('Search language...')); ?>"/>
 
         <select name="action" class="select-box-extra select-box-medium float-left" onchange="this.form.submit();">
-          <option value="languages" <?php if( Params::getParam('action') == 'languages' ) echo 'selected="selected"'; ?> ><?php _e('Osclass translations'); ?></option>
-          <option value="languages-themes" <?php if( Params::getParam('action') == 'languages-themes' ) echo 'selected="selected"'; ?> ><?php _e('Themes translations'); ?></option>
-          <option value="languages-plugins" <?php if( Params::getParam('action') == 'languages-plugins' ) echo 'selected="selected"'; ?> ><?php _e('Plugins translations'); ?></option>
+          <option value="languages" <?php if(Params::getParam('action') == 'languages' ) echo 'selected="selected"'; ?> ><?php _e('Osclass translations'); ?></option>
+          <option value="languages-themes" <?php if(Params::getParam('action') == 'languages-themes' ) echo 'selected="selected"'; ?> ><?php _e('Themes translations'); ?></option>
+          <option value="languages-plugins" <?php if(Params::getParam('action') == 'languages-plugins' ) echo 'selected="selected"'; ?> ><?php _e('Plugins translations'); ?></option>
         </select>
 
         <button type="submit" class="btn btn-submit"><?php _e('Filter'); ?></button>
@@ -112,12 +112,12 @@ osc_current_admin_theme_path( 'market/header.php' );
           } else {
             $version_req = sprintf(__('%s or higher'), $p['s_version']);
           }
-          
+
           $compatible_from = true;
 
           if($vfrom != '' && $vfrom != null && $vfrom != 'null') {
             $check_from = version_compare2($vfrom, osc_version());
-            if ($check_from == 1) {    // A > B
+            if($check_from == 1) {    // A > B
               $compatible_from = false;
             }
           }
@@ -128,7 +128,7 @@ osc_current_admin_theme_path( 'market/header.php' );
             $current_ver = trim(str_replace('osclass', '', $current_ver));
 
             $check_update = version_compare2($p['version'], $current_ver);
-            if ($check_update == 1) {    // A > B 
+            if($check_update == 1) {    // A > B
               $need_update = true;
             }
           }
@@ -147,15 +147,15 @@ osc_current_admin_theme_path( 'market/header.php' );
             <div class="desc">
               <div class="line"><strong><?php _e('File name'); ?>:</strong> <span><?php echo $p['full_name']; ?></span></div>
               <div class="line"><strong><?php _e('Updated on'); ?>:</strong> <span><?php echo date('Y-m-d', strtotime($p['date'])); ?></span></div>
-              <div class="line"><strong><?php _e('Size'); ?>:</strong> <span><?php echo $p['size']; ?></span></div> 
+              <div class="line"><strong><?php _e('Size'); ?>:</strong> <span><?php echo $p['size']; ?></span></div>
             </div>
 
             <div class="actions">
-              <?php if ($pstat != 'NOT' && $need_update && $compatible_from) { ?>
+              <?php if($pstat != 'NOT' && $need_update && $compatible_from) { ?>
                 <a class="mkt-update btn btn-gray is-update" href="<?php echo $p['url']; ?>" data-product-key="<?php echo osc_esc_html($p['code']); ?>"><i class="fa fa-refresh"></i> <?php _e('Update'); ?></a>
 
-              <?php } else if ($pstat != 'NOT' && $need_update) { ?>
-                <a href="#" onclick="return false;" class="btn btn-gray" title="<?php echo osc_esc_html(__('Not compatible with your osclass version')); ?>"><i class="fa fa-exclamation-circle"></i> <?php _e('Can\'t update'); ?></a>
+              <?php } elseif($pstat != 'NOT' && $need_update) { ?>
+                <a href="#" onclick="return false;" class="btn btn-gray" title="<?php echo osc_esc_html(__('Not compatible with your osclass version')); ?>"><i class="fa fa-exclamation-circle"></i> <?php _e('Cannot update'); ?></a>
 
               <?php } else if($pstat == 'NOT') { ?>
                 <a class="mkt-update btn btn-gray" href="<?php echo $p['url']; ?>" data-product-key="<?php echo osc_esc_html($p['code']); ?>"><i class="fa fa-download"></i> <?php _e('Download'); ?></a>
@@ -246,7 +246,7 @@ osc_current_admin_theme_path( 'market/header.php' );
     $('a.btn.enable, a.btn.install').on('click', function(e){
       e.preventDefault();
 
-      $(this).find('i').removeClass().addClass('fa').addClass('fa-spinner').addClass('fa-spin'); 
+      $(this).find('i').removeClass().addClass('fa').addClass('fa-spinner').addClass('fa-spin');
 
       $.ajax({
         url : $(this).attr('href'),
@@ -273,11 +273,11 @@ osc_current_admin_theme_path( 'market/header.php' );
           content += oscEscapeHTML(data.message);
 
           if(elem.hasClass('is-update')) {
-            content += '<h3><?php echo osc_esc_js(__('Language has been updated correctly.')); ?></h3>';
+            content += '<h3><?php echo osc_esc_js(__('The package has been updated')); ?></h3>';
           } else {
-            content += '<h3><?php echo osc_esc_js(__('Language has been downloaded correctly.')); ?></h3>';
+            content += '<h3><?php echo osc_esc_js(__('The package has been downloaded')); ?></h3>';
           }
-          
+
           content += "<p>";
           content += '<a class="btn btn-mini btn-green" href="<?php echo osc_admin_base_url(true); ?>?page=languages&marketError='+data.error+'&message='+oscEscapeHTML(data.message)+'&slug='+oscEscapeHTML(data.data['download'])+'"><?php echo osc_esc_js(__('Go to language page')); ?></a>';
           content += '<a class="btn btn-mini" href="javascript:location.reload(true)"><?php echo osc_esc_js(__('Close')); ?></a>';
@@ -327,11 +327,11 @@ osc_current_admin_theme_path( 'market/header.php' );
     }
 
     var dialogWidth = 485;
-    
+
     if($(window).width() < 525) {
       dialogWidth = $(window).width() - 40;
     }
-    
+
     $('#market_installer').dialog({
       modal: true,
       title: modalTitle,
@@ -342,4 +342,4 @@ osc_current_admin_theme_path( 'market/header.php' );
   });
 </script>
 
-<?php osc_current_admin_theme_path( 'parts/footer.php' ); ?>
+<?php osc_current_admin_theme_path( 'parts/footer.php' );

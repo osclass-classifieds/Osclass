@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 if(!defined('ABS_PATH')) exit('ABS_PATH is not loaded. Direct access is not allowed.');
 /*
  * Copyright 2014 Osclass
@@ -18,23 +18,18 @@ if(!defined('ABS_PATH')) exit('ABS_PATH is not loaded. Direct access is not allo
 
 
 $users      = __get("users");
-$max        = __get("max");
+$listings   = __get("listings");
 $item       = __get("item");
 $users_by_country = __get("users_by_country");
 $users_by_region  = __get("users_by_region");
+$users_by_company = __get("users_by_company");
+$users_by_status = __get("users_by_status");
+$items_by_user_type = __get("items_by_user_type");
 $latest_users   = __get("latest_users");
-$type       = Params::getParam('type_stat');
-
-switch($type){
-  case 'week':
-    $type_stat = __('Last 10 weeks');
-    break;
-  case 'month':
-    $type_stat = __('Last 10 months');
-    break;
-  default:
-    $type_stat = __('Last 10 days');
-}
+$comments_by_kind = __get("comments_by_kind");
+$period     = __get("stats_period");
+$prev_users = (int)__get('prev_users');
+$prev_listings = (int)__get('prev_listings');
 
 osc_add_filter('render-wrapper','render_offset');
 function render_offset(){
@@ -42,7 +37,13 @@ function render_offset(){
 }
 
 function addHelp() {
-  echo '<p>' . __('Stay up-to-date on the number of users registered on your site. You can also see a breakdown of the countries and regions where users live among those available on your site.') . '</p>';
+  echo '<p>' . __('New user registrations and new listings for the selected period, plus where registered users are located.') . '</p>';
+  echo '<p>' . __('Users by country and region are all-time totals. Those charts show the top values; the rest are grouped as Other.') . '</p>';
+  echo '<p>' . __('Users by type counts registered personal and company accounts.') . '</p>';
+  echo '<p>' . __('Users by status counts pending validation, active and blocked accounts. Blocked takes priority over pending validation.') . '</p>';
+  echo '<p>' . __('Listings by user type counts all listings from non-registered posters, personal accounts and business accounts.') . '</p>';
+  echo '<p>' . __('Comments chart uses the same period. It splits registered users from guests and shows each as a share of that day.') . '</p>';
+  echo '<p>' . __('Saved-search alerts have their own statistics page.') . '</p>';
 }
 osc_add_hook('help_box','addHelp');
 
@@ -55,184 +56,279 @@ function customPageHeader(){ ?>
 }
 
 function customPageTitle($string) {
-  return sprintf(__('User Statistics - %s'), $string);
+  return sprintf(__('%s - %s'), __('User statistics'), $string);
 }
 osc_add_filter('admin_title', 'customPageTitle');
 
 function customHead(){
-  $users      = __get("users");
-  $max        = __get("max");
-  $item       = __get("item");
-  $users_by_country = __get("users_by_country");
-  $users_by_region  = __get("users_by_region");
-  $latest_users   = __get("latest_users");
-  ?>
-  <script type="text/javascript" src="https://www.google.com/jsapi"></script>
-  <?php if(count($users)>0) { ?>
-    <script type="text/javascript">
-    // Load the Visualization API and the piechart package.
-    google.load('visualization', '1', {'packages':['corechart']});
-
-    // Set a callback to run when the Google Visualization API is loaded.
-    google.setOnLoadCallback(drawChart);
-
-    // Callback that creates and populates a data table,
-    // instantiates the pie chart, passes in the data and
-    // draws it.
-    function drawChart() {
-      var data = new google.visualization.DataTable();
-
-      data.addColumn('string', '<?php echo osc_esc_js(__('Date')); ?>',0,1);
-      data.addColumn('number', '<?php echo osc_esc_js(__('New users')); ?>');
-      <?php $k = 0;
-      echo "data.addRows(" . count($users) . ");";
-      foreach($users as $date => $num) {
-        echo "data.setValue(" . $k . ', 0, "'. $date . '");';
-        echo "data.setValue(" . $k . ", 1, " . $num . ");";
-        $k++;
-      }
-      ?>
-
-      // Instantiate and draw our chart, passing in some options.
-      var chart = new google.visualization.AreaChart(document.getElementById('placeholder'));
-      var options = 
-        {
-        colors:['<?php echo omg_current_color_scheme_chart(); ?>','<?php echo omg_current_color_scheme_chart(); ?>'],
-          areaOpacity: 0.15,
-          lineWidth:2,
-          hAxis: {
-          viewWindow:'explicit',
-          showTextEvery: 2,
-          slantedText: false,
-          color: 'none',
-          baselineColor: 'none',
-          textStyle: {
-            color: '#8C8C8C',
-            fontName: 'Calibri',
-            fontSize: 12
-          }
-          },
-          vAxis: {
-          color: 'none',
-          baselineColor: 'none',
-          textStyle: {
-            color: '#8C8C8C',
-            fontName: 'Calibri',
-            fontSize: 12
-          },      
-          gridlines: {
-            color: '#ddd',
-            count: 4
-          }
-          },
-          legend: 'none',
-          pointSize: 10,
-          animation: {
-          duration: 500,
-          easing: 'out',
-          startup: true
-          },
-          chartArea:{
-          left:10,
-          top:10,
-          width:"95%",
-          height:"84%"
-          }
-        };
-        
-      chart.draw(data, options);
-
-      var data_country = new google.visualization.DataTable();
-      data_country.addColumn('string', '<?php _e('Country'); ?>');
-      data_country.addColumn('number', '<?php _e('Users per country'); ?>');
-      data_country.addRows(<?php echo count($users_by_country); ?>);
-      <?php foreach($users_by_country as $k => $v) {
-        echo "data_country.setValue(" . $k . ", 0, '" . ( ( $v['s_country'] == NULL ) ? __('Unknown') : $v['s_country'] ) . "');";
-        echo "data_country.setValue(" . $k . ", 1, " . $v['num'] . ");";
-      } ?>
-
-      // Create and draw the visualization.
-      new google.visualization.PieChart(document.getElementById('by_country')).draw(data_country, {title:null,height: 200});
-
-      var data_region = new google.visualization.DataTable();
-      data_region.addColumn('string', '<?php _e('Region'); ?>');
-      data_region.addColumn('number', '<?php _e('Users per region'); ?>');
-      data_region.addRows(<?php echo count($users_by_region); ?>);
-      <?php foreach($users_by_region as $k => $v) {
-        echo "data_region.setValue(" . $k . ", 0, '" . ( ( $v['s_region'] == NULL ) ? __('Unknown') : $v['s_region'] ) . "');";
-        echo "data_region.setValue(" . $k . ", 1, " . $v['num'] . ");";
-      } ?>
-
-      // Create and draw the visualization.
-      new google.visualization.PieChart(document.getElementById('by_region')).draw(data_region, {title:null,height: 200});
+  $users = __get("users");
+  $listings = __get("listings");
+  $users_by_country = osc_admin_stats_limit_slices((array)__get("users_by_country"), 's_country');
+  $users_by_region  = osc_admin_stats_limit_slices((array)__get("users_by_region"), 's_region');
+  $users_by_company = __get("users_by_company");
+  if(!is_array($users_by_company)) {
+    $users_by_company = array();
+  }
+  $users_by_company_rows = array(
+    array('s_label' => __('Personal'), 'num' => (int)(isset($users_by_company['personal']) ? $users_by_company['personal'] : 0)),
+    array('s_label' => __('Company'), 'num' => (int)(isset($users_by_company['company']) ? $users_by_company['company'] : 0))
+  );
+  if(isset($users_by_company['other']) && (int)$users_by_company['other'] > 0) {
+    $users_by_company_rows[] = array('s_label' => __('Other'), 'num' => (int)$users_by_company['other']);
+  }
+  $users_by_status = __get("users_by_status");
+  if(!is_array($users_by_status)) {
+    $users_by_status = array();
+  }
+  $users_by_status_rows = array(
+    array('s_label' => __('Pending'), 'num' => (int)(isset($users_by_status['pending']) ? $users_by_status['pending'] : 0)),
+    array('s_label' => __('Active'), 'num' => (int)(isset($users_by_status['active']) ? $users_by_status['active'] : 0)),
+    array('s_label' => __('Blocked'), 'num' => (int)(isset($users_by_status['blocked']) ? $users_by_status['blocked'] : 0))
+  );
+  $items_by_user_type = __get("items_by_user_type");
+  if(!is_array($items_by_user_type)) {
+    $items_by_user_type = array();
+  }
+  $items_by_user_type_rows = array(
+    array('s_label' => __('Guest'), 'num' => (int)(isset($items_by_user_type['guest']) ? $items_by_user_type['guest'] : 0)),
+    array('s_label' => __('Personal'), 'num' => (int)(isset($items_by_user_type['personal']) ? $items_by_user_type['personal'] : 0)),
+    array('s_label' => __('Business'), 'num' => (int)(isset($items_by_user_type['business']) ? $items_by_user_type['business'] : 0))
+  );
+  $comments_by_kind = __get("comments_by_kind");
+  if(!is_array($comments_by_kind)) {
+    $comments_by_kind = array();
+  }
+  $comments_kind_user = 0;
+  $comments_kind_guest = 0;
+  foreach($comments_by_kind as $vals) {
+    if(!is_array($vals)) {
+      continue;
     }
-    </script>
-  <?php } ?>
-  <?php 
+    $comments_kind_user += (int)(isset($vals[0]) ? $vals[0] : 0);
+    $comments_kind_guest += (int)(isset($vals[1]) ? $vals[1] : 0);
+  }
+  $comments_kind_rows = array(
+    array('s_label' => __('Registered'), 'num' => $comments_kind_user),
+    array('s_label' => __('Guest'), 'num' => $comments_kind_guest)
+  );
+  $chart_color = omg_current_color_scheme_chart();
+  echo osc_admin_stats_chart_js(array(
+    array('id' => 'placeholder', 'type' => 'line', 'labels' => array(__('Date'), __('New users')), 'rows' => $users, 'colors' => array($chart_color)),
+    array('id' => 'placeholder_listings', 'type' => 'area', 'labels' => array(__('Date'), __('New listings')), 'rows' => $listings, 'colors' => array(osc_item_stats_palette_color(6))),
+    array('id' => 'placeholder_comments', 'type' => 'stacked_percent', 'labels' => array(__('Date'), __('Registered'), __('Guest')), 'rows' => $comments_by_kind, 'colors' => array($chart_color, osc_item_stats_palette_color(6)))
+  ), array(
+    'page' => 'users',
+    'mix' => array(
+      array('id' => 'by_user_type', 'type' => 'pie', 'labels' => array(__('User type'), __('Listings')), 'rows' => $items_by_user_type_rows),
+      array('id' => 'by_company', 'type' => 'donut', 'labels' => array(__('User type'), __('Users')), 'rows' => $users_by_company_rows),
+      array('id' => 'by_status', 'type' => 'pie', 'labels' => array(__('Status'), __('Users')), 'rows' => $users_by_status_rows),
+      array('id' => 'by_comments_kind', 'type' => 'donut', 'labels' => array(__('Account'), __('Comments')), 'rows' => $comments_kind_rows),
+      array('id' => 'by_country', 'type' => 'bar', 'labels' => array(__('Country'), __('Users per country')), 'rows' => $users_by_country, 'colors' => array($chart_color)),
+      array('id' => 'by_region', 'type' => 'bar', 'labels' => array(__('Region'), __('Users per region')), 'rows' => $users_by_region, 'colors' => array($chart_color))
+    )
+  ));
+  osc_run_hook('admin_stats_header', 'users');
 }
 
 osc_add_hook('admin_header', 'customHead', 10);
 
-osc_current_admin_theme_path( 'parts/header.php' ); 
+osc_current_admin_theme_path( 'parts/header.php' );
 ?>
 
+<?php
+if(!is_array($items_by_user_type)) {
+  $items_by_user_type = array();
+}
+$items_by_user_type_sum = (int)(isset($items_by_user_type['guest']) ? $items_by_user_type['guest'] : 0) + (int)(isset($items_by_user_type['personal']) ? $items_by_user_type['personal'] : 0) + (int)(isset($items_by_user_type['business']) ? $items_by_user_type['business'] : 0);
+if(!is_array($users_by_company)) {
+  $users_by_company = array();
+}
+$users_by_company_sum = (int)(isset($users_by_company['personal']) ? $users_by_company['personal'] : 0) + (int)(isset($users_by_company['company']) ? $users_by_company['company'] : 0) + (int)(isset($users_by_company['other']) ? $users_by_company['other'] : 0);
+if(!is_array($users_by_status)) {
+  $users_by_status = array();
+}
+$users_by_status_sum = (int)(isset($users_by_status['pending']) ? $users_by_status['pending'] : 0) + (int)(isset($users_by_status['active']) ? $users_by_status['active'] : 0) + (int)(isset($users_by_status['blocked']) ? $users_by_status['blocked'] : 0);
+if(!is_array($comments_by_kind)) {
+  $comments_by_kind = array();
+}
+$comments_kind_user = 0;
+$comments_kind_guest = 0;
+foreach($comments_by_kind as $vals) {
+  if(!is_array($vals)) {
+    continue;
+  }
+  $comments_kind_user += (int)(isset($vals[0]) ? $vals[0] : 0);
+  $comments_kind_guest += (int)(isset($vals[1]) ? $vals[1] : 0);
+}
+$comments_kind_sum = $comments_kind_user + $comments_kind_guest;
+$sum_users = array_sum((array)$users);
+$sum_listings = array_sum((array)$listings);
+$sum_personal = (int)(isset($users_by_company['personal']) ? $users_by_company['personal'] : 0);
+$sum_company = (int)(isset($users_by_company['company']) ? $users_by_company['company'] : 0);
+$recent_users = array();
+foreach((array)$latest_users as $u) {
+  $label = (isset($u['s_name']) && $u['s_name'] != '' ? $u['s_name'] : (isset($u['s_email']) ? $u['s_email'] : '#' . (int)$u['pk_i_id']));
+  $meta_parts = array();
+  if(isset($u['s_email']) && $u['s_email'] != '' && $u['s_email'] != $label) {
+    $meta_parts[] = $u['s_email'];
+  }
+  if(isset($u['s_country']) && $u['s_country'] != '') {
+    $meta_parts[] = $u['s_country'];
+  }
+  if(isset($u['b_company']) && (int)$u['b_company'] == 1) {
+    $meta_parts[] = __('Company');
+  } else {
+    $meta_parts[] = __('Personal');
+  }
+  $recent_users[] = array(
+    'label' => $label,
+    'href' => osc_admin_base_url(true) . '?page=users&action=edit&id=' . (int)$u['pk_i_id'],
+    'meta' => implode(', ', $meta_parts),
+    'date' => osc_admin_stats_recent_date(isset($u['dt_reg_date']) ? $u['dt_reg_date'] : '')
+  );
+}
+?>
 <div class="grid-system" id="stats-page">
-  <div class="grid-row grid-50">
+  <div class="grid-row grid-30">
     <div class="row-wrapper">
-      <h2 class="render-title"><?php _e('User Statistics'); ?></h2>
+      <h2 class="render-title"><?php _e('User statistics'); ?></h2>
     </div>
   </div>
-  <div class="grid-row grid-50">
+  <div class="grid-row grid-70">
     <div class="row-wrapper">
-      <a id="monthly" class="btn float-right <?php if($type=='month') echo 'btn-green';?>" href="<?php echo osc_admin_base_url(true); ?>?page=stats&amp;action=users&amp;type_stat=month"><?php _e('Last 10 months'); ?></a>
-      <a id="weekly"  class="btn float-right <?php if($type=='week') echo 'btn-green';?>" href="<?php echo osc_admin_base_url(true); ?>?page=stats&amp;action=users&amp;type_stat=week"><?php _e('Last 10 weeks'); ?></a>
-      <a id="daily"   class="btn float-right <?php if($type==''||$type=='day') echo 'btn-green';?>" href="<?php echo osc_admin_base_url(true); ?>?page=stats&amp;action=users&amp;type_stat=day"><?php _e('Last 10 days'); ?></a>
+      <?php echo osc_admin_stats_period_links('users'); ?>
     </div>
   </div>
-  <div class="grid-row grid-50 clear">
+  <div class="grid-row grid-100">
+    <div class="row-wrapper osc-stats-kpi-cards">
+      <a href="<?php echo osc_admin_base_url(true); ?>?page=users">
+        <span class="k-label"><?php _e('New users'); ?></span>
+        <?php echo osc_stats_kpi_value_html($sum_users, $prev_users); ?>
+      </a>
+      <a href="<?php echo osc_admin_base_url(true); ?>?page=stats&amp;action=items&amp;stats_period=<?php echo osc_esc_html($period); ?>">
+        <span class="k-label"><?php _e('New listings'); ?></span>
+        <?php echo osc_stats_kpi_value_html($sum_listings, $prev_listings); ?>
+      </a>
+      <span>
+        <span class="k-label"><?php _e('Personal'); ?></span>
+        <?php echo osc_stats_kpi_value_html($sum_personal); ?>
+      </span>
+      <span>
+        <span class="k-label"><?php _e('Company'); ?></span>
+        <?php echo osc_stats_kpi_value_html($sum_company); ?>
+      </span>
+      <?php osc_run_hook('admin_stats_kpi', 'users'); ?>
+    </div>
+  </div>
+  <div class="stats-band">
+  <div class="grid-row grid-65 stats-main">
     <div class="row-wrapper">
       <div class="widget-box">
         <div class="widget-box-title">
           <h3><?php _e('New users'); ?></h3>
         </div>
         <div class="widget-box-content">
-          <b class="stats-title"></b>
+          <?php echo osc_admin_stats_chart_total(__('New users'), $sum_users, $period); ?>
           <div id="placeholder" class="graph-placeholder">
-            <?php if( count($users) == 0 ) {
+            <?php if(count($users) == 0 ) {
               _e("There're no statistics yet");
             } ?>
           </div>
         </div>
       </div>
+      <div class="widget-box">
+        <div class="widget-box-title">
+          <h3><?php _e('New listings'); ?></h3>
+        </div>
+        <div class="widget-box-content">
+          <?php echo osc_admin_stats_chart_total(__('New listings'), $sum_listings, $period); ?>
+          <div id="placeholder_listings" class="graph-placeholder">
+            <?php if(count($listings) == 0 ) {
+              _e("There're no statistics yet");
+            } ?>
+          </div>
+        </div>
+      </div>
+      <div class="widget-box">
+        <div class="widget-box-title">
+          <h3><?php _e('New comments'); ?></h3>
+        </div>
+        <div class="widget-box-content">
+          <?php echo osc_admin_stats_chart_total(__('New comments'), $comments_kind_sum, $period, array(__('Registered') => $comments_kind_user, __('Guest') => $comments_kind_guest)); ?>
+          <div id="placeholder_comments" class="graph-placeholder">
+            <?php if($comments_kind_sum == 0) {
+              _e("There're no statistics yet");
+            } ?>
+          </div>
+        </div>
+      </div>
+      <?php osc_run_hook('admin_stats_main', 'users'); ?>
     </div>
   </div>
-  <div class="grid-row grid-50">
+  <div class="grid-row grid-35 stats-side">
+    <div class="row-wrapper">
+      <div class="widget-box">
+        <div class="widget-box-title">
+          <h3><?php _e('Listings by user type'); ?></h3>
+        </div>
+        <div class="widget-box-content">
+          <div id="by_user_type" class="graph-placeholder">
+            <?php if($items_by_user_type_sum == 0) {
+              _e("There're no statistics yet");
+            } ?>
+          </div>
+        </div>
+      </div>
+      <div class="widget-box">
+        <div class="widget-box-title">
+          <h3><?php _e('Users by type'); ?></h3>
+        </div>
+        <div class="widget-box-content">
+          <div id="by_company" class="graph-placeholder">
+            <?php if($users_by_company_sum == 0) {
+              _e("There're no statistics yet");
+            } ?>
+          </div>
+        </div>
+      </div>
+      <div class="widget-box">
+        <div class="widget-box-title">
+          <h3><?php _e('Users by status'); ?></h3>
+        </div>
+        <div class="widget-box-content">
+          <div id="by_status" class="graph-placeholder">
+            <?php if($users_by_status_sum == 0) {
+              _e("There're no statistics yet");
+            } ?>
+          </div>
+        </div>
+      </div>
+      <?php osc_run_hook('admin_stats_side', 'users'); ?>
+    </div>
+  </div>
+  </div>
+  <div class="stats-band">
+  <div class="grid-row grid-65 stats-main">
     <div class="row-wrapper">
       <div class="widget-box">
         <div class="widget-box-title">
           <h3><?php _e('Users per country'); ?></h3>
         </div>
         <div class="widget-box-content">
-          <b class="stats-title"></b>
           <div id="by_country" class="graph-placeholder">
-            <?php if( count($users_by_country) == 0 ) {
+            <?php if(count($users_by_country) == 0 ) {
               _e("There're no statistics yet");
             } ?>
           </div>
         </div>
       </div>
-    </div>
-  </div>
-  <div class="grid-row grid-50">
-    <div class="row-wrapper">
       <div class="widget-box">
         <div class="widget-box-title">
           <h3><?php _e('Users per region'); ?></h3>
         </div>
         <div class="widget-box-content">
-          <b class="stats-title"></b>
           <div id="by_region" class="graph-placeholder">
-            <?php if( count($users_by_region) == 0 ) {
+            <?php if(count($users_by_region) == 0 ) {
               _e("There're no statistics yet");
             } ?>
           </div>
@@ -240,41 +336,12 @@ osc_current_admin_theme_path( 'parts/header.php' );
       </div>
     </div>
   </div>
-  <div class="grid-row grid-50">
+  <div class="grid-row grid-35 stats-side">
     <div class="row-wrapper">
-      <div class="widget-box">
-        <div class="widget-box-title"><h3><?php _e('Latest users on the web'); ?></h3></div>
-        <div class="widget-box-content">
-          <?php if( count($latest_users) > 0 ) { ?>
-          <table class="table" cellpadding="0" cellspacing="0">
-            <thead>
-            <tr>
-              <th>ID</th>
-              <th><?php _e('E-Mail'); ?></th>
-              <th><?php _e('Name'); ?></th>
-            </tr>
-            </thead>
-            <tbody>
-            <?php foreach($latest_users as $u) { ?>
-            <tr>
-              <td><a href="<?php echo osc_admin_base_url(true); ?>?page=users&amp;action=edit&amp;id=<?php echo $u['pk_i_id']; ?>"><?php echo $u['pk_i_id']; ?></a></td>
-              <td><a href="<?php echo osc_admin_base_url(true); ?>?page=users&amp;action=edit&amp;id=<?php echo $u['pk_i_id']; ?>"><?php echo $u['s_email']; ?></a></td>
-              <td><a href="<?php echo osc_admin_base_url(true); ?>?page=users&amp;action=edit&amp;id=<?php echo $u['pk_i_id']; ?>"><?php echo $u['s_name']; ?></a></td>
-            </tr>
-            <?php } ?>
-            </tbody>
-          </table>
-          <?php } else { ?>
-            <p><?php _e("There are no statistics yet"); ?></p>
-          <?php } ?>
-
-
-        </div>
+      <div class="widget-box stats-span-2">
+        <div class="widget-box-title"><h3><?php _e('Latest users'); ?></h3></div>
+        <div class="widget-box-content"><?php echo osc_admin_stats_recent_table($recent_users); ?></div>
       </div>
-    </div>
-  </div>
-  <div class="grid-row grid-50">
-    <div class="row-wrapper">
       <div class="widget-box">
         <div class="widget-box-title"><h3><?php _e('Avg. items per user'); ?></h3></div>
         <div class="widget-box-content">
@@ -283,9 +350,23 @@ osc_current_admin_theme_path( 'parts/header.php' );
           </div>
         </div>
       </div>
+      <div class="widget-box">
+        <div class="widget-box-title">
+          <h3><?php _e('Comments by account'); ?></h3>
+        </div>
+        <div class="widget-box-content">
+          <div id="by_comments_kind" class="graph-placeholder">
+            <?php if($comments_kind_sum == 0) {
+              _e("There're no statistics yet");
+            } ?>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
+  </div>
   <div class="clear"></div>
+  <?php osc_run_hook('admin_stats_after', 'users'); ?>
 </div>
 
-<?php osc_current_admin_theme_path( 'parts/footer.php' ); ?>
+<?php osc_current_admin_theme_path( 'parts/footer.php' );

@@ -54,13 +54,13 @@
 
   View::newInstance()->_exportVariableToView('user', $user);
   osc_current_web_theme_path('header.php');
-  View::newInstance()->_exportVariableToView('user', $user); 
+  View::newInstance()->_exportVariableToView('user', $user);
 ?>
-  
+
 <div id="item-content">
   <div class="user-card">
     <?php osc_run_hook('user_public_profile_sidebar_top'); ?>
-    
+
     <?php if(osc_profile_img_users_enabled()) { ?>
       <p class="user-img">
         <img src="<?php echo osc_user_profile_img_url(osc_user_id()); ?>" alt="<?php echo osc_esc_html(osc_user_name()); ?>"/>
@@ -69,25 +69,28 @@
 
     <ul id="user_data">
       <li class="name"><?php echo osc_user_name(); ?></li>
-      <?php if( osc_user_website() !== '' ) { ?>
+      <?php if(osc_user_website() !== '' ) { ?>
       <li class="website"><a href="<?php echo osc_user_website(); ?>"><?php echo osc_user_website(); ?></a></li>
       <?php } ?>
-      <?php if( $address !== '' ) { ?>
+      <?php if($address !== '' ) { ?>
       <li class="adress"><?php printf(__('<strong>Address:</strong> %1$s'), $address); ?></li>
       <?php } ?>
-      <?php if( $location !== '' ) { ?>
+      <?php if($location !== '' ) { ?>
       <li class="location"><?php printf(__('<strong>Location:</strong> %1$s'), $location); ?></li>
       <?php } ?>
+      <?php if(function_exists('osc_can_report_user') && osc_can_report_user()) { ?>
+      <li class="report"><a rel="nofollow" href="<?php echo osc_report_user_url(osc_user_id()); ?>"><?php _e('Report user', 'sigma'); ?></a></li>
+      <?php } ?>
     </ul>
-    
+
     <?php osc_run_hook('user_public_profile_sidebar_bottom'); ?>
   </div>
-  
+
   <?php if(osc_user_info() !== '') { ?>
     <h2><?php _e('Description', 'sigma'); ?></h2>
     <?php echo nl2br(osc_user_info()); ?>
   <?php } ?>
-  
+
 
   <div class="similar_ads user-public-profile-items">
     <?php osc_run_hook('user_public_profile_items_top'); ?>
@@ -100,18 +103,18 @@
       <input type="hidden" name="id" value="<?php echo osc_esc_html($user['pk_i_id']); ?>"/>
 
       <?php osc_run_hook('user_public_profile_search_form_top'); ?>
-      
+
       <div class="control-group">
         <label class="control-label" for="sPattern"><?php _e('Keyword', 'sigma'); ?></label>
-        
+
         <div class="controls">
           <?php UserForm::search_pattern_text(); ?>
         </div>
       </div>
-      
+
       <div class="control-group">
         <label class="control-label" for="sCategory"><?php _e('Category', 'sigma'); ?></label>
-        
+
         <div class="controls">
           <?php UserForm::search_category_select(); ?>
         </div>
@@ -119,31 +122,31 @@
 
       <div class="control-group">
         <label class="control-label" for="sCity"><?php _e('City', 'sigma'); ?></label>
-        
+
         <div class="controls">
           <?php UserForm::search_city_select(); ?>
         </div>
       </div>
-      
+
       <?php osc_run_hook('user_public_profile_search_form_bottom'); ?>
-      
+
       <div class="actions">
         <button type="submit" class="btn btn-primary"><?php _e('Apply', 'sigma'); ?></button>
       </div>
     </form>
-    
+
     <div class="clear"></div>
 
     <?php if(osc_count_items() == 0) { ?>
       <p class="empty" ><?php _e('No listings found', 'sigma'); ?></p>
-      
+
     <?php } else { ?>
       <?php osc_current_web_theme_path('loop.php'); ?>
       <div class="paginate"><?php echo osc_pagination_items(); ?></div>
     <?php } ?>
-    
+
     <div class="clear"></div>
   </div>
 </div>
 
-<?php osc_current_web_theme_path('footer.php') ; ?>
+<?php osc_current_web_theme_path('footer.php') ;

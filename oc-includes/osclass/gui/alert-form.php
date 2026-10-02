@@ -22,7 +22,7 @@ $(document).ready(function(){
         $.post('<?php echo osc_base_url(true); ?>', {email:$("#alert_email").val(), userid:$("#alert_userId").val(), alert:$("#alert").val(), page:"ajax", action:"alerts"},
             function(data){
                 if(data==1) { alert('<?php echo osc_esc_js(__('You have sucessfully subscribed to the alert', 'sigma')); ?>'); }
-                else if(data==-1) { alert('<?php echo osc_esc_js(__('Invalid email address', 'sigma')); ?>'); }
+                else if(data==-1) { alert('<?php echo osc_esc_js(__('The email is not valid', 'sigma')); ?>'); }
                 else { alert('<?php echo osc_esc_js(__('There was a problem with the alert', 'sigma')); ?>');
                 };
         });
@@ -73,7 +73,7 @@ $(document).ready(function(){
                     <?php AlertForm::user_id_hidden(); ?>
                     <?php AlertForm::email_text(); ?>
 
-                <?php }; ?>
+                <?php } ?>
                 <button type="submit" class="sub_button btn btn-secondary" ><?php _e('Subscribe now', 'sigma'); ?>!</button>
         </form>
     <?php } ?>

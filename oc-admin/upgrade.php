@@ -28,17 +28,17 @@ class CAdminUpgrade extends AdminSecBaseModel {
     parent::doModel();
 
     //specific things for this class
-    switch ($this->action) {
+    switch($this->action) {
       case 'upgrade-funcs':
         if(defined('DEMO')) {
           osc_add_flash_warning_message( _m("This action cannot be done because it is a demo site"), 'admin');
           $this->redirectTo(osc_admin_base_url(true));
           exit;
         }
-        
+
         require(LIB_PATH.'osclass/upgrade-funcs.php');
         break;
-        
+
       default:
         $this->doView('upgrade/index.php');
     }

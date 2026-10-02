@@ -30,10 +30,14 @@ if(isset($prepare['date']) && strtotime('-3 day') < strtotime($prepare['date']) 
   osc_set_preference('widget_data_blog', json_encode(array('date' => date('Y-m-d H:i:s'), 'data' => $articles)));
 }
 
+if(is_array($articles)) {
+  $articles = array_slice($articles, 0, 5);
+}
+
 ?>
 
 <?php if(!is_array($articles) || count($articles) <= 0) { ?>
-  <div class="empty"><?php _e('No articles has been found'); ?></div>
+  <div class="empty"><?php _e('No articles have been found'); ?></div>
 <?php } else { ?>
   <?php foreach($articles as $a) { ?>
     <div class="row">
@@ -45,5 +49,5 @@ if(isset($prepare['date']) && strtotime('-3 day') < strtotime($prepare['date']) 
 <?php } ?>
 
 <div class="foot">
-  <a href="https://osclasspoint.com/blog/home"><?php _e('More news'); ?></a>
+  <a href="https://osclasspoint.com/blog/"><?php _e('More news'); ?></a>
 </div>

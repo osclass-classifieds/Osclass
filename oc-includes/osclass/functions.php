@@ -16,9 +16,12 @@
  */
 
 
-
-// Apply location based conditions 
+// Apply location based conditions
 osc_add_hook('custom_item_query', 'osc_subdomains_filter_to_dao');
+
+
+// Print tranlsations debug
+osc_add_hook('after_html', 'osc_print_translations');
 
 
 // Calculate max width and max height for Uppy uploader
@@ -27,9 +30,9 @@ function osc_uploader_max_image_size() {
   $dim_ = explode('x', osc_normal_dimensions());
   $w = (int)$dim_[0];
   $h = (int)(isset($dim_[1]) ? $dim_[1] : $dim_[0]);
-  
+
   $aspect = osc_force_aspect_image();
-  
+
   // If keep aspect ratio, max size must be square like 1200x1200
   if($aspect) {
     $w = max($w, $h);
@@ -39,7 +42,7 @@ function osc_uploader_max_image_size() {
   if($w <= 0 || $h <= 0) {
     return false;
   }
-  
+
   return osc_apply_filter('uploader_max_image_size', array(
     'w' => intval($w * $upscale),
     'h' => intval($h * $upscale)
@@ -50,14 +53,14 @@ function osc_uploader_max_image_size() {
 // Check osclass settings and report issues to admin dashboard
 osc_add_hook('admin_dashboard_col1_top', function() {
   $warnings = array();
-  
+
   if(osc_get_preference('auto_cron') == 1) {
     $warnings[] = __('<b>Built-in cron</b> is enabled. This is not recommended on production website due to it\'s unreliability!');
   }
-  
+
   // Check hourly cron
-  $cron_hourly = Cron::newInstance()->getCronByType('HOURLY'); 
-  
+  $cron_hourly = Cron::newInstance()->getCronByType('HOURLY');
+
   if(!isset($cron_hourly['d_last_exec']) || $cron_hourly['d_last_exec'] == '' || $cron_hourly['d_last_exec'] < time() - (3 * 3600)) {
     $warnings[] = sprintf(__('Your daily <b>cron is unstable</b>, last run happened more than 3 hours ago (%s) - it should run every hour!'), $cron_hourly['d_last_exec'] == '' ? __('has not run yet') : $cron_hourly['d_last_exec']);
   }
@@ -66,19 +69,18 @@ osc_add_hook('admin_dashboard_col1_top', function() {
   if(osc_get_preference('mailserver_port') == '' || osc_get_preference('mailserver_mail_from') == '' || osc_get_preference('mailserver_username') == '' || osc_get_preference('mailserver_password') == '') {
     $warnings[] = __('<b>Mail server</b> might not be configured properly - port, username, from email or password seems to be empty!');
   }
-  
+
   // Check if user use https url
   if(strpos(WEB_PATH, 'http://') === 0) {
     $warnings[] = sprintf(__('Use an <b>https://</b> URL in your Osclass configuration. Using http:// may cause security issues and site malfunctions. Update WEB_PATH to HTTPS. Current value: %s'), WEB_PATH);
   }
-  
+
   $warnings = implode('<hr/>', $warnings);
-  
+
   if($warnings != '') {
     echo '<div class="widget-box widget-message widget-warning">' . $warnings . '</div>';
   }
 }, 3);
-
 
 
 // Generate alert name
@@ -92,14 +94,14 @@ function osc_generate_alert_name($alert_json, $max_elem = 3, $tags = false) {
     'price_min' => __('Min price'),
     'price_max' => __('Max price')
   );
-  
+
   // Pattern, Min price, Max price
   foreach($opts1 as $opt_id => $opt_name) {
     if(isset($conditions[$opt_id]) && $conditions[$opt_id] != '') {
       if(in_array($opt_id, array('price_min', 'price_max'))) {
         $conditions[$opt_id] .= osc_currency_symbol();
       }
-      
+
       if($tags) {
         $pieces[] = sprintf(__('<b>%s:</b> %s'), $opt_name, $conditions[$opt_id]);
       } else {
@@ -124,7 +126,7 @@ function osc_generate_alert_name($alert_json, $max_elem = 3, $tags = false) {
     if(isset($conditions[$opt_id]) && is_array($conditions[$opt_id]) && count($conditions[$opt_id]) > 0) {
       $prep = array_filter(array_unique($conditions[$opt_id]));
       $merge = implode(', ', array_slice($prep, 0, $max_elem));
-      
+
       if(count($prep) > $max_elem) {
         $merge .= ' (+' . (count($prep) - $max_elem) . ')';
       }
@@ -137,8 +139,8 @@ function osc_generate_alert_name($alert_json, $max_elem = 3, $tags = false) {
     }
   }
 
-  $name = implode(', ', $pieces); 
-  
+  $name = implode(', ', $pieces);
+
   // For now let's keep it empty and let just user put some label to it
   // price_min, price_max, city_areas, cities, regions, countries, sPattern
 
@@ -151,7 +153,7 @@ function osc_check_static_page_user_visibility($page, $user = null) {
   if(!isset($page['pk_i_id'])) {
     return false;
   }
-  
+
   // Email template
   if($page['b_indelible'] == 1) {
     return false;
@@ -160,7 +162,7 @@ function osc_check_static_page_user_visibility($page, $user = null) {
   if($user === null) {
     $user = osc_logged_user();
   }
-  
+
   $visibility_id = (int)$page['i_visibility'];
 
   // Page visibility restrictions, 0 == visible to all
@@ -169,41 +171,41 @@ function osc_check_static_page_user_visibility($page, $user = null) {
     $user_is_logged = (osc_is_web_user_logged_in() ? true : false);
     $user_is_personal = ((isset($user['b_company']) && $user['b_company'] == 0) ? true : false);
     $user_is_company = ((isset($user['b_company']) && $user['b_company'] == 1) ? true : false);
-    
+
     // print_r($user);
     // echo $visibility_id . 'xxxx';
 
-    
+
     // Visible to logged-in users only
     if($visibility_id == 1 && $user_is_logged === false) {
       return false;
-    
+
     // Visible to personal users only
-    } else if ($visibility_id == 2 && ($user_is_logged === false || $user_is_personal === false)) {
+    } elseif($visibility_id == 2 && ($user_is_logged === false || $user_is_personal === false)) {
       return false;
-      
+
     // Visible to company users only
-    } else if ($visibility_id == 3 && ($user_is_logged === false || $user_is_company === false)) {
+    } elseif($visibility_id == 3 && ($user_is_logged === false || $user_is_company === false)) {
       return false;
-      
+
     // Visible to admins only
-    } else if ($visibility_id == 4 && $admin_is_logged === false) {
+    } elseif($visibility_id == 4 && $admin_is_logged === false) {
       return false;
-    
+
     // Hidden page
-    } else if ($visibility_id == 5) {
+    } elseif($visibility_id == 5) {
       return false;
-      
+
     // Custom condition
-    } else if ($visibility_id > 5) {
+    } elseif($visibility_id > 5) {
       $custom_check = osc_apply_filter('page_visibility_custom_check', false, $page, $user);
-      
+
       if($custom_check === false) {
         return false;
       }
     }
   }
-  
+
   return true;
 }
 
@@ -214,30 +216,21 @@ function osc_fix_gettext_lang_code($code) {
     return 'ja_JP';
   } else if($code == 'he_HE') {
     return 'he_IL';
+  } else if($code == 'eo_WW') {
+    return 'eo';
   }
-  
+
   return $code;
 }
 
 
-// Widget content filter
-function osc_widget_content_wrap($content = '', $widget = array()) {
-  return osc_apply_filter(
-    'widget_content_wrap', 
-    '<div class="widget" data-id="' . osc_esc_html(isset($widget['pk_i_id']) ? $widget['pk_i_id'] : '') . '" data-location="' . osc_esc_html(isset($widget['s_location']) ? strtolower(trim((string)$widget['s_location'])) : '') . '" data-kind="' . osc_esc_html(isset($widget['e_kind']) ? strtolower(trim((string)$widget['e_kind'])) : '') . '">' . $content . '</div>', 
-    $content, 
-    $widget
- );
-}
-
 osc_add_filter('widget_content', 'osc_widget_content_wrap', 5);
-
 
 
 // Check if hook has any functions hooked
 function osc_item_post_edit_hook_variant_check_func($hook) {
   $hooks = Plugins::getActive();
-  
+
   if(isset($hooks[$hook])) {
     for($priority = 0;$priority<=10;$priority++) {
       if(isset($hooks[$hook][$priority]) && is_array($hooks[$hook][$priority])) {
@@ -249,17 +242,17 @@ function osc_item_post_edit_hook_variant_check_func($hook) {
       }
     }
   }
-  
+
   return false;
 }
-  
+
 
 // Execute hook variants on item publish & edit pages
 function osc_item_post_edit_hook_variant($variant) {
   if(defined('THEME_COMPATIBLE_WITH_OSCLASS_HOOKS') && THEME_COMPATIBLE_WITH_OSCLASS_HOOKS >= 820) {
     $is_edit = (Params::getParam('action') == 'item_edit' ? true : false);
     $hook = ($is_edit ? 'item_edit' : 'item_form');
-    
+
     if(osc_item_post_edit_hook_variant_check_func($hook . '_' . $variant)) {
       if($is_edit) {
         ItemForm::plugin_edit_item($variant);
@@ -283,27 +276,104 @@ osc_add_hook('item_publish_bottom', function() { osc_item_post_edit_hook_variant
 osc_add_hook('item_publish_after', function() { osc_item_post_edit_hook_variant('after'); });
 
 
-// Check if item ID is viewed, if not add it
-function osc_is_item_viewed_in_session($item_id, $type = 'i_num_views') {
-  if($item_id <= 0) {
+// Normalize a once-per-session bucket name
+function osc_session_seen_bucket($bucket) {
+  $bucket = strtolower(trim((string)$bucket));
+  if(strpos($bucket, 'i_num_') === 0) {
+    $bucket = substr($bucket, 6);
+  }
+  $bucket = preg_replace('/[^a-z0-9_]/', '', $bucket);
+  return ($bucket == '' ? 'id' : $bucket);
+}
+
+
+// Load or replace the compact osc_seen session map
+function osc_session_seen_store($write = null) {
+  static $store = null;
+  static $loaded = false;
+  if(!$loaded) {
+    $raw = Session::newInstance()->_get('osc_seen');
+    $store = (is_array($raw) ? $raw : array());
+    $loaded = true;
+  }
+  if(is_array($write)) {
+    $store = $write;
+    Session::newInstance()->_set('osc_seen', $store);
+  }
+  return $store;
+}
+
+
+// Move old item_ids_* lists into osc_seen for one bucket
+function osc_session_seen_import_legacy($bucket) {
+  $store = osc_session_seen_store();
+  if(isset($store[$bucket]) && is_array($store[$bucket])) {
+    return $store;
+  }
+  $store[$bucket] = array();
+  foreach(array('item_ids_' . $bucket, 'item_ids_i_num_' . $bucket) as $legacy_key) {
+    $list = Session::newInstance()->_get($legacy_key);
+    if(!is_array($list)) {
+      continue;
+    }
+    foreach($list as $lid) {
+      $lid = (int)$lid;
+      if($lid > 0) {
+        $store[$bucket][$lid] = 1;
+      }
+    }
+    Session::newInstance()->_drop($legacy_key);
+  }
+  osc_session_seen_store($store);
+  return $store;
+}
+
+
+// True if this id was already recorded in the session bucket
+function osc_session_seen($bucket, $id, $mark = true) {
+  $bucket = osc_session_seen_bucket($bucket);
+  $id = (int)$id;
+  if($id <= 0) {
     return false;
   }
-  
-  $view_type = 'item_ids_' . $type;
-  $item_ids_arr = Session::newInstance()->_get($view_type);
-
-  if(is_array($item_ids_arr) && in_array($item_id, $item_ids_arr)) {
+  $store = osc_session_seen_import_legacy($bucket);
+  if(isset($store[$bucket][$id]) && (int)$store[$bucket][$id] > 0) {
     return true;
   }
-  
-  if(!is_array($item_ids_arr)) {
-    Session::newInstance()->_set($view_type, array($item_id));
-  } else {
-    $item_ids_arr[] = $item_id;
-    Session::newInstance()->_set($view_type, $item_ids_arr);
+  if($mark) {
+    $store[$bucket][$id] = 1;
+    osc_session_seen_store($store);
   }
-
   return false;
+}
+
+
+// Increase a session counter; returns 0 when $max was already reached
+function osc_session_seen_inc($bucket, $id, $max = 0) {
+  $bucket = osc_session_seen_bucket($bucket);
+  $id = (int)$id;
+  $max = (int)$max;
+  if($id <= 0) {
+    return 0;
+  }
+  $store = osc_session_seen_store();
+  if(!isset($store[$bucket]) || !is_array($store[$bucket])) {
+    $store[$bucket] = array();
+  }
+  $cur = (isset($store[$bucket][$id]) ? (int)$store[$bucket][$id] : 0);
+  if($max > 0 && $cur >= $max) {
+    return 0;
+  }
+  $cur++;
+  $store[$bucket][$id] = $cur;
+  osc_session_seen_store($store);
+  return $cur;
+}
+
+
+// Check if item ID is viewed, if not add it
+function osc_is_item_viewed_in_session($item_id, $type = 'i_num_views') {
+  return osc_session_seen($type, $item_id, true);
 }
 
 
@@ -327,7 +397,7 @@ function osc_publish_edit_assets() {
       osc_enqueue_style('uppy', osc_assets_url('css/uppy.min.css'));
       osc_enqueue_style('jquery-ui', osc_assets_url('css/jquery-ui/jquery-ui.css'));
       osc_enqueue_style('image-uploader', osc_assets_url('css/image-uploader.css'));
-      
+
       osc_remove_script('jquery-fineuploader');
       osc_remove_style('fine-uploader-css');
     }
@@ -516,7 +586,7 @@ function osc_image_uploader_js_locale($type = '') {
 // Clean temporary images (qqfiles)
 function osc_clean_temp_images() {
   $qqprefixes = array('qqfile_*', 'auto_qqfile_*','uppyfile_*', 'auto_uppyfile_*');
-  foreach ($qqprefixes as $qqprefix) {
+  foreach($qqprefixes as $qqprefix) {
     $qqfiles = glob(osc_content_path().'uploads/temp/'.$qqprefix);
     if(is_array($qqfiles)) {
       foreach($qqfiles as $qqfile) {
@@ -541,7 +611,7 @@ osc_add_hook('user_locale_changed', 'osc_set_default_user_locale_code', 5);
 // Generate canonical URL on all pages
 function osc_generate_canonical() {
   if(osc_always_generate_canonical_enabled()) {
-    $url = osc_apply_filter('canonical_url', osc_get_current_url());
+    $url = osc_apply_filter('canonical_url', osc_get_current_url(), true);
     View::newInstance()->_exportVariableToView('canonical', $url);
   }
 }
@@ -550,16 +620,30 @@ osc_add_hook('init', 'osc_generate_canonical', 1);
 
 
 // Enhance canonical URLs
-function osc_enhance_canonical_url($url) {
+function osc_enhance_canonical_url($url, $no_override = false) {
   if(osc_enhance_canonical_url_enabled() != 1) {
     return $url;
   }
-  
+
   $original_url = $url;
+
+  if($url != '' && $no_override === true) {
+    return $url;
+  }
+
+  if(osc_is_static_page()) {
+    if($url != osc_base_url() && $url != osc_base_url(false, true) && osc_rewrite_enabled()) {
+      if(substr($url, -1) == '/') {
+        $url = substr($url, 0, strlen($url)-1);
+      }
+    }
+
+    return $url;
+  }
+
   $params = Params::getParamsAsArray();
   $params_original = $params;
-  $custom_lang_code = '';
-  
+
   // Search page enhancements
   if(osc_is_search_page()) {
     //unset($params['lang']);
@@ -572,72 +656,143 @@ function osc_enhance_canonical_url($url) {
     unset($params['sParams']);
   }
 
-  // If language code enabled in URL, use default Osclass language as canonical
-  if(osc_rewrite_enabled() && osc_subdomain_type() != 'language' && osc_locale_to_base_url_enabled()) {
-    if(osc_current_user_locale() != osc_language()) {
-      $custom_lang_code = osc_language();
-    }
+  // Params has changed, recreate URL in current user locale
+  if($params != $params_original || $url == '') {
+    $url = osc_search_url($params);
   }
 
-  // Params has changed, recreate URL
-  if($params != $params_original) {
-    $url = osc_search_url($params, $custom_lang_code);
-  }
-
-  // if(
-    // osc_locale_to_base_url_type() == 'LONG' && !(preg_match('/\/[a-z]{2}_[a-zA-Z]{2}\//', osc_get_current_url()) || preg_match('/\/[a-z]{2}-[a-zA-Z]{2}\//', osc_get_current_url()))
+  // if(// osc_locale_to_base_url_type() == 'LONG' && !(preg_match('/\/[a-z]{2}_[a-zA-Z]{2}\//', osc_get_current_url()) || preg_match('/\/[a-z]{2}-[a-zA-Z]{2}\//', osc_get_current_url()))
     // || osc_locale_to_base_url_type() == '' && !preg_match('/\/[a-z]{2}\//', osc_get_current_url())
   // ) {
     // $redirect_url = str_replace(osc_base_url(), osc_base_url(false, true), osc_get_current_url());   // add slug to link
     // osc_redirect_to($redirect_url);
   // }
-  
+
   if($url != osc_base_url() && $url != osc_base_url(false, true) && osc_rewrite_enabled()) {
     if(substr($url, -1) == '/') {
       $url = substr($url, 0, strlen($url)-1);
     }
   }
-  
-  return $url;  
+
+  return $url;
 }
 
-osc_add_filter('canonical_url', 'osc_enhance_canonical_url');
-osc_add_filter('canonical_url_osc', 'osc_enhance_canonical_url');
-osc_add_filter('canonical_url_search', 'osc_enhance_canonical_url');
-osc_add_filter('canonical_url_public_profile', 'osc_enhance_canonical_url');
+osc_add_filter('canonical_url', 'osc_enhance_canonical_url', 4);
+osc_add_filter('canonical_url_search', 'osc_enhance_canonical_url', 7);
+osc_add_filter('canonical_url_public_profile', 'osc_enhance_canonical_url', 7);
+osc_add_filter('canonical_url_page', 'osc_enhance_canonical_url', 7);
 
+osc_add_filter('osc_get_canonical', 'osc_enhance_canonical_url', 4);
+
+
+// Hreflang URL for one locale (item and search URLs are generated, not prefix-replaced)
+function osc_hreflang_alternate_url($locale_code) {
+  $locale_code = osc_locale_code_from_param($locale_code);
+  if($locale_code == '') {
+    return '';
+  }
+
+  $page = Params::getParam('page');
+  $action = Params::getParam('action');
+
+  if($page == 'item' && $action == '') {
+    $item = osc_item();
+    if(!is_array($item) || !isset($item['pk_i_id']) || (int)$item['pk_i_id'] <= 0) {
+      $item_id = (int)Params::getParam('id');
+      if($item_id > 0) {
+        $item = Item::newInstance()->findByPrimaryKey($item_id);
+      }
+    } else if(!isset($item['locale']) || !is_array($item['locale'])) {
+      $reloaded = Item::newInstance()->findByPrimaryKey((int)$item['pk_i_id']);
+      if(is_array($reloaded) && isset($reloaded['pk_i_id'])) {
+        $item = $reloaded;
+      }
+    }
+
+    if(is_array($item) && isset($item['pk_i_id']) && (int)$item['pk_i_id'] > 0) {
+      return osc_item_url_from_item($item, $locale_code);
+    }
+  }
+
+  if($page == 'search' || osc_is_search_page()) {
+    $params = Params::getParamsAsArray();
+    unset($params['lang']);
+    return osc_search_url($params, $locale_code);
+  }
+
+  if(osc_is_static_page()) {
+    $static_page = osc_static_page();
+    if(is_array($static_page)) {
+      if(isset($static_page['locale'][$locale_code]['s_title']) && $static_page['locale'][$locale_code]['s_title'] != '') {
+        $static_page['s_title'] = $static_page['locale'][$locale_code]['s_title'];
+      }
+      return osc_static_page_url_from_page($static_page, osc_base_url_locale_slug($locale_code));
+    }
+  }
+
+  $url = osc_get_current_url();
+  $current_code = osc_base_url_locale_slug(osc_current_user_locale());
+  $new_code = osc_base_url_locale_slug($locale_code);
+  if($current_code != '' && preg_match('/\/' . preg_quote($current_code, '/') . '\//', $url)) {
+    return preg_replace('/\/' . preg_quote($current_code, '/') . '\//', '/' . $new_code . '/', $url, 1);
+  }
+
+  return '';
+}
 
 // Generate hreflang versions
 function osc_generate_lang_tags() {
   if(osc_generate_hreflang_tags_enabled()) {
     $locales = osc_get_locales();
-    
+    $default_url = '';
+    $default_code = osc_language();
+
     // Language code in base URL
     if(osc_locale_to_base_url_enabled() && osc_subdomain_type() != 'language') {
       foreach($locales as $locale) {
-        $url = osc_get_current_url();
-        $current_code = osc_base_url_locale_slug(osc_current_user_locale());
+        if(!isset($locale['pk_c_code'])) {
+          continue;
+        }
+        $url = osc_hreflang_alternate_url($locale['pk_c_code']);
+        if($url == '') {
+          continue;
+        }
+
         $new_code = osc_base_url_locale_slug($locale['pk_c_code']);
-
-        if(preg_match('/\/' . $current_code . '\//', $url)) {
-          $original_url = preg_replace('/\/' . $current_code . '\//', '/' . $new_code . '/', $url);
-
-          if($original_url != '') {
-            echo '<link rel="alternate" href="' . $original_url . '" hreflang="' . $new_code . '"/>' . PHP_EOL;
-          }
+        echo '<link rel="alternate" href="' . $url . '" hreflang="' . $new_code . '"/>' . PHP_EOL;
+        if($locale['pk_c_code'] == $default_code) {
+          $default_url = $url;
         }
       }
-      
+
+      if($default_url != '') {
+        echo '<link rel="alternate" href="' . $default_url . '" hreflang="x-default"/>' . PHP_EOL;
+      }
+
     // Language based subdomains
     } else if(!osc_locale_to_base_url_enabled() && osc_subdomain_type() == 'language') {
       $http_url = osc_is_ssl() ? "https://" : "http://";
       $pattern_url = $http_url . '{LOCALE_CODE}.' . osc_subdomain_host() . REL_WEB_URL;
-      $url_path = ltrim(isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '', '/');
 
       foreach($locales as $locale) {
+        if(!isset($locale['pk_c_code'])) {
+          continue;
+        }
         $used_code = osc_subdomain_locale_slug($locale['pk_c_code']);
-        $original_url = str_replace('{LOCALE_CODE}', $used_code, $pattern_url);
-        echo '<link rel="alternate" href="' . $original_url . $url_path . '" hreflang="' . $used_code . '"/>' . PHP_EOL;
+        $alternate_url = osc_hreflang_alternate_url($locale['pk_c_code']);
+        if($alternate_url != '') {
+          $parts = parse_url($alternate_url);
+          $original_url = $http_url . $used_code . '.' . osc_subdomain_host() . (isset($parts['path']) ? $parts['path'] : '/');
+          if(!empty($parts['query'])) {
+            $original_url .= '?' . $parts['query'];
+          }
+        } else if(Params::getParam('page') != 'item' && Params::getParam('page') != 'search' && !osc_is_search_page()) {
+          $url_path = ltrim(isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '', '/');
+          $original_url = str_replace('{LOCALE_CODE}', $used_code, $pattern_url) . $url_path;
+        } else {
+          continue;
+        }
+        echo '<link rel="alternate" href="' . $original_url . '" hreflang="' . $used_code . '"/>' . PHP_EOL;
       }
     }
   }
@@ -661,7 +816,7 @@ osc_add_hook('header', 'osc_block_indexing_tags', 10);
 // Add locale to rewrite URLs
 function osc_locale_to_url($rules) {
   $output = array();
-  
+
   if(!osc_locale_to_base_url_enabled()) {
     return $rules;
   }
@@ -672,7 +827,7 @@ function osc_locale_to_url($rules) {
   $cparams = $reg['params_count'];            // 1 or 2
   $lang_param = $reg['lang_param'];           // $1 or $1_$2
   $fallback = false;
-  
+
 
   // Create new list respecting original order of rules
   // What to do with [^language/(.*?)/?$]  ??
@@ -692,15 +847,15 @@ function osc_locale_to_url($rules) {
 
         $fallback = true;
       }
-      
+
       if(substr($key, 1, strlen($regex)) !== $regex) { // && strpos($key, $default_regex) === false) {
         $new_key = '^' . $regex . '/' . substr($key, 1);
         $new_val = $val;
-        
+
         for($i=20;$i>=1;$i--) {
           $new_val = str_replace('$' . $i, '$' . ($i+$cparams), $new_val);
         }
-        
+
         $output[$new_key] = $new_val . '&lang=' . $lang_param;
       }
 
@@ -709,13 +864,13 @@ function osc_locale_to_url($rules) {
         $output[$key] = $val;
       }
     }
-    
+
     // Maybe not needed? It's home page
     //$output['^([a-z]{2})/$'] = 'index.php?lang=' . $lang_param;
     //$output['^' . $regex . '/$'] = 'index.php?lang=' . $lang_param;
   }
-  
-  
+
+
   // echo '<pre>';
   // print_r($output);
   // echo '</pre>';
@@ -733,47 +888,47 @@ function osc_user_country_from_ip($force = false) {
   $cookie_ip_data_status = Cookie::newInstance()->get_value('ip_data_status');
   $cookie_ip_data_address = Cookie::newInstance()->get_value('ip_data_address');
   $cookie_ip_data_last_check = Cookie::newInstance()->get_value('ip_data_last_check');
-  
+
   if($force === false) {
     if($cookie_ip_data_status == 'FOUND_EXISTS' || $cookie_ip_data_status == 'FOUND_NOTEXISTS') {
       //if($cookie_ip_data_address == $ip) {  // if IP has changed, do request again
         return false;
       //}
     }
-    
+
     // Only check once per day
     if($cookie_ip_data_last_check != '' && date('Y-m-d H:i:s', strtotime($cookie_ip_data_last_check)) > date('Y-m-d H:i:s', strtotime("-1 day"))) {
       return false;
     }
   }
- 
+
   // country_code, geoplugin_countryName, ..., geoplugin_continentCode
   // geoplugin_region, geoplugin_regionCode, geoplugin_regionName
   // geoplugin_city
   // geoplugin_currencyCode, geoplugin_currencySymbol, geoplugin_currencyConverter, geoplugin_timezone
   $ip_service = osc_ipdata_service_map('ALL', $ip);
- 
+
   $bot_regex_pattern = "(googlebot\/|Googlebot\-Mobile|Googlebot\-Image|Google favicon|Mediapartners\-Google|bingbot|slurp|java|wget|curl|Commons\-HttpClient|Python\-urllib|libwww|httpunit|nutch|phpcrawl|msnbot|jyxobot|FAST\-WebCrawler|FAST Enterprise Crawler|biglotron|teoma|convera|seekbot|gigablast|exabot|ngbot|ia_archiver|GingerCrawler|webmon |httrack|webcrawler|grub\.org|UsineNouvelleCrawler|antibot|netresearchserver|speedy|fluffy|bibnum\.bnf|findlink|msrbot|panscient|yacybot|AISearchBot|IOI|ips\-agent|tagoobot|MJ12bot|dotbot|woriobot|yanga|buzzbot|mlbot|yandexbot|purebot|Linguee Bot|Voyager|CyberPatrol|voilabot|baiduspider|citeseerxbot|spbot|twengabot|postrank|turnitinbot|scribdbot|page2rss|sitebot|linkdex|Adidxbot|blekkobot|ezooms|dotbot|Mail\.RU_Bot|discobot|heritrix|findthatfile|europarchive\.org|NerdByNature\.Bot|sistrix crawler|ahrefsbot|Aboundex|domaincrawler|wbsearchbot|summify|ccbot|edisterbot|seznambot|ec2linkfinder|gslfbot|aihitbot|intelium_bot|facebookexternalhit|yeti|RetrevoPageAnalyzer|lb\-spider|sogou|lssbot|careerbot|wotbox|wocbot|ichiro|DuckDuckBot|lssrocketcrawler|drupact|webcompanycrawler|acoonbot|openindexspider|gnam gnam spider|web\-archive\-net\.com\.bot|backlinkcrawler|coccoc|integromedb|content crawler spider|toplistbot|seokicks\-robot|it2media\-domain\-crawler|ip\-web\-crawler\.com|siteexplorer\.info|elisabot|proximic|changedetection|blexbot|arabot|WeSEE:Search|niki\-bot|CrystalSemanticsBot|rogerbot|360Spider|psbot|InterfaxScanBot|Lipperhey SEO Service|CC Metadata Scaper|g00g1e\.net|GrapeshotCrawler|urlappendbot|brainobot|fr\-crawler|binlar|SimpleCrawler|Livelapbot|Twitterbot|cXensebot|smtbot|bnf\.fr_bot|A6\-Indexer|ADmantX|Facebot|Twitterbot|OrangeBot|memorybot|AdvBot|MegaIndex|SemanticScholarBot|ltx71|nerdybot|xovibot|BUbiNG|Qwantify|archive\.org_bot|Applebot|TweetmemeBot|crawler4j|findxbot|SemrushBot|yoozBot|lipperhey|y!j\-asr|Domain Re\-Animator Bot|AddThis|YisouSpider|BLEXBot|YandexBot|SurdotlyBot|AwarioRssBot|FeedlyBot|Barkrowler|Gluten Free Crawler|Cliqzbot)";
-  
+
   if(preg_match("/{$bot_regex_pattern}/", @$_SERVER['HTTP_USER_AGENT'])) {
     $ip_data = array();
   } else {
     $ip_data = osc_file_get_contents_json($ip_service['url']);
-  }  
+  }
 
   if(isset($ip_data[$ip_service['status']]) && $ip_data[$ip_service['status']] == $ip_service['status_ok']) {
     if(isset($ip_data[$ip_service['country_code']]) && $ip_data[$ip_service['country_code']] != '') {
       $country_code = strtolower(trim($ip_data[$ip_service['country_code']]));
       $country = osc_get_country_row($country_code);
-      
+
       if($country !== false && isset($country['pk_c_code']) && $country['pk_c_code'] != '' && $country_code != '') {
         // we've found country and it exists in osclass installation
         $country_url = osc_subdomain_base_url(array('sCountry' => $country_code));
-        
-        if($country_url != osc_subdomain_top_url(false, false)) { 
+
+        if($country_url != osc_subdomain_top_url(false, false)) {
           $country_url = '';
         }
-        
+
         Cookie::newInstance()->push('ip_data_status', 'FOUND_EXISTS');
         Cookie::newInstance()->push('ip_data_message', isset($ip_data[$ip_service['message']]) ? $ip_data[$ip_service['message']] : '');
         Cookie::newInstance()->push('ip_data', json_encode($ip_data));
@@ -823,7 +978,7 @@ function osc_user_country_from_ip($force = false) {
     Cookie::newInstance()->push('ip_country', false);
     Cookie::newInstance()->set();
   }
-  
+
   return $ip_data;
 }
 
@@ -834,39 +989,39 @@ function osc_ipdata_service_map($type = '', $ip = '') {
     'service' => 'GeoPlugin.net',
     'service_url' => 'https://www.geoplugin.net/',
     'url' => 'http://www.geoplugin.net/json.gp?ip={IP_ADDRESS}',
-    'status_ok' => 200, 
-    'status' => 'geoplugin_status', 
-    'message' => 'geoplugin_message', 
-    'continent_code' => 'geoplugin_continentCode', 
-    'continent_name' => 'geoplugin_continentName', 
-    'country_code' => 'geoplugin_countryCode', 
-    'country_name' => 'geoplugin_countryName', 
-    'region_code' => 'geoplugin_regionCode', 
-    'region_name' => 'geoplugin_region', 
-    'region_name_alt' => 'geoplugin_regionName', 
-    'city_name' => 'geoplugin_city', 
-    'latitude' => 'geoplugin_latitude', 
-    'longitude' => 'geoplugin_longitude', 
-    'currency_code' => 'geoplugin_currencyCode', 
-    'currency_symbol' => 'geoplugin_currencySymbol', 
-    'currency_rate' => 'geoplugin_currencyConverter', 
+    'status_ok' => 200,
+    'status' => 'geoplugin_status',
+    'message' => 'geoplugin_message',
+    'continent_code' => 'geoplugin_continentCode',
+    'continent_name' => 'geoplugin_continentName',
+    'country_code' => 'geoplugin_countryCode',
+    'country_name' => 'geoplugin_countryName',
+    'region_code' => 'geoplugin_regionCode',
+    'region_name' => 'geoplugin_region',
+    'region_name_alt' => 'geoplugin_regionName',
+    'city_name' => 'geoplugin_city',
+    'latitude' => 'geoplugin_latitude',
+    'longitude' => 'geoplugin_longitude',
+    'currency_code' => 'geoplugin_currencyCode',
+    'currency_symbol' => 'geoplugin_currencySymbol',
+    'currency_rate' => 'geoplugin_currencyConverter',
     'timezone' => 'geoplugin_timezone'
   );
-  
+
   $data = osc_apply_filter('ipdata_service_map', $data, $ip);
-  
+
   if($ip != '' && isset($data['url'])) {
     $data['url'] = str_replace('{IP_ADDRESS}', $ip, $data['url']);
   }
-  
+
   if($type != '' && $type != 'ALL') {
     if(isset($data[$type])) {
       return $data[$type];
     }
-  
+
     return false;
   }
-  
+
   return $data;
 }
 
@@ -880,10 +1035,10 @@ function osc_get_subdomains($limit = 100, $min_count = 0, $with_toplink = false,
   if(osc_locale_to_base_url_enabled() && osc_subdomain_type() != 'language') {
     $lang_slug = osc_base_url_locale_slug() . '/';
   }
-  
+
   if(osc_subdomain_enabled()) {
     $type = osc_subdomain_type();
-    
+
     if($with_toplink) {
       $output[0] = array(
         'id' => 0,
@@ -892,23 +1047,23 @@ function osc_get_subdomains($limit = 100, $min_count = 0, $with_toplink = false,
         'item_count' => osc_total_active_items(),
         'url' => osc_subdomain_top_url(true, true)
       );
-      
+
       if($type == 'country') {
         $output[0]['image'] = osc_includes_url() . '/images/flag/country/h48/default.png';
       }
     }
-    
+
     if($type == 'category') {
       $sql = "b.s_name != '' AND a.b_enabled = 1";
-      
+
       if($min_count > 0) {
         $sql .= " AND c.i_num_items >= " . $min_count;
       }
-      
+
       if($category_only_root == true) {
         $sql .= " AND a.fk_i_parent_id IS NULL";
       }
-      
+
       $data = Category::newInstance()->listWhere($sql);
 
       if(is_array($data) && count($data) > 0) {
@@ -930,7 +1085,7 @@ function osc_get_subdomains($limit = 100, $min_count = 0, $with_toplink = false,
           }
         }
       }
-      
+
     } else if($type == 'country') {
       $data = CountryStats::newInstance()->listCountriesLimit('s_name ASC', $limit, $min_count);
 
@@ -944,7 +1099,7 @@ function osc_get_subdomains($limit = 100, $min_count = 0, $with_toplink = false,
             'item_count' => $dat['i_num_items'] > 0 ? $dat['i_num_items'] : 0,
             'url' => $http_url . $dat['s_slug'] . '.' . osc_subdomain_host() . REL_WEB_URL.$lang_slug
           );
-          
+
           if(file_exists(osc_includes_path() . '/images/flag/country/h48/' . strtolower($dat['pk_c_code']) . '.png')) {
             $output[$dat['pk_c_code']]['image'] = osc_includes_url() . '/images/flag/country/h48/' . strtolower($dat['pk_c_code']) . '.png';
           } else {
@@ -952,10 +1107,10 @@ function osc_get_subdomains($limit = 100, $min_count = 0, $with_toplink = false,
           }
         }
       }
-      
+
     } else if($type == 'region') {
       $data = RegionStats::newInstance()->listRegionsLimit(null, 's_name ASC', $limit, $min_count);
-      
+
       if(is_array($data) && count($data) > 0) {
         $k = 0;
         foreach($data as $dat) {
@@ -968,10 +1123,10 @@ function osc_get_subdomains($limit = 100, $min_count = 0, $with_toplink = false,
           );
         }
       }
-      
+
     } else if($type == 'city') {
       $data = CityStats::newInstance()->listCitiesLimit(null, null, 's_name ASC', $limit, $min_count);
-      
+
       if(is_array($data) && count($data) > 0) {
         $k = 0;
         foreach($data as $dat) {
@@ -984,10 +1139,10 @@ function osc_get_subdomains($limit = 100, $min_count = 0, $with_toplink = false,
           );
         }
       }
-      
+
     } else if($type == 'user') {
       $data = User::newInstance()->listUsersLimit('s_name ASC', $limit, $min_count, true, true);
-      
+
       if(is_array($data) && count($data) > 0) {
         $k = 0;
         foreach($data as $dat) {
@@ -1013,10 +1168,10 @@ function osc_get_subdomains($limit = 100, $min_count = 0, $with_toplink = false,
             'item_count' => 0,
             'url' => $http_url . osc_subdomain_locale_slug($dat['pk_c_code']) . '.' . osc_subdomain_host() . REL_WEB_URL
           );
-          
+
           $img_path = osc_includes_path() . '/images/flag/country/h48/';
           $img_url = osc_includes_url() . '/images/flag/country/h48/';
-          
+
           if(file_exists($img_path . strtolower(substr($dat['pk_c_code'], 0, 2)) . '.png')) {
             $output[$dat['pk_c_code']]['image'] = $img_url . strtolower(substr($dat['pk_c_code'], 0, 2)) . '.png';
 
@@ -1025,7 +1180,7 @@ function osc_get_subdomains($limit = 100, $min_count = 0, $with_toplink = false,
 
           } else if(file_exists($img_path . strtolower(str_replace('_', '-', $dat['pk_c_code'])) . '.png')) {
             $output[$dat['pk_c_code']]['image'] = $img_url . strtolower(str_replace('_', '-', $dat['pk_c_code'])) . '.png';
-            
+
           } else {
             $output[$dat['pk_c_code']]['image'] = osc_includes_url() . '/images/flag/country/h48/default.png';
           }
@@ -1045,15 +1200,15 @@ function osc_subdomain_select($with_toplink = false, $limit = 100, $min_count = 
 
   if(is_array($subdomains) && count($subdomains) > 0) {
     $html .= '<select id="subdomains-selector" onChange="window.location.href=this.value;return false;">';
-    
+
     foreach($subdomains as $sd) {
-      $html .= '<option value="' . $sd['url'] . '" data-slug="' . $sd['slug'] . '"' . (osc_subdomain_slug() == $sd['slug'] ? ' selected="selected"' : '') . '>' . $sd['name'] . '</option>'; 
+      $html .= '<option value="' . $sd['url'] . '" data-slug="' . $sd['slug'] . '"' . (osc_subdomain_slug() == $sd['slug'] ? ' selected="selected"' : '') . '>' . $sd['name'] . '</option>';
     }
-    
+
     $html .= '</select>';
     return $html;
   }
-  
+
   return false;
 }
 
@@ -1064,22 +1219,22 @@ function osc_subdomain_links($with_images = true, $with_counts = true, $with_top
   $subdomains = osc_get_subdomains($limit, $min_count, $with_toplink, $category_only_root);
   $user_country_code = Cookie::newInstance()->get_value('ip_country_code');
   $restricted_country_ids = array_filter(explode(',', osc_subdomain_restricted_ids()));
-  
+
   if(is_array($subdomains) && count($subdomains) > 0) {
     $html .= '<div id="subdomains-list">';
-    
+
     foreach($subdomains as $sd) {
       $restricted = false;
       if($user_country_code != '' && osc_subdomain_type() == 'country') {
         if(osc_subdomain_restricted_ids() == 'all' && strtolower($sd['id']) != $user_country_code) {
           $restricted = true;
-        } else if (in_array(strtolower($sd['id']), $restricted_country_ids) && strtolower($sd['id']) != $user_country_code) {
+        } elseif(in_array(strtolower($sd['id']), $restricted_country_ids) && strtolower($sd['id']) != $user_country_code) {
           $restricted = true;
         }
       }
-    
+
       $html .= '<a href="' . $sd['url'] . '" class="sd-' . $sd['slug'] . '' . (osc_subdomain_slug() == $sd['slug'] ? ' active' : '') . ($restricted ? ' restricted' : '') . '" data-id="' . $sd['id'] . '">';
-  
+
       if($with_images) {
         if(isset($sd['image']) && $sd['image'] != '') {
           $html .= '<img class="sd-img" src="' . $sd['image'] . '" alt="' . osc_esc_html($sd['name']) . '" height="48" width="auto"/>';
@@ -1092,43 +1247,119 @@ function osc_subdomain_links($with_images = true, $with_counts = true, $with_top
       if($with_counts == true && isset($sd['item_count']) && $sd['item_count'] > 0) {
         $html .= ' <em>(' . $sd['item_count'] . ')</em>';
       }
-      
+
       $html .= '</span>';
-      $html .= '</a>'; 
+      $html .= '</a>';
     }
-    
+
     $html .= '</div>';
     return $html;
   }
-  
+
   return false;
 }
 
 
 // Check if latest search word is not in ban/white list
-function osc_latest_search_filter($search) {
-  $search = trim(strtolower($search));
+function osc_latest_search_filter($search, $locale = '') {
+  if(is_array($search) || is_object($search)) {
+    return '';
+  }
+
+  $search = trim(strip_tags((string)$search));
+
+  if($search == '' || @preg_match('//u', $search) !== 1) {
+    return '';
+  }
+
+  $search = osc_strtolower($search);
+
+  if(
+    preg_match('/\bhttps?:\/\/|\bwww\./iu', $search) === 1
+    || preg_match('/\b[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,24}\b/iu', $search) === 1
+    || preg_match('/(^|[\s,;])(?:[a-z0-9](?:[a-z0-9\-]{0,61}[a-z0-9])?\.)+[a-z]{2,24}(?:$|[\s\/,;])/iu', $search) === 1
+    || (strlen((string)preg_replace('/\D+/', '', $search)) >= 7 && preg_match('/(?:\+|00|\d)[\d\-\.\s\(\)]{6,}/', $search) === 1)
+    || preg_match('/\b(?:whats\s*app|wa\.me|telegram|viber|messenger|skype|wechat|line)\b/iu', $search) === 1
+    || preg_match('/\b(?:buy\s+now|click\s+here|special\s+offer|limited\s+offer|promo(?:tion)?(?:\s+code)?|coupon(?:\s+code)?|discount(?:\s+code)?|contact(?:\s+me)?|call(?:\s+me)?|text(?:\s+me)?|sms(?:\s+me)?|follow\s+(?:us|me)|subscribe|visit\s+(?:us|our)|visit\s+website)\b/iu', $search) === 1
+  ) {
+    return '';
+  }
+
+  $words = preg_split('/[^\p{L}\p{N}]+/u', $search, -1, PREG_SPLIT_NO_EMPTY);
+
+  if(!is_array($words) || count($words) == 0) {
+    return '';
+  }
+
+  $min = osc_latest_searches_min_length();
+  $max = osc_latest_searches_max_length();
+  $max = ($max < $min ? $min : $max);
+  $stopWords = array();
+  $localeRow = ($locale != '' ? osc_get_locale_row($locale) : osc_get_current_user_locale());
+  $stopWordsText = osc_field($localeRow, 's_stop_words', '');
+
+  if($stopWordsText != '') {
+    $stopWordsList = preg_split('/\s*,\s*/', $stopWordsText, -1, PREG_SPLIT_NO_EMPTY);
+
+    if(is_array($stopWordsList) && count($stopWordsList) > 0) {
+      foreach($stopWordsList as $stopWord) {
+        $stopWord = trim((string)$stopWord);
+
+        if($stopWord != '') {
+          $stopWords[] = osc_strtolower($stopWord);
+        }
+      }
+    }
+  }
+
+  $search = '';
+
+  foreach($words as $word) {
+    $word = trim((string)$word);
+
+    if($word == '') {
+      continue;
+    }
+
+    $word = osc_strtolower($word);
+
+    if(in_array($word, $stopWords, true)) {
+      continue;
+    }
+
+    $length = osc_strlen($word);
+
+    if($length < $min || $length > $max || preg_match('/\p{L}/u', $word) !== 1) {
+      continue;
+    }
+
+    $search .= ($search != '' ? ' ' : '') . $word;
+  }
+
   $list = explode(',', osc_latest_searches_words());
 
-  if($search <> '' && osc_latest_searches_restriction() <> 0 && is_array($list) && count($list) > 0) { 
+  if($search <> '' && osc_latest_searches_restriction() <> 0 && is_array($list) && count($list) > 0) {
     foreach($list as $word) {
       if($word !== '') {
-        $word = (string)$word;
-        $search = (string)$search;
-        $safeWord = preg_quote($word, '/');
+        $word = trim((string)$word);
 
-        // Use UTF-8 safe case-insensitive match
+        if($word == '' || @preg_match('//u', $word) !== 1) {
+          continue;
+        }
+
+        $safeWord = preg_quote(osc_strtolower($word), '/');
+
         if(preg_match("/{$safeWord}/iu", $search)) {
           if(osc_latest_searches_restriction() == 1) {
             return '';
-          } else if (osc_latest_searches_restriction() == 2) {
+          } elseif(osc_latest_searches_restriction() == 2) {
             return $search;
           }
         }
       }
     }
   }
-  
+
   if(osc_latest_searches_restriction() == 2) {
     return '';
   } else {
@@ -1136,27 +1367,352 @@ function osc_latest_search_filter($search) {
   }
 }
 
-osc_add_filter('save_latest_searches_pattern', 'osc_latest_search_filter'); 
+osc_add_filter('save_latest_searches_pattern', 'osc_latest_search_filter');
 
+
+// Get list of supported cleanup types
+function osc_cleanup_available_types($include_logs = false) {
+  $types = array(
+    'items_inactive',
+    'items_blocked_spam',
+    'items_expired',
+    'users_inactive',
+    'users_blocked',
+    'comments_inactive',
+    'comments_blocked',
+    'unsubscribed_alerts',
+    'expired_alerts',
+    'expired_ban_rules',
+    'item_stats',
+    'reports_closed'
+  );
+
+  if($include_logs) {
+    $types[] = 'old_logs';
+  }
+
+  return $types;
+}
+
+// Execute cleanup by specific type and return number of deleted rows
+function osc_cleanup_data_by_type($type, $limit_days = null) {
+  $type = trim((string)$type);
+  $limit_days = (int)$limit_days;
+
+  if($limit_days <= 0) {
+    $limit_days = (int)osc_cleanup_threshold_days();
+  }
+
+  if($type != 'old_logs' && $type != 'item_stats' && $type != 'reports_closed' && $limit_days <= 0) {
+    return 0;
+  }
+
+  if(!in_array($type, osc_cleanup_available_types(true), true)) {
+    return false;
+  }
+
+  $deleted = 0;
+  $limit_date = date('Y-m-d', strtotime('-' . $limit_days . ' days'));
+
+  if($type == 'items_inactive') {
+    $data = osc_get_query_results(sprintf('SELECT * FROM %st_item WHERE b_active != 1 AND dt_pub_date <= "%s" LIMIT 50000', DB_TABLE_PREFIX, $limit_date));
+    $manager = new ItemActions(true);
+
+    if(is_array($data) && !empty($data)) {
+      foreach($data as $d) {
+        if($manager->delete($d['s_secret'], $d['pk_i_id'])) {
+          $deleted++;
+        }
+      }
+    }
+
+  } else if($type == 'items_blocked_spam') {
+    $data = osc_get_query_results(sprintf('SELECT * FROM %st_item WHERE (b_enabled = 0 OR b_spam = 1) AND dt_pub_date <= "%s" LIMIT 50000', DB_TABLE_PREFIX, $limit_date));
+    $manager = new ItemActions(true);
+
+    if(is_array($data) && !empty($data)) {
+      foreach($data as $d) {
+        if($manager->delete($d['s_secret'], $d['pk_i_id'])) {
+          $deleted++;
+        }
+      }
+    }
+
+  } else if($type == 'items_expired') {
+    $data = osc_get_query_results(sprintf('SELECT * FROM %st_item WHERE dt_expiration <= "%s" LIMIT 50000', DB_TABLE_PREFIX, $limit_date));
+    $manager = new ItemActions(true);
+
+    if(is_array($data) && !empty($data)) {
+      foreach($data as $d) {
+        if($manager->delete($d['s_secret'], $d['pk_i_id'])) {
+          $deleted++;
+        }
+      }
+    }
+
+  } else if($type == 'users_inactive') {
+    $data = osc_get_query_results(sprintf('SELECT * FROM %st_user WHERE b_active != 1 AND dt_reg_date <= "%s" LIMIT 50000', DB_TABLE_PREFIX, $limit_date));
+    $manager = User::newInstance();
+
+    if(is_array($data) && !empty($data)) {
+      foreach($data as $d) {
+        Log::newInstance()->insertLog('user', 'delete', $d['pk_i_id'], $d['s_email'], 'admin', osc_logged_admin_id());
+
+        if($manager->deleteUser($d['pk_i_id'])) {
+          $deleted++;
+        }
+      }
+    }
+
+  } else if($type == 'users_blocked') {
+    $data = osc_get_query_results(sprintf('SELECT * FROM %st_user WHERE b_enabled = 0 AND coalesce(dt_access_date, dt_reg_date) <= "%s" LIMIT 50000', DB_TABLE_PREFIX, $limit_date));
+    $manager = User::newInstance();
+
+    if(is_array($data) && !empty($data)) {
+      foreach($data as $d) {
+        Log::newInstance()->insertLog('user', 'delete', $d['pk_i_id'], $d['s_email'], 'admin', osc_logged_admin_id());
+
+        if($manager->deleteUser($d['pk_i_id'])) {
+          $deleted++;
+        }
+      }
+    }
+
+  } else if($type == 'comments_inactive') {
+    $data = osc_get_query_results(sprintf('SELECT * FROM %st_item_comment WHERE b_active != 1 AND dt_pub_date <= "%s" LIMIT 50000', DB_TABLE_PREFIX, $limit_date));
+    $manager = ItemComment::newInstance();
+
+    if(is_array($data) && !empty($data)) {
+      foreach($data as $d) {
+        if($manager->delete(array('pk_i_id' => $d['pk_i_id']))) {
+          $deleted++;
+        }
+      }
+    }
+
+  } else if($type == 'comments_blocked') {
+    $data = osc_get_query_results(sprintf('SELECT * FROM %st_item_comment WHERE b_enabled = 0 AND dt_pub_date <= "%s" LIMIT 50000', DB_TABLE_PREFIX, $limit_date));
+    $manager = ItemComment::newInstance();
+
+    if(is_array($data) && !empty($data)) {
+      foreach($data as $d) {
+        if($manager->delete(array('pk_i_id' => $d['pk_i_id']))) {
+          $deleted++;
+        }
+      }
+    }
+
+  } else if($type == 'unsubscribed_alerts') {
+    $data = osc_get_query_results(sprintf('SELECT * FROM %st_alerts WHERE b_active = 0 AND coalesce(dt_unsub_date, dt_date) <= "%s" LIMIT 50000', DB_TABLE_PREFIX, $limit_date));
+    $manager = Alerts::newInstance();
+
+    if(is_array($data) && !empty($data)) {
+      foreach($data as $d) {
+        if($manager->delete(array('pk_i_id' => $d['pk_i_id']))) {
+          $deleted++;
+        }
+      }
+    }
+
+  } else if($type == 'expired_alerts') {
+    $expired_alerts_days = max(30, (int)$limit_days);
+    $limit_date_expired_alerts = date('Y-m-d', strtotime('-' . $expired_alerts_days . ' days'));
+    $data = osc_get_query_results(sprintf('SELECT * FROM %st_alerts WHERE dt_expire_date IS NOT NULL AND dt_expire_date <= "%s" LIMIT 50000', DB_TABLE_PREFIX, $limit_date_expired_alerts));
+    $manager = Alerts::newInstance();
+
+    if(is_array($data) && !empty($data)) {
+      foreach($data as $d) {
+        if($manager->delete(array('pk_i_id' => $d['pk_i_id']))) {
+          $deleted++;
+        }
+      }
+    }
+
+  } else if($type == 'expired_ban_rules') {
+    $data = osc_get_query_results(sprintf('SELECT * FROM %st_ban_rule WHERE dt_expire_date <= "%s" LIMIT 50000', DB_TABLE_PREFIX, $limit_date));
+    $manager = BanRule::newInstance();
+
+    if(is_array($data) && !empty($data)) {
+      foreach($data as $d) {
+        if($manager->delete(array('pk_i_id' => $d['pk_i_id']))) {
+          $deleted++;
+        }
+      }
+    }
+
+  } else if($type == 'old_logs') {
+    $limit_months = (osc_logging_months() > 0 ? (int)osc_logging_months() : 24);
+    $limit_date_log = date('Y-m-d', strtotime('-' . $limit_months . ' months'));
+    $deleted = (int)osc_get_count_query_data(sprintf('SELECT count(*) FROM %st_log WHERE date(dt_date) <= "%s"', DB_TABLE_PREFIX, $limit_date_log));
+
+    if($deleted > 0) {
+      osc_execute_query(sprintf('DELETE FROM %st_log WHERE date(dt_date) <= "%s"', DB_TABLE_PREFIX, $limit_date_log));
+    }
+
+  } else if($type == 'item_stats') {
+    $limit_months = (osc_item_stats_cleanup_months() > 0 ? (int)osc_item_stats_cleanup_months() : 24);
+    $limit_date_item_stats = date('Y-m-d', strtotime('-' . $limit_months . ' months'));
+    $deleted = (int)osc_get_count_query_data(sprintf('SELECT count(*) FROM %st_item_stats WHERE dt_date <= "%s"', DB_TABLE_PREFIX, $limit_date_item_stats));
+
+    if($deleted > 0) {
+      osc_execute_query(sprintf('DELETE FROM %st_item_stats WHERE dt_date <= "%s"', DB_TABLE_PREFIX, $limit_date_item_stats));
+    }
+
+  } else if($type == 'reports_closed') {
+    $limit_months = (osc_reports_retention_months() > 0 ? (int)osc_reports_retention_months() : 24);
+    $limit_date_reports = date('Y-m-d', strtotime('-' . $limit_months . ' months'));
+    $data = osc_get_query_results(sprintf('SELECT pk_i_id FROM %st_report WHERE date(dt_create_date) <= "%s" LIMIT 50000', DB_TABLE_PREFIX, $limit_date_reports));
+
+    if(is_array($data) && !empty($data)) {
+      foreach($data as $d) {
+        if(Report::newInstance()->deleteByPrimaryKey($d['pk_i_id'])) {
+          $deleted++;
+        }
+      }
+    }
+  }
+
+  return $deleted;
+}
+
+// Automatically cleanup configured sections (except logs)
+function osc_auto_cleanup_data() {
+  $types = osc_cleanup_auto_types_array();
+
+  if(!is_array($types) || empty($types)) {
+    return 0;
+  }
+
+  $allowed = osc_cleanup_available_types(false);
+  $days = (int)osc_cleanup_threshold_days();
+
+  if($days <= 0) {
+    return 0;
+  }
+
+  $total = 0;
+
+  foreach($types as $type) {
+    if(!in_array($type, $allowed, true)) {
+      continue;
+    }
+
+    $count = osc_cleanup_data_by_type($type, $days);
+    if($count !== false) {
+      $total += (int)$count;
+    }
+  }
+
+  return $total;
+}
 
 // Automatically remove old osclass logs, when enabled
 function osc_purge_old_logs() {
   if(osc_logging_auto_cleanup() && osc_logging_months() >= 1) {
-    $limit_months = (int)osc_logging_months();
-    $limit_date_log = date('Y-m-d', strtotime('-' . $limit_months . ' months'));
-
-    $res = osc_execute_query(sprintf('DELETE FROM %st_log WHERE dt_date <= "%s"', DB_TABLE_PREFIX, $limit_date_log));
-    return $res;
+    return (int)osc_cleanup_data_by_type('old_logs');
   }
+
+  return 0;
 }
 
+// Automatically remove old item statistics from t_item_stats, when enabled
+function osc_purge_old_item_stats() {
+  if(osc_item_stats_auto_cleanup_enabled() && osc_item_stats_cleanup_months() >= 1) {
+    return (int)osc_cleanup_data_by_type('item_stats');
+  }
+
+  return 0;
+}
+
+// Automatically remove old reports, when retention is set
+function osc_purge_old_reports() {
+  if(!osc_ensure_reports_tables() || osc_reports_retention_months() < 1) {
+    return 0;
+  }
+
+  osc_run_hook('pre_purge_old_reports');
+  $deleted = (int)osc_cleanup_data_by_type('reports_closed');
+  osc_run_hook('after_purge_old_reports', $deleted);
+
+  return $deleted;
+}
+
+// Automatically resolve reports awaiting feedback with no activity, when enabled
+function osc_auto_close_reports() {
+  if(!osc_reports_enabled() || !osc_ensure_reports_tables() || !osc_reports_auto_close_enabled() || osc_reports_auto_close_days() < 1) {
+    return 0;
+  }
+
+  osc_run_hook('pre_auto_close_reports');
+  $reports = Report::newInstance()->findAwaitingFeedbackOlderThan(osc_reports_auto_close_days());
+  $closed = 0;
+
+  foreach($reports as $report) {
+    if(Report::newInstance()->updateStatus($report['pk_i_id'], 'resolved', 'cron', 0)) {
+      $report = Report::newInstance()->findByPrimaryKey($report['pk_i_id']);
+
+      if(osc_reports_notify_reporter_resolved()) {
+        osc_run_hook('hook_email_report_reporter_resolved', $report);
+      }
+
+      if(osc_reports_notify_owner_resolved()) {
+        osc_run_hook('hook_email_report_owner_resolved', $report);
+      }
+
+      osc_run_hook('report_status_change', $report, $report['s_status']);
+      osc_run_hook('auto_close_report', $report);
+      $closed++;
+    }
+  }
+
+  osc_run_hook('after_auto_close_reports', $closed);
+
+  return $closed;
+}
+
+// Automatically unsubscribe alerts for inactive users
+function osc_unsub_alerts_for_inactive_users() {
+  $months = (int)osc_alerts_unsub_inactive_months();
+  if($months <= 0) {
+    return 0;
+  }
+
+  $limit_date = date('Y-m-d H:i:s', strtotime('-' . $months . ' months'));
+
+  $count = (int)osc_get_count_query_data(sprintf("SELECT COUNT(*) FROM %st_alerts a INNER JOIN %st_user u ON u.pk_i_id = a.fk_i_user_id WHERE a.dt_unsub_date IS NULL AND COALESCE(u.dt_access_date, u.dt_reg_date) <= '%s'", DB_TABLE_PREFIX, DB_TABLE_PREFIX, $limit_date));
+
+  if($count > 0) {
+    osc_execute_query(sprintf("UPDATE %st_alerts a INNER JOIN %st_user u ON u.pk_i_id = a.fk_i_user_id SET a.dt_unsub_date = '%s', a.b_active = 0 WHERE a.dt_unsub_date IS NULL AND COALESCE(u.dt_access_date, u.dt_reg_date) <= '%s'", DB_TABLE_PREFIX, DB_TABLE_PREFIX, date('Y-m-d H:i:s'), $limit_date));
+  }
+
+  return $count;
+}
+
+osc_add_hook('cron_daily', 'osc_auto_cleanup_data');
 osc_add_hook('cron_daily', 'osc_purge_old_logs');
+osc_add_hook('cron_daily', 'osc_purge_old_item_stats');
+osc_add_hook('cron_daily', 'osc_item_stats_cron_recalc');
+osc_add_hook('cron_daily', 'osc_purge_old_reports');
+osc_add_hook('cron_daily', 'osc_auto_close_reports');
+osc_add_hook('cron_daily', 'osc_unsub_alerts_for_inactive_users');
+osc_add_hook('pre_contact_post', 'osc_report_hook_web_contact');
+osc_add_filter('contact_send_mail', 'osc_report_filter_contact_send_mail');
+osc_add_hook('init', 'osc_item_stats_register_chart_hooks');
+osc_add_hook('init', 'osc_item_stats_capture_period');
+osc_add_hook('user_items_body', 'osc_user_item_stats_inline');
+osc_add_hook('init', 'osc_item_stats_enqueue');
+osc_add_hook('add_comment', 'osc_item_stats_on_comment_changed');
+osc_add_hook('activate_comment', 'osc_item_stats_on_comment_changed');
+osc_add_hook('deactivate_comment', 'osc_item_stats_on_comment_changed');
+osc_add_hook('enable_comment', 'osc_item_stats_on_comment_changed');
+osc_add_hook('disable_comment', 'osc_item_stats_on_comment_changed');
+osc_add_hook('edit_comment', 'osc_item_stats_on_comment_changed');
 
 
 // Automatically remove oc-content/uploads/temp folder data
 function osc_clean_temp_folder() {
   $path = UPLOADS_PATH . 'temp';
-  
+
   if(!is_dir($path)) {
     return;
   }
@@ -1187,23 +1743,22 @@ function osc_update_user_stats() {
 osc_add_hook('cron_daily', 'osc_update_user_stats');
 
 
-
 // Check demo login data
 function osc_check_demo_login_data($type = 'email') {
   if((defined('DEMO_PLUGINS') && DEMO_PLUGINS === true) || (defined('DEMO_THEMES') && DEMO_THEMES === true) || (defined('DEMO') && DEMO === true)) {
     $demo_user = osc_get_user_row_by_username('demo');
-    
+
     if($demo_user !== false) {
       if($type == 'email') {
         return 'demo@demo.com';
-      } else if ($type == 'username') {
+      } elseif($type == 'username') {
         return 'demo';
-      } else if ($type == 'password') {
+      } elseif($type == 'password') {
         return 'demo123';
       }
     }
   }
-  
+
   return '';
 }
 
@@ -1238,11 +1793,10 @@ function osc_custom_js_footer() {
 osc_add_hook(strtolower(osc_get_preference('custom_js_hook') != '' ? osc_get_preference('custom_js_hook') : 'footer'), 'osc_custom_js_footer', 10);
 
 
-
 function osc_admin_toolbar_in_front() {
   if(osc_is_admin_user_logged_in() && osc_admin_toolbar_front_enabled()) {
     osc_admin_toolbar_in_front_css();
-    
+
     osc_add_hook('add_admin_toolbar_menus', 'osc_admin_toolbar_back', 0);
     osc_add_hook('add_admin_toolbar_menus', 'osc_admin_toolbar_logged_user', 0);
     osc_add_hook('add_admin_toolbar_menus', 'osc_admin_toolbar_edit_item', 0);
@@ -1274,14 +1828,14 @@ function osc_admin_toolbar_in_front_css() {
     #header-admin #osc_toolbar_logout a:before {display:none;}
     #header-admin #osc_toolbar_logout a:hover {background:#444;}
     #header-admin #osc_mt_demo {display:none;}
-   
+
     @media screen and (min-width: 768px) {
       #header-admin #osc_toolbar_logout {position:absolute;right:10px;top:0;}
       #header-admin #osc_toolbar_logout a {display:inline-block;margin: 3px 0; line-height: 18px; padding: 5px 6px 5px 8px;border-radius:0; height: 28px; border: none; background: transparent; font-size: 13px;}
       #header-admin #osc_toolbar_back, #header-admin #osc_toolbar_logged, #header-admin #osc_toolbar_edititem, #header-admin #osc_toolbar_editpage {margin-right:5px;}
       #header-admin #osc_toolbar_back i.fa {float: left; line-height: 19px; width: 20px; font-size: 16px; margin-right: 3px;}
     }
-    
+
     @media screen and (max-width: 767px) {
       body {margin-top:46px!important;}
       #header-admin .header-wrapper > div {display:none;}
@@ -1300,74 +1854,74 @@ function osc_admin_toolbar_in_front_css() {
       #header-admin .osc_mobile_list li a .circle { margin: 0px 5px 0 0; }
       #header-admin #osc_mt_back, #header-admin #osc_mt_logged, #header-admin #osc_mt_editpage, #header-admin #osc_mt_edituser, #header-admin #osc_mt_edititem, #header-admin #osc_mt_logout {display:none;}
     }
-    
+
     <?php if(in_array($admin_scheme, array('sunrise', 'ectoplasm', 'midnight', 'ocean', 'coffee', 'blue', 'modern', 'light'))) { ?>
     #header-admin .header-wrapper > div a:hover, #header-admin .header-wrapper > div a.active {color:#fff;}
     #header-admin .header-wrapper > div a:hover, #header-admin .header-wrapper > div a.active, #header-admin #osc_toolbar_logout a:hover {color:#fff;background:rgba(0,0,0,0.2);}
     #header-admin a .circle {background: rgba(0,0,0,0.2);}
     @media screen and (max-width: 767px) { #header-admin .header-wrapper > div a {color:#eee;} }
     <?php } ?>
-    
+
     <?php if($admin_scheme == 'sunrise') { ?>
     #header-admin {background: #b32924;}
-    @media screen and (max-width: 767px) { 
+    @media screen and (max-width: 767px) {
       #header-admin .osc_mobile_list, #header-admin .header-wrapper > div a:hover, #header-admin .header-wrapper > div a.active {background:#cf4944;}
-      #header-admin #osc_toolbar_mobilemenu a:after {background:#dd823b;}  
+      #header-admin #osc_toolbar_mobilemenu a:after {background:#dd823b;}
     }
-    <?php } else if ($admin_scheme == 'ectoplasm') { ?>
+    <?php } elseif($admin_scheme == 'ectoplasm') { ?>
     #header-admin {background: #413256;}
     #header-admin a .circle { background: #d46f15; }
-    @media screen and (max-width: 767px) { 
+    @media screen and (max-width: 767px) {
       #header-admin .osc_mobile_list, #header-admin .header-wrapper > div a:hover, #header-admin .header-wrapper > div a.active {background:#523f6d;}
-      #header-admin #osc_toolbar_mobilemenu a:after {background:#d46f15;}  
+      #header-admin #osc_toolbar_mobilemenu a:after {background:#d46f15;}
     }
-    <?php } else if ($admin_scheme == 'midnight') { ?>
+    <?php } elseif($admin_scheme == 'midnight') { ?>
     #header-admin {background: #25282b;}
     #header-admin a .circle { background: #e14d43; }
-    @media screen and (max-width: 767px) { 
+    @media screen and (max-width: 767px) {
       #header-admin .osc_mobile_list, #header-admin .header-wrapper > div a:hover, #header-admin .header-wrapper > div a.active {background:#363b3f;}
       #header-admin #osc_toolbar_mobilemenu a:after {background:#e14d43;}
     }
-    <?php } else if ($admin_scheme == 'ocean') { ?>
+    <?php } elseif($admin_scheme == 'ocean') { ?>
     #header-admin {background: #627c83;}
     #header-admin a .circle { background: #9ebaa0; }
-    @media screen and (max-width: 767px) { 
+    @media screen and (max-width: 767px) {
       #header-admin .osc_mobile_list, #header-admin .header-wrapper > div a:hover, #header-admin .header-wrapper > div a.active {background:#738e96;}
       #header-admin #osc_toolbar_mobilemenu a:after {background:#aa9d88;}
     }
-    <?php } else if ($admin_scheme == 'coffee') { ?>
+    <?php } elseif($admin_scheme == 'coffee') { ?>
     #header-admin {background: #46403c;}
     #header-admin a .circle { background: #9ea476; }
-    @media screen and (max-width: 767px) { 
+    @media screen and (max-width: 767px) {
       #header-admin .osc_mobile_list, #header-admin .header-wrapper > div a:hover, #header-admin .header-wrapper > div a.active {background:#59524c;color:#fff;}
       #header-admin #osc_toolbar_mobilemenu a:after {background:#9ea476;}
     }
-    <?php } else if ($admin_scheme == 'blue') { ?>
+    <?php } elseif($admin_scheme == 'blue') { ?>
     #header-admin {background: #096484;}
     #header-admin a .circle { background: #e1a948; }
-    @media screen and (max-width: 767px) { 
+    @media screen and (max-width: 767px) {
       #header-admin .osc_mobile_list, #header-admin .header-wrapper > div a:hover, #header-admin .header-wrapper > div a.active {background:#4796b3;color:#fff;}
       #header-admin #osc_toolbar_mobilemenu a:after {background:#e1a948;}
     }
-    <?php } else if ($admin_scheme == 'modern') { ?>
+    <?php } elseif($admin_scheme == 'modern') { ?>
     #header-admin {background: #1e1e1e;}
     #header-admin a .circle { background: #3858e9; }
-    @media screen and (max-width: 767px) { 
+    @media screen and (max-width: 767px) {
       #header-admin .osc_mobile_list, #header-admin .header-wrapper > div a:hover, #header-admin .header-wrapper > div a.active {background:#000;color:#fff;}
       #header-admin #osc_toolbar_mobilemenu a:after {background:#33f078;}
     }
-    <?php } else if ($admin_scheme == 'light') { ?>
+    <?php } elseif($admin_scheme == 'light') { ?>
     #header-admin {background: #e5e5e5;}
     #header-admin a .circle { background: #d64e07; }
     body #header-admin #osc_toolbar_back i.fa {color:#999;}
     body #header-admin .header-wrapper > div a {color:#666;}
-    @media screen and (max-width: 767px) { 
+    @media screen and (max-width: 767px) {
       #header-admin .osc_mobile_list, #header-admin .header-wrapper > div a:hover, #header-admin .header-wrapper > div a.active {background:#fff;color:#666;}
       body #header-admin a {color:#666;}
       body #header-admin .header-wrapper > div a {color:#999;}
       #header-admin #osc_toolbar_mobilemenu a:after {background:#d64e07;}
     }
-    <?php } ?>    
+    <?php } ?>
 
   </style>
   <?php
@@ -1383,17 +1937,17 @@ function osc_admin_toolbar_in_front_js() {
     if(!$('body').hasClass('osc-has-admin-header')) {
       $('body').addClass('osc-has-admin-header');
     }
-    
+
     $('body').on('click', '#osc_toolbar_mobilemenu', function(e) {
       e.preventDefault();
       $('#header-admin .osc_mobile_list').slideToggle(200);
     });
-    
-    $(document).click(function(event) { 
+
+    $(document).click(function(event) {
       var $target = $(event.target);
       if(!$target.closest('#header-admin #osc_toolbar_mobilemenu').length && !$target.closest('#header-admin .osc_mobile_list').length && $('#header-admin .osc_mobile_list').is(":visible")) {
         $('#header-admin .osc_mobile_list').slideUp(200);
-      }        
+      }
     });
   });
   </script>
@@ -1418,16 +1972,62 @@ osc_add_hook('body_class', 'osc_admin_toolbar_in_front_class');
  * clean optimization files from folder oc-includes/uploads/minify
  */
 function osc_clean_optimization_files() {
-  foreach(glob(osc_content_path() . 'uploads/minify/*.css') as $file) {
+  $css_files = glob(osc_content_path() . 'uploads/minify/*.css');
+  $js_files = glob(osc_content_path() . 'uploads/minify/*.js');
+
+  foreach(($css_files !== false ? $css_files : array()) as $file) {
     unlink($file);
   }
-  
-  foreach(glob(osc_content_path() . 'uploads/minify/*.js') as $file) {
+
+  foreach(($js_files !== false ? $js_files : array()) as $file) {
     unlink($file);
   }
 }
 
-osc_add_hook('cron_weekly', 'osc_clean_optimization_files');
+/**
+ * get optimization files count and size
+ */
+function osc_optimization_files_stats() {
+  $css_files = glob(osc_content_path() . 'uploads/minify/*.css');
+  $js_files = glob(osc_content_path() . 'uploads/minify/*.js');
+  $files = array_merge(($css_files !== false ? $css_files : array()), ($js_files !== false ? $js_files : array()));
+  $size = 0;
+
+  foreach($files as $file) {
+    if(is_file($file) && is_readable($file)) {
+      $size += filesize($file);
+    }
+  }
+
+  return array(
+    'count' => count($files),
+    'size' => $size,
+    'size_formatted' => number_format(round($size / 1000000, 2), 2) . 'MB'
+  );
+}
+
+/**
+ * clean optimization files from cron
+ */
+function osc_clean_optimization_files_cron($frequency) {
+  if(osc_optimization_cleanup_frequency() != $frequency) {
+    return false;
+  }
+
+  osc_clean_optimization_files();
+  return true;
+}
+
+function osc_clean_optimization_files_weekly() {
+  return osc_clean_optimization_files_cron('weekly');
+}
+
+function osc_clean_optimization_files_monthly() {
+  return osc_clean_optimization_files_cron('monthly');
+}
+
+osc_add_hook('cron_weekly', 'osc_clean_optimization_files_weekly');
+osc_add_hook('cron_monthly', 'osc_clean_optimization_files_monthly');
 osc_add_hook('theme_activate', 'osc_clean_optimization_files');
 osc_add_hook('after_plugin_install', 'osc_clean_optimization_files');
 osc_add_hook('after_plugin_uninstall', 'osc_clean_optimization_files');
@@ -1447,14 +2047,207 @@ osc_add_hook('after_auto_upgrade', 'osc_clean_optimization_files');
 osc_add_hook('after_upgrade', 'osc_clean_optimization_files');
 
 
+/**
+ * return database optimization tables
+ */
+function osc_database_optimization_tables() {
+  $tables = array();
+  $prefix = (string)DB_TABLE_PREFIX;
+
+  if($prefix == '') {
+    return $tables;
+  }
+
+  $dao = Item::newInstance()->dao;
+  $result = $dao->query(sprintf("SHOW TABLE STATUS LIKE '%s%%'", $dao->escapeStr($prefix, true)));
+
+  if(!$result) {
+    return false;
+  }
+
+  $rows = $result->result();
+
+  foreach($rows as $row) {
+    $name = (isset($row['Name']) ? (string)$row['Name'] : '');
+    $engine = (isset($row['Engine']) ? (string)$row['Engine'] : '');
+
+    if($name != '' && $engine != '' && strpos($name, $prefix) === 0) {
+      $tables[] = array(
+        'name' => $name,
+        'rows' => (isset($row['Rows']) ? (int)$row['Rows'] : 0),
+        'engine' => $engine
+      );
+    }
+  }
+
+  return $tables;
+}
+
+
+/**
+ * return SQL safe table name
+ */
+function osc_database_optimization_table_name($table) {
+  return '`' . str_replace('`', '``', $table) . '`';
+}
+
+
+/**
+ * return database optimization operations
+ */
+function osc_database_optimization_allowed_operations() {
+  return array(
+    'check' => 'CHECK TABLE',
+    'analyze' => 'ANALYZE TABLE',
+    'optimize' => 'OPTIMIZE TABLE',
+    'flush' => 'FLUSH TABLES'
+  );
+}
+
+
+/**
+ * optimize database tables
+ */
+function osc_optimize_database_tables($operations = null) {
+  @set_time_limit(0);
+
+  $allowed = osc_database_optimization_allowed_operations();
+  $selected = ($operations === null ? osc_database_optimization_operations_array() : $operations);
+  $selected = (is_array($selected) ? $selected : array());
+  $table_operations = array();
+  $flush = false;
+
+  foreach($selected as $operation) {
+    $operation = trim(strtolower((string)$operation));
+
+    if(!isset($allowed[$operation]) || in_array($operation, $table_operations, true)) {
+      continue;
+    }
+
+    if($operation == 'flush') {
+      $flush = true;
+    } else {
+      $table_operations[] = $operation;
+    }
+  }
+
+  $summary = array(
+    'tables' => 0,
+    'processed' => 0,
+    'operations' => $table_operations,
+    'flush' => $flush,
+    'large_tables' => array(),
+    'issues' => array()
+  );
+
+  $running = (int)osc_get_preference('database_optimization_running');
+  if($running > 0 && $running > (time() - 21600)) {
+    $summary['issues'][] = array('table' => '', 'operation' => '', 'message' => __('Database optimization is already running.'));
+    return $summary;
+  }
+
+  if(empty($table_operations) && !$flush) {
+    $summary['issues'][] = array('table' => '', 'operation' => '', 'message' => __('No database optimization operation was selected.'));
+    return $summary;
+  }
+
+  osc_set_preference('database_optimization_running', time(), 'osclass', 'INTEGER');
+  $tables = osc_database_optimization_tables();
+  if($tables === false) {
+    $summary['issues'][] = array('table' => '', 'operation' => '', 'message' => Item::newInstance()->dao->getErrorDesc());
+    osc_set_preference('database_optimization_running', 0, 'osclass', 'INTEGER');
+    return $summary;
+  }
+
+  $summary['tables'] = count($tables);
+
+  if(DB_TABLE_PREFIX == '') {
+    $summary['issues'][] = array('table' => '', 'operation' => '', 'message' => __('Database table prefix is empty. Database optimization was skipped.'));
+    osc_set_preference('database_optimization_running', 0, 'osclass', 'INTEGER');
+    return $summary;
+  }
+
+  $dao = Item::newInstance()->dao;
+
+  foreach($tables as $table) {
+    $name = $table['name'];
+
+    if((int)$table['rows'] > 100000) {
+      $summary['large_tables'][] = array('table' => $name, 'rows' => (int)$table['rows']);
+    }
+
+    foreach($table_operations as $operation) {
+      $result = $dao->query($allowed[$operation] . ' ' . osc_database_optimization_table_name($name));
+
+      if(!$result) {
+        $summary['issues'][] = array('table' => $name, 'operation' => $allowed[$operation], 'message' => $dao->getErrorDesc());
+        continue;
+      }
+
+      $rows = $result->result();
+      foreach($rows as $row) {
+        $type = (isset($row['Msg_type']) ? strtolower((string)$row['Msg_type']) : '');
+        $message = (isset($row['Msg_text']) ? (string)$row['Msg_text'] : '');
+
+        if(in_array($type, array('error', 'warning'), true) || ($type == 'status' && strtolower($message) != 'ok')) {
+          $summary['issues'][] = array('table' => $name, 'operation' => $allowed[$operation], 'message' => $message);
+        }
+      }
+    }
+
+    $summary['processed']++;
+  }
+
+  if($flush) {
+    if(!$dao->query('FLUSH TABLES')) {
+      $summary['issues'][] = array('table' => '', 'operation' => 'FLUSH TABLES', 'message' => $dao->getErrorDesc());
+    }
+  }
+
+  osc_set_preference('database_optimization_running', 0, 'osclass', 'INTEGER');
+  return $summary;
+}
+
+
+/**
+ * run database optimization from cron
+ */
+function osc_optimize_database_tables_cron($frequency) {
+  if(osc_database_optimization_frequency() != $frequency) {
+    return false;
+  }
+
+  return osc_optimize_database_tables();
+}
+
+
+function osc_optimize_database_tables_daily() {
+  return osc_optimize_database_tables_cron('daily');
+}
+
+
+function osc_optimize_database_tables_weekly() {
+  return osc_optimize_database_tables_cron('weekly');
+}
+
+
+function osc_optimize_database_tables_monthly() {
+  return osc_optimize_database_tables_cron('monthly');
+}
+
+
+osc_add_hook('cron_daily', 'osc_optimize_database_tables_daily');
+osc_add_hook('cron_weekly', 'osc_optimize_database_tables_weekly');
+osc_add_hook('cron_monthly', 'osc_optimize_database_tables_monthly');
+
 
 /**
  * return true if string contains any of array elements. Is case insensitive
  */
 function osc_string_contains_array($string, $array) {
   if(is_array($array) && !empty($array) && count($array) > 0) {
-    foreach ($array as $substr) {
-      if (stripos($string, $substr) !== false) { 
+    foreach($array as $substr) {
+      if(stripos($string, $substr) !== false) {
         return true;
       }
     }
@@ -1470,7 +2263,7 @@ function osc_string_contains_array($string, $array) {
 function osc_dir_size($path, $measurement = true){
   $bytestotal = 0;
   $path = realpath($path);
-  
+
   if($path!==false && $path!='' && file_exists($path)){
     foreach(new RecursiveIteratorIterator(new RecursiveDirectoryIterator($path, FilesystemIterator::SKIP_DOTS)) as $object){
       if($object->isReadable()) {
@@ -1478,13 +2271,13 @@ function osc_dir_size($path, $measurement = true){
       }
     }
   }
-  
+
   $size = round($bytestotal/1000000, 2);   // megabytes
-  
+
   if($measurement) {
     return $size . 'Mb';
   }
-  
+
   return $size;
 }
 
@@ -1494,6 +2287,8 @@ function osc_dir_size($path, $measurement = true){
  */
 function osc_dir_chmod($path){
   $path = realpath($path);
+  $not_writtable = array();
+  $not_readable = array();
 
   //$iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($path));
   $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($path));
@@ -1502,9 +2297,7 @@ function osc_dir_chmod($path){
     if($file->isDir()) {
       $filename = $file->getRealpath();
       $filename = str_replace(osc_base_path(), '', $filename);
-      
-      $not_writtable = array();
-      $not_readable = array();
+
       if(!$file->isWritable() || !$file->isExecutable()) {
         $not_writtable[] = $filename;
       } else if(!$file->isReadable()) {
@@ -1512,7 +2305,7 @@ function osc_dir_chmod($path){
       }
     }
   }
-  
+
   return array(
     'not_readable' => $not_readable,
     'not_writtable' => $not_writtable
@@ -1525,16 +2318,16 @@ function osc_dir_chmod($path){
  */
 function osc_base64_to_image($data, $user_id = null) {
   $user_id = ($user_id === null ? osc_logged_user_id() : $user_id);
-  
+
   if($user_id <= 0) {
     return false;
   }
-  
+
   $image_array_1 = explode(";", $data);
   $image_array_2 = explode(",", $image_array_1[1]);
   $data = base64_decode($image_array_2[1]);
 
-  $image_name = $user_id . '_' . osc_generate_rand_string(5) . '_' . date('Ymd') . '.png'; 
+  $image_name = $user_id . '_' . osc_generate_rand_string(5) . '_' . date('Ymd') . '.png';
   $image_url = osc_content_url() . 'uploads/user-images/' . $image_name;
   $image_path = osc_content_path() . 'uploads/user-images/' . $image_name;
 
@@ -1554,7 +2347,7 @@ if(!function_exists('osc_generate_rand_int')) {
     $charactersLength = strlen($characters);
     $randomString = '';
 
-    for ($i = 0; $i < $length; $i++) {
+    for($i = 0; $i < $length; $i++) {
       $randomString .= $characters[rand(0, $charactersLength - 1)];
     }
 
@@ -1572,7 +2365,7 @@ if(!function_exists('osc_generate_rand_string')) {
     $charactersLength = strlen($characters);
     $randomString = '';
 
-    for ($i = 0; $i < $length; $i++) {
+    for($i = 0; $i < $length; $i++) {
       $randomString .= $characters[rand(0, $charactersLength - 1)];
     }
 
@@ -1581,14 +2374,14 @@ if(!function_exists('osc_generate_rand_string')) {
 }
 
 
-// GET SQL RESULT SET (array) 
+// GET SQL RESULT SET (array)
 function osc_get_query_results($sql) {
   if(trim($sql) == '') {
-    return array(); 
+    return array();
   }
 
   $result = Item::newInstance()->dao->query($sql);
-  if(!$result) { 
+  if(!$result) {
     return array();
   } else {
     $prepare = $result->result();
@@ -1599,7 +2392,7 @@ function osc_get_query_results($sql) {
 // EXECUTE QUERY
 function osc_execute_query($sql) {
   if(trim($sql) == '') {
-    return false; 
+    return false;
   }
 
   $result = Item::newInstance()->dao->query($sql);
@@ -1609,12 +2402,12 @@ function osc_execute_query($sql) {
 // RETURN COUNT OF QUERY
 function osc_get_count_query_data($sql) {
   if(trim($sql) == '') {
-    return 0; 
+    return 0;
   }
 
   $result = Item::newInstance()->dao->query($sql);
-  if(!$result) { 
-    return 0; 
+  if(!$result) {
+    return 0;
   } else {
     $prepare = $result->row();
     return (reset($prepare) > 0 ? reset($prepare) : 0);   // first array element
@@ -1633,25 +2426,25 @@ function osc_smart_date_diff($time) {
 
   if($time_diff < 2) {
   $time_diff_name = __('minute ago');
-  } else if ($time_diff < 60) {
+  } elseif($time_diff < 60) {
   $time_diff_name = sprintf(__('%d minutes ago'), $time_diff);
-  } else if ($time_diff < 120) {
+  } elseif($time_diff < 120) {
   $time_diff_name = sprintf(__('%d hour ago'), $time_diff_h);
-  } else if ($time_diff < 1440) {
+  } elseif($time_diff < 1440) {
   $time_diff_name = sprintf(__('%d hours ago'), $time_diff_h);
-  } else if ($time_diff < 2880) {
+  } elseif($time_diff < 2880) {
   $time_diff_name = sprintf(__('%d day ago'), $time_diff_d);
-  } else if ($time_diff < 10080) {
+  } elseif($time_diff < 10080) {
   $time_diff_name = sprintf(__('%d days ago'), $time_diff_d);
-  } else if ($time_diff < 20160) {
+  } elseif($time_diff < 20160) {
   $time_diff_name = sprintf(__('%d week ago'), $time_diff_w);
-  } else if ($time_diff < 43200) {
+  } elseif($time_diff < 43200) {
   $time_diff_name = sprintf(__('%d weeks ago'), $time_diff_w);
-  } else if ($time_diff < 86400) {
+  } elseif($time_diff < 86400) {
   $time_diff_name = sprintf(__('%d month ago'), $time_diff_m);
-  } else if ($time_diff < 518400) {
+  } elseif($time_diff < 518400) {
   $time_diff_name = sprintf(__('%d months ago'), $time_diff_m);
-  } else if ($time_diff < 1036800) {
+  } elseif($time_diff < 1036800) {
   $time_diff_name = sprintf(__('%d year ago'), $time_diff_y);
   } else {
   $time_diff_name = sprintf(__('%d years ago'), $time_diff_y);
@@ -1729,12 +2522,12 @@ osc_add_hook('init' , 'osc_tinymce_item_head');
 
 function osc_tinymce_item_script() {
   $custom_code = osc_apply_filter('tinymce_item_script', '');
-  
+
   if(osc_tinymce_items_enabled() == '1' && (osc_is_publish_page() || osc_is_edit_page())) { ?>
   <script type="text/javascript">
     <?php if($custom_code != '') { ?>
       <?php echo $custom_code; ?>
-      
+
     <?php } else { ?>
       tinyMCE.init({
         <?php echo osc_run_hook('tinymce_item_script_top'); ?>
@@ -1772,7 +2565,7 @@ function osc_tinymce_item_script() {
         }
         <?php echo osc_run_hook('tinymce_item_script_bottom'); ?>
       });
-      
+
       <?php echo osc_run_hook('tinymce_item_script_after'); ?>
     <?php } ?>
   </script>
@@ -1794,12 +2587,12 @@ osc_add_hook('init' , 'osc_tinymce_user_head');
 
 function osc_tinymce_user_script() {
   $custom_code = osc_apply_filter('tinymce_user_script', '');
-  
+
   if(osc_tinymce_users_enabled() == '1' && osc_is_user_profile()) { ?>
   <script type="text/javascript">
     <?php if($custom_code != '') { ?>
       <?php echo $custom_code; ?>
-      
+
     <?php } else { ?>
       tinyMCE.init({
         <?php echo osc_run_hook('tinymce_user_script_top'); ?>
@@ -1830,7 +2623,7 @@ function osc_tinymce_user_script() {
         }
         <?php echo osc_run_hook('tinymce_user_script_bottom'); ?>
       });
-      
+
       <?php echo osc_run_hook('tinymce_user_script_after'); ?>
     <?php } ?>
   </script>
@@ -1839,7 +2632,6 @@ function osc_tinymce_user_script() {
 }
 
 osc_add_hook('footer', 'osc_tinymce_user_script', 10);
-
 
 
 function osc_rotate_js() {
@@ -1871,15 +2663,15 @@ function osc_search_title() {
   $city = osc_search_city();
   $category = osc_search_category_id();
   $cat_ = '';
-  
+
   $result = '';
 
   // CHECK IF IT'S ALERT URL
   $alert_id = (int)Params::getParam('iAlertId');
-  
+
   if($alert_id > 0) {
     $alert = Alerts::newInstance()->findByPrimaryKey($alert_id);
-    
+
     if(isset($alert['s_name'])) {
       $result = sprintf(__('Alert #%d: %s'), $alert_id, ($alert['s_name'] <> '' ? $alert['s_name'] : '-'));
       return osc_apply_filter('search_title', $result);
@@ -1888,7 +2680,7 @@ function osc_search_title() {
 
   if(isset($category[0]) && $category[0] > 0) {
     $cat_arr = osc_get_category_row($category[0]);
-    
+
     if(isset($cat_arr['s_name']) && trim($cat_arr['s_name']) != '') {
       $cat_ = $cat_arr['s_name'];
     }
@@ -1896,7 +2688,7 @@ function osc_search_title() {
 
   $parts = array_filter(array_map('trim', array($cat_, $country, $region, $city)));
   $result = implode(' - ', $parts);
-  
+
   if($result == '') {
     $result = __('Search results');
   }
@@ -1920,9 +2712,9 @@ function meta_title() {
   $section = Rewrite::newInstance()->get_section();
   $text = '';
 
-  switch ($location) {
+  switch($location) {
     case ('item'):
-      switch ($section) {
+      switch($section) {
         case 'item_add':
           $text = __('Publish a listing');
           break;
@@ -1954,7 +2746,7 @@ function meta_title() {
       $s_page = '';
       $i_page = Params::getParam('iPage');
 
-      if ($i_page != '' && $i_page > 1) {
+      if($i_page != '' && $i_page > 1) {
         $s_page = ' - ' . __('page') . ' ' . $i_page;
       }
 
@@ -1964,42 +2756,42 @@ function meta_title() {
       $b_city = ($city != '');
       $b_region = ($region != '');
 
-      if ($b_show_all) {
+      if($b_show_all) {
         $text = __('Show all listings') . ' - ' . $s_page . osc_page_title();
       }
 
       $result = '';
-      if ($b_pattern) {
+      if($b_pattern) {
         $result .= $pattern . ' &raquo; ';
       }
 
-      if ($b_category && is_array($category) && count($category) > 0) {
+      if($b_category && is_array($category) && count($category) > 0) {
         $cat = osc_get_category_row($category[0]);
-        if ($cat) {
+        if($cat) {
           $result .= $cat['s_name'] . ' ';
         }
       }
 
-      if ($b_city) {
+      if($b_city) {
         $result .= $city . ' &raquo; ';
-      } else if ($b_region) {
+      } elseif($b_region) {
         $result .= $region . ' &raquo; ';
       }
 
       $result = preg_replace('|\s?&raquo;\s$|' , '' , $result);
 
-      if ($result == '') {
+      if($result == '') {
         $result = __('Search results');
       }
 
       $text = '';
-      if (osc_get_preference('seo_title_keyword') != '') {
+      if(osc_get_preference('seo_title_keyword') != '') {
         $text .= osc_get_preference('seo_title_keyword') . ' ';
       }
       $text .= $result . $s_page;
       break;
     case('login'):
-      switch ($section) {
+      switch($section) {
         case('recover'):
           $text = __('Recover your password');
           break;
@@ -2015,7 +2807,7 @@ function meta_title() {
       break;
 
     case('user'):
-      switch ($section) {
+      switch($section) {
         case('dashboard'):
           $text = __('Dashboard');
           break;
@@ -2054,7 +2846,7 @@ function meta_title() {
       } else {
         $text = osc_page_title();
       }
-      
+
       break;
   }
 
@@ -2065,7 +2857,7 @@ function meta_title() {
       $text = osc_page_title();
     }
   }
-  
+
   $text = preg_replace('/\s+/', ' ', $text);
 
   return osc_apply_filter('meta_title_filter', $text);
@@ -2079,27 +2871,27 @@ function meta_title() {
 function meta_description() {
   $text = '';
   // home page
-  if (osc_is_home_page()) {
+  if(osc_is_home_page()) {
     $text = osc_page_description();
   }
   // static page
-  if (osc_is_static_page()) {
+  if(osc_is_static_page()) {
     $text = osc_highlight(osc_static_page_text() , 140 , '' , '');
   }
   // search
-  if (osc_is_search_page()) {
-    if (osc_has_items()) {
+  if(osc_is_search_page()) {
+    if(osc_has_items()) {
       $text = osc_item_category() . ' ' . osc_item_city() . ', ' . osc_highlight(osc_item_description() , 120);
     }
     osc_reset_items();
   }
   // listing
-  if (osc_is_ad_page()) {
+  if(osc_is_ad_page()) {
     $text = osc_item_category() . ' ' . osc_item_city() . ', ' . osc_highlight(osc_item_description() , 120);
   }
 
   $text = preg_replace('/\s+/', ' ', $text);
-  
+
   return osc_apply_filter('meta_description_filter' , $text);
 }
 
@@ -2111,19 +2903,19 @@ function meta_description() {
 function meta_keywords() {
   $text = '';
   // search
-  if (osc_is_search_page()) {
-    if (osc_has_items()) {
+  if(osc_is_search_page()) {
+    if(osc_has_items()) {
       $keywords = array ();
       $keywords[] = osc_item_category();
-      if (osc_item_city() != '') {
+      if(osc_item_city() != '') {
         $keywords[] = osc_item_city();
         $keywords[] = sprintf('%s %s' , osc_item_category() , osc_item_city());
       }
-      if (osc_item_region() != '') {
+      if(osc_item_region() != '') {
         $keywords[] = osc_item_region();
         $keywords[] = sprintf('%s %s' , osc_item_category() , osc_item_region());
       }
-      if ((osc_item_city() != '') && (osc_item_region() != '')) {
+      if((osc_item_city() != '') && (osc_item_region() != '')) {
         $keywords[] = sprintf('%s %s %s' , osc_item_category() , osc_item_region() , osc_item_city());
         $keywords[] = sprintf('%s %s' , osc_item_region() , osc_item_city());
       }
@@ -2132,18 +2924,18 @@ function meta_keywords() {
     osc_reset_items();
   }
   // listing
-  if (osc_is_ad_page()) {
+  if(osc_is_ad_page()) {
     $keywords = array ();
     $keywords[] = osc_item_category();
-    if (osc_item_city() != '') {
+    if(osc_item_city() != '') {
       $keywords[] = osc_item_city();
       $keywords[] = sprintf('%s %s' , osc_item_category() , osc_item_city());
     }
-    if (osc_item_region() != '') {
+    if(osc_item_region() != '') {
       $keywords[] = osc_item_region();
       $keywords[] = sprintf('%s %s' , osc_item_category() , osc_item_region());
     }
-    if ((osc_item_city() != '') && (osc_item_region() != '')) {
+    if((osc_item_city() != '') && (osc_item_region() != '')) {
       $keywords[] = sprintf('%s %s %s' , osc_item_category() , osc_item_region() , osc_item_city());
       $keywords[] = sprintf('%s %s' , osc_item_region() , osc_item_city());
     }
@@ -2151,7 +2943,7 @@ function meta_keywords() {
   }
 
   $text = preg_replace('/\s+/', ' ', $text);
-  
+
   return osc_apply_filter('meta_keywords_filter', $text);
 }
 
@@ -2161,29 +2953,29 @@ function meta_keywords() {
  * @throws \Exception
  */
 function osc_search_footer_links() {
-  if (!osc_rewrite_enabled()) {
+  if(!osc_rewrite_enabled()) {
     return array ();
   }
 
   $categoryID = osc_search_category_id();
-  if (!empty($categoryID) && Category::newInstance()->isRoot(current($categoryID))) {
+  if(!empty($categoryID) && Category::newInstance()->isRoot(current($categoryID))) {
     $cat = Category::newInstance()->findSubcategories(current($categoryID));
-    if (count($cat) > 0) {
+    if(count($cat) > 0) {
       $categoryID = array();
-      foreach ($cat as $c) {
+      foreach($cat as $c) {
         $categoryID[] = $c['pk_i_id'];
       }
     }
   }
 
-  if (osc_search_city() != '') {
+  if(osc_search_city() != '') {
     return array ();
   }
 
   $regionID = '';
-  if (osc_search_region() != '') {
+  if(osc_search_region() != '') {
     $aRegion = Region::newInstance()->findByName(osc_search_region());
-    if (isset($aRegion['pk_i_id'])) {
+    if(isset($aRegion['pk_i_id'])) {
       $regionID = $aRegion['pk_i_id'];
     }
   }
@@ -2197,7 +2989,7 @@ function osc_search_footer_links() {
   $comm->select('COUNT(*) AS total');
   $comm->from(DB_TABLE_PREFIX . 't_item as i');
   $comm->from(DB_TABLE_PREFIX . 't_item_location as l');
-  if (! empty($categoryID)) {
+  if(! empty($categoryID)) {
     $comm->whereIn('i.fk_i_category_id' , $categoryID);
   }
   $comm->where('i.pk_i_id = l.fk_i_item_id');
@@ -2207,7 +2999,7 @@ function osc_search_footer_links() {
 
   $comm->where('l.fk_i_region_id IS NOT NULL');
   $comm->where('l.fk_i_city_id IS NOT NULL');
-  if ($regionID > 0) {
+  if($regionID > 0) {
     $comm->where('l.fk_i_region_id' , $regionID);
     $comm->groupBy('l.fk_i_city_id');
   } else {
@@ -2215,7 +3007,7 @@ function osc_search_footer_links() {
   }
   $rs = $comm->get();
 
-  if (! $rs) {
+  if(! $rs) {
     return array ();
   }
 
@@ -2230,8 +3022,8 @@ function osc_search_footer_links() {
  * @throws \Exception
  */
 function osc_footer_link_url($f = null) {
-  if ($f == null) {
-    if (View::newInstance()->_exists('footer_link')) {
+  if($f == null) {
+    if(View::newInstance()->_exists('footer_link')) {
       $f = View::newInstance()->_get('footer_link');
     } else {
       return '';
@@ -2241,11 +3033,11 @@ function osc_footer_link_url($f = null) {
   }
   $params = array ();
   $tmp = osc_search_category_id();
-  if (isset($tmp)) {
+  if(isset($tmp)) {
     $params['sCategory'] = $f['fk_i_category_id'];
   }
 
-  if (osc_search_region() == '') {
+  if(osc_search_region() == '') {
     $params['sRegion'] = $f['fk_i_region_id'];
   } else {
     $params['sCity'] = $f['fk_i_city_id'];
@@ -2262,8 +3054,8 @@ function osc_footer_link_url($f = null) {
  * @throws \Exception
  */
 function osc_footer_link_title($f = null) {
-  if ($f == null) {
-    if (View::newInstance()->_exists('footer_link')) {
+  if($f == null) {
+    if(View::newInstance()->_exists('footer_link')) {
       $f = View::newInstance()->_get('footer_link');
     } else {
       return '';
@@ -2273,16 +3065,16 @@ function osc_footer_link_title($f = null) {
   }
   $text = '';
 
-  if (osc_get_preference('seo_title_keyword') != '') {
+  if(osc_get_preference('seo_title_keyword') != '') {
     $text .= osc_get_preference('seo_title_keyword') . ' ';
   }
 
   $cat = osc_get_category('id' , $f['fk_i_category_id']);
-  if (@$cat['s_name'] != '') {
+  if(@$cat['s_name'] != '') {
     $text .= $cat['s_name'] . ' ';
   }
 
-  if (osc_search_region() == '') {
+  if(osc_search_region() == '') {
     $text .= $f['s_region'];
   } else {
     $text .= $f['s_city'];
@@ -2330,10 +3122,18 @@ function osc_draw_admin_toolbar() {
  * Add webtitle with link to frontend
  */
 function osc_admin_toolbar_menu() {
+  $home_url = osc_base_url();
+  if(osc_locale_to_base_url_enabled() && osc_subdomain_type() != 'language') {
+    $default_locale = (string)osc_language();
+    if($default_locale != '') {
+      $home_url = osc_base_url(false, true, $default_locale);
+    }
+  }
+
   AdminToolbar::newInstance()->add_menu(array(
     'id' => 'home' ,
     'title' => '<span class="">' . __('Home') . '</span>' ,
-    'href' => osc_base_url() ,
+    'href' => $home_url ,
     'meta' => array ('class' => 'user-profile', 'title' => osc_esc_html(osc_page_title())) ,
     'target' => ''
  ));
@@ -2375,7 +3175,7 @@ function osc_admin_toolbar_edit_item() {
   if(osc_is_ad_page() && osc_item_id() > 0) {
     AdminToolbar::newInstance()->add_menu(array(
       'id' => 'edititem',
-      'title' => '<i class="fa fa-edit"></i> <span>' . __('Edit item') . '</span>',
+      'title' => '<i class="fa fa-edit"></i> <span>' . __('Edit listing') . '</span>',
       'href' => osc_admin_base_url(true) . '?page=items&action=item_edit&id=' . osc_item_id(),
       'meta' => array ('class' => '')
     ));
@@ -2440,7 +3240,7 @@ function osc_admin_toolbar_back() {
 
 function osc_admin_toolbar_comments() {
   $total = ItemComment::newInstance()->countAll('(c.b_active = 0 OR c.b_enabled = 0 OR c.b_spam = 1)');
-  if ($total > 0) {
+  if($total > 0) {
     $title = '<i class="circle circle-green">' . $total . '</i>' . __('New comments');
 
     AdminToolbar::newInstance()->add_menu(
@@ -2455,16 +3255,50 @@ function osc_admin_toolbar_comments() {
 }
 
 
+/**
+ * Legacy spam toolbar entry. Kept empty so old hooks/plugins do not fatal.
+ * Spam counts moved to Reports (see osc_admin_toolbar_reports).
+ */
 function osc_admin_toolbar_spam() {
-  $total = Item::newInstance()->countByMarkas('spam');
-  if ($total > 0) {
-    $title = '<i class="circle circle-red">' . $total . '</i>' . __('Spam');
+  return;
+}
+
+
+function osc_admin_toolbar_reports() {
+  if((!osc_reports_enabled() && !osc_web_contact_create_report()) || !osc_ensure_reports_tables()) {
+    return;
+  }
+
+  $total = Report::newInstance()->countByStatus('submitted');
+  if($total > 0) {
+    $title = '<i class="circle circle-red">' . $total . '</i>' . __('New reports');
 
     AdminToolbar::newInstance()->add_menu(
       array (
-        'id' => 'spam' ,
+        'id' => 'reports' ,
         'title' => $title ,
-        'href' => osc_admin_base_url(true) . '?page=items&action=items_reported&sort=spam' ,
+        'href' => osc_admin_base_url(true) . '?page=reports&status=submitted' ,
+        'meta' => array ('class' => 'action-btn action-btn-black')
+      )
+    );
+  }
+}
+
+
+function osc_admin_toolbar_report_comments() {
+  if((!osc_reports_enabled() && !osc_web_contact_create_report()) || !osc_ensure_reports_tables()) {
+    return;
+  }
+
+  $total = Report::newInstance()->countUnseenComments();
+  if($total > 0) {
+    $title = '<i class="circle circle-green">' . $total . '</i>' . __('New report replies');
+
+    AdminToolbar::newInstance()->add_menu(
+      array (
+        'id' => 'report_comments' ,
+        'title' => $title ,
+        'href' => osc_admin_base_url(true) . '?page=reports&unseen=1' ,
         'meta' => array ('class' => 'action-btn action-btn-black')
       )
     );
@@ -2473,7 +3307,7 @@ function osc_admin_toolbar_spam() {
 
 
 function osc_admin_toolbar_demo() {
-  if(strpos(osc_logged_admin_username(), 'demo') === false) {   
+  if(strpos(osc_logged_admin_username(), 'demo') === false) {
     if(defined('DEMO_THEMES') && DEMO_THEMES === true) {
       $label = __('Demo');
       $title = __('Themes Demo');
@@ -2503,14 +3337,14 @@ function osc_admin_toolbar_demo() {
  * @param bool $force
  */
 function osc_admin_toolbar_update_core($force = false) {
-  if (!osc_is_moderator()) {
+  if(!osc_is_moderator()) {
     $data = json_decode(osc_update_core_json(), true);
 
-    if ($force) {
+    if($force) {
       AdminToolbar::newInstance()->remove_menu('update_core');
     }
-    
-    if (isset($data['version']) && $data['version'] > 0 && version_compare2(osc_version(true), $data['version_string']) == -1) {
+
+    if(isset($data['version']) && $data['version'] > 0 && version_compare2(osc_version(true), $data['version_string']) == -1) {
       $title = sprintf(__('Osclass %s is available'), $data['s_name']);
       AdminToolbar::newInstance()->add_menu(
         array (
@@ -2532,10 +3366,10 @@ function osc_admin_toolbar_update_core($force = false) {
  */
 function osc_check_plugins_update($force = false) {
   $total = getPreference('plugins_update_count');
-  
-  if ($force) {
+
+  if($force) {
     return _osc_check_plugins_update();
-  } else if ((time() - (int) osc_plugins_last_version_check()) > (24 * 3600)) {
+  } elseif((time() - (int) osc_plugins_last_version_check()) > (24 * 3600)) {
     osc_add_hook('admin_footer' , 'check_plugins_admin_footer');
   }
 
@@ -2550,17 +3384,17 @@ function _osc_check_plugins_update() {
   $total = 0;
   $array = array();
   $array_downloaded = array();
-  
+
   $plugins = Plugins::listAll();
-  
+
   foreach($plugins as $plugin) {
     $info = osc_plugin_get_info($plugin);
-    
-    if (osc_check_plugin_update(@$info['product_key'], @$info['version'])) {
+
+    if(osc_check_plugin_update(@$info['product_key'], @$info['version'])) {
       $array[] = @$info['product_key'];
       $total ++;
     }
-    
+
     $array_downloaded[] = @$info['product_key'];
   }
 
@@ -2578,13 +3412,13 @@ function _osc_check_plugins_update() {
  * @param bool $force
  */
 function osc_admin_toolbar_update_plugins($force = false) {
-  if (! osc_is_moderator()) {
+  if(! osc_is_moderator()) {
     $total = osc_check_plugins_update($force);
 
-    if ($force) {
+    if($force) {
       AdminToolbar::newInstance()->remove_menu('update_plugin');
     }
-    if ($total > 0) {
+    if($total > 0) {
       $title = '<i class="circle circle-gray">' . $total . '</i>' . __('Plugin updates');
       AdminToolbar::newInstance()->add_menu(
         array (
@@ -2606,9 +3440,9 @@ function osc_admin_toolbar_update_plugins($force = false) {
  */
 function osc_check_themes_update($force = false) {
   $total = getPreference('themes_update_count');
-  if ($force) {
+  if($force) {
     return _osc_check_themes_update();
-  } else if ((time() - (int) osc_themes_last_version_check()) > (24 * 3600)) {
+  } elseif((time() - (int) osc_themes_last_version_check()) > (24 * 3600)) {
     osc_add_hook('admin_footer' , 'check_themes_admin_footer');
   }
 
@@ -2624,20 +3458,20 @@ function _osc_check_themes_update() {
   $array = array();
   $array_downloaded = array();
   $themes = WebThemes::newInstance()->getListThemes();
-  
+
   foreach($themes as $theme) {
     $info = WebThemes::newInstance()->loadThemeInfo($theme);
-    
+
     if(osc_check_theme_update(@$info['product_key'], @$info['version'])) {
       if(strpos($theme, '_child') === false) {    // Child themes are not objective of update!
         $array[] = $theme;
         $total++;
       }
     }
-    
+
     $array_downloaded[] = @$info['product_key'];
   }
-  
+
   osc_set_preference('themes_to_update', json_encode(array_filter($array)));
   osc_set_preference('themes_downloaded', json_encode(array_filter($array_downloaded)));
   osc_set_preference('themes_update_count', $total);
@@ -2652,13 +3486,13 @@ function _osc_check_themes_update() {
  * @param bool $force
  */
 function osc_admin_toolbar_update_themes($force = false) {
-  if (! osc_is_moderator()) {
+  if(! osc_is_moderator()) {
     $total = osc_check_themes_update($force);
 
-    if ($force) {
+    if($force) {
       AdminToolbar::newInstance()->remove_menu('update_theme');
     }
-    if ($total > 0) {
+    if($total > 0) {
       $title = '<i class="circle circle-gray">' . $total . '</i>' . __('Theme updates');
       AdminToolbar::newInstance()->add_menu(
         array (
@@ -2680,9 +3514,9 @@ function osc_admin_toolbar_update_themes($force = false) {
  */
 function osc_check_languages_update($force = false) {
   $total = getPreference('languages_update_count');
-  if ($force) {
+  if($force) {
     return _osc_check_languages_update();
-  } else if ((time() - (int) osc_languages_last_version_check()) > (24 * 3600)) {
+  } elseif((time() - (int) osc_languages_last_version_check()) > (24 * 3600)) {
     osc_add_hook('admin_footer' , 'check_languages_admin_footer');
   }
 
@@ -2698,8 +3532,8 @@ function _osc_check_languages_update() {
   $array = array ();
   $array_downloaded = array ();
   $languages = OSCLocale::newInstance()->listAll();
-  foreach ($languages as $lang) {
-    if (osc_check_language_update($lang['pk_c_code'] , $lang['s_version'])) {
+  foreach($languages as $lang) {
+    if(osc_check_language_update($lang['pk_c_code'] , $lang['s_version'])) {
       $array[] = $lang['pk_c_code'];
       $total ++;
     }
@@ -2719,13 +3553,13 @@ function _osc_check_languages_update() {
  * @param bool $force
  */
 function osc_admin_toolbar_update_languages($force = false) {
-  if (! osc_is_moderator()) {
+  if(! osc_is_moderator()) {
     $total = osc_check_languages_update($force);
 
-    if ($force) {
+    if($force) {
       AdminToolbar::newInstance()->remove_menu('update_language');
     }
-    if ($total > 0) {
+    if($total > 0) {
       $title = '<i class="circle circle-gray">' . $total . '</i>' . __('Language updates');
       AdminToolbar::newInstance()->add_menu(
         array (
@@ -2757,7 +3591,7 @@ function osc_check_all_updates_cron() {
     }
 
     osc_set_preference('last_version_check', time());
-  } else { 
+  } else {
     // Latest version couldn't be checked (site down?)
     osc_set_preference('last_version_check', time()-82800); // 82800 = 23 hours, so repeat check in one hour
   }
@@ -2766,9 +3600,3 @@ function osc_check_all_updates_cron() {
 // Disabled for now, impact on API server is not clear
 // osc_add_hook('cron_daily' , 'osc_check_all_updates_cron');
 
-// Define function if does not exists
-if(!function_exists('mb_strlen')) {
-  function mb_strlen($value, $encoding = NULL) {
-    return strlen($value);    
-  }
-}

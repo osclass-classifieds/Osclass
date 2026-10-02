@@ -25,11 +25,11 @@ function customPageHeader() { ?>
 }
 
 function customPageTitle($string) {
-  return sprintf(__('Appearance - %s'), $string);
+  return sprintf(__('%s - %s'), __('Appearance'), $string);
 }
 osc_add_filter('admin_title', 'customPageTitle');
 
-osc_current_admin_theme_path( 'parts/header.php' ); 
+osc_current_admin_theme_path( 'parts/header.php' );
 ?>
 
 <!-- theme files -->
@@ -41,4 +41,4 @@ osc_current_admin_theme_path( 'parts/header.php' );
   ?>
 </div>
 <!-- /theme files -->
-<?php osc_current_admin_theme_path( 'parts/footer.php' ); ?>
+<?php osc_current_admin_theme_path( 'parts/footer.php' );

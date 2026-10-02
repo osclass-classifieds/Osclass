@@ -37,21 +37,21 @@ abstract class BaseModel {
     if(parse_url(osc_base_url(), PHP_URL_HOST) !== $current_host) {
       // first check if it's http or https
       $url = 'http://';
-      
+
       if(osc_is_ssl()) {
         $url = 'https://';
       }
 
       // append the domain
       $url .= parse_url(osc_base_url(), PHP_URL_HOST);
-      
+
       // append the port number if it's necessary
       $http_port = parse_url(Params::getServerParam('HTTP_HOST'), PHP_URL_PORT);
-      
+
       if($http_port !== 80) {
         $url .= ':' . parse_url(Params::getServerParam('HTTP_HOST'), PHP_URL_PORT);
       }
-      
+
       // append the request
       $url .= Params::getServerParam('REQUEST_URI', false, false);
 
@@ -60,16 +60,16 @@ abstract class BaseModel {
 
     try {
       $this->subdomain_params($current_host);
-    } catch (Exception $e) {
+    } catch(Exception $e) {
     }
-    
+
     $this->page = Params::getParam('page');
     $this->action = Params::getParam('action');
     $this->ajax = false;
     $this->time = microtime(true);
-    
+
     osc_run_hook('before_init');
-    
+
     WebThemes::newInstance();
     Cookie::newInstance()->_setRefererHistory();
 
@@ -156,11 +156,11 @@ abstract class BaseModel {
   private function subdomain_params($host) {
     $subdomain_type = osc_subdomain_type();
     $subhost = osc_subdomain_host();
-    
+
     // strpos is used to check if the domain is different, useful when accessing the website by diferent domains
     if($subdomain_type != '' && $subhost != '' && strpos($host, $subhost) !== false && preg_match('|^(www\.)?(.+)\.' . $subhost . '$|i', $host, $match)) {
       $subdomain = $match[2];
-      
+
       if($subdomain != '' && $subdomain !== 'www') {
         if($subdomain_type === 'category') {
           $category = osc_get_category_row_by_slug($subdomain);
@@ -230,14 +230,14 @@ abstract class BaseModel {
           //if($lang != '' && (preg_match('/.{2}_.{2}/', $lang) && $locale != $lang || preg_match('/.{2}/', $lang) && substr($locale, 0, 2) != $lang)) {
           if($lang != '' && (preg_match('/.{2}_.{2}/', $lang) || preg_match('/.{2}/', $lang))) {
             $find_lang = false;
-            
+
             if(preg_match('/.{2}_.{2}/', $lang)) {
               $lang = strtolower(substr($lang, 0, 2)) . '_' . strtolower(substr($lang, 3, 2));
               $find_lang = OSCLocale::newInstance()->findByShortCode($lang);
             } else if(preg_match('/.{2}/', $lang)) {
               $find_lang = OSCLocale::newInstance()->findByShortCode($lang);
             }
-            
+
             if($find_lang !== false && isset($find_lang['pk_c_code']) && $find_lang['pk_c_code'] != '') {
               Session::newInstance()->_set('userLocale', $find_lang['pk_c_code']);
               Translation::init();
@@ -247,9 +247,9 @@ abstract class BaseModel {
               View::newInstance()->_exportVariableToView('subdomain_slug', $find_lang['pk_c_code']);
               View::newInstance()->_exportVariableToView('subdomain_param', 'sLanguage');
               Params::setParam('sLanguage', $find_lang['pk_c_code']);
-              
+
               osc_run_hook('user_locale_changed', $find_lang['pk_c_code']);
-              
+
             } else {
               $this->do400();
             }

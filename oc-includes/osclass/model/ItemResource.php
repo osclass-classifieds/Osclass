@@ -125,7 +125,7 @@ class ItemResource extends DAO {
     $key = md5(osc_base_url().'ItemResource:getAllResourcesFromItem:'.(string)$itemId);
     $found = null;
     $cache = osc_cache_get($key, $found);
-    
+
     if($cache === false) {
       $this->dao->select();
       $this->dao->from($this->getTableName());
@@ -225,7 +225,7 @@ class ItemResource extends DAO {
   public function countResources($itemId = null) {
     $this->dao->select('COUNT(*) AS numrows');
     $this->dao->from($this->getTableName());
-    if (null !== $itemId && is_numeric($itemId)) {
+    if(null !== $itemId && is_numeric($itemId)) {
       $this->dao->where('fk_i_item_id', $itemId);
     }
 
@@ -271,11 +271,11 @@ class ItemResource extends DAO {
     $this->dao->select('r.*, c.dt_pub_date');
     $this->dao->from($this->getTableName() . ' r');
     $this->dao->join($this->getTableItemName() . ' c', 'c.pk_i_id = r.fk_i_item_id');
-    
-    if (null !== $itemId && is_numeric($itemId)) {
+
+    if(null !== $itemId && is_numeric($itemId)) {
       $this->dao->where('r.fk_i_item_id', $itemId);
     }
-    
+
     $this->dao->orderBy($order, $type);
     $this->dao->limit($start);
     $this->dao->offset($length);
@@ -286,6 +286,73 @@ class ItemResource extends DAO {
     }
 
     return $result->result();
+  }
+
+  public function searchResources($itemId = null, $start = 0, $length = 10, $order = 'r.pk_i_id', $type = 'DESC', $keyword = '', $extension = '') {
+    $resources = array(
+      'rows' => 0,
+      'total_results' => 0,
+      'resources' => array()
+    );
+
+    $allowed_sort = array('r.pk_i_id', 'r.s_path', 'r.s_extension', 'r.s_content_type', 'r.fk_i_item_id', 'r.i_order', 'c.dt_pub_date');
+    if(!in_array($order, $allowed_sort)) {
+      $order = 'r.pk_i_id';
+    }
+
+    $type = strtoupper($type);
+    if(!in_array($type, array('DESC', 'ASC'))) {
+      $type = 'DESC';
+    }
+
+    $this->dao->select('SQL_CALC_FOUND_ROWS r.*, c.dt_pub_date');
+    $this->dao->from($this->getTableName() . ' r');
+    $this->dao->join($this->getTableItemName() . ' c', 'c.pk_i_id = r.fk_i_item_id');
+    if($itemId !== null && is_numeric($itemId)) {
+      $this->dao->where('r.fk_i_item_id', $itemId);
+    }
+
+    if(trim((string)$extension) != '') {
+      $this->dao->where('r.s_extension', trim((string)$extension));
+    }
+
+    if(trim((string)$keyword) != '') {
+      $kw = $this->dao->escapeStr($keyword);
+      $kw = str_replace('*', '%', $kw);
+      if(strpos($kw, '%') === false) {
+        $kw = '%' . $kw . '%';
+      }
+      $this->dao->where("(CAST(r.pk_i_id AS CHAR) LIKE '" . $kw . "' OR r.s_name LIKE '" . $kw . "' OR r.s_path LIKE '" . $kw . "' OR r.s_extension LIKE '" . $kw . "' OR r.s_content_type LIKE '" . $kw . "' OR CAST(r.fk_i_item_id AS CHAR) LIKE '" . $kw . "')");
+    }
+
+    $this->dao->orderBy($order, $type);
+    $this->dao->limit((int)$start, (int)$length);
+    $result = $this->dao->get();
+
+    if($result === false) {
+      return $resources;
+    }
+
+    $resources['resources'] = $result->result();
+    $rsRows = $this->dao->query('SELECT FOUND_ROWS() as total');
+    $row = $rsRows->row();
+    $resources['total_results'] = (isset($row['total']) ? (int)$row['total'] : 0);
+
+    $this->dao->select('COUNT(*) as total');
+    $this->dao->from($this->getTableName() . ' r');
+    if($itemId !== null && is_numeric($itemId)) {
+      $this->dao->where('r.fk_i_item_id', $itemId);
+    }
+    if(trim((string)$extension) != '') {
+      $this->dao->where('r.s_extension', trim((string)$extension));
+    }
+    $totalResult = $this->dao->get();
+    if($totalResult !== false) {
+      $totalRow = $totalResult->row();
+      $resources['rows'] = (isset($totalRow['total']) ? (int)$totalRow['total'] : 0);
+    }
+
+    return $resources;
   }
 
   /**

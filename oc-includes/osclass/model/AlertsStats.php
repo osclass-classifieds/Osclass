@@ -45,7 +45,7 @@ class AlertsStats extends DAO {
    * @return AlertsStats
    */
   public static function newInstance() {
-    if( !self::$instance instanceof self ) {
+    if(!self::$instance instanceof self ) {
       self::$instance = new self;
     }
     return self::$instance;
@@ -80,12 +80,12 @@ class AlertsStats extends DAO {
 
 /*
     // first we try to insert
-    if( $this->insert(array('d_date' => $date, 'i_num_alerts_sent' => '1')) ) {
+    if($this->insert(array('d_date' => $date, 'i_num_alerts_sent' => '1')) ) {
       return true;
     }
 
     // duplicate key?
-    if( $this->getErrorLevel() != 1062 ) {
+    if($this->getErrorLevel() != 1062 ) {
       return false;
     }
 

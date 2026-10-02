@@ -45,7 +45,7 @@ class LogDatabase
    */
   public static function newInstance()
   {
-    if (!self::$instance instanceof self) {
+    if(!self::$instance instanceof self) {
       self::$instance = new self;
     }
     return self::$instance;
@@ -98,18 +98,18 @@ class LogDatabase
     echo '<fieldset id="osc-database-logs" style="border:1px solid #000;line-height:1.4;padding:8px 10px 10px 10px;margin: 12px;width:calc(100% - 24px);background-color:#fff;">' . PHP_EOL;
     echo '<legend style="font-size:14px;font-weight:600;padding:4px 8px;border:1px solid #000;background:#fff;">Database queries (Total queries: ' . $this->getTotalNumberQueries() .' - Total queries time: ' . $this->getTotalQueriesTime() . ' sec)</legend>' . PHP_EOL;
     echo '<table style="border-collapse: collapse;width:100%;font-size:13px;padding:0;border-spacing:0;font-family:monospace;line-height:1.4;">' . PHP_EOL;
-    if (count($this->messages) == 0) {
+    if(count($this->messages) == 0) {
       echo '<tr><td>No queries</td></tr>' . PHP_EOL;
     } else {
-      foreach ($this->messages as $msg) {
+      foreach($this->messages as $msg) {
         $row_style = '';
-        if ($msg['errno'] != 0) {
+        if($msg['errno'] != 0) {
           $row_style = 'style="background-color: #FFC2C2;"';
         }
         echo '<tr ' . $row_style . '>' . PHP_EOL;
         echo '<td style="padding:6px 8px;text-align:left;vertical-align:top;border: 1px solid #ccc;min-width:75px;">' . $msg['query_time'] . '</td>' . PHP_EOL;
         echo '<td style="padding:6px 8px;text-align:left;vertical-align:top;border: 1px solid #ccc;">';
-        if ($msg['errno'] != 0) {
+        if($msg['errno'] != 0) {
           echo '<strong>Error number:</strong> ' . $msg['errno'] . '<br/>';
           echo '<strong>Error description:</strong> ' . $msg['error'] . '<br/><br/>';
         }
@@ -129,14 +129,14 @@ class LogDatabase
   {
     $filename = CONTENT_PATH . 'queries.log';
 
-    if ((!file_exists($filename) && !is_writable(CONTENT_PATH)) || (file_exists($filename) && !is_writable($filename))) {
+    if((!file_exists($filename) && !is_writable(CONTENT_PATH)) || (file_exists($filename) && !is_writable($filename))) {
       error_log('Can not write explain_queries.log file in "'.CONTENT_PATH.'", please check directory/file permissions.');
       return false;
     }
 
     $fp = fopen($filename, 'ab');
 
-    if ($fp == false) {
+    if($fp == false) {
       return false;
     }
 
@@ -146,9 +146,9 @@ class LogDatabase
     fwrite($fp, '=' . str_pad('Total queries time: ' . $this->getTotalQueriesTime(), 48, ' ', STR_PAD_BOTH) . '=' . PHP_EOL);
     fwrite($fp, '==================================================' . PHP_EOL . PHP_EOL);
 
-    foreach ($this->messages as $msg) {
+    foreach($this->messages as $msg) {
       fwrite($fp, 'QUERY TIME' . ' ' . $msg['query_time'] . PHP_EOL);
-      if ($msg['errno'] != 0) {
+      if($msg['errno'] != 0) {
         fwrite($fp, 'Error number: ' . $msg['errno'] . PHP_EOL);
         fwrite($fp, 'Error description: ' . $msg['error'] . PHP_EOL);
       }
@@ -169,14 +169,14 @@ class LogDatabase
   {
     $filename = CONTENT_PATH . 'explain_queries.log';
 
-    if ((!file_exists($filename) && !is_writable(CONTENT_PATH)) || (file_exists($filename) && !is_writable($filename))) {
+    if((!file_exists($filename) && !is_writable(CONTENT_PATH)) || (file_exists($filename) && !is_writable($filename))) {
       error_log('Can not write explain_queries.log file in "'.CONTENT_PATH.'", please check directory/file permissions.');
       return false;
     }
 
     $fp = fopen($filename, 'ab');
 
-    if ($fp == false) {
+    if($fp == false) {
       return false;
     }
 
@@ -195,12 +195,12 @@ class LogDatabase
     $title .= str_pad('rows', 8, ' ', STR_PAD_BOTH) . '|';
     $title .= str_pad('Extra', 38, ' ', STR_PAD_BOTH) . '|';
 
-    for ($i = 0 , $iMax = count($this->explain_messages); $i < $iMax; $i ++) {
+    for($i = 0 , $iMax = count($this->explain_messages); $i < $iMax; $i ++) {
       fwrite($fp, $this->explain_messages[$i]['query'] . PHP_EOL);
       fwrite($fp, str_pad('', 211, '-', STR_PAD_BOTH) . PHP_EOL);
       fwrite($fp, $title . PHP_EOL);
       fwrite($fp, str_pad('', 211, '-', STR_PAD_BOTH) . PHP_EOL);
-      foreach ($this->explain_messages[$i]['explain'] as $explain) {
+      foreach($this->explain_messages[$i]['explain'] as $explain) {
         $row  = '|' . str_pad((string)$explain['id'], 3, ' ', STR_PAD_BOTH) . '|';
         $row .= str_pad((string)$explain['select_type'], 20, ' ', STR_PAD_BOTH) . '|';
         $row .= str_pad((string)$explain['table'], 20, ' ', STR_PAD_BOTH) . '|';
@@ -214,7 +214,7 @@ class LogDatabase
         fwrite($fp, $row . PHP_EOL);
         fwrite($fp, str_pad('', 211, '-', STR_PAD_BOTH) . PHP_EOL);
       }
-      if ($i != (count($this->explain_messages) - 1)) {
+      if($i != (count($this->explain_messages) - 1)) {
         fwrite($fp, PHP_EOL . PHP_EOL);
       }
     }
@@ -230,7 +230,7 @@ class LogDatabase
   public function getTotalQueriesTime()
   {
     $time = 0;
-    foreach ($this->messages as $m) {
+    foreach($this->messages as $m) {
       $time += $m[ 'query_time' ];
     }
 

@@ -28,7 +28,7 @@ class CWebUser extends WebSecBaseModel {
     parent::__construct();
     
     if(!osc_users_enabled()) {
-      osc_add_flash_error_message(_m('Users not enabled'));
+      osc_add_flash_error_message(_m('Users are not enabled'));
       $this->redirectTo(osc_base_url());
     }
     
@@ -107,7 +107,7 @@ class CWebUser extends WebSecBaseModel {
         $success = $userActions->edit($userId);
         
         if($success==1 || $success==2) {
-          osc_add_flash_ok_message(_m('Your profile has been updated successfully'));
+          osc_add_flash_ok_message(_m('Your profile has been updated'));
         } else {
           osc_add_flash_error_message($success);
         }
@@ -127,6 +127,11 @@ class CWebUser extends WebSecBaseModel {
         break;
         
       case('alerts'):     //alerts
+        if(!osc_alerts_enabled()) {
+          osc_add_flash_warning_message(_m('Alerts are disabled'));
+          $this->redirectTo(osc_user_dashboard_url());
+        }
+
         $aAlerts = Alerts::newInstance()->findByUser(Session::newInstance()->_get('userId'));
         $user = osc_get_user_row(Session::newInstance()->_get('userId'));
         
@@ -159,7 +164,7 @@ class CWebUser extends WebSecBaseModel {
         osc_csrf_check();
         
         if(!osc_validate_email(Params::getParam('new_email'))) {
-          osc_add_flash_error_message(_m('The specified e-mail is not valid'));
+          osc_add_flash_error_message(_m('The email is not valid'));
           $this->redirectTo(osc_change_user_email_url());
           
         } else {
@@ -184,7 +189,7 @@ class CWebUser extends WebSecBaseModel {
             osc_run_hook('hook_email_new_email', Params::getParam('new_email'), $validation_url);
             $this->redirectTo(osc_user_profile_url());
           } else {
-            osc_add_flash_error_message(_m('The specified e-mail is already in use'));
+            osc_add_flash_error_message(_m('This email is already in use'));
             $this->redirectTo(osc_change_user_email_url());
           }
         }
@@ -243,18 +248,18 @@ class CWebUser extends WebSecBaseModel {
         }
 
         if(!Params::getParam('new_password', false, false)) {
-          osc_add_flash_error_message(_m("Passwords can't be empty"));
+          osc_add_flash_error_message(_m("Passwords cannot be empty"));
           $this->redirectTo(osc_change_user_password_url());
         }
 
         if(Params::getParam('new_password', false, false) != Params::getParam('new_password2', false, false)) {
-          osc_add_flash_error_message(_m("Passwords don't match"));
+          osc_add_flash_error_message(_m('The passwords do not match'));
           $this->redirectTo(osc_change_user_password_url());
         }
 
         User::newInstance()->update(array('s_password' => osc_hash_password(Params::getParam ('new_password', false, false))), array('pk_i_id' => Session::newInstance()->_get('userId')));
 
-        osc_add_flash_ok_message(_m('Password has been changed'));
+        osc_add_flash_ok_message(_m('The password has been changed'));
         $this->redirectTo(osc_user_profile_url());
         break;
         
@@ -481,8 +486,13 @@ class CWebUser extends WebSecBaseModel {
         break;
         
       case 'activate_alert':
-        $email = Params::getParam('email');
-        $secret = Params::getParam('secret');
+        if(!osc_alerts_enabled()) {
+          osc_add_flash_warning_message(_m('Alerts are disabled'));
+          $this->redirectTo(osc_user_dashboard_url());
+        }
+
+        $email = osc_esc_html(Params::getParam('email'));
+        $secret = osc_esc_html(Params::getParam('secret'));
 
         $result = 0;
         if($email!='' && $secret!='') {
@@ -491,7 +501,7 @@ class CWebUser extends WebSecBaseModel {
 
         if($result == 1) {
           osc_add_flash_ok_message(_m('Alert activated'));
-        }else{
+        } else {
           osc_add_flash_error_message(_m('Oops! There was a problem trying to activate your alert. Please contact an administrator'));
         }
 
@@ -499,18 +509,36 @@ class CWebUser extends WebSecBaseModel {
         break;
         
       case 'unsub_alert':
-        $email = Params::getParam('email');
-        $secret = Params::getParam('secret');
-        $id = Params::getParam('id');
+        if(!osc_alerts_enabled()) {
+          osc_add_flash_warning_message(_m('Alerts are disabled'));
+          $this->redirectTo(osc_user_dashboard_url());
+        }
+
+        $email = osc_esc_html(Params::getParam('email'));
+        $secret = osc_esc_html(Params::getParam('secret'));
+        $id = osc_esc_html(Params::getParam('id'));
 
         $alert = Alerts::newInstance()->findByPrimaryKey($id);
         $result = 0;
-        if (! empty($alert) && $email == $alert[ 's_email' ] && $secret == $alert[ 's_secret' ]) {
-          $result = Alerts::newInstance()->unsub($id);
+        $already = false;
+        $valid = (!empty($alert) && $email == $alert['s_email'] && $secret == $alert['s_secret']);
+
+        if($valid) {
+          if(trim((string)($alert['dt_unsub_date'] ?? '')) != '') {
+            $already = true;
+          } else {
+            $result = Alerts::newInstance()->unsub($id);
+          }
+
+          if(osc_is_web_user_logged_in() && strcasecmp((string)osc_logged_user_email(), (string)$alert['s_email']) !== 0) {
+            osc_add_flash_warning_message(sprintf(_m('This alert was tied to account %s.'), $alert['s_email']));
+          }
         }
 
-        if($result == 1) {
-          osc_add_flash_ok_message(_m('Unsubscribed correctly'));
+        if($already) {
+          osc_add_flash_info_message(_m('You have successfully unsubscribed from this alert.'));
+        } else if($result == 1) {
+          osc_add_flash_ok_message(_m('You have been unsubscribed from this alert'));
         } else {
           osc_add_flash_error_message(_m('Oops! There was a problem trying to unsubscribe you. Please contact an administrator'));
         }
@@ -519,6 +547,11 @@ class CWebUser extends WebSecBaseModel {
         break;
 
       case 'alert_change_freq':
+        if(!osc_alerts_enabled()) {
+          osc_add_flash_warning_message(_m('Alerts are disabled'));
+          $this->redirectTo(osc_user_dashboard_url());
+        }
+
         $type = strtoupper(osc_esc_html(Params::getParam('type')));
         $secret = osc_esc_html(Params::getParam('secret'));
         $id = osc_esc_html(Params::getParam('id'));
@@ -537,14 +570,49 @@ class CWebUser extends WebSecBaseModel {
         }
 
         if($result == 1) {
-          osc_add_flash_ok_message(_m('Alert frequency changed successfully'));
+          osc_add_flash_ok_message(_m('Alert frequency has been changed'));
         } else {
           osc_add_flash_error_message(_m('Oops! There was a problem trying to change alert frequency. Please contact an administrator'));
         }
 
         $this->redirectTo(osc_user_alerts_url());
         break;
-        
+
+      case 'alert_change_expire':
+        if(!osc_alerts_enabled()) {
+          osc_add_flash_warning_message(_m('Alerts are disabled'));
+          $this->redirectTo(osc_user_dashboard_url());
+        }
+
+        if(!osc_alerts_allow_user_expiration_change()) {
+          osc_add_flash_error_message(_m('Changing alert expiration is not allowed'));
+          $this->redirectTo(osc_user_alerts_url());
+        }
+
+        $op = strtoupper(osc_esc_html(Params::getParam('op')));
+        $secret = osc_esc_html(Params::getParam('secret'));
+        $id = osc_esc_html(Params::getParam('id'));
+
+        $alert = Alerts::newInstance()->findByPrimaryKey($id);
+
+        if(!isset($alert['pk_i_id']) || $secret != $alert['s_secret']) {
+          osc_add_flash_error_message(_m('Oops! There was a problem trying to change alert expiration. Please contact an administrator'));
+        } else if(osc_is_web_user_logged_in() && (int)$alert['fk_i_user_id'] > 0 && (int)$alert['fk_i_user_id'] != (int)osc_logged_user_id()) {
+          osc_add_flash_error_message(_m('Oops! You cannot do that'));
+        } else {
+          $result = Alerts::newInstance()->updateAlertExpiration($id, $op, $alert);
+
+          if($result == 1) {
+            osc_run_hook('alert_change_expire', $alert, $op);
+            osc_add_flash_ok_message(_m('Alert expiration has been changed'));
+          } else {
+            osc_add_flash_error_message(_m('Oops! There was a problem trying to change alert expiration - invalid operation. Please contact an administrator'));
+          }
+        }
+
+        $this->redirectTo(osc_user_alerts_url());
+        break;
+
       case 'delete':
         $id = Params::getParam('id');
         $secret = Params::getParam('secret');
@@ -569,14 +637,14 @@ class CWebUser extends WebSecBaseModel {
             Cookie::newInstance()->pop('oc_userSecret');
             Cookie::newInstance()->set();
 
-            osc_add_flash_ok_message(_m('Your account have been deleted'));
+            osc_add_flash_ok_message(_m('Your account has been deleted'));
             $this->redirectTo(osc_base_url());
           } else {
-            osc_add_flash_error_message(_m('Oops! you can not do that'));
+            osc_add_flash_error_message(_m('Oops! You cannot do that'));
             $this->redirectTo(osc_user_dashboard_url());
           }
         } else {
-          osc_add_flash_error_message(_m('Oops! you can not do that'));
+          osc_add_flash_error_message(_m('Oops! You cannot do that'));
           $this->redirectTo(osc_base_url());
         }
         

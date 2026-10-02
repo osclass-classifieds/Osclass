@@ -73,7 +73,7 @@
                                     50%
                                 </div>
                             </div>
-                            
+
                             <div class="clear"></div>
                         </div>
                         </p>
@@ -153,5 +153,5 @@
         </div>
         <div class="clear"></div>
     </div>
-    
+
 </div>

@@ -14,13 +14,12 @@
  * warranties or conditions of any kind, either express or implied. Do not remove
  * this NOTICE section as it contains license information and copyrights.
  */
- 
+
 
 if(osc_profile_img_users_enabled() == '1') {
   osc_enqueue_script('cropper');
   osc_enqueue_style('cropper', osc_assets_url('js/cropper/cropper.min.css'));
 }
-
 
 
 // meta tag robots
@@ -55,8 +54,8 @@ $osc_user = osc_user();
             <div class="user-img">
               <div class="img-preview">
                 <img src="<?php echo osc_user_profile_img_url(osc_logged_user_id()); ?>" alt="<?php echo osc_esc_html(osc_logged_user_name()); ?>"/>
-              </div> 
-            </div> 
+              </div>
+            </div>
 
             <div class="user-img-button">
               <?php UserForm::upload_profile_img(); ?>
@@ -139,7 +138,7 @@ $osc_user = osc_user();
           <?php UserForm::info_textarea('s_info', osc_locale_code(), @$osc_user['locale'][osc_locale_code()]['s_info']); ?>
         </div>
       </div>
-      
+
       <?php osc_run_hook('user_profile_form', osc_user()); ?>
 
       <div class="control-group bts">
@@ -156,4 +155,4 @@ $osc_user = osc_user();
   </div>
 </div>
 
-<?php osc_current_web_theme_path('footer.php') ; ?>
+<?php osc_current_web_theme_path('footer.php') ;

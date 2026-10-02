@@ -20,7 +20,7 @@ if(!defined('ABS_PATH')) exit('ABS_PATH is not loaded. Direct access is not allo
 osc_enqueue_script('jquery-validate');
 
 //customize Head
-function customHead() { 
+function customHead() {
   ?>
   <script type="text/javascript">
   $(document).ready(function(){
@@ -38,12 +38,12 @@ function customHead() {
       },
       messages: {
         num_moderate_comments: {
-          required: '<?php echo osc_esc_js(__("Moderated comments: this field is required")); ?>.',
-          digits: '<?php echo osc_esc_js(__("Moderated comments: this field must only contain numeric characters")); ?>.'
+          required: '<?php echo osc_esc_js(sprintf(__('%s is required'), __('Moderated comments'))); ?>.',
+          digits: '<?php echo osc_esc_js(__('Moderated comments: this field must only contain numeric characters')); ?>.'
         },
         comments_per_page: {
-          required: '<?php echo osc_esc_js(__("Comments per page: this field is required")); ?>.',
-          digits: '<?php echo osc_esc_js(__("Comments per page: this field must only contain numeric characters")); ?>.'
+          required: '<?php echo osc_esc_js(sprintf(__('%s is required'), __('Comments per page'))); ?>.',
+          digits: '<?php echo osc_esc_js(__('Comments per page: this field must only contain numeric characters')); ?>.'
         }
       },
       wrapper: "li",
@@ -85,7 +85,7 @@ function addHelp() {
 osc_add_hook('help_box','addHelp');
 
 
-function customPageHeader(){ 
+function customPageHeader(){
   ?>
   <h1><?php _e('Settings'); ?>
     <a href="#" class="btn ico ico-32 ico-help float-right"></a>
@@ -97,12 +97,12 @@ osc_add_hook('admin_page_header','customPageHeader');
 
 
 function customPageTitle($string) {
-  return sprintf(__('Comment Settings - %s'), $string);
+  return sprintf(__('%s - %s'), __('Comment settings'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');
 
-osc_current_admin_theme_path('parts/header.php'); 
+osc_current_admin_theme_path('parts/header.php');
 ?>
 
 <div id="general-settings">
@@ -112,7 +112,7 @@ osc_current_admin_theme_path('parts/header.php');
     <input type="hidden" name="action" value="comments_post" />
     <fieldset>
       <div class="form-horizontal">
-        <h2 class="render-title"><?php _e('Comment Settings'); ?></h2>
+        <h2 class="render-title"><?php _e('Comment settings'); ?></h2>
 
         <div class="form-row">
           <div class="form-label"><?php _e('Default comment settings'); ?></div>
@@ -122,13 +122,13 @@ osc_current_admin_theme_path('parts/header.php');
                 <input type="checkbox" <?php echo (osc_comments_enabled() ? 'checked="checked"' : ''); ?> name="enabled_comments" value="1" /> <?php _e('Allow people to post comments on listings'); ?>
               </label>
             </div>
-            
+
             <div class="form-label-checkbox">
               <label>
                 <input type="checkbox" <?php echo (osc_reg_user_post_comments() ? 'checked="checked"' : ''); ?> name="reg_user_post_comments" value="1" /> <?php _e('Users must be registered and logged in to comment'); ?>
               </label>
             </div>
-            
+
             <div class="form-label-checkbox">
               <label>
                 <input type="checkbox" <?php echo (osc_enable_comment_rating() ? 'checked="checked"' : ''); ?> name="enable_comment_rating" value="1" /> <?php _e('Enable rating on comments'); ?>
@@ -139,13 +139,13 @@ osc_current_admin_theme_path('parts/header.php');
               <?php printf(__('User can rate each listing maximum %s time(s)'), '<input type="text" class="input-small" name="comment_rating_limit" value="' . ((osc_comment_rating_limit() == -1) ? '0' : osc_esc_html(osc_comment_rating_limit())) . '" />'); ?>
               <div class="help-box"><?php _e('If the value is zero, there will be no limit on ratings per item and user'); ?></div>
             </div>
-            
+
             <div class="form-label-checkbox">
               <label>
                 <input type="checkbox" <?php echo ((osc_moderate_comments() == -1) ? '' : 'checked="checked"'); ?> name="moderate_comments" value="1" /> <?php _e('A comment is being held for moderation'); ?>
               </label>
             </div>
-            
+
             <div class="form-label-checkbox-offset">
               <?php printf(__('Before a comment appears, comment author must have at least %s previously approved comments'), '<input type="text" class="input-small" name="num_moderate_comments" value="' . ((osc_moderate_comments() == -1) ? '0' : osc_esc_html(osc_moderate_comments())) . '" />'); ?>
               <div class="help-box"><?php _e('If the value is zero, an administrator must always approve comments'); ?></div>
@@ -160,7 +160,7 @@ osc_current_admin_theme_path('parts/header.php');
             <div class="help-box"><?php _e('If the value is zero all comments are shown'); ?></div>
           </div>
         </div>
-        
+
         <h2 class="render-title"><?php _e('Comment reply'); ?></h2>
 
         <div class="form-row">
@@ -168,10 +168,10 @@ osc_current_admin_theme_path('parts/header.php');
           <div class="form-controls">
             <div class="form-label-checkbox">
               <label>
-                <input type="checkbox" <?php echo (osc_enable_comment_reply() ? 'checked="checked"' : ''); ?> name="enable_comment_reply" value="1" /> <?php _e('Enable reply on comments'); ?>
+                <input type="checkbox" <?php echo (osc_enable_comment_reply() ? 'checked="checked"' : ''); ?> name="enable_comment_reply" value="1" /> <?php _e('Enable replies to comments'); ?>
               </label>
             </div>
-            
+
             <div class="form-label-checkbox">
               <label>
                 <input type="checkbox" <?php echo (osc_enable_comment_reply_rating() ? 'checked="checked"' : ''); ?> name="enable_comment_reply_rating" value="1" /> <?php _e('Enable rating on comment reply'); ?>
@@ -179,32 +179,31 @@ osc_current_admin_theme_path('parts/header.php');
             </div>
           </div>
         </div>
-        
+
         <div class="form-row">
           <div class="form-label"><?php _e('Reply restrictions'); ?></div>
           <div class="form-controls">
             <select name="comment_reply_user_type">
               <option value="" <?php if(osc_comment_reply_user_type() == '') { ?>selected="selected"<?php } ?>><?php echo __('Anyone can reply on comment'); ?></option>
-              <option value="LOGGED" <?php if(osc_comment_reply_user_type() == 'LOGGED') { ?>selected="selected"<?php } ?>><?php echo __('Only logged-in users can reply on comments'); ?></option>
-              <option value="OWNER" <?php if(osc_comment_reply_user_type() == 'OWNER') { ?>selected="selected"<?php } ?>><?php echo __('Only owner of listing can reply on comments'); ?></option>
-              <option value="ADMIN" <?php if(osc_comment_reply_user_type() == 'ADMIN') { ?>selected="selected"<?php } ?>><?php echo __('Only logged-in admin can reply on comments'); ?></option>
+              <option value="LOGGED" <?php if(osc_comment_reply_user_type() == 'LOGGED') { ?>selected="selected"<?php } ?>><?php echo __('Only logged-in users can reply to comments'); ?></option>
+              <option value="OWNER" <?php if(osc_comment_reply_user_type() == 'OWNER') { ?>selected="selected"<?php } ?>><?php echo __('Only the listing owner can reply to comments'); ?></option>
+              <option value="ADMIN" <?php if(osc_comment_reply_user_type() == 'ADMIN') { ?>selected="selected"<?php } ?>><?php echo __('Only a logged-in administrator can reply to comments'); ?></option>
             </select>
           </div>
         </div>
-        
 
 
         <h2 class="render-title"><?php _e('Notifications'); ?></h2>
 
         <div class="form-row">
-          <div class="form-label"><?php _e('E-mail admin whenever') ?></div>
+          <div class="form-label"><?php _e('Email admin whenever') ?></div>
           <div class="form-controls">
             <div class="form-label-checkbox">
               <label>
                 <input type="checkbox" <?php echo (osc_notify_new_comment() ? 'checked="checked"' : ''); ?> name="notify_new_comment" value="1" /> <?php _e("A new comment is posted"); ?>
               </label>
             </div>
-            
+
             <div class="form-label-checkbox">
               <label>
                 <input type="checkbox" <?php echo (osc_notify_new_comment_reply() ? 'checked="checked"' : ''); ?> name="notify_new_comment_reply" value="1" /> <?php _e("A new comment reply is posted"); ?>
@@ -213,14 +212,14 @@ osc_current_admin_theme_path('parts/header.php');
           </div>
         </div>
         <div class="form-row">
-          <div class="form-label"><?php _e('E-mail user whenever') ?></div>
+          <div class="form-label"><?php _e('Email user whenever') ?></div>
           <div class="form-controls">
             <div class="form-label-checkbox">
               <label>
                 <input type="checkbox" <?php echo (osc_notify_new_comment_user() ? 'checked="checked"' : ''); ?> name="notify_new_comment_user" value="1" /> <?php _e("There's a new comment on his listing"); ?>
               </label>
             </div>
-            
+
             <div class="form-label-checkbox">
               <label>
                 <input type="checkbox" <?php echo (osc_notify_new_comment_reply_user() ? 'checked="checked"' : ''); ?> name="notify_new_comment_reply_user" value="1" /> <?php _e("There's a new comment reply on his listing"); ?>
@@ -228,7 +227,7 @@ osc_current_admin_theme_path('parts/header.php');
             </div>
           </div>
         </div>
-        
+
         <div class="form-actions">
           <input type="submit" id="save_changes" value="<?php echo osc_esc_html(__('Save changes')); ?>" class="btn btn-submit" />
         </div>
@@ -236,4 +235,4 @@ osc_current_admin_theme_path('parts/header.php');
     </fieldset>
   </form>
 </div>
-<?php osc_current_admin_theme_path('parts/footer.php'); ?>
+<?php osc_current_admin_theme_path('parts/footer.php');

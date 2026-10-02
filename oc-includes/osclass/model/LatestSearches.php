@@ -48,7 +48,7 @@ class LatestSearches extends DAO {
       'd_date',
       's_search'
     );
-    
+
     $this->setFields($array_fields);
   }
 
@@ -76,19 +76,19 @@ class LatestSearches extends DAO {
 
     $data = $result->result();
     $output = array();
-    
+
     if(is_array($data) && count($data) > 0 && osc_latest_searches_restriction() <> 0 && osc_latest_searches_words() <> '') {
       foreach($data as $row) {
         $word = osc_latest_search_filter($row['s_search']);
-        
+
         if($word <> '') {
           $output[] = $row;
         }
       }
-      
+
       return $output;
-    }    
-    
+    }
+
     return $data;
   }
 
@@ -105,17 +105,17 @@ class LatestSearches extends DAO {
   public function getSearchesByDate($datetime = null) {
     $this->dao->select('d_date, s_search, COUNT(s_search) as i_total');
     $this->dao->from($this->getTableName());
-    
+
     if($datetime !== NULL) {
       $this->dao->where(sprintf('d_date >= "%s"', date('Y-m-d H:i:s', $datetime)));
     }
-    
+
     $this->dao->groupBy('d_date, s_search');
     $this->dao->orderBy('d_date', 'DESC');
     $this->dao->limit($limit);
     $result = $this->dao->get();
 
-    if( $result == false ) {
+    if($result == false ) {
       return false;
     }
 
@@ -136,12 +136,12 @@ class LatestSearches extends DAO {
   public function countAllSearches() {
     $this->dao->select('count(*) as i_total');
     $this->dao->from($this->getTableName());
-    
+
     $result = $this->dao->get();
 
     if($result) {
       $data = $result->row();
-      
+
       if(isset($data['i_total']) && $data['i_total'] > 0) {
         return (int)$data['i_total'];
       }
@@ -149,7 +149,7 @@ class LatestSearches extends DAO {
 
     return 0;
   }
-  
+
   /**
    * Purge search by pattern.
    *
@@ -163,7 +163,7 @@ class LatestSearches extends DAO {
     $this->dao->where('s_search like "' . $pattern . '"');
     return $this->dao->delete();
   }
-  
+
   /**
    * Purge all searches by date.
    *
@@ -182,7 +182,7 @@ class LatestSearches extends DAO {
     return $this->dao->delete();
   }
 
-  
+
   /**
    * Purge all searches.
    *
@@ -213,7 +213,6 @@ class LatestSearches extends DAO {
     $this->dao->orderBy('d_date', 'DESC');
     $this->dao->limit($number, 1);
     $result = $this->dao->get();
-    $last = $result->row();
 
     if($result == false) {
       return false;
@@ -222,6 +221,8 @@ class LatestSearches extends DAO {
     if($result->numRows() == 0) {
       return false;
     }
+
+    $last = $result->row();
 
     return $this->purgeDate($last['d_date']);
   }

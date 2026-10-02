@@ -69,11 +69,6 @@ $(document).ready(function(event){
   $('.flashmessage .ico-close').click(function(){
     $(this).parents('.flashmessage').remove();
   });
-  $('#mask_as_form select').on('change',function(){
-    $('#mask_as_form').submit();
-    $('#mask_as_form').submit();
-  });
-
   /*
   if(typeof $.fancybox == 'function') {
     $("a.fancybox").fancybox({

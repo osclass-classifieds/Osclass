@@ -29,7 +29,7 @@
       <div id="logo">
         <?php echo logo_header(); ?>
       </div>
-      
+
       <div class="menu-icon isTablet isMobile">
         <div>
           <span class="l1"></span>
@@ -37,7 +37,7 @@
           <span class="l3"></span>
         </div>
       </div>
-      
+
       <div class="nav">
         <?php osc_run_hook('header_links'); ?>
         <a href="<?php echo osc_base_url(); ?>" class="isMobile"><?php _e('Home', 'sigma'); ?></a>
@@ -63,7 +63,7 @@
           <?php } ?>
         <?php } ?>
 
-        <?php if( osc_users_enabled() || ( !osc_users_enabled() && !osc_reg_user_post() )) { ?>
+        <?php if(osc_users_enabled() || ( !osc_users_enabled() && !osc_reg_user_post() )) { ?>
           <a class="publish isTablet isDesktop" href="<?php echo osc_item_post_url_in_category() ; ?>"><?php _e('Publish Ad', 'sigma');?></a>
         <?php } ?>
 
@@ -88,16 +88,16 @@
   </section>
 <?php } ?>
 
-<?php if( osc_is_home_page() ) { ?>
+<?php if(osc_is_home_page() ) { ?>
   <?php osc_run_hook('home_search_pre'); ?>
 
   <section class="home-search">
     <div class="wrapper">
       <form action="<?php echo osc_base_url(true); ?>" method="get" class="search nocsrf box">
         <input type="hidden" name="page" value="search"/>
-        
+
         <?php osc_run_hook('home_search_top'); ?>
-        
+
         <h1><?php _e('What are you looking for today?', 'sigma'); ?></h1>
 
         <div class="main-search">
@@ -117,12 +117,12 @@
           </div>
         </div>
         <div id="message-seach"></div>
-        
+
         <?php osc_run_hook('home_search_bottom'); ?>
       </form>
     </div>
   </section>
-  
+
   <?php osc_run_hook('home_search_after'); ?>
 <?php } ?>
 
@@ -131,7 +131,7 @@
 <?php osc_show_widgets('header'); ?>
   <?php $breadcrumb = osc_breadcrumb('>', false, get_breadcrumb_lang()); ?>
 
-  <?php if( $breadcrumb !== '') { ?>
+  <?php if($breadcrumb !== '') { ?>
     <div class="wrapper wrapper-flash">
       <div class="breadcrumb">
         <?php echo $breadcrumb; ?>
@@ -147,4 +147,4 @@
   <div class="wrapper" id="content">
     <?php osc_run_hook('before-main'); ?>
     <div id="main">
-      <?php osc_run_hook('inside-main'); ?>
+      <?php osc_run_hook('inside-main');

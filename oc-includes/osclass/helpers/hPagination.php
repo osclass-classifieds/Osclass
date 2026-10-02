@@ -32,7 +32,7 @@
 function osc_search_pagination()
 {
   $params = array();
-  if( View::newInstance()->_exists('search_uri') ) { // CANONICAL URL
+  if(View::newInstance()->_exists('search_uri') ) { // CANONICAL URL
     $params['url'] = osc_base_url().View::newInstance()->_get('search_uri') . '/{PAGE}';
     $params['first_url'] = osc_base_url().View::newInstance()->_get('search_uri');
   } else {
@@ -50,7 +50,7 @@ function osc_search_pagination()
  * @throws \Exception
  */
 function osc_comments_pagination() {
-  if( (osc_comments_per_page() == 0) || (osc_item_comments_page() === 'all') || (osc_item_total_comments() <= osc_comments_per_page())) {
+  if((osc_comments_per_page() == 0) || (osc_item_comments_page() === 'all') || (osc_item_total_comments() <= osc_comments_per_page())) {
     return '';
   } else {
     $params = array('total'  => ceil(osc_item_total_comments()/osc_comments_per_page())
@@ -72,47 +72,47 @@ function osc_pagination_items($extra_params = null, $field = false) {
   if($extra_params === null) {
     $extra_params = Params::getParamsAsArray();
   }
-  
+
   $extra_params = (!is_array($extra_params) ? array() : $extra_params);
-  
+
   if(osc_is_public_profile()) {
     // $url = osc_user_list_items_pub_profile_url('{PAGE}', $field);
     // $first_url = osc_user_public_profile_url();
 
     unset($extra_params['iPage']);
     $first_url = osc_user_public_profile_url(null, false, 'username', $extra_params);
-    
+
     $extra_params['iPage'] = '{PAGE}';
     $url = osc_user_public_profile_url(null, false, 'username', $extra_params);
-    
+
   } else if(osc_is_list_items()) {
     // $url = osc_user_list_items_url('{PAGE}', $field);
     // $first_url = osc_user_list_items_url('', $field);
-    
+
     unset($extra_params['iPage']);
     $first_url = osc_user_items_url($extra_params);
-    
+
     $extra_params['iPage'] = '{PAGE}';
     $url = osc_user_items_url($extra_params);
-    
+
   } else {
     $url = '';
     $first_url = '';
   }
-  
+
   $params = array(
     'total'  => osc_search_total_pages(),
     'selected' => osc_search_page(),
     'url' => $url,
     'first_url' => $first_url
   );
-  
+
   if(is_array($extra_params) && !empty($extra_params)) {
     foreach($extra_params as $key => $value) {
       $params[$key] = $value;
     }
   }
-  
+
   $pagination = new Pagination($params);
   return $pagination->doPagination();
 }
@@ -175,10 +175,10 @@ function osc_show_pagination_admin( $aData )
 ?>
 <div class="has-pagination">
   <?php osc_run_hook('before_show_pagination_admin'); ?>
-  <?php if( $pageTotal > 1 ) { ?>
+  <?php if($pageTotal > 1 ) { ?>
   <form method="get" action="<?php echo $urlActual; ?>" style="display:inline;">
-    <?php foreach( Params::getParamsAsArray('get') as $key => $value ) { ?>
-    <?php if( $key !== 'iPage') { ?>
+    <?php foreach(Params::getParamsAsArray('get') as $key => $value ) { ?>
+    <?php if($key !== 'iPage') { ?>
     <input type="hidden" name="<?php echo osc_esc_html($key); ?>" value="<?php echo osc_esc_html($value); ?>" />
     <?php } } ?>
     <ul>

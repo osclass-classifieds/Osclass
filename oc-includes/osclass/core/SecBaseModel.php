@@ -25,7 +25,7 @@ class SecBaseModel extends BaseModel
     parent::__construct ();
 
     //Checking granting...
-    if (!$this->isLogged()) {
+    if(!$this->isLogged()) {
       //If we are not logged or we do not have permissions -> go to the login page
       $this->logout();
       $this->showAuthFailPage();

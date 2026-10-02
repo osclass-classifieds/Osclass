@@ -18,7 +18,7 @@ if(!defined('ABS_PATH')) exit('ABS_PATH is not loaded. Direct access is not allo
 
 $file = __get('file');
 osc_add_hook('admin_page_header','customPageHeader');
-function customPageHeader() { 
+function customPageHeader() {
   ?>
   <h1><?php echo osc_apply_filter('custom_plugin_title',__('Plugins')); ?></h1>
   <?php
@@ -26,13 +26,13 @@ function customPageHeader() {
 
 
 function customPageTitle($string) {
-  return sprintf(__('Plugins - %s'), $string);
+  return sprintf(__('%s - %s'), __('Plugins'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');
 
 
-osc_current_admin_theme_path( 'parts/header.php' ); 
+osc_current_admin_theme_path( 'parts/header.php' );
 ?>
 
 <!-- theme files -->
@@ -54,4 +54,4 @@ osc_current_admin_theme_path( 'parts/header.php' );
   ?>
 </div>
 <!-- /theme files -->
-<?php osc_current_admin_theme_path( 'parts/footer.php' ); ?>
+<?php osc_current_admin_theme_path( 'parts/footer.php' );

@@ -20,9 +20,9 @@ if(!defined('ABS_PATH')) exit('ABS_PATH is not loaded. Direct access is not allo
 
 osc_enqueue_script('jquery-validate');
 
-function customPageHeader() { 
+function customPageHeader() {
   ?>
-  <h1><?php _e('Settings'); ?></h1>
+  <h1><?php _e('International'); ?></h1>
   <?php
 }
 
@@ -30,7 +30,7 @@ osc_add_hook('admin_page_header','customPageHeader');
 
 
 function customPageTitle($string) {
-  return sprintf(__('Edit language - %s'), $string);
+  return sprintf(__('%s - %s'), __('Edit language'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');
@@ -45,7 +45,7 @@ osc_add_hook('admin_header','customHead', 10);
 
 $aLocale = __get('aLocale');
 
-osc_current_admin_theme_path( 'parts/header.php' ); 
+osc_current_admin_theme_path( 'parts/header.php' );
 ?>
 
 <h2 class="render-title"><?php _e('Edit language'); ?></h2>
@@ -58,19 +58,27 @@ osc_current_admin_theme_path( 'parts/header.php' );
 
     <div class="form-horizontal">
       <div class="form-row">
+        <div class="form-label"><?php _e('Language code'); ?></div>
+        <div class="form-controls">
+          <input type="text" class="input-small" value="<?php echo osc_esc_html($aLocale['pk_c_code']); ?>" disabled="disabled" style="opacity: 0.7;" />
+          <span class="help-box"><?php _e('Read-only. Language identifier in BCP 47 / ISO 15897 form.'); ?></span>
+        </div>
+      </div>
+
+      <div class="form-row">
         <div class="form-label"><?php _e('Name'); ?></div>
         <div class="form-controls">
           <?php LanguageForm::name_input_text($aLocale); ?>
         </div>
       </div>
-      
+
       <div class="form-row">
         <div class="form-label"><?php _e('Short name'); ?></div>
         <div class="form-controls">
           <?php LanguageForm::short_name_input_text($aLocale); ?>
         </div>
       </div>
-      
+
       <div class="form-row">
         <div class="form-label"><?php _e('Description'); ?></div>
         <div class="form-controls">
@@ -82,23 +90,24 @@ osc_current_admin_theme_path( 'parts/header.php' );
         <div class="form-label"><?php _e('Date format'); ?></div>
         <div class="form-controls">
           <?php LanguageForm::date_format_input_text($aLocale); ?>
+          <span class="help-box"><?php _e('PHP date() format string. Examples: Y-m-d, d/m/Y, m/d/Y, d.m.Y, j.n.Y, F j, Y, l j F Y.'); ?></span>
         </div>
       </div>
-      
+
       <div class="form-row has-blank-label">
-        <div class="form-label blank"><?php _e('Font-office'); ?></div>
+        <div class="form-label blank"><?php _e('Frontoffice'); ?></div>
         <div class="form-controls">
-          <div class="form-label-checkbox"><?php LanguageForm::enabled_input_checkbox($aLocale); ?> <?php _e('Enabled for the public website'); ?></div>
+          <div class="form-label-checkbox"><?php LanguageForm::enabled_input_checkbox($aLocale); ?> <?php _e('Enabled for the frontoffice'); ?></div>
         </div>
       </div>
-      
+
       <div class="form-row has-blank-label">
         <div class="form-label blank"><?php _e('Back-office'); ?></div>
         <div class="form-controls">
           <div class="form-label-checkbox"><?php LanguageForm::enabled_bo_input_checkbox($aLocale); ?> <?php _e('Enabled for the backoffice (oc-admin)'); ?></div>
         </div>
       </div>
-      
+
       <h2 class="render-title separate-top"><?php _e('Price format settings'); ?></h2>
 
       <div class="form-row">
@@ -107,21 +116,21 @@ osc_current_admin_theme_path( 'parts/header.php' );
           <?php LanguageForm::currency_format_input_text($aLocale); ?>
         </div>
       </div>
-      
+
       <div class="form-row">
         <div class="form-label"><?php _e('Number of decimals'); ?></div>
         <div class="form-controls">
           <?php LanguageForm::num_dec_input_text($aLocale); ?>
         </div>
       </div>
-      
+
       <div class="form-row">
         <div class="form-label"><?php _e('Decimal point'); ?></div>
         <div class="form-controls">
           <?php LanguageForm::dec_point_input_text($aLocale); ?>
         </div>
       </div>
-      
+
       <div class="form-row">
         <div class="form-label"><?php _e('Thousands separator'); ?></div>
         <div class="form-controls">
@@ -130,9 +139,10 @@ osc_current_admin_theme_path( 'parts/header.php' );
       </div>
 
       <div class="form-row">
-        <div class="form-label"><?php _e('Default currency'); ?></div>
+        <div class="form-label"><?php _e('Default language currency'); ?></div>
         <div class="form-controls">
           <?php LanguageForm::def_currency_select($aLocale); ?>
+          <span class="help-box"><?php _e('Default language currency: choose the default currency for this language when it is in use on the site (e.g. prices and new listings).'); ?></span>
         </div>
       </div>
 
@@ -144,25 +154,32 @@ osc_current_admin_theme_path( 'parts/header.php' );
           <?php LanguageForm::description_textarea($aLocale); ?>
         </div>
       </div>
-     
+
       <div class="form-row has-blank-label">
         <div class="form-label blank"><?php _e('Native location names'); ?></div>
         <div class="form-controls">
           <div class="form-label-checkbox"><?php LanguageForm::locations_native_input_checkbox($aLocale); ?> <?php _e('Location names will be shown in their native form'); ?></div>
         </div>
       </div>
-      
+
       <div class="form-row has-blank-label">
         <div class="form-label blank"><?php _e('Text direction'); ?></div>
         <div class="form-controls">
           <div class="form-label-checkbox"><?php LanguageForm::rtl_input_checkbox($aLocale); ?> <?php _e('Is RTL language'); ?></div>
         </div>
       </div>
-      
+
+      <div class="form-row">
+        <div class="form-label"><?php _e('Default language'); ?></div>
+        <div class="form-controls">
+          <label><input type="checkbox" name="b_set_default_language" value="1" <?php if(osc_language() == $aLocale['pk_c_code']) echo 'checked="checked"'; ?> /> <?php _e('Set as default website language (updates General settings)'); ?></label>
+        </div>
+      </div>
+
       <div class="form-actions">
         <input type="submit" value="<?php echo osc_esc_html(__('Save changes')); ?>" class="btn btn-submit" />
       </div>
     </div>
   </form>
 </div>
-<?php osc_current_admin_theme_path( 'parts/footer.php' ); ?>
+<?php osc_current_admin_theme_path( 'parts/footer.php' );

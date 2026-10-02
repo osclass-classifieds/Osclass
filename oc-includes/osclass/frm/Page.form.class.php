@@ -42,7 +42,7 @@ class PageForm extends Form {
     if(Session::newInstance()->_getForm('s_internal_name') != '') {
       $internal_name = Session::newInstance()->_getForm('s_internal_name');
     }
-    
+
     parent::generic_input_text('s_internal_name' , $internal_name , null , (isset($page['b_indelible']) && $page['b_indelible'] == 1));
   }
 
@@ -72,74 +72,121 @@ class PageForm extends Form {
 
   /**
    * @param null $page
+   */
+  public static function pub_date_input_text($page = null) {
+    $pubDate = '';
+    if(is_array($page) && isset($page['dt_pub_date']) && trim((string)$page['dt_pub_date']) != '') {
+      $pubDate = $page['dt_pub_date'];
+    }
+
+    if(Session::newInstance()->_getForm('dt_pub_date') != '') {
+      $pubDate = Session::newInstance()->_getForm('dt_pub_date');
+    }
+
+    parent::generic_input_text('dt_pub_date', $pubDate, null, false, true, -1, 'text', 'yyyy-mm-dd hh:mm:ss');
+  }
+
+  // Position/order input for orderable static pages
+  public static function order_input_text($page = null, $isNew = false) {
+    $pageManager = Page::newInstance();
+    $min = 1;
+
+    if($isNew) {
+      $max = $pageManager->getNextPositionableOrder();
+      $order = $max;
+    } else {
+      $max = max(1, $pageManager->getMaxPositionableOrder());
+      $order = 1;
+      if(is_array($page) && isset($page['i_order'])) {
+        $order = max(1, (int)$page['i_order']);
+      }
+    }
+
+    if(Session::newInstance()->_getForm('i_order') != '') {
+      $order = max(1, (int)Session::newInstance()->_getForm('i_order'));
+    }
+
+    if($order < $min) {
+      $order = $min;
+    }
+    if($order > $max) {
+      $order = $max;
+    }
+
+    $name = 'i_order';
+    echo '<input id="' . preg_replace('|([^_a-zA-Z0-9-]+)|', '', $name) . '" type="number" name="' . osc_esc_html($name) . '" value="' . (int)$order . '" min="' . (int)$min . '" max="' . (int)$max . '" step="1" />';
+  }
+
+  /**
+   * @param null $page
   */
   public static function visibility_select($page = null) {
     $options = array();
     $data = osc_static_page_visibility_options();
-    
+
     foreach($data as $id => $name) {
       $options[] = array('i_value' => $id, 's_text' => $name);
     }
-    
+
     parent::generic_select('i_visibility', $options, 'i_value', 's_text', null, isset($page['i_visibility']) ? $page['i_visibility'] : 0);
   }
-  
+
   /**
    * @param    $locales
    * @param null $page
    */
   public static function multilanguage_name_description($locales , $page = null) {
     $num_locales = count($locales);
-    if ($num_locales > 1) {
+    if($num_locales > 1) {
       echo '<div class="tabber">';
     }
-    
+
     $aFieldsDescription = Session::newInstance()->_getForm('aFieldsDescription');
     foreach($locales as $locale) {
       if($num_locales > 1) {
         echo '<div class="tabbertab">';
         echo '<h2>' . $locale['s_name'] . '</h2>';
       }
-      
+
       echo '<div class="FormElement">';
       echo '<div class="FormElementName">' . __('Title') . '</div>';
       echo '<div class="FormElementInput">';
-      
+
       $title = '';
       if(isset($page['locale'][$locale['pk_c_code']])) {
         $title = $page['locale'][$locale['pk_c_code']]['s_title'];
       }
-      
+
       if(isset($aFieldsDescription[$locale['pk_c_code']]) && isset($aFieldsDescription[$locale['pk_c_code']]['s_title']) &&$aFieldsDescription[$locale['pk_c_code']]['s_title'] != '') {
         $title = $aFieldsDescription[$locale['pk_c_code']]['s_title'];
       }
-      
+
       parent::generic_input_text($locale['pk_c_code'] . '#s_title', $title);
-      
+
       echo '</div>';
       echo '</div>';
       echo '<div class="FormElement">';
       echo '<div class="FormElementName">' . __('Body') . '</div>';
       echo '<div class="FormElementInput">';
-      
+
       $description = '';
       if(isset($page['locale'][$locale['pk_c_code']])) {
         $description = $page['locale'][$locale['pk_c_code']]['s_text'];
       }
-      
+
       if(isset($aFieldsDescription[$locale['pk_c_code']]) && isset($aFieldsDescription[$locale['pk_c_code']]['s_text']) &&$aFieldsDescription[$locale['pk_c_code']]['s_text'] != '') {
         $description = $aFieldsDescription[$locale['pk_c_code']]['s_text'];
       }
-      
+
       parent::generic_textarea($locale['pk_c_code'] . '#s_text', $description);
-      
+
       echo '</div>';
       echo '</div>';
       if($num_locales > 1) {
         echo '</div>';
       }
     }
-     
+
     if($num_locales > 1) {
       echo '</div>';
     }

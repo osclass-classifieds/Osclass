@@ -41,7 +41,7 @@ class AdminMenu {
     if(!self::$instance instanceof self) {
       self::$instance = new self;
     }
-    
+
     return self::$instance;
   }
 
@@ -55,14 +55,13 @@ class AdminMenu {
     $this->add_submenu('items', __('Manage listings'), osc_admin_base_url(true).'?page=items', 'items_manage', 'moderator');
     $this->add_submenu('items', __('Manage comments'), osc_admin_base_url(true).'?page=comments', 'items_comments', 'moderator');
     $this->add_submenu('items', __('Manage media'), osc_admin_base_url(true).'?page=media', 'items_media', 'moderator');
-    $this->add_submenu('items', __('Reported listings'), osc_admin_base_url(true).'?page=items&action=items_reported', 'items_reported', 'moderator');
-    $this->add_submenu('items', __('Custom fields'), osc_admin_base_url(true).'?page=cfields', 'items_cfields', 'administrator');
+    $this->add_submenu('items', __('Custom fields'), osc_admin_base_url(true).'?page=custom_fields', 'items_custom_fields', 'administrator');
     $this->add_submenu('items', __('Settings'), osc_admin_base_url(true).'?page=items&action=settings', 'items_settings', 'administrator');
 
     $is_moderator = false;
     if(osc_logged_admin_id() > 0) {
       $admin = Admin::newInstance()->findByPrimaryKey(osc_logged_admin_id());
-      
+
       if(isset($admin['pk_i_id']) && $admin['pk_i_id'] > 0 && isset($admin['b_moderator']) && $admin['b_moderator'] == 1) {
         $is_moderator = true;
       }
@@ -73,17 +72,26 @@ class AdminMenu {
     } else {
       $this->add_menu(__('Users'), osc_admin_base_url(true) .'?page=admins&action=edit', 'users', 'moderator');
     }
-    
+
     $this->add_submenu('users', __('Users'), osc_admin_base_url(true) .'?page=users', 'users_manage', 'administrator');
     $this->add_submenu('users', __('Ban rules'), osc_admin_base_url(true) .'?page=users&action=ban', 'users_ban', 'administrator');
-    $this->add_submenu('users', __('Alerts'), osc_admin_base_url(true) .'?page=users&action=alerts', 'users_alerts', 'administrator');
+    if(osc_alerts_enabled()) {
+      $this->add_submenu('users', __('Alerts'), osc_admin_base_url(true) .'?page=users&action=alerts', 'users_alerts', 'administrator');
+    }
     $this->add_submenu('users', __('Settings'), osc_admin_base_url(true) .'?page=users&action=settings', 'users_settings', 'administrator');
 
-    $this->add_menu(__('Statistics'), osc_admin_base_url(true) .'?page=stats&action=items', 'stats', 'moderator');
+    $this->add_menu(__('Reports'), osc_admin_base_url(true).'?page=reports', 'reports', 'moderator');
+    $this->add_submenu('reports', __('Manage reports'), osc_admin_base_url(true).'?page=reports', 'reports_manage', 'moderator');
+    $this->add_submenu('reports', __('Settings'), osc_admin_base_url(true).'?page=reports&action=settings', 'reports_settings', 'administrator');
+
+    $this->add_menu(__('Statistics'), osc_admin_base_url(true) .'?page=stats&action=overview', 'stats', 'moderator');
+    $this->add_submenu('stats', __('Overview'), osc_admin_base_url(true) .'?page=stats&action=overview', 'stats_overview', 'moderator');
     $this->add_submenu('stats', __('Listings'), osc_admin_base_url(true) .'?page=stats&action=items', 'stats_items', 'moderator');
-    $this->add_submenu('stats', __('Reports'), osc_admin_base_url(true) .'?page=stats&action=reports', 'stats_reports', 'moderator');
+    $this->add_submenu('stats', __('Listing details'), osc_admin_base_url(true) .'?page=stats&action=details', 'stats_reports', 'moderator');
     $this->add_submenu('stats', __('Users'), osc_admin_base_url(true) .'?page=stats&action=users', 'stats_users', 'moderator');
     $this->add_submenu('stats', __('Comments'), osc_admin_base_url(true) .'?page=stats&action=comments', 'stats_comments', 'moderator');
+    $this->add_submenu('stats', __('Alerts'), osc_admin_base_url(true) .'?page=stats&action=alerts', 'stats_alerts', 'moderator');
+    $this->add_submenu('stats', __('Settings'), osc_admin_base_url(true) .'?page=stats&action=settings', 'stats_settings', 'administrator');
 
     $this->add_menu(__('Appearance'), osc_admin_base_url(true) .'?page=appearance', 'appearance', 'administrator');
     $this->add_submenu('appearance', __('Manage themes'), osc_admin_base_url(true) .'?page=appearance', 'appearance_manage', 'administrator');
@@ -137,11 +145,10 @@ class AdminMenu {
     $this->add_submenu('tools', __('Import SQL data'), osc_admin_base_url(true) .'?page=tools&action=import', 'tools_import', 'administrator');
     $this->add_submenu('tools', __('Backup data'), osc_admin_base_url(true) .'?page=tools&action=backup', 'tools_backup', 'administrator');
     $this->add_submenu('tools', __('Upgrade Osclass'), osc_admin_base_url(true) .'?page=tools&action=upgrade', 'tools_upgrade', 'administrator');
-    $this->add_submenu('tools', __('Location stats'), osc_admin_base_url(true) .'?page=tools&action=locations', 'tools_location', 'administrator');
-    $this->add_submenu('tools', __('Category stats'), osc_admin_base_url(true) .'?page=tools&action=category', 'tools_category', 'administrator');
+    $this->add_submenu('tools', __('Statistics'), osc_admin_base_url(true) .'?page=tools&action=statistics', 'tools_statistics', 'administrator');
     $this->add_submenu('tools', __('Maintenance mode'), osc_admin_base_url(true) .'?page=tools&action=maintenance', 'tools_maintenance', 'administrator');
     $this->add_submenu('tools', __('Changelog'), osc_admin_base_url(true) .'?page=tools&action=version', 'tools_version', 'administrator');
-    
+
     $this->add_menu(__('Admins'), osc_admin_base_url(true) .'?page=admins', 'admins', 'moderator');
     $this->add_submenu('admins', __('Admins'), osc_admin_base_url(true) .'?page=admins', 'admins_manage', 'admins');
     $this->add_submenu('admins', __('Your Profile'), osc_admin_base_url(true) .'?page=admins&action=edit', 'admins_profile', 'moderator');
@@ -149,16 +156,16 @@ class AdminMenu {
 
     if($is_moderator) {
       $moderator_access = array();
-      if(isset($admin['s_moderator_access']) && trim($admin['s_moderator_access']) <> '') {
+      if(isset($admin['s_moderator_access']) && trim((string)$admin['s_moderator_access']) <> '') {
         $moderator_access = array_filter(explode(',', $admin['s_moderator_access']));
       }
-      
+
       if(is_array($moderator_access) && !empty($moderator_access) && count($moderator_access) > 0) {
         $def_file_url = osc_admin_base_url() . '?page=plugins&action=renderplugin&file=';
         $def_route_url = osc_admin_base_url() . '?page=plugins&action=renderplugin&route=';
 
         $routes = Rewrite::newInstance()->getRoutes();
-      
+
         $c = 0;
         foreach($moderator_access as $m) {
           // is file
@@ -167,17 +174,17 @@ class AdminMenu {
             $menu_url = $def_file_url . $m;
             $part = str_replace('/admin', '', $m);
             $part = array_filter(explode('/', str_replace('.php', '', $part)));
-            
+
             $name = ucwords(str_replace('_', ' ', implode(' > ', $part)));
-            
+
           // is route
           } else {
             if(isset($routes[$m]) && isset($routes[$m]['title']) && $routes[$m]['title'] <> '') {
               $plg = @explode('/', @$routes[$m]['file'])[0];
               $plg = ucwords(str_replace('_', ' ', str_replace('-', ' ', $plg)));
-              
+
               $name = $routes[$m]['title'];
-              
+
               if($plg <> '') {
                 $name = $plg . ' > ' . $name;
               }
@@ -190,15 +197,15 @@ class AdminMenu {
             }
             $menu_url = $def_route_url . $m;
           }
-          
+
           if($c == 0) {
             $this->add_menu(__('Plugins'), '#', 'modplugins', 'moderator');
           }
-          
+
           if($is_ok) {   // remove unfound routes
             $this->add_submenu('modplugins', $name, $menu_url, 'modplugins_c' . $c, 'moderator');
           }
-          
+
           $c++;
         }
       }
@@ -226,7 +233,7 @@ class AdminMenu {
       $icon_url,
       $position
    );
-    
+
     $this->aMenu[$menu_id] = $array;
   }
 
@@ -258,7 +265,7 @@ class AdminMenu {
       $capability ,
       $icon_url
    );
-    
+
     $this->aMenu[$menu_id]['sub'][$submenu_id] = $array;
   }
 

@@ -39,17 +39,17 @@ class CAdminItems extends AdminSecBaseModel {
     }
 
     //specific things for this class
-    switch ($this->action) {
+    switch($this->action) {
       case 'bulk_actions':
         osc_csrf_check();
         $mItems = new ItemActions(true);
-        switch (Params::getParam('bulk_actions'))
+        switch(Params::getParam('bulk_actions'))
         {
           case 'enable_all':
             $id = Params::getParam('id');
-            if ($id) {
+            if($id) {
               $numSuccess = 0;
-              foreach ($id as $_id) {
+              foreach($id as $_id) {
                 if($mItems->enable($_id)) {
                   $numSuccess++;
                 }
@@ -60,9 +60,9 @@ class CAdminItems extends AdminSecBaseModel {
 
           case 'disable_all':
             $id = Params::getParam('id');
-            if ($id) {
+            if($id) {
               $numSuccess = 0;
-              foreach ($id as $_id) {
+              foreach($id as $_id) {
                 if($mItems->disable((int)$_id)) {
                   $numSuccess++;
                 }
@@ -73,9 +73,9 @@ class CAdminItems extends AdminSecBaseModel {
 
           case 'activate_all':
             $id = Params::getParam('id');
-            if ($id) {
+            if($id) {
               $numSuccess = 0;
-              foreach ($id as $_id) {
+              foreach($id as $_id) {
                 if($mItems->activate($_id)) {
                   $numSuccess++;
                 }
@@ -86,9 +86,9 @@ class CAdminItems extends AdminSecBaseModel {
 
           case 'deactivate_all':
             $id = Params::getParam('id');
-            if ($id) {
+            if($id) {
               $numSuccess = 0;
-              foreach ($id as $_id) {
+              foreach($id as $_id) {
                 if($mItems->deactivate($_id)) {
                   $numSuccess++;
                 }
@@ -99,9 +99,9 @@ class CAdminItems extends AdminSecBaseModel {
 
           case 'premium_all':
             $id = Params::getParam('id');
-            if ($id) {
+            if($id) {
               $numSuccess = 0;
-              foreach ($id as $_id) {
+              foreach($id as $_id) {
                 if($mItems->premium($_id)) {
                   $numSuccess++;
                 }
@@ -112,9 +112,9 @@ class CAdminItems extends AdminSecBaseModel {
 
           case 'depremium_all':
             $id = Params::getParam('id');
-            if ($id) {
+            if($id) {
               $numSuccess = 0;
-              foreach ($id as $_id) {
+              foreach($id as $_id) {
                 if($mItems->premium($_id,false)) {
                   $numSuccess++;
                 }
@@ -127,7 +127,7 @@ class CAdminItems extends AdminSecBaseModel {
             $id = Params::getParam('id');
             if($id) {
               $numSuccess = 0;
-              foreach ($id as $_id) {
+              foreach($id as $_id) {
                 if($mItems->spam($_id)) {
                   $numSuccess++;
                 }
@@ -138,9 +138,9 @@ class CAdminItems extends AdminSecBaseModel {
 
           case 'despam_all':
             $id = Params::getParam('id');
-            if ($id) {
+            if($id) {
               $numSuccess = 0;
-              foreach ($id as $_id) {
+              foreach($id as $_id) {
                 if($mItems->spam($_id, false)) {
                   $numSuccess++;
                 }
@@ -157,7 +157,7 @@ class CAdminItems extends AdminSecBaseModel {
             if($id) {
               $numSuccess = 0;
               foreach($id as $i) {
-                if ($i) {
+                if($i) {
                   $item = $this->itemManager->findByPrimaryKey($i);
                   $success = $mItems->delete($item['s_secret'], $item['pk_i_id']);
                   if($success) {
@@ -166,114 +166,6 @@ class CAdminItems extends AdminSecBaseModel {
                 }
               }
               osc_add_flash_ok_message(sprintf(_mn('%d listing has been deleted', '%d listings have been deleted', $numSuccess), $numSuccess), 'admin');
-            }
-            break;
-
-          case 'clear_spam_all':
-            $id = Params::getParam('id');
-            $success = false;
-
-            if($id) {
-              $numSuccess = 0;
-              foreach($id as $i) {
-                if ($i) {
-                  $success = $this->itemManager->clearStat($i , 'spam');
-                  if($success) {
-                    $numSuccess++;
-                  }
-                }
-              }
-              osc_add_flash_ok_message(sprintf(_mn('%d listing has been unmarked as spam', '%d listings have been unmarked as spam', $numSuccess), $numSuccess), 'admin');
-            }
-            break;
-
-          case 'clear_bad_all':
-            $id = Params::getParam('id');
-            $success = false;
-
-            if($id) {
-              $numSuccess = 0;
-              foreach($id as $i) {
-                if ($i) {
-                  $success = $this->itemManager->clearStat($i , 'bad');
-                  if($success) {
-                    $numSuccess++;
-                  }
-                }
-              }
-              osc_add_flash_ok_message(sprintf(_mn('%d listing has been unmarked as missclassified', '%d listings have been unmarked as missclassified', $numSuccess), $numSuccess), 'admin');
-            }
-            break;
-
-          case 'clear_dupl_all':
-            $id = Params::getParam('id');
-            $success = false;
-
-            if($id) {
-              $numSuccess = 0;
-              foreach($id as $i) {
-                if ($i) {
-                  $success = $this->itemManager->clearStat($i , 'duplicated');
-                  if($success) {
-                    $numSuccess++;
-                  }
-                }
-              }
-              osc_add_flash_ok_message(sprintf(_mn('%d listing has been unmarked as duplicated', '%d listings have been unmarked as duplicated', $numSuccess), $numSuccess), 'admin');
-            }
-            break;
-
-          case 'clear_expi_all':
-            $id = Params::getParam('id');
-            $success = false;
-
-            if($id) {
-              $numSuccess = 0;
-              foreach($id as $i) {
-                if ($i) {
-                  $success = $this->itemManager->clearStat($i , 'expired');
-                  if($success) {
-                    $numSuccess++;
-                  }
-                }
-              }
-              osc_add_flash_ok_message(sprintf(_mn('%d listing has been unmarked as expired', '%d listings have been unmarked as expired', $numSuccess), $numSuccess), 'admin');
-            }
-            break;
-
-          case 'clear_offe_all':
-            $id = Params::getParam('id');
-            $success = false;
-
-            if($id) {
-              $numSuccess = 0;
-              foreach($id as $i) {
-                if ($i) {
-                  $success = $this->itemManager->clearStat($i , 'offensive');
-                  if($success) {
-                    $numSuccess++;
-                  }
-                }
-              }
-              osc_add_flash_ok_message(sprintf(_mn('%d listing has been unmarked as offensive', '%d listings have been unmarked as offensive', $numSuccess), $numSuccess), 'admin');
-            }
-            break;
-
-          case 'clear_all':
-            $id = Params::getParam('id');
-            $success = false;
-
-            if($id) {
-              $numSuccess = 0;
-              foreach($id as $i) {
-                if ($i) {
-                  $success = $this->itemManager->clearStat($i , 'all');
-                  if($success) {
-                    $numSuccess++;
-                  }
-                }
-              }
-              osc_add_flash_ok_message(sprintf(_mn('%d listing has been unmarked', '%d listings have been unmarked', $numSuccess), $numSuccess), 'admin');
             }
             break;
 
@@ -293,7 +185,7 @@ class CAdminItems extends AdminSecBaseModel {
         $success = false;
 
         foreach($id as $i) {
-          if ($i) {
+          if($i) {
             $aItem = $this->itemManager->findByPrimaryKey($i);
             $mItems = new ItemActions(true);
             $success = $mItems->delete($aItem['s_secret'], $aItem['pk_i_id']);
@@ -314,29 +206,29 @@ class CAdminItems extends AdminSecBaseModel {
         $id = Params::getParam('id');
         $value = Params::getParam('value');
 
-        if (!$id)
+        if(!$id)
           return false;
 
         $id = (int) $id;
 
-        if (!is_numeric($id))
+        if(!is_numeric($id))
           return false;
 
-        if (!in_array($value, array('ACTIVE', 'INACTIVE','ENABLE','DISABLE','RENEW')))
+        if(!in_array($value, array('ACTIVE', 'INACTIVE','ENABLE','DISABLE','RENEW')))
           return false;
 
         $item = $this->itemManager->findByPrimaryKey($id);
         $mItems = new ItemActions(true);
 
-        switch ($value) {
+        switch($value) {
           case 'ACTIVE':
             $success = $mItems->activate($id);
             if($success && $success > 0) {
               osc_add_flash_ok_message(_m('The listing has been activated'), 'admin');
-            } else if (!$success){
-              osc_add_flash_error_message(_m('An error has occurred'), 'admin');
+            } elseif(!$success){
+              osc_add_flash_error_message(_m('An error occurred'), 'admin');
             } else {
-              osc_add_flash_error_message(_m("The listing can't be activated because it's blocked"), 'admin');
+              osc_add_flash_error_message(_m("The listing cannot be activated because it is blocked"), 'admin');
             }
 
             break;
@@ -346,7 +238,7 @@ class CAdminItems extends AdminSecBaseModel {
             if($success && $success > 0) {
               osc_add_flash_ok_message(_m('The listing has been deactivated'), 'admin');
             } else {
-              osc_add_flash_error_message(_m('An error has occurred'), 'admin');
+              osc_add_flash_error_message(_m('An error occurred'), 'admin');
             }
 
             break;
@@ -356,7 +248,7 @@ class CAdminItems extends AdminSecBaseModel {
             if($success && $success > 0) {
               osc_add_flash_ok_message(_m('The listing has been enabled'), 'admin');
             } else {
-              osc_add_flash_error_message(_m('An error has occurred'), 'admin');
+              osc_add_flash_error_message(_m('An error occurred'), 'admin');
             }
 
             break;
@@ -366,7 +258,7 @@ class CAdminItems extends AdminSecBaseModel {
             if($success && $success > 0) {
               osc_add_flash_ok_message(_m('The listing has been disabled'), 'admin');
             } else {
-              osc_add_flash_error_message(_m('An error has occurred'), 'admin');
+              osc_add_flash_error_message(_m('An error occurred'), 'admin');
             }
 
             break;
@@ -380,23 +272,23 @@ class CAdminItems extends AdminSecBaseModel {
         $id = Params::getParam('id');
         $value = Params::getParam('value');
 
-        if (!$id)
+        if(!$id)
           return false;
 
         $id = (int) $id;
 
-        if (!is_numeric($id))
+        if(!is_numeric($id))
           return false;
 
-        if (!in_array($value, array(0, 1)))
+        if(!in_array($value, array(0, 1)))
           return false;
 
         $mItems = new ItemActions(true);
 
-        if ($mItems->premium($id, $value==1?true:false)) {
-          osc_add_flash_ok_message(_m('Changes have been applied'), 'admin');
+        if($mItems->premium($id, $value==1?true:false)) {
+          osc_add_flash_ok_message(_m('Changes have been saved'), 'admin');
         } else {
-          osc_add_flash_error_message(_m('An error has occurred'), 'admin');
+          osc_add_flash_error_message(_m('An error occurred'), 'admin');
         }
 
         $this->redirectTo(Params::getServerParam('HTTP_REFERER', false, false));
@@ -407,44 +299,44 @@ class CAdminItems extends AdminSecBaseModel {
         $id = Params::getParam('id');
         $value = Params::getParam('value');
 
-        if (!$id)
+        if(!$id)
           return false;
 
         $id = (int) $id;
 
-        if (!is_numeric($id))
+        if(!is_numeric($id))
           return false;
 
-        if (!in_array($value, array(0, 1)))
+        if(!in_array($value, array(0, 1)))
           return false;
 
         $mItems = new ItemActions(true);
 
         if($mItems->spam($id, $value==1?true:false)){
-          osc_add_flash_ok_message(_m('Changes have been applied'), 'admin');
+          osc_add_flash_ok_message(_m('Changes have been saved'), 'admin');
         } else {
-          osc_add_flash_error_message(_m('An error has occurred'), 'admin');
+          osc_add_flash_error_message(_m('An error occurred'), 'admin');
         }
 
         $this->redirectTo(Params::getServerParam('HTTP_REFERER', false, false));
         break;
-        
+
       case 'renew':  //status renew
         osc_csrf_check();
         $id = Params::getParam('id');
         $value = Params::getParam('value');
 
-        if (!$id) {
+        if(!$id) {
           return false;
         }
-        
+
         $id = (int) $id;
 
-        if (!is_numeric($id)) {
+        if(!is_numeric($id)) {
           return false;
         }
-        
-        if (!in_array($value, array(1))) {
+
+        if(!in_array($value, array(1))) {
           return false;
         }
 
@@ -453,34 +345,7 @@ class CAdminItems extends AdminSecBaseModel {
         if($do == 1){
           osc_add_flash_ok_message(_m('The listing has been renewed'), 'admin');
         } else {
-          osc_add_flash_error_message(_m('The listing can\'t be renewed' . ' (' . $do . ')'), 'admin');
-        }
-
-        $this->redirectTo(Params::getServerParam('HTTP_REFERER', false, false));
-        break;
-
-      case 'clear_stat':
-        osc_csrf_check();
-        $id = Params::getParam('id');
-        $stat = Params::getParam('stat');
-
-        if (!$id)
-          return false;
-
-        if (!$stat)
-          return false;
-
-        $id = (int) $id;
-
-        if (!is_numeric($id))
-          return false;
-
-        $success = $this->itemManager->clearStat($id , $stat);
-
-        if($success) {
-          osc_add_flash_ok_message(_m('The listing has been unmarked as')." $stat", 'admin');
-        } else {
-          osc_add_flash_error_message(_m("The listing hasn't been unmarked as")." $stat", 'admin');
+          osc_add_flash_error_message(sprintf(_m('The listing cannot be renewed (%s)'), $do), 'admin');
         }
 
         $this->redirectTo(Params::getServerParam('HTTP_REFERER', false, false));
@@ -490,7 +355,7 @@ class CAdminItems extends AdminSecBaseModel {
         $id = Params::getParam('id');
 
         $item = Item::newInstance()->findByPrimaryKey($id);
-        if (count($item) <= 0) {
+        if(count($item) <= 0) {
           $this->redirectTo(osc_admin_base_url(true) . "?page=items");
         }
 
@@ -526,15 +391,10 @@ class CAdminItems extends AdminSecBaseModel {
         }
 
         // save referer if belongs to manage items
-        // redirect only if ManageItems or ReportedListngs
         if(Params::existServerParam('HTTP_REFERER')) {
           $referer = Params::getServerParam('HTTP_REFERER', false, false);
           if(preg_match('/page=items/', $referer)) {
-            if(preg_match("/action=([\p{L}|_|-]+)/u", $referer, $matches)) {
-              if($matches[1] == 'items_reported') {
-                Session::newInstance()->_set('osc_admin_referer', $referer);
-              }
-            } else {
+            if(!preg_match("/action=([\p{L}|_|-]+)/u", $referer, $matches)) {
               // no actions - Manage Listings
               Session::newInstance()->_set('osc_admin_referer', $referer);
             }
@@ -569,16 +429,16 @@ class CAdminItems extends AdminSecBaseModel {
         $success = $mItems->edit();
 
         if($success==1){
-          osc_add_flash_ok_message(_m('Changes saved correctly'), 'admin');
+          osc_add_flash_ok_message(_m('Changes have been saved'), 'admin');
           $url = osc_admin_base_url(true) . "?page=items";
-          
+
           // if Referer is saved that means referer is ManageListings or ReportListings
           if(Session::newInstance()->_get('osc_admin_referer')!='') {
             $url = Session::newInstance()->_get('osc_admin_referer');
           }
-          
+
           Session::newInstance()->_clearVariables();
-          
+
           if(is_array($meta)) {
             foreach($meta as $key => $value) {
               Session::newInstance()->_dropKeepForm('meta_'.$key);
@@ -586,12 +446,12 @@ class CAdminItems extends AdminSecBaseModel {
           }
 
           $this->redirectTo($url);
-          
+
         } else {
           osc_add_flash_error_message($success , 'admin');
           $this->redirectTo(osc_admin_base_url(true) . "?page=items&action=item_edit&id=" . Params::getParam('id'));
         }
-        
+
         break;
 
       case 'deleteResource':  //delete resource
@@ -606,9 +466,9 @@ class CAdminItems extends AdminSecBaseModel {
 
         $result = ItemResource::newInstance()->delete(array('pk_i_id' => $id, 'fk_i_item_id' => $fkid, 's_name' => $name));
         if($result === false) {
-          osc_add_flash_error_message(_m('An error has occurred'), 'admin');
+          osc_add_flash_error_message(_m('An error occurred'), 'admin');
         } else {
-          osc_add_flash_ok_message(_m('Resource deleted'), 'admin');
+          osc_add_flash_ok_message(_m('The media file has been deleted'), 'admin');
         }
         $this->redirectTo(osc_admin_base_url(true) . "?page=items");
         break;
@@ -653,23 +513,23 @@ class CAdminItems extends AdminSecBaseModel {
             $url = Session::newInstance()->_get('osc_admin_referer');
             Session::newInstance()->_drop('osc_admin_referer');
           }
-          
+
           Session::newInstance()->_clearVariables();
           if(is_array($meta)) {
             foreach($meta as $key => $value) {
               Session::newInstance()->_dropKeepForm('meta_'.$key);
             }
           }
-          
+
           if(isset($mItem->data['dt_pub_date']) && date('Y-m-d', strtotime($mItem->data['dt_pub_date'])) != date('Y-m-d')) {
             osc_add_flash_ok_message(sprintf(_m('A new listing has been added with modified publish date: %s (may not be at top of listings table)'), $mItem->data['dt_pub_date']), 'admin');
 
           } else {
             osc_add_flash_ok_message(_m('A new listing has been added'), 'admin');
           }
-          
+
           $this->redirectTo($url);
-          
+
         } else {
           osc_add_flash_error_message($success, 'admin');
           $this->redirectTo(osc_admin_base_url(true) . "?page=items&action=post");
@@ -724,11 +584,27 @@ class CAdminItems extends AdminSecBaseModel {
         $titleLength = Params::getParam('max_chars_per_title');
         $descriptionLength = Params::getParam('max_chars_per_description');
         $itemPostRedirect = Params::getParam('item_post_redirect');
-        $itemMarkDisable = Params::getParam('item_mark_disable');
-        $itemMarkDisable = (($itemMarkDisable != '') ? true : false);
         $enableRenewal = Params::getParam('enabled_renewal_items');
         $enableRenewal = (($enableRenewal != '') ? true : false);
         $itemStatsMethod = Params::getParam('item_stats_method');
+        if($itemStatsMethod != 'PAGELOAD') {
+          $itemStatsMethod = 'SESSION';
+        }
+        $itemStatsLoggedOnly = (Params::getParam('item_stats_logged_only') != '' ? '1' : '0');
+        $itemStatsEnabled = osc_item_stats_sanitize_enabled(Params::getParam('item_stats_enabled'));
+        $itemStatsPreset = Params::getParam('item_stats_preset');
+        if(!in_array($itemStatsPreset, array('essential', 'engagement', 'commerce', 'full', 'custom'), true)) {
+          $itemStatsPreset = 'custom';
+        }
+        if($itemStatsPreset != 'custom') {
+          $preset_keys = osc_item_stats_preset_keys($itemStatsPreset);
+          $saved_keys = osc_item_stats_parse_csv($itemStatsEnabled);
+          sort($preset_keys);
+          sort($saved_keys);
+          if($preset_keys !== $saved_keys) {
+            $itemStatsPreset = 'custom';
+          }
+        }
         $renewalUpdatePublish = Params::getParam('renewal_update_pub_date');
         $renewalUpdatePublish = (($renewalUpdatePublish != '') ? true : false);
         $renewalLimit = (int)Params::getParam('renewal_limit');
@@ -759,21 +635,23 @@ class CAdminItems extends AdminSecBaseModel {
         }
 
 
-        $iUpdated += osc_set_preference('item_mark_disable', $itemMarkDisable);
         $iUpdated += osc_set_preference('enabled_renewal_items', $enableRenewal);
         $iUpdated += osc_set_preference('item_stats_method', $itemStatsMethod);
+        $iUpdated += osc_set_preference('item_stats_logged_only', $itemStatsLoggedOnly);
+        $iUpdated += osc_set_preference('item_stats_enabled', $itemStatsEnabled);
+        $iUpdated += osc_set_preference('item_stats_preset', $itemStatsPreset);
         $iUpdated += osc_set_preference('renewal_update_pub_date', $renewalUpdatePublish);
         $iUpdated += osc_set_preference('renewal_limit', $renewalLimit);
 
         $iUpdated += osc_set_preference('enabled_recaptcha_items', $enabledRecaptchaItems);
         $iUpdated += osc_set_preference('enabled_tinymce_items', $enabledTinymceItems);
-        
+
         if($moderateItems) {
           $iUpdated += osc_set_preference('moderate_items', $numModerateItems);
         } else {
           $iUpdated += osc_set_preference('moderate_items', '-1');
         }
-        
+
         $iUpdated += osc_set_preference('logged_user_item_validation', $loggedUserItemValidation);
         $iUpdated += osc_set_preference('can_deactivate_items', $canDeactivateItems);
         $iUpdated += osc_set_preference('reg_user_post', $regUserPost);
@@ -796,69 +674,14 @@ class CAdminItems extends AdminSecBaseModel {
 
 
         if($iUpdated > 0) {
-          osc_add_flash_ok_message(_m("Listings' settings have been updated"), 'admin');
+          osc_add_flash_ok_message(_m("Settings have been updated"), 'admin');
         }
         $this->redirectTo(osc_admin_base_url(true) . '?page=items&action=settings');
         break;
 
       case('items_reported'):
-        require_once osc_lib_path()."osclass/classes/datatables/ItemsDataTable.php";
-
-        // set default iDisplayLength
-        if(Params::getParam('iDisplayLength') != '') {
-          Cookie::newInstance()->push('listing_iDisplayLength', Params::getParam('iDisplayLength'));
-          Cookie::newInstance()->set();
-        } else {
-          // set a default value if it's set in the cookie
-          if(Cookie::newInstance()->get_value('listing_iDisplayLength') != '') {
-            Params::setParam('iDisplayLength', Cookie::newInstance()->get_value('listing_iDisplayLength'));
-          } else {
-            Params::setParam('iDisplayLength', 25);
-          }
-        }
-        
-        $this->_exportVariableToView('iDisplayLength', Params::getParam('iDisplayLength'));
-
-        // Table header order by related
-        if(Params::getParam('sort') == '') {
-          Params::setParam('sort', 'date');
-        }
-        if(Params::getParam('direction') == '') {
-          Params::setParam('direction', 'desc');
-        }
-
-        $page = (int)Params::getParam('iPage');
-        if($page==0) { $page = 1; };
-        Params::setParam('iPage', $page);
-
-        $params = Params::getParamsAsArray();
-
-        $itemsDataTable = new ItemsDataTable();
-        $itemsDataTable->tableReported($params);
-        $aData = $itemsDataTable->getData();
-
-        if(count($aData['aRows']) == 0 && $page!=1) {
-          $total = (int)$aData['iTotalDisplayRecords'];
-          $maxPage = ceil($total / (int)$aData['iDisplayLength']);
-
-          $url = osc_admin_base_url(true).'?'.Params::getServerParam('QUERY_STRING', false, false);
-
-          if($maxPage==0) {
-            $url = preg_replace('/&iPage=(\d)+/', '&iPage=1', $url);
-            $this->redirectTo($url);
-          }
-
-          if($page > 1) {
-            $url = preg_replace('/&iPage=(\d)+/', '&iPage='.$maxPage, $url);
-            $this->redirectTo($url);
-          }
-        }
-
-        $this->_exportVariableToView('aData', $aData);
-        $this->_exportVariableToView('aRawRows', $itemsDataTable->rawRows());
-
-        //calling the view...
-        $this->doView('items/reported.php');
+        // Legacy "Reported listings" section has been replaced by Reports
+        $this->redirectTo(osc_admin_base_url(true) . '?page=reports');
         break;
 
       default:        // default
@@ -876,7 +699,7 @@ class CAdminItems extends AdminSecBaseModel {
             Params::setParam('iDisplayLength', 25);
           }
         }
-        
+
         $this->_exportVariableToView('iDisplayLength', Params::getParam('iDisplayLength'));
 
         // Table header order by related
@@ -888,7 +711,7 @@ class CAdminItems extends AdminSecBaseModel {
         }
 
         $page = (int)Params::getParam('iPage');
-        if($page==0) { $page = 1; };
+        if($page==0) { $page = 1; }
         Params::setParam('iPage', $page);
 
         $params = Params::getParamsAsArray();
@@ -930,7 +753,7 @@ class CAdminItems extends AdminSecBaseModel {
           array('value' => 'spam_all', 'data-dialog-content' => sprintf(__('Are you sure you want to %s the selected listings?'), strtolower(__('Mark as spam'))), 'label' => __('Mark as spam')),
           array('value' => 'despam_all', 'data-dialog-content' => sprintf(__('Are you sure you want to %s the selected listings?'), strtolower(__('Unmark as spam'))), 'label' => __('Unmark as spam'))
         );
-        
+
         $bulk_options = osc_apply_filter("item_bulk_filter", $bulk_options);
         $this->_exportVariableToView('bulk_options', $bulk_options);
 

@@ -38,7 +38,7 @@ sigma_add_body_class('home');
 
         <strong><?php echo osc_category_name(); ?></strong>
       </a>
-      
+
 
     <?php } ?>
   </div>
@@ -46,7 +46,7 @@ sigma_add_body_class('home');
 
 </div><!-- main -->
 <div id="sidebar">
-  <?php if( osc_get_preference('sidebar-300x250', 'sigma') != '') { ?>
+  <?php if(osc_get_preference('sidebar-300x250', 'sigma') != '') { ?>
     <div class="ads_300"><?php echo osc_get_preference('sidebar-300x250', 'sigma'); ?></div>
   <?php } ?>
 
@@ -69,8 +69,8 @@ sigma_add_body_class('home');
 </div>
 
 <div class="clear"><!-- do not close, use main clossing tag for this case -->
-<?php if( osc_get_preference('homepage-728x90', 'sigma') != '') { ?>
+<?php if(osc_get_preference('homepage-728x90', 'sigma') != '') { ?>
   <div class="ads_728"><?php echo osc_get_preference('homepage-728x90', 'sigma'); ?></div>
 <?php } ?>
 
-<?php osc_current_web_theme_path('footer.php') ; ?>
+<?php osc_current_web_theme_path('footer.php') ;

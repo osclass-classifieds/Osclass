@@ -20,7 +20,7 @@ if(!defined('ABS_PATH')) exit('ABS_PATH is not loaded. Direct access is not allo
 osc_enqueue_script('jquery-validate');
 
 //customize Head
-function customHead() { 
+function customHead() {
   ?>
   <script type="text/javascript">
   $(document).ready(function(){
@@ -78,7 +78,7 @@ function addHelp() {
 osc_add_hook('help_box','addHelp');
 
 
-function customPageHeader() { 
+function customPageHeader() {
   ?>
   <h1><?php _e('Settings'); ?>
     <a href="#" class="btn ico ico-32 ico-help float-right"></a>
@@ -90,23 +90,23 @@ osc_add_hook('admin_page_header','customPageHeader');
 
 
 function customPageTitle($string) {
-  return sprintf(__('Latest searches Settings - %s'), $string);
+  return sprintf(__('%s - %s'), __('Latest searches settings'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');
 
-osc_current_admin_theme_path('parts/header.php'); 
+osc_current_admin_theme_path('parts/header.php');
 ?>
 
 <div id="general-setting">
   <!-- settings form -->
   <div id="general-settings">
-    <h2 class="render-title"><?php _e('Latest searches Settings'); ?></h2>
+    <h2 class="render-title"><?php _e('Latest searches settings'); ?></h2>
       <ul id="error_list"></ul>
       <form name="searches_form" action="<?php echo osc_admin_base_url(true); ?>" method="post">
         <input type="hidden" name="page" value="settings"/>
         <input type="hidden" name="action" value="latestsearches_post"/>
-        
+
         <fieldset>
           <div class="form-horizontal">
           <div class="form-row">
@@ -119,7 +119,7 @@ osc_current_admin_theme_path('parts/header.php');
             </div>
             </div>
           </div>
-          
+
           <div class="form-row row-latest-radio">
             <div class="form-label"><?php _e('How long queries are stored'); ?></div>
             <div class="form-controls">
@@ -127,12 +127,12 @@ osc_current_admin_theme_path('parts/header.php');
                 <input type="radio" name="purge_searches" value="hour" <?php echo ((osc_purge_latest_searches() == 'hour') ? 'checked="checked"' : ''); ?> onclick="javascript:document.getElementById('customPurge').value = 'hour';" />
                 <?php _e('One hour'); ?>
               </div>
-              
+
               <div>
                 <input type="radio" name="purge_searches" value="day" <?php echo ((osc_purge_latest_searches() == 'day') ? 'checked="checked"' : ''); ?> onclick="javascript:document.getElementById('customPurge').value = 'day';" />
                 <?php _e('One day'); ?>
               </div>
-              
+
               <div>
                 <input type="radio" name="purge_searches" value="week" <?php echo ((osc_purge_latest_searches() == 'week') ? 'checked="checked"' : ''); ?> onclick="javascript:document.getElementById('customPurge').value = 'week';" />
                 <?php _e('One week'); ?>
@@ -142,25 +142,25 @@ osc_current_admin_theme_path('parts/header.php');
                 <input type="radio" name="purge_searches" value="month" <?php echo ((osc_purge_latest_searches() == 'month') ? 'checked="checked"' : ''); ?> onclick="javascript:document.getElementById('customPurge').value = 'month';" />
                 <?php _e('One month'); ?>
               </div>
-              
+
               <div>
                 <input type="radio" name="purge_searches" value="year" <?php echo ((osc_purge_latest_searches() == 'year') ? 'checked="checked"' : ''); ?> onclick="javascript:document.getElementById('customPurge').value = 'year';" />
                 <?php _e('One year'); ?>
               </div>
-              
+
               <div>
                 <input type="radio" name="purge_searches" value="forever" <?php echo ((osc_purge_latest_searches() == 'forever') ? 'checked="checked"' : ''); ?> onclick="javascript:document.getElementById('customPurge').value = 'forever';" />
                 <?php _e('Forever'); ?>
               </div>
-              
+
               <div>
                 <input type="radio" name="purge_searches" value="1000" <?php echo ((osc_purge_latest_searches() == '1000') ? 'checked="checked"' : ''); ?> onclick="javascript:document.getElementById('customPurge').value = '1000';" />
                 <?php _e('Store 1000 queries'); ?>
               </div>
-              
+
               <div>
-                <input type="radio" name="purge_searches" id="purge_searches" value="custom" <?php echo (!in_array(osc_purge_latest_searches(), array('hour', 'day', 'week', 'forever', '1000')) ? 'checked="checked"' : ''); ?> />
-                <?php printf(__('Store %s queries'), '<input name="custom_queries" id="custom_queries" type="text" class="input-small" ' . (!in_array(osc_purge_latest_searches(), array('hour', 'day', 'week', 'forever', '1000')) ? 'value="' . osc_esc_html(osc_purge_latest_searches()) . '"' : '') . ' onkeyup="javascript:document.getElementById(\'customPurge\').value = this.value;" />'); ?>
+                <input type="radio" name="purge_searches" id="purge_searches" value="custom" <?php echo (!in_array(osc_purge_latest_searches(), array('hour', 'day', 'week', 'month', 'year', 'forever', '1000')) ? 'checked="checked"' : ''); ?> />
+                <?php printf(__('Store %s queries'), '<input name="custom_queries" id="custom_queries" type="text" class="input-small" ' . (!in_array(osc_purge_latest_searches(), array('hour', 'day', 'week', 'month', 'year', 'forever', '1000')) ? 'value="' . osc_esc_html(osc_purge_latest_searches()) . '"' : '') . ' onkeyup="javascript:document.getElementById(\'customPurge\').value = this.value;" />'); ?>
                 <div class="help-box">
                   <?php _e("This feature can generate a lot of data. It's recommended to purge this data periodically."); ?>
                 </div>
@@ -170,7 +170,17 @@ osc_current_admin_theme_path('parts/header.php');
             </div>
           </div>
 
-          <h2 class="render-title separate-top"><?php _e('Words Restriction Settings'); ?></h2>
+          <div class="form-row">
+            <div class="form-label"><?php _e('Word length'); ?></div>
+            <div class="form-controls">
+              <?php printf(__('Keep words from %s to %s characters'), '<input name="latest_searches_min_length" id="latest_searches_min_length" type="text" class="input-small" value="' . osc_esc_html(osc_latest_searches_min_length()) . '" />', '<input name="latest_searches_max_length" id="latest_searches_max_length" type="text" class="input-small" value="' . osc_esc_html(osc_latest_searches_max_length()) . '" />'); ?>
+              <div class="help-box">
+                <?php _e('Latest searches keep only words in this length range. Stop words are removed automatically from current locale settings.'); ?>
+              </div>
+            </div>
+          </div>
+
+          <h2 class="render-title separate-top"><?php _e('Words restriction settings'); ?></h2>
           <div class="form-row">
             <div class="form-label"><?php _e('Restrict mode'); ?></div>
             <div class="form-controls">
@@ -181,18 +191,18 @@ osc_current_admin_theme_path('parts/header.php');
               </select>
             </div>
           </div>
-          
+
           <div class="form-row">
             <div class="form-label"><?php _e('Restricted words'); ?></div>
             <div class="form-controls">
               <textarea name="latest_searches_words" id="latest_searches_words"><?php echo osc_latest_searches_words(); ?></textarea>
-              
+
               <div class="help-box">
                 <?php _e('Delimit words by comma. Words are not case sensitive. Extra white space is considered in pattern as well.'); ?>
               </div>
             </div>
           </div>
-          
+
           <div class="form-actions">
             <input type="submit" id="save_changes" value="<?php echo osc_esc_html(__('Save changes')); ?>" class="btn btn-submit" />
           </div>
@@ -205,15 +215,16 @@ osc_current_admin_theme_path('parts/header.php');
 
 <div id="clean-settings" style="margin-top:30px;">
   <div class="form-horizontal">
-    <h2 class="render-title"><?php _e('Clean up latest searches'); ?></h2>
+    <h2 class="render-title"><?php _e('Run latest searches cleanup'); ?></h2>
 
     <div class="form-row">
-      <p><?php _e('Latest searches are cleaned from database using Cron.'); ?></p>
+      <p><?php _e('Latest searches are cleaned from database using Cron and the retention setting above.'); ?></p>
+      <p><?php _e('Use the button below to execute the same cleanup rule immediately. If queries are stored forever, nothing is deleted.'); ?></p>
       <p><?php echo sprintf(__('You have currently %s search patterns stored, you should not have more than 50k, otherwise it may slow down performance of your website.'), '<strong>' . LatestSearches::newInstance()->countAllSearches() . '</strong>'); ?></p>
-      <p><a class="btn" href="<?php echo osc_admin_base_url(true) . '?page=settings&action=latestsearches_clean&' . osc_csrf_token_url(); ?>"><?php  _e('Clean up latest searches'); ?></a></p>
+      <p><a class="btn" href="<?php echo osc_admin_base_url(true) . '?page=settings&action=latestsearches_clean&' . osc_csrf_token_url(); ?>"><?php  _e('Run cleanup now'); ?></a></p>
       <p>&nbsp;</p>
     </div>
   </div>
 </div>
 
-<?php osc_current_admin_theme_path('parts/footer.php'); ?>
+<?php osc_current_admin_theme_path('parts/footer.php');

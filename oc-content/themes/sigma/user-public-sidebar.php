@@ -47,7 +47,7 @@
                     <div class="control-group">
                         <div class="controls">
                             <?php osc_run_hook('item_contact_form', osc_item_id()); ?>
-                            <?php if( osc_recaptcha_public_key() ) { ?>
+                            <?php if(osc_recaptcha_public_key() ) { ?>
                             <script type="text/javascript">
                                 var RecaptchaOptions = {
                                     theme : 'custom',

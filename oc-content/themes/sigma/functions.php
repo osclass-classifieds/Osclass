@@ -16,7 +16,7 @@
  */
 
 
-define('SIGMA_THEME_VERSION', '150');
+define('SIGMA_THEME_VERSION', '180');
 define('THEME_COMPATIBLE_WITH_OSCLASS_HOOKS', 830);     // Compatibility with new hooks up to version
 
 
@@ -27,7 +27,7 @@ function sigma_home_latest() {
 
     osc_reset_latest_items();
 
-    if(osc_count_latest_items() > 0) { 
+    if(osc_count_latest_items() > 0) {
       ?>
       <div class="home-latest">
         <h2><?php _e('Latest Listings', 'sigma') ; ?></h2>
@@ -37,10 +37,10 @@ function sigma_home_latest() {
           osc_current_web_theme_path('loop.php');
         ?>
       </div>
-      
+
       <?php osc_run_hook('home_latest'); ?>
-      <?php 
-    } 
+      <?php
+    }
   }
 }
 
@@ -218,7 +218,7 @@ if(!function_exists('sigma_logo_url')) {
     if($logo != '' && file_exists(osc_uploads_path() . $logo)) {
       return osc_uploads_url() . $logo;
     }
-    
+
     return false;
   }
 }
@@ -286,7 +286,7 @@ if(!function_exists('sigma_draw_categories_list')) {
    osc_goto_first_category();
    $i    = 0;
 
-   while (osc_has_categories()) {
+   while(osc_has_categories()) {
    ?>
   <?php
     if($i%$col1_max_cat == 0){
@@ -317,7 +317,7 @@ if(!function_exists('sigma_draw_categories_list')) {
        </h1>
        <?php if(osc_count_subcategories() > 0) { ?>
          <ul>
-           <?php while (osc_has_subcategories()) { ?>
+           <?php while(osc_has_subcategories()) { ?>
              <li>
              <?php if(osc_category_total_items() > 0) { ?>
                <a class="category sub-category <?php echo osc_category_slug() ; ?>" href="<?php echo osc_search_category_url() ; ?>"><?php echo osc_category_name() ; ?></a> <span>(<?php echo osc_category_total_items() ; ?>)</span>
@@ -496,11 +496,13 @@ if(!function_exists('get_user_menu')) {
       'url'   => osc_user_list_items_url(),
       'class' => 'opt_items'
     );
-    $options[] = array(
-      'name' => __('Alerts', 'sigma'),
-      'url' => osc_user_alerts_url(),
-      'class' => 'opt_alerts'
-    );
+    if(function_exists('osc_alerts_enabled') && osc_alerts_enabled()) {
+      $options[] = array(
+        'name' => __('Alerts', 'sigma'),
+        'url' => osc_user_alerts_url(),
+        'class' => 'opt_alerts'
+      );
+    }
     $options[] = array(
       'name'  => __('Account', 'sigma'),
       'url'   => osc_user_profile_url(),
@@ -589,7 +591,7 @@ function theme_sigma_actions_admin() {
 
       osc_set_preference('rtl', (Params::getParam('rtl') ? '1' : '0'), 'sigma');
 
-      osc_add_flash_ok_message(__('Theme settings updated correctly', 'sigma'), 'admin');
+      osc_add_flash_ok_message(__('Settings have been updated', 'sigma'), 'admin');
       osc_redirect_to(osc_admin_render_theme_url('oc-content/themes/sigma/admin/settings.php'));
     break;
     case('upload_logo'):
@@ -604,9 +606,9 @@ function theme_sigma_actions_admin() {
 
         osc_set_preference('logo', $logo_name, 'sigma');
 
-        osc_add_flash_ok_message(__('The logo image has been uploaded correctly', 'sigma'), 'admin');
+        osc_add_flash_ok_message(__('The logo image has been uploaded', 'sigma'), 'admin');
       } else {
-        osc_add_flash_error_message(__("An error has occurred, please try again", 'sigma'), 'admin');
+        osc_add_flash_error_message(__('An error occurred. Please try again', 'sigma'), 'admin');
       }
       osc_redirect_to(osc_admin_render_theme_url('oc-content/themes/sigma/admin/header.php'));
     break;
@@ -648,8 +650,6 @@ function sigma_admin_menu_links() {
 }
 
 osc_add_hook('init_admin', 'sigma_admin_menu_links');
-
-
 
 
 //TRIGGER FUNCTIONS
@@ -767,7 +767,7 @@ class sigmaBodyClass
 
   public static function newInstance()
   {
-    if( !self::$instance instanceof self)
+    if(!self::$instance instanceof self)
     {
       self::$instance = new self;
     }
@@ -788,11 +788,11 @@ class sigmaBodyClass
 function osc_theme_check_compatibility_branch() {
   $osclass_version = (int)str_replace('.', '', OSCLASS_VERSION);
   $osclass_author = (!defined('OSCLASS_AUTHOR') ? 'NONE' : strtoupper(OSCLASS_AUTHOR));
-  
+
   if($osclass_version >= 420 && $osclass_author <> 'OSCLASSPOINT') {
     osc_add_flash_error_message('Theme is not compatible with your osclass version or branch! You cannot use this theme as it would generate errors on your installation. Download and install supported osclass version: <a href="https://osclass-classifieds.com/download">https://osclass-classifieds.com/download</a>');
   }
-} 
+}
 
 osc_add_hook('header', 'osc_theme_check_compatibility_branch', 1);
 
@@ -821,4 +821,4 @@ if(!function_exists('search_ads_listing_medium_fn')) {
   }
 }
 osc_add_hook('search_ads_listing_medium', 'search_ads_listing_medium_fn');
-?>
+

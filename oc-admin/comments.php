@@ -39,56 +39,67 @@ class CAdminItemComments extends AdminSecBaseModel {
         $id = Params::getParam('id');
         if($id) {
           switch(Params::getParam('bulk_actions')) {
-            case('delete_all'):   $this->itemCommentManager->delete(array(DB_CUSTOM_COND => 'pk_i_id IN (' . implode(', ', $id) . ')'));
-              foreach ($id as $_id) {
+            case('delete_all'):
+              $sync_item_ids = array();
+              foreach($id as $_id) {
+                $row = $this->itemCommentManager->findByPrimaryKey($_id);
+                if(is_array($row) && isset($row['fk_i_item_id'])) {
+                  $sync_item_ids[] = (int)$row['fk_i_item_id'];
+                }
+              }
+              $this->itemCommentManager->delete(array(DB_CUSTOM_COND => 'pk_i_id IN (' . implode(', ', $id) . ')'));
+              foreach($id as $_id) {
                 $iUpdated = $this->itemCommentManager->delete(array('pk_i_id' => $_id));
                 osc_run_hook("delete_comment", $_id);
               }
-              
+              foreach(array_unique($sync_item_ids) as $sync_item_id) {
+                osc_item_stats_sync_item_comments($sync_item_id);
+              }
+
               osc_add_flash_ok_message(_m('The comments have been deleted'), 'admin');
               break;
 
             case('activate_all'):
-              foreach ($id as $_id) {
+              foreach($id as $_id) {
                 $iUpdated = $this->itemCommentManager->update(array('b_active' => 1),array('pk_i_id' => $_id));
                 if($iUpdated) {
                   $this->sendCommentActivated($_id);
                 }
-                
+
                 osc_run_hook("activate_comment", $_id);
               }
-              
+
               osc_add_flash_ok_message(_m('The comments have been approved'), 'admin');
               break;
 
             case('deactivate_all'):
-              foreach ($id as $_id) {
+              foreach($id as $_id) {
                 $this->itemCommentManager->update(array('b_active' => 0),array('pk_i_id' => $_id));
                 osc_run_hook("deactivate_comment", $_id);
               }
-              
+
               osc_add_flash_ok_message(_m('The comments have been disapproved'), 'admin');
               break;
 
             case('enable_all'):
-              foreach ($id as $_id) {
+              foreach($id as $_id) {
                 $iUpdated = $this->itemCommentManager->update(array('b_enabled' => 1), array('pk_i_id' => $_id));
                 if($iUpdated) {
                   $this->sendCommentActivated($_id);
                 }
-                
+
                 osc_run_hook("enable_comment", $_id);
               }
-              
+
               osc_add_flash_ok_message(_m('The comments have been unblocked'), 'admin');
               break;
 
             case('disable_all'):
-              foreach ($id as $_id) {
+              foreach($id as $_id) {
                 $this->itemCommentManager->update(array('b_enabled' => 0), array('pk_i_id' => $_id));
                 osc_run_hook("disable_comment", $_id);
               }
-              
+
               osc_add_flash_ok_message(_m('The comments have been blocked'), 'admin');
               break;
 
@@ -108,17 +119,17 @@ class CAdminItemComments extends AdminSecBaseModel {
         $id = Params::getParam('id');
         $value = Params::getParam('value');
 
-        if (!$id) return false;
+        if(!$id) return false;
         $id = (int) $id;
-        if (!is_numeric($id)) return false;
-        if (!in_array($value, array('ACTIVE', 'INACTIVE', 'ENABLE', 'DISABLE'))) return false;
+        if(!is_numeric($id)) return false;
+        if(!in_array($value, array('ACTIVE', 'INACTIVE', 'ENABLE', 'DISABLE'))) return false;
 
         if($value == 'ACTIVE') {
           $iUpdated = $this->itemCommentManager->update(array('b_active' => 1),array('pk_i_id' => $id));
           if($iUpdated) {
             $this->sendCommentActivated($id);
           }
-          
+
           osc_run_hook("activate_comment", $id);
           osc_add_flash_ok_message(_m('The comment has been approved'), 'admin');
         } else if($value == 'INACTIVE') {
@@ -135,25 +146,163 @@ class CAdminItemComments extends AdminSecBaseModel {
           osc_add_flash_ok_message(_m('The comment has been disabled'), 'admin');
         }
 
-        $this->redirectTo(osc_admin_base_url(true) . "?page=comments");
+        $this->redirectTo(osc_admin_base_url(true) . "?page=comments&action=comment_edit&id=" . $id);
+        break;
+
+      case('comment_add'):
+        $comment = array();
+        $item = false;
+        $itemId = (int)Params::getParam('itemId');
+
+        if($itemId > 0) {
+          $item = Item::newInstance()->findByPrimaryKey($itemId);
+        }
+
+        $reply = false;
+        $actions = array();
+
+        $this->_exportVariableToView('comment', $comment);
+        $this->_exportVariableToView('reply', $reply);
+        $this->_exportVariableToView('item', $item);
+        $this->_exportVariableToView('actions', $actions);
+        $this->doView('comments/frm.php');
+        break;
+
+      case('add_comment_post'):
+        osc_csrf_check();
+
+        $msg = '';
+        $itemId = (int)Params::getParam('itemId');
+
+        if($itemId <= 0) {
+          $msg .= _m('Listing ID is required')."<br/>";
+        } else {
+          $item = Item::newInstance()->findByPrimaryKey($itemId);
+          if($item === false || !isset($item['pk_i_id'])) {
+            $msg .= _m('Listing does not exist')."<br/>";
+          }
+        }
+
+        if(!osc_validate_email(Params::getParam('authorEmail'), true)) {
+          $msg .= _m('The email is not valid')."<br/>";
+        }
+        if(!osc_validate_text(Params::getParam('body'), 1, true)) {
+          $msg .= _m('Comment is required')."<br/>";
+        }
+
+        $rating = (int)Params::getParam('rating');
+        if($rating > 5) {
+          $rating = 5;
+        } elseif($rating <= 0) {
+          $rating = null;
+        }
+
+        if($msg == '' && Params::getParam('replyId') > 0) {
+          $reply = ItemComment::newInstance()->findByPrimaryKey(Params::getParam('replyId'));
+
+          if($reply === false || !isset($reply['pk_i_id'])) {
+            $msg .= _m('Parent comment does not exists')."<br/>";
+          }
+
+          if(isset($reply['fk_i_reply_id']) && ($reply['fk_i_reply_id'] !== null || $reply['fk_i_reply_id'] > 0)) {
+            $msg .= _m('Parent comment is already reply. Only 1 level of replies are allowed, parent comment cannot be reply to other comment.')."<br/>";
+          }
+
+          if(isset($reply['fk_i_item_id']) && $reply['fk_i_item_id'] != $itemId) {
+            $msg .= _m('Parent comment belongs to different listing')."<br/>";
+          }
+        }
+
+        if($msg != '') {
+          osc_add_flash_error_message($msg, 'admin');
+          $this->redirectTo(osc_admin_base_url(true) . "?page=comments&action=comment_add&itemId=" . $itemId);
+        }
+
+        $userId = null;
+        $user = User::newInstance()->findByEmail(Params::getParam('authorEmail'));
+        if($user !== false && is_array($user) && isset($user['pk_i_id']) && $user['pk_i_id'] > 0) {
+          $userId = (int)$user['pk_i_id'];
+        }
+
+        $aComment = array(
+          'dt_pub_date' => date('Y-m-d H:i:s'),
+          'fk_i_item_id' => $itemId,
+          's_title' => Params::getParam('title'),
+          's_body' => Params::getParam('body'),
+          'i_rating' => $rating,
+          's_author_name' => Params::getParam('authorName'),
+          's_author_email' => Params::getParam('authorEmail'),
+          'b_active' => 1,
+          'b_enabled' => 1,
+          'fk_i_user_id' => $userId,
+          'fk_i_reply_id' => (Params::getParam('replyId') <= 0 ? null : Params::getParam('replyId'))
+        );
+
+        osc_run_hook('before_add_comment', $aComment);
+        $aComment = osc_apply_filter('comment_insert_data', $aComment);
+
+        if($this->itemCommentManager->insert($aComment)) {
+          $commentID = $this->itemCommentManager->dao->insertedId();
+          osc_run_hook('add_comment', $commentID);
+          osc_add_flash_ok_message(_m('Comment has been added'), 'admin');
+          $this->redirectTo(osc_admin_base_url(true) . "?page=comments&action=comment_edit&id=" . $commentID);
+        }
+
+        osc_add_flash_error_message(_m('Comment could not be added'), 'admin');
+        $this->redirectTo(osc_admin_base_url(true) . "?page=comments&action=comment_add&itemId=" . $itemId);
         break;
 
       case('comment_edit'):
         $comment = ItemComment::newInstance()->findByPrimaryKey(Params::getParam('id'));
-        
+
         $item = false;
         if(isset($comment['fk_i_item_id'])) {
           $item = Item::newInstance()->findByPrimaryKey($comment['fk_i_item_id']);
+          if($item !== false) {
+            View::newInstance()->_exportVariableToView('item', $item);
+          }
         }
-        
+
         $reply = false;
         if($comment !== false && isset($comment['fk_i_reply_id']) && $comment['fk_i_reply_id'] !== null) {
           $reply = ItemComment::newInstance()->findByPrimaryKey($comment['fk_i_reply_id']);
         }
-        
+
+        $actions = array();
+        if($comment !== false && isset($comment['pk_i_id'])) {
+          $commentId = (int)$comment['pk_i_id'];
+
+          if($comment['b_active']) {
+            $actions[] = '<a class="btn float-left" href="'.osc_admin_base_url(true).'?page=comments&amp;action=status&amp;id='.$commentId.'&amp;value=INACTIVE">'.__('Deactivate').'</a>';
+          } else {
+            $actions[] = '<a class="btn btn-red float-left" href="'.osc_admin_base_url(true).'?page=comments&amp;action=status&amp;id='.$commentId.'&amp;value=ACTIVE">'.__('Activate').'</a>';
+          }
+
+          if($comment['b_enabled']) {
+            $actions[] = '<a class="btn float-left" href="'.osc_admin_base_url(true).'?page=comments&amp;action=status&amp;id='.$commentId.'&amp;value=DISABLE">'.__('Block').'</a>';
+          } else {
+            $actions[] = '<a class="btn btn-red float-left" href="'.osc_admin_base_url(true).'?page=comments&amp;action=status&amp;id='.$commentId.'&amp;value=ENABLE">'.__('Unblock').'</a>';
+          }
+
+          if(isset($comment['fk_i_item_id']) && $comment['fk_i_item_id'] > 0) {
+            $actions[] = '<a class="btn float-left" href="'.osc_admin_base_url(true).'?page=items&amp;action=item_edit&amp;id='.$comment['fk_i_item_id'].'">'.__('Edit listing').'</a>';
+            $actions[] = '<a class="btn float-left" href="'.osc_admin_base_url(true).'?page=comments&amp;itemId='.$comment['fk_i_item_id'].'">'.__('View all item comments').'</a>';
+          }
+
+          if(isset($comment['fk_i_user_id']) && $comment['fk_i_user_id'] > 0) {
+            $actions[] = '<a class="btn float-left" href="'.osc_admin_base_url(true).'?page=users&amp;action=edit&amp;id='.$comment['fk_i_user_id'].'">'.__('Edit user').'</a>';
+            $actions[] = '<a class="btn float-left" href="'.osc_admin_base_url(true).'?page=comments&amp;userId='.$comment['fk_i_user_id'].'">'.__('View all user comments').'</a>';
+          }
+
+          if($reply !== false && isset($reply['pk_i_id'])) {
+            $actions[] = '<a class="btn float-left" href="'.osc_admin_base_url(true).'?page=comments&amp;action=comment_edit&amp;id='.$reply['pk_i_id'].'">'.__('Edit parent comment').'</a>';
+          }
+        }
+
         $this->_exportVariableToView('comment', $comment);
         $this->_exportVariableToView('reply', $reply);
         $this->_exportVariableToView('item', $item);
+        $this->_exportVariableToView('actions', $actions);
         $this->doView('comments/frm.php');
         break;
 
@@ -164,7 +313,7 @@ class CAdminItemComments extends AdminSecBaseModel {
 
         $msg = '';
         if(!osc_validate_email(Params::getParam('authorEmail'),true)) {
-          $msg .= _m('Email is not correct')."<br/>";
+          $msg .= _m('The email is not valid')."<br/>";
         }
         if(!osc_validate_text(Params::getParam('body'),1 , true)) {
           $msg .= _m('Comment is required')."<br/>";
@@ -178,10 +327,10 @@ class CAdminItemComments extends AdminSecBaseModel {
         $rating = (int)Params::getParam('rating');
         if($rating > 5) {
           $rating = 5;
-        } else if ($rating <= 0) {
+        } elseif($rating <= 0) {
           $rating = null;
         }
-        
+
         if(Params::getParam('replyId') > 0) {
           $reply = ItemComment::newInstance()->findByPrimaryKey(Params::getParam('replyId'));
 
@@ -189,23 +338,29 @@ class CAdminItemComments extends AdminSecBaseModel {
           if($reply === false || !isset($reply['pk_i_id'])) {
             $msg .= _m('Parent comment does not exists')."<br/>";
           }
-          
-          if (isset($reply['fk_i_reply_id']) && ($reply['fk_i_reply_id'] !== null || $reply['fk_i_reply_id'] > 0)) {
+
+          if(isset($reply['fk_i_reply_id']) && ($reply['fk_i_reply_id'] !== null || $reply['fk_i_reply_id'] > 0)) {
             $msg .= _m('Parent comment is already reply. Only 1 level of replies are allowed, parent comment cannot be reply to other comment.')."<br/>";
-          } 
-           
-          if (isset($reply['fk_i_item_id']) && $reply['fk_i_item_id'] != $comment['fk_i_item_id']) {
+          }
+
+          if(isset($reply['fk_i_item_id']) && $reply['fk_i_item_id'] != $comment['fk_i_item_id']) {
             $msg .= _m('Parent comment belongs to different listing')."<br/>";
           }
-          
-          if (isset($reply['pk_i_id']) && $reply['pk_i_id'] == $comment['pk_i_id']) {
+
+          if(isset($reply['pk_i_id']) && $reply['pk_i_id'] == $comment['pk_i_id']) {
             $msg .= _m('Reply ID cannot be same as comment ID')."<br/>";
           }
-          
+
           if($msg != '') {
             osc_add_flash_error_message($msg, 'admin');
             $this->redirectTo(osc_admin_base_url(true) . "?page=comments&action=comment_edit&id=".Params::getParam('id'));
           }
+        }
+
+        $userId = null;
+        $user = User::newInstance()->findByEmail(Params::getParam('authorEmail'));
+        if($user !== false && is_array($user) && isset($user['pk_i_id']) && $user['pk_i_id'] > 0) {
+          $userId = (int)$user['pk_i_id'];
         }
 
         $this->itemCommentManager->update(
@@ -215,6 +370,7 @@ class CAdminItemComments extends AdminSecBaseModel {
             'i_rating' => $rating,
             's_author_name' => Params::getParam('authorName'),
             's_author_email' => Params::getParam('authorEmail'),
+            'fk_i_user_id' => $userId,
             'fk_i_reply_id' => (Params::getParam('replyId') <= 0 ? NULL : Params::getParam('replyId'))
           ),
           array(
@@ -223,21 +379,26 @@ class CAdminItemComments extends AdminSecBaseModel {
        );
 
         osc_run_hook('edit_comment', Params::getParam('id'));
-        
+
         if(Params::getParam('replyId') > 0) {
           osc_run_hook('edit_comment_reply', Params::getParam('replyId'));
         }
 
-        osc_add_flash_ok_message(_m('Great! We just updated your comment'), 'admin');
+        osc_add_flash_ok_message(_m('The comment has been updated'), 'admin');
         //$this->redirectTo(osc_admin_base_url(true) . "?page=comments");
         $this->redirectTo(osc_admin_base_url(true) . "?page=comments&action=comment_edit&id=".Params::getParam('id'));
         break;
 
       case('delete'):
         osc_csrf_check();
-        $this->itemCommentManager->deleteByPrimaryKey(Params::getParam('id'));
+        $commentId = Params::getParam('id');
+        $commentRow = $this->itemCommentManager->findByPrimaryKey($commentId);
+        $this->itemCommentManager->deleteByPrimaryKey($commentId);
         osc_add_flash_ok_message(_m('The comment has been deleted'), 'admin');
-        osc_run_hook('delete_comment', Params::getParam('id'));
+        osc_run_hook('delete_comment', $commentId);
+        if(is_array($commentRow) && isset($commentRow['fk_i_item_id'])) {
+          osc_item_stats_sync_item_comments((int)$commentRow['fk_i_item_id']);
+        }
         $this->redirectTo(osc_admin_base_url(true) . "?page=comments");
         break;
 
@@ -267,7 +428,7 @@ class CAdminItemComments extends AdminSecBaseModel {
         }
 
         $page = (int)Params::getParam('iPage');
-        if($page==0) { $page = 1; };
+        if($page==0) { $page = 1; }
         Params::setParam('iPage', $page);
 
         $params = Params::getParamsAsArray();
@@ -305,7 +466,7 @@ class CAdminItemComments extends AdminSecBaseModel {
           array('value' => 'disable_all', 'data-dialog-content' => sprintf(__('Are you sure you want to %s the selected comments?'), strtolower(__('Block'))), 'label' => __('Block')),
           array('value' => 'enable_all', 'data-dialog-content' => sprintf(__('Are you sure you want to %s the selected comments?'), strtolower(__('Unblock'))), 'label' => __('Unblock'))
        );
-        
+
         $bulk_options = osc_apply_filter("comment_bulk_filter", $bulk_options);
         $this->_exportVariableToView('bulk_options', $bulk_options);
 

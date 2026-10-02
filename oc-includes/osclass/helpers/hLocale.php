@@ -24,7 +24,6 @@
 */
 
 
-
 /**
  * Gets details about locale to be added into base URL
  * Supports "xx", "xx-yy", "xx-YY"
@@ -33,17 +32,17 @@
  */
 function osc_base_url_locale_regex() {
   $output = array();
-  
+
   if(osc_locale_to_base_url_type() == '') {
     $output['regex'] = '([a-z]{2})';
     $output['params_count'] = 1;
     $output['lang_param'] = '$1';
-    
+
   } else if(osc_locale_to_base_url_type() == 'LONG') {
     $output['regex'] = '([a-z]{2})-([a-zA-Z]{2})';
     $output['params_count'] = 2;
     $output['lang_param'] = '$1-$2';
-    
+
   // } else if(osc_locale_to_base_url_type() == 'xx_YY') {      // we do not want this, not SEO friendly
     // $output['regex'] = '([a-z]{2})_([A-Z]{2})';
     // $output['params_count'] = 2;
@@ -51,9 +50,9 @@ function osc_base_url_locale_regex() {
   } else {
     $output['regex'] = '';
     $output['params_count'] = 0;
-    $output['lang_param'] = ''; 
+    $output['lang_param'] = '';
   }
-  
+
   return $output;
 }
 
@@ -65,17 +64,46 @@ function osc_base_url_locale_regex() {
  * @return string
  */
 function osc_base_url_locale_slug($locale = '') {
+  $locale = (string)$locale;
   if($locale == '') {
-    $locale = osc_current_user_locale();
+    $locale = (string)osc_current_user_locale();
   }
-  
+
   if(osc_locale_to_base_url_type() == '') {
     return strtolower(substr($locale, 0, 2));
-    
+
   } else {
     //return str_replace('_', '-', $locale);
     return strtolower(str_replace('_', '-', $locale));
   }
+}
+
+// Resolve locale slug or code (en, en-US, en_US) to t_locale pk_c_code
+function osc_locale_code_from_param($locale) {
+  $locale = trim((string)$locale);
+  if($locale == '') {
+    return osc_current_user_locale();
+  }
+
+  $locales = osc_get_locales();
+  if(!is_array($locales)) {
+    return $locale;
+  }
+
+  foreach($locales as $row) {
+    if(!isset($row['pk_c_code'])) {
+      continue;
+    }
+    $code = $row['pk_c_code'];
+    if($code == $locale || strtolower($code) == strtolower($locale)) {
+      return $code;
+    }
+    if(osc_base_url_locale_slug($code) == strtolower($locale) || strtolower(str_replace('_', '-', $code)) == strtolower($locale)) {
+      return $code;
+    }
+  }
+
+  return $locale;
 }
 
 /**
@@ -86,9 +114,10 @@ function osc_base_url_locale_slug($locale = '') {
  * @return string
  */
 function osc_subdomain_locale_slug($locale) {
+  $locale = (string)$locale;
   if(osc_subdomain_language_slug_type() == '') {
     return substr($locale, 0, 2);
-    
+
   } else {
     //return str_replace('_', '-', $locale);
     return strtolower(str_replace('_', '-', $locale));
@@ -113,10 +142,10 @@ function osc_locale_field($field, $locale = '') {
  */
 function osc_locale() {
   $locale = null;
-  if (View::newInstance()->_exists('locales')) {
+  if(View::newInstance()->_exists('locales')) {
     $locale = View::newInstance()->_current('locales');
-    
-  } else if (View::newInstance()->_exists('locale')) {
+
+  } elseif(View::newInstance()->_exists('locale')) {
     $locale = View::newInstance()->_get('locale');
   }
 
@@ -133,11 +162,11 @@ function osc_get_locales() {
     // $locales = OSCLocale::newInstance()->listAllEnabled(false, true);
     $locales = osc_get_locales_all('FRONT', true);
     View::newInstance()->_exportVariableToView('locales', $locales);
-    
+
   } else {
     $locales = View::newInstance()->_get('locales');
   }
-  
+
   return $locales;
 }
 
@@ -149,11 +178,11 @@ function osc_get_locales() {
  */
 function osc_get_locales_all($enabled = 'ALL', $by_pk = false) {
   $key = 'locales_' . strtolower((string)$enabled) . '_' . (string)$by_pk;
-  
+
   if(!View::newInstance()->_exists($key)) {
     $locales_all = OSCLocale::newInstance()->listAllRaw();
     $locales = array();
-    
+
     if(is_array($locales_all) && count($locales_all) > 0) {
       foreach($locales_all as $locale) {
         if($enabled == 'ALL' || $enabled == '' || ($enabled == 'FRONT' && $locale['b_enabled'] == 1)  || ($enabled == 'BACK' && $locale['b_enabled_bo'] == 1)) {
@@ -165,10 +194,10 @@ function osc_get_locales_all($enabled = 'ALL', $by_pk = false) {
         }
       }
     }
-    
+
     View::newInstance()->_exportVariableToView($key, $locales);
   }
-  
+
   return View::newInstance()->_get($key);
 }
 
@@ -184,7 +213,7 @@ function osc_get_locale_row($code, $cache = true) {
   if($code == '' || strlen($code) < 2) {
     return false;
   }
-  
+
   if($cache === true && View::newInstance()->_exists('locale_' . $code)) {
     return View::newInstance()->_get('locale_' . $code);
   }
@@ -196,23 +225,23 @@ function osc_get_locale_row($code, $cache = true) {
   if(isset($locales[$code])) {
     View::newInstance()->_exportVariableToView('locale_' . $code, $locales[$code]);
     return $locales[$code];
-  
+
   } else {
-    
+
     // Maybe code is not in form xx_YY
     if(strlen((string)$code) == 5) {
       $code5 = strtolower(substr($code, 0, 2)) . '_' . strtoupper(substr($code, 3, 2));
-      
+
       if(isset($locales[$code5])) {
         View::newInstance()->_exportVariableToView('locale_' . $code, $locales[$code5]);
         return $locales[$code5];
       }
     }
 
-    
+
     // Try to search by first 2 letters only
     $code2 = strtolower(substr($code, 0, 2));
-    
+
     if(is_array($locales) && count($locales) > 0) {
       foreach($locales as $pk => $loc_row) {
         if($code2 == substr($pk, 0, 2)) {
@@ -222,14 +251,14 @@ function osc_get_locale_row($code, $cache = true) {
       }
     }
   }
-  
+
   // Search in DB
   $locale = OSCLocale::newInstance()->findByCode($code);
   if($locale !== false && isset($locale['pk_c_code'])) {
     View::newInstance()->_exportVariableToView('locale_' . $code, $locale);
     return $locale;
   }
-  
+
   return false;
 }
 
@@ -260,7 +289,7 @@ function osc_count_web_enabled_locales() {
   if(!View::newInstance()->_exists('locales')) {
     View::newInstance()->_exportVariableToView('locales', osc_get_locales());
   }
-  
+
   return osc_priv_count_locales();
 }
 
@@ -374,7 +403,7 @@ function osc_all_enabled_locales_for_admin($indexed_by_pk = false) {
  */
 function osc_get_current_user_locale() {
   $locale = osc_get_locale_row(osc_current_user_locale());
-  
+
   if(!View::newInstance()->_exists('locale')) {
     $locale = osc_get_locale_row(osc_current_user_locale());
 
@@ -382,20 +411,20 @@ function osc_get_current_user_locale() {
       View::newInstance()->_exportVariableToView('locale', $locale);
       return $locale;
     }
-    
+
     // Try to search in DB
     $locale = OSCLocale::newInstance()->findByPrimaryKey(osc_current_user_locale());
-    
+
     if($locale !== false && isset($locale['pk_c_code'])) {
       View::newInstance()->_exportVariableToView('locale', $locale);
       return $locale;
     }
-    
+
     // Get first enabled locale from session
     $locale = osc_get_first_locale();
     View::newInstance()->_exportVariableToView('locale', $locale);
     return $locale;
-    
+
   } else {
     return View::newInstance()->_get('locale');
   }
@@ -426,7 +455,7 @@ function osc_get_current_user_locations_native() {
   if(osc_get_current_user_locale() !== false && is_array(osc_get_current_user_locale()) && isset(osc_get_current_user_locale()['b_locations_native'])) {
     return (osc_get_current_user_locale()['b_locations_native'] == 1 ? 1 : 0);
   }
-  
+
   return 0;
 }
 
@@ -447,14 +476,14 @@ function osc_current_user_locale_is_rtl() {
     } else {
       // compare on first 2 chars only. Could be also 5.
       $rtl_codes = osc_rtl_lang_codes(false);
-      
+
       $code = substr(0, 2, osc_current_user_locale_code());
       if($code != '' && in_array($code, $rtl_codes)) {
         return 1;
       }
     }
-  } 
-  
+  }
+
   return 0;
 }
 

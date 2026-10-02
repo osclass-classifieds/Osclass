@@ -6,6 +6,7 @@ if(!defined('ABS_PATH')) exit('ABS_PATH is not loaded. Direct access is not allo
  *
  * Osclass maintained & developed by OsclassPoint.com
  * You may not use this file except in compliance with the License.
+ *
  * You may download copy of Osclass at
  *
  *     https://osclass-classifieds.com/download
@@ -18,17 +19,17 @@ if(!defined('ABS_PATH')) exit('ABS_PATH is not loaded. Direct access is not allo
 
 
 function addHelp() {
-  echo '<p>' . __("Add new currencies or edit existing currencies so users can publish listings in their country's currency.") . '</p>';
+  echo '<p>' . __("Add or edit currencies so listings and prices can use the correct symbol and conversion rate.") . '</p>';
 }
 
 osc_add_hook('help_box','addHelp');
 
 
-function customPageHeader(){ 
+function customPageHeader(){
   ?>
-  <h1><?php _e('Currencies'); ?>
+  <h1><?php _e('International'); ?>
     <a href="#" class="btn ico ico-32 ico-help float-right"></a>
-    <a href="<?php echo osc_admin_base_url(true).'?page=currencies&action=add'; ?>" class="btn btn-green ico ico-add-white float-right"><?php _e('Add'); ?></a>
+    <a href="<?php echo osc_admin_base_url(true).'?page=currencies&action=add'; ?>" class="btn btn-green ico ico-add-white float-right"><?php _e('Add currency'); ?></a>
   </h1>
   <?php
 }
@@ -36,18 +37,16 @@ osc_add_hook('admin_page_header','customPageHeader');
 
 
 function customPageTitle($string) {
-  return sprintf(__('Currencies - %s'), $string);
+  return sprintf(__('%s - %s'), __('Manage currencies'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');
 
 
-//customize Head
-function customHead() { 
+function customHead() {
   ?>
   <script type="text/javascript">
   $(document).ready(function(){
-    // check_all bulkactions
     $("#check_all").change(function(){
       var isChecked = $(this).prop("checked");
       $('.col-bulkactions input').each(function() {
@@ -59,13 +58,11 @@ function customHead() {
       });
     });
 
-    // dialog delete
     $("#dialog-currency-delete").dialog({
       autoOpen: false,
-      modal: true,
+      modal: true
     });
 
-    // dialog bulk actions
     $("#dialog-bulk-actions").dialog({
       autoOpen: false,
       modal: true
@@ -77,7 +74,6 @@ function customHead() {
       $("#datatablesForm").attr('data-dialog-open', 'false');
       $('#dialog-bulk-actions').dialog('close');
     });
-    // dialog bulk actions function
     $("#datatablesForm").submit(function() {
       if($("#bulk_actions option:selected").val() == "") {
         return false;
@@ -93,10 +89,8 @@ function customHead() {
       $("#dialog-bulk-actions").dialog('open');
       return false;
     });
-    // /dialog bulk actions
   });
 
-  // dialog delete function
   function delete_dialog(item_id) {
     $("#dialog-currency-delete input[name='code']").attr('value', item_id);
     $("#dialog-currency-delete").dialog('open');
@@ -107,74 +101,126 @@ function customHead() {
 }
 osc_add_hook('admin_header','customHead', 10);
 
-$aCurrencies = __get('aCurrencies');
 
-$aData = array();
-foreach($aCurrencies as $currency) {
-  $row = array();
-  $row[] = '<input type="checkbox" name="code[]" value="' . osc_esc_html($currency['pk_c_code']) . '" />';
+$aData = __get('aData');
+$aRawRows = __get('aRawRows');
+$iDisplayLength = __get('iDisplayLength');
+$sort = Params::getParam('sort');
+$direction = Params::getParam('direction');
 
-  $options = array();
-  $options[] = '<a onclick="return delete_dialog(\'' . $currency['pk_c_code'] . '\');" href="' . osc_admin_base_url(true) . '?page=currencies&amp;action=delete&amp;code=' . $currency['pk_c_code'] . '">' . __('Delete') . '</a>';
-  $options[] = '<a href="' . osc_admin_base_url(true) . '?page=currencies&amp;action=edit&amp;code=' . $currency['pk_c_code'] . '">' . __('Edit') . '</a>';
-
-  $row[] = $currency['pk_c_code'] . ' (' . implode(' &middot; ', $options) . ')';
-  $row[] = $currency['s_name'];
-  $row[] = $currency['s_description'];
-  $aData[] = $row;
-}
-
-osc_current_admin_theme_path('parts/header.php'); 
+$columns = $aData['aColumns'];
+$columnSources = (isset($aData['aColumnSources']) ? $aData['aColumnSources'] : array());
+$sortableColumns = (isset($aData['aSortableColumns']) ? $aData['aSortableColumns'] : array());
+$rows = $aData['aRows'];
+$withFilters = __get('withFilters');
 ?>
 
-<h2 class="render-title"><?php _e('Currencies'); ?> <a href="<?php echo osc_admin_base_url(true); ?>?page=currencies&action=add" class="btn btn-mini"><?php _e('Add new'); ?></a></h2>
+<?php osc_current_admin_theme_path('parts/header.php'); ?>
+
+<h2 class="render-title"><?php _e('Manage currencies'); ?> <a href="<?php echo osc_admin_base_url(true); ?>?page=currencies&action=add" class="btn btn-mini"><?php _e('Add new'); ?></a></h2>
 <div class="relative">
   <div id="currencies-toolbar" class="table-toolbar">
+    <div class="float-right">
+      <form method="get" action="<?php echo osc_admin_base_url(true); ?>" class="inline nocsrf">
+        <?php foreach(Params::getParamsAsArray('get') as $key => $value) { ?>
+        <?php if($key != 'iDisplayLength') { ?>
+        <input type="hidden" name="<?php echo osc_esc_html(strip_tags($key)); ?>" value="<?php echo osc_esc_html(strip_tags($value)); ?>" />
+        <?php } } ?>
+        <select name="iDisplayLength" class="select-box-extra select-box-medium float-left" onchange="this.form.submit();" >
+          <option value="10" <?php if(Params::getParam('iDisplayLength') == 10) echo 'selected'; ?> ><?php printf(__('%d Currencies'), 10); ?></option>
+          <option value="25" <?php if(Params::getParam('iDisplayLength') == 25) echo 'selected'; ?> ><?php printf(__('%d Currencies'), 25); ?></option>
+          <option value="50" <?php if(Params::getParam('iDisplayLength') == 50) echo 'selected'; ?> ><?php printf(__('%d Currencies'), 50); ?></option>
+          <option value="100" <?php if(Params::getParam('iDisplayLength') == 100) echo 'selected'; ?> ><?php printf(__('%d Currencies'), 100); ?></option>
+        </select>
+      </form>
+      <form method="get" action="<?php echo osc_admin_base_url(true); ?>" id="shortcut-filters" class="inline nocsrf">
+        <input type="hidden" name="page" value="currencies" />
+        <?php foreach(Params::getParamsAsArray('get') as $key => $value) { ?>
+        <?php if(!in_array($key, array('page', 'sSearch', 'action'), true)) { ?>
+        <input type="hidden" name="<?php echo osc_esc_html(strip_tags($key)); ?>" value="<?php echo osc_esc_html(strip_tags($value)); ?>" />
+        <?php } } ?>
+        <?php if($withFilters) { ?>
+        <a id="btn-hide-filters" href="<?php echo osc_admin_base_url(true); ?>?page=currencies" class="btn"><?php _e('Reset search'); ?></a>
+        <?php } ?>
+        <input id="fCurrencySearch" name="sSearch" type="text" class="input-text input-actions" value="<?php echo osc_esc_html(Params::getParam('sSearch')); ?>" placeholder="<?php echo osc_esc_html(__('Search currencies')); ?>" />
+        <input type="submit" class="btn submit-right" value="<?php echo osc_esc_html(__('Find')); ?>">
+      </form>
+    </div>
   </div>
+
   <form class="" id="datatablesForm" action="<?php echo osc_admin_base_url(true); ?>" method="post">
+    <?php echo osc_csrf_token_form(); ?>
     <input type="hidden" name="page" value="currencies" />
-    <input type="hidden" name="action" value="delete" />
+
     <div id="bulk-actions">
       <label>
-        <select id="bulk_actions" name="bulk_actions" class="select-box-extra">
-          <option value=""><?php _e('Bulk actions'); ?></option>
-          <option value="delete_all" data-dialog-content="<?php printf(__('Are you sure you want to %s the selected currencies?'), strtolower(__('Delete'))); ?>"><?php _e('Delete'); ?></option>
-        </select> <input type="submit" id="bulk_apply" class="btn" value="<?php echo osc_esc_html(__('Apply')); ?>" />
+        <?php osc_print_bulk_actions('bulk_actions', 'action', __get('bulk_options'), 'select-box-extra'); ?>
+        <input type="submit" id="bulk_apply" class="btn" value="<?php echo osc_esc_html(__('Apply')); ?>" />
       </label>
     </div>
-    
+
     <div class="table-contains-actions">
-      <table class="table currencies" cellpadding="0" cellspacing="0">
+      <table class="table" cellpadding="0" cellspacing="0">
         <thead>
           <tr>
-            <th class="col-bulkactions"><input id="check_all" type="checkbox" /></th>
-            <th><?php _e('Code'); ?></th>
-            <th><?php _e('Name'); ?></th>
-            <th><?php _e('Symbol'); ?></th>
+            <?php foreach($columns as $k => $v) {
+              $sourceCol = (isset($columnSources[$k]) ? $columnSources[$k] : '');
+              $isSortable = ((in_array($k, $sortableColumns, true) || strpos((string)$v, 'sort=') !== false) ? 'is-sortable' : '');
+              echo '<th class="col-'.$k.' '.$isSortable.' '.($sort==$k?($direction=='desc'?'sort-desc':'sort-asc'):'').'" data-source-col="' . osc_esc_html($sourceCol) . '">' . $v . '</th>';
+            } ?>
           </tr>
         </thead>
+
         <tbody>
-        <?php foreach($aData as $array) { ?>
-          <tr>
-          <?php foreach($array as $key => $value) { ?>
-            <?php if($key == 0) { ?>
-            <td class="col-bulkactions">
-            <?php } else { ?>
-            <td>
-            <?php } ?>
-            <?php echo $value; ?>
-            </td>
+        <?php if(count($rows) > 0) { ?>
+          <?php foreach($rows as $key => $row) { ?>
+            <tr class="<?php echo implode(' ', osc_apply_filter('datatable_currencies_class', array(), isset($aRawRows[$key]) ? $aRawRows[$key] : array(), $row)); ?>">
+              <?php foreach($row as $k => $v) { ?>
+                <td class="col-<?php echo $k; ?>"><?php echo $v; ?></td>
+              <?php } ?>
+            </tr>
           <?php } ?>
+        <?php } else { ?>
+          <tr>
+            <td colspan="<?php echo max(1, count($columns)); ?>" class="text-center">
+            <p><?php _e('No data available in table'); ?></p>
+            </td>
           </tr>
         <?php } ?>
         </tbody>
       </table>
+
+      <div id="table-row-actions"></div>
     </div>
   </form>
 </div>
+
+<?php
+  function showingResults(){
+    $aData = __get('aData');
+    echo '<ul class="showing-results"><li><span>'.osc_pagination_showing((Params::getParam('iPage')-1)*$aData['iDisplayLength']+1, ((Params::getParam('iPage')-1)*$aData['iDisplayLength'])+count($aData['aRows']), $aData['iTotalDisplayRecords'], $aData['iTotalRecords']).'</span></li></ul>';
+  }
+  osc_add_hook('before_show_pagination_admin','showingResults');
+  osc_show_pagination_admin($aData);
+?>
+<div class="display-select-bottom">
+  <form method="get" action="<?php echo osc_admin_base_url(true); ?>" class="inline nocsrf">
+    <?php foreach(Params::getParamsAsArray('get') as $key => $value) { ?>
+      <?php if($key != 'iDisplayLength') { ?>
+        <input type="hidden" name="<?php echo osc_esc_html(strip_tags($key)); ?>" value="<?php echo osc_esc_html(strip_tags($value)); ?>" />
+      <?php } ?>
+    <?php } ?>
+    <select name="iDisplayLength" class="select-box-extra select-box-medium float-left" onchange="this.form.submit();" >
+      <option value="10" <?php if(Params::getParam('iDisplayLength') == 10) echo 'selected'; ?> ><?php printf(__('%d Currencies'), 10); ?></option>
+      <option value="25" <?php if(Params::getParam('iDisplayLength') == 25) echo 'selected'; ?> ><?php printf(__('%d Currencies'), 25); ?></option>
+      <option value="50" <?php if(Params::getParam('iDisplayLength') == 50) echo 'selected'; ?> ><?php printf(__('%d Currencies'), 50); ?></option>
+      <option value="100" <?php if(Params::getParam('iDisplayLength') == 100) echo 'selected'; ?> ><?php printf(__('%d Currencies'), 100); ?></option>
+    </select>
+  </form>
+</div>
+
 <form id="dialog-currency-delete" method="get" action="<?php echo osc_admin_base_url(true); ?>" class="has-form-actions hide" title="<?php echo osc_esc_html(__('Delete currency')); ?>">
   <input type="hidden" name="page" value="currencies" />
-  <!--<input type="hidden" name="action" value="currencies" />-->
   <input type="hidden" name="action" value="delete" />
   <input type="hidden" name="code" value="" />
   <div class="form-horizontal">
@@ -189,16 +235,18 @@ osc_current_admin_theme_path('parts/header.php');
     </div>
   </div>
 </form>
+
 <div id="dialog-bulk-actions" title="<?php _e('Bulk actions'); ?>" class="has-form-actions hide">
   <div class="form-horizontal">
     <div class="form-row"></div>
     <div class="form-actions">
       <div class="wrapper">
-        <a id="bulk-actions-submit" href="javascript:void(0);" class="btn btn-red" ><?php echo osc_esc_html(__('Delete')); ?></a>
+        <a id="bulk-actions-submit" href="javascript:void(0);" class="btn btn-submit" ><?php echo osc_esc_html(__('Delete')); ?></a>
         <a id="bulk-actions-cancel" class="btn" href="javascript:void(0);"><?php _e('Cancel'); ?></a>
         <div class="clear"></div>
       </div>
     </div>
   </div>
 </div>
-<?php osc_current_admin_theme_path('parts/footer.php'); ?>
+
+<?php osc_current_admin_theme_path('parts/footer.php');

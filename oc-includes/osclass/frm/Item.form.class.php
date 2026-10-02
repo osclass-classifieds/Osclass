@@ -52,7 +52,7 @@ class ItemForm extends Form {
       }
     }
 
-    if ($item == null) { $item = osc_item(); }
+    if($item == null) { $item = osc_item(); }
 
     echo '<select name="catId" id="catId">';
     if(isset($default_item)) {
@@ -64,7 +64,7 @@ class ItemForm extends Form {
     if(count($categories)==1) { $parent_selectable = 1; }
 
     foreach($categories as $c) {
-      if (!osc_selectable_parent_categories() && !$parent_selectable) {
+      if(!osc_selectable_parent_categories() && !$parent_selectable) {
         echo '<optgroup label="' . $c['s_name'] . '">';
         if(isset($c['categories']) && is_array($c['categories'])) {
           self::subcategory_select($c[ 'categories' ] , $item , $default_item , 1);
@@ -91,7 +91,7 @@ class ItemForm extends Form {
   */
   public static function category_two_selects($categories = null , $item = null , $default_item = null , $parent_selectable = false) {
     $categoryID = Params::getParam('catId');
-    
+
     if(osc_item_category_id() != null) {
       $categoryID = osc_item_category_id();
     }
@@ -115,7 +115,7 @@ class ItemForm extends Form {
       }
     }
 
-    if ($item == null) { $item = osc_item(); }
+    if($item == null) { $item = osc_item(); }
 
     $subcategory = array();
     ?>
@@ -144,13 +144,13 @@ class ItemForm extends Form {
       }
       ?>
     </select>
-    
+
     <script type="text/javascript" charset="utf-8">
       <?php
         foreach($categories as $c) {
           if(count($c['categories']) > 0) {
             $subcategory = array();
-            foreach ($c[ 'categories' ] as $i => $iValue) {
+            foreach($c[ 'categories' ] as $i => $iValue) {
               $subcategory[] = array($c['categories'][$i]['pk_i_id'], $c['categories'][$i]['s_name']);
             }
             printf('var categories_%1$s = %2$s;', $c['pk_i_id'], json_encode($subcategory));
@@ -196,17 +196,18 @@ class ItemForm extends Form {
   *
   * @throws \Exception
   */
+  // Cascade category selects (select_1, select_2, ...); includes jquery-validate when parent categories are not selectable
   public static function category_multiple_selects($categories = null, $item = null, $default_item = null, $parent_selectable = false) {
     $categoryID = Params::getParam('catId');
-    if( osc_item_category_id() != null ) {
+    if(osc_item_category_id() != null ) {
       $categoryID = osc_item_category_id();
     }
 
-    if( Session::newInstance()->_getForm('catId') > 0 ) {
+    if(Session::newInstance()->_getForm('catId') > 0 ) {
       $categoryID = Session::newInstance()->_getForm('catId');
     }
 
-    if ($item == null) { $item = osc_item(); }
+    if($item == null) { $item = osc_item(); }
 
     if(isset($item['fk_i_category_id'])) {
       $categoryID = $item['fk_i_category_id'];
@@ -214,11 +215,11 @@ class ItemForm extends Form {
 
     $tmp_categories_tree = Category::newInstance()->toRootTree($categoryID);
     $categories_tree = array();
-    
+
     foreach($tmp_categories_tree as $t) {
       $categories_tree[] = (isset($t['pk_i_id']) ? $t['pk_i_id'] : null);
     }
-    
+
     unset($tmp_categories_tree);
 
     if($categories == null) {
@@ -226,44 +227,46 @@ class ItemForm extends Form {
     }
 
     parent::generic_input_hidden('catId', $categoryID);
+    $cascade_validate = self::category_cascade_validation_enabled($parent_selectable);
     ?>
     <div id="select_holder"></div>
     <script type="text/javascript" charset="utf-8">
       <?php
         $tmp_cat = array();
         foreach($categories as $c) {
-          if($c['fk_i_parent_id']==null ) { 
+          if($c['fk_i_parent_id']==null ) {
             $c['fk_i_parent_id'] = 0;
           }
-          
+
           $tmp_cat[$c['fk_i_parent_id']][] = array($c['pk_i_id'], $c['s_name']);
         }
-        
+
         // List of subcategories for each "parent" category
         foreach($tmp_cat as $k => $v) {
           echo 'var categories_'.$k.' = '.json_encode($v).';'.PHP_EOL;
         }
       ?>
 
-      if(osc == undefined) { 
-        var osc = {}; 
+      if(osc == undefined) {
+        var osc = {};
       }
-      
-      if(osc.langs == undefined) { 
-        osc.langs = {}; 
+
+      if(osc.langs == undefined) {
+        osc.langs = {};
       }
-      
-      if(osc.langs.select_category == undefined) { 
-        osc.langs.select_category = '<?php echo osc_esc_js(__('Select category')); ?>'; 
+
+      if(osc.langs.select_category == undefined) {
+        osc.langs.select_category = '<?php echo osc_esc_js(__('Select category')); ?>';
       }
-      
-      if(osc.langs.select_subcategory == undefined) { 
+
+      if(osc.langs.select_subcategory == undefined) {
         osc.langs.select_subcategory = '<?php echo osc_esc_js(__('Select subcategory')); ?>';
       }
-      
+
       osc.item_post = {};
       osc.item_post.category_id  = '<?php echo $categoryID; ?>';
       osc.item_post.category_tree_id  = <?php echo json_encode($categories_tree); ?>;
+      <?php if($cascade_validate) { self::category_cascade_jquery_validation_attach_script(); } ?>
 
       $(document).ready(function(){
         <?php if($categoryID == array()) { ?>
@@ -273,40 +276,44 @@ class ItemForm extends Form {
           <?php for($i=0; $i<count($categories_tree)-1; $i++) { ?>
           draw_select(<?php echo ($i+2); ?> ,<?php echo $categories_tree[$i]; ?>);
           <?php } ?>
-          
+
           window.setTimeout(function() {
             $('#select_<?php echo ($i+2-1); ?>').trigger('change');
           }, 200);
         <?php } ?>
-        
-        
+
+
         // When chaning category, remove it's children select boxes
         $('body').on('change', '[name^="select_"]', function() {
           var depth = parseInt($(this).attr("depth"));
           var maxDepth = parseInt(Math.max(4, <?php echo osc_num_category_levels(); ?>));
-          
+
           // Category select boxes has name by it's depts, select_1, select_2, select_3, ...
           for(var d=(depth+1); d<=maxDepth; d++) {
             $("#select_"+d).trigger('removed');
             $("#select_"+d).remove();
           }
-          
+
           $("#catId").attr("value", $(this).val());
           $("#catId").change();
-          
+
           if(catPriceEnabled[$('#catId').val()] == 1) {
             $('.price').show();
           } else {
             $('.price').hide();
             $('#price').val('') ;
           }
-          
+
           if((depth==1 && $(this).val()!=0) || (depth>1 && $(this).val()!=$("#select_"+(depth-1)).val())) {
             draw_select(depth+1, $(this).val());
           }
-          
+
           return true;
         });
+
+        <?php if($cascade_validate) { ?>
+        oscCategoryCascadeStartAttach();
+        <?php } ?>
       });
 
       // Generate category select box
@@ -314,28 +321,28 @@ class ItemForm extends Form {
         tmp_categories = window['categories_' + categoryID];    // list of subcategories for each "parent" category
 
         if(tmp_categories != null && $.isArray(tmp_categories)) {
-          $("#select_holder").before('<select id="select_'+select+'" name="select_'+select+'" depth="'+select+'"></select>');
+          $("#select_holder").before('<select id="select_'+select+'" name="select_'+select+'" depth="'+select+'" data-parent-id="'+categoryID+'"></select>');
 
           if(categoryID==0) {
             var options = '<option value="' + categoryID + '" >' + osc.langs.select_category + '</option>';
           } else {
             var options = '<option value="' + categoryID + '" >' + osc.langs.select_subcategory + '</option>';
           }
-          
+
           var hasSelected = false;
-          
+
           $.each(tmp_categories, function(index, catRow){   // catRow[0] == cat ID, catRow[1] == cat name
             // Sufficient to check if category is in array only
             // options += '<option value="' + value[0] + '" '+(value[0]==osc.item_post.category_tree_id[select-1]?'selected="selected"':'')+'>' + value[1] + '</option>';
             options += '<option value="' + catRow[0] + '" ' + (osc.item_post.category_tree_id.indexOf(catRow[0]) >= 0 ? 'selected="selected"' : '') + '>' + catRow[1] + '</option>';
-            
+
             if(osc.item_post.category_tree_id.indexOf(catRow[0]) >= 0) {
               hasSelected = true;
             }
           });
-          
+
           //osc.item_post.category_tree_id[select-1] = null;
-          
+
           $('#select_'+select).html(options);
           $('#select_'+select).next("a").find(".select-box-label").text(osc.langs.select_subcategory);
           $('#select_'+select).trigger("created");
@@ -356,17 +363,17 @@ class ItemForm extends Form {
   public static function subcategory_select($categories , $item , $default_item = null , $deep = 0) {
     // Did user select a specific category to post in?
     $catId = Params::getParam('catId');
-    
+
     if(Session::newInstance()->_getForm('catId') > 0){
       $catId = Session::newInstance()->_getForm('catId');
     }
-    
+
     // How many indents to add?
     $deep_string = '';
     for($var = 0;$var<$deep;$var++) {
       $deep_string .= '&nbsp;&nbsp;';
     }
-    
+
     $deep++;
 
     foreach($categories as $c) {
@@ -389,23 +396,23 @@ class ItemForm extends Form {
   public static function user_select($users = null , $item = null , $default_item = null) {
     if($users==null) { $users = User::newInstance()->listAll(); }
     if($item==null) { $item = osc_item(); }
-    
+
     $userId = '';
-    if (Session::newInstance()->_getForm('userId') > 0) {
+    if(Session::newInstance()->_getForm('userId') > 0) {
       $userId = Session::newInstance()->_getForm('userId');
     }
-    
+
     echo '<select name="userId" id="userId">';
-  
+
     if(isset($default_item)) {
       echo '<option value="">' . $default_item . '</option>';
     }
-    
+
     foreach($users as $user) {
       $bool = false;
       if($userId > 0 && $userId == $user['pk_i_id']){$bool = true;}
       if(isset($item[ 'fk_i_user_id' ]) && $item[ 'fk_i_user_id' ] == $user['pk_i_id']){$bool = true;}
-      
+
       echo '<option value="' . $user['pk_i_id'] . '"' . ($bool ? ' selected="selected"' : '') . '>';
 
       if(isset($user['s_name']) && !empty($user['s_name'])) {
@@ -417,7 +424,7 @@ class ItemForm extends Form {
     }
 
     echo '</select>';
-    
+
     return true;
   }
 
@@ -432,7 +439,7 @@ class ItemForm extends Form {
     if($type === 'edit') {
       $value = '-1';  // default no change expiration date
     }
-    
+
     echo '<input id="dt_expiration" type="text" name="dt_expiration" value="'.osc_esc_html(htmlentities($value, ENT_COMPAT, 'UTF-8')) . '" placeholder="yyyy-mm-dd HH:mm:ss" />';
     return true;
   }
@@ -449,7 +456,7 @@ class ItemForm extends Form {
     } else {
       if($options==null) { $options = array(0,1,3,5,7,10,15,30); }
     }
-    
+
     echo '<select name="dt_expiration" id="dt_expiration"></select>';
     $categories = Category::newInstance()->listEnabled();
     ?>
@@ -458,21 +465,21 @@ class ItemForm extends Form {
       <?php foreach($categories as $c) {
         echo 'exp_days['.$c['pk_i_id'].'] = '.$c['i_expiration_days'].';';
       }?>
-      
+
       $(document).ready(function(){
         $('body').on('change', '#catId', function(){
           draw_expiration(exp_days[this.value]);
         });
         draw_expiration(exp_days[$("#catId").value]);
       });
-      
+
       if(osc==undefined) { var osc = {}; }
       if(osc.langs==undefined) { osc.langs = {}; }
       if(osc.langs.nochange_expiration==undefined) { osc.langs.nochange_expiration = '<?php echo osc_esc_js(__('No change expiration')); ?>'; }
       if(osc.langs.without_expiration==undefined) { osc.langs.without_expiration = '<?php echo osc_esc_js(__('Without expiration')); ?>'; }
       if(osc.langs.expiration_day==undefined) { osc.langs.expiration_day = '<?php echo osc_esc_js(__('1 day')); ?>'; }
       if(osc.langs.expiration_days==undefined) { osc.langs.expiration_days = '<?php echo osc_esc_js(__('%d days')); ?>'; }
-      
+
       function draw_expiration(max_exp) {
         $('#dt_expiration').html("");
         var options = '';
@@ -493,7 +500,7 @@ class ItemForm extends Form {
         $('#dt_expiration').change();
       }
     </script>
-    
+
     <?php
     return true;
   }
@@ -532,11 +539,11 @@ class ItemForm extends Form {
     $num_locales = count($locales);
 
     if($num_locales>1) { echo '<div class="tabber">'; }
-    
+
     foreach($locales as $locale) {
       if($num_locales>1) { echo '<div class="tabbertab">'; }
       if($num_locales>1) { echo '<h2>' . $locale['s_name'] . '</h2>'; }
-    
+
       echo '<div class="title">';
       echo '<div><label for="title">' . __('Title') . ' *</label></div>';
       $title = (isset($item) && isset($item['locale'][$locale['pk_c_code']]) && isset($item['locale'][$locale['pk_c_code']]['s_title'])) ? $item['locale'][$locale['pk_c_code']]['s_title'] : '';
@@ -547,12 +554,12 @@ class ItemForm extends Form {
           $title = $title_[$locale['pk_c_code']];
         }
       }
-      
+
       self::title_input('title', $locale['pk_c_code'], $title);
       echo '</div>';
       echo '<div class="description">';
       echo '<div><label for="description">' . __('Description') . ' *</label></div>';
-      
+
       $description = (isset($item) && isset($item['locale'][$locale['pk_c_code']]) && isset($item['locale'][$locale['pk_c_code']]['s_description'])) ? $item['locale'][$locale['pk_c_code']]['s_description'] : '';
       if(Session::newInstance()->_getForm('description') != '') {
         $description_ = Session::newInstance()->_getForm('description');
@@ -560,12 +567,12 @@ class ItemForm extends Form {
           $description = $description_[$locale['pk_c_code']];
         }
       }
-      
+
       self::description_textarea('description', $locale['pk_c_code'], $description);
       echo '</div>';
       if($num_locales>1) { echo '</div>'; }
     }
-    
+
     if($num_locales>1) { echo '</div>'; }
   }
 
@@ -593,7 +600,7 @@ class ItemForm extends Form {
 
     parent::generic_input_text('dt_pub_date', isset($item['dt_pub_date']) ? $item['dt_pub_date'] : null, null, false, true, -1, $type, $placeholder);
   }
-  
+
   /**
   * @param null $item
   * @param string $type (HTML input type, text or number)
@@ -605,14 +612,14 @@ class ItemForm extends Form {
     }
 
     $expire_date = '';
-    
+
     if(isset($item['dt_expiration']) && $item['dt_expiration'] != '9999-12-31 23:59:59') {
       $expire_date = $item['dt_expiration'];
     }
-    
+
     parent::generic_input_text('dt_expiration', $expire_date, null, false, true, -1, $type, $placeholder);
   }
-  
+
   /**
   * @param array|null $currencies
   * @param array|null $item
@@ -620,11 +627,11 @@ class ItemForm extends Form {
   public static function currency_select($currencies = null , $item = null) {
     if($currencies == null) { $currencies = osc_get_currencies(); }
     if($item == null) { $item = osc_item(); }
-    
+
     if(Session::newInstance()->_getForm('currency') != '') {
       $item['fk_c_currency_code'] = Session::newInstance()->_getForm('currency');
     }
-    
+
     if(count($currencies) > 1) {
       $default_key = null;
       $currency = osc_get_preference('currency');
@@ -648,26 +655,26 @@ class ItemForm extends Form {
    * @return bool
    */
   public static function country_select($countries = null , $item = null) {
-    if($countries==null) { 
-      $countries = osc_get_countries(); 
+    if($countries==null) {
+      $countries = osc_get_countries();
     }
-    
-    if($item==null) { 
-      $item = osc_item(); 
+
+    if($item==null) {
+      $item = osc_item();
     }
-    
+
     if(count($countries) >= 1) {
       if(Session::newInstance()->_getForm('countryId') != '') {
         $item['fk_c_country_code'] = Session::newInstance()->_getForm('countryId');
       }
-      
+
       parent::generic_select('countryId', $countries, 'pk_c_code', 's_name', __('Select a country...'), isset($item['fk_c_country_code']) ? $item['fk_c_country_code'] : null);
       return true;
     } else {
       if(Session::newInstance()->_getForm('country') != '') {
         $item['s_country'] = Session::newInstance()->_getForm('country');
       }
-      
+
       parent::generic_input_text('country', isset($item['s_country']) ? $item['s_country'] : null);
       return true;
     }
@@ -679,14 +686,14 @@ class ItemForm extends Form {
    * @return bool
    */
   public static function country_text($item = null) {
-    if($item==null) { 
-      $item = osc_item(); 
+    if($item==null) {
+      $item = osc_item();
     }
-    
+
     if(Session::newInstance()->_getForm('country') != '') {
       $item['s_country'] = Session::newInstance()->_getForm('country');
     }
-    
+
     $readonly = false;
     if(!isset($item['s_country'])) {
       $countries = osc_get_countries();
@@ -696,7 +703,7 @@ class ItemForm extends Form {
         $readonly = true;
       }
     }
-    
+
     parent::generic_input_text('countryName', isset($item['s_country']) ? $item['s_country'] : null, null, $readonly);
     parent::generic_input_hidden('countryId', (isset($item['fk_c_country_code']) && $item['fk_c_country_code']!=null)?$item['fk_c_country_code']:'');
     return true;
@@ -709,14 +716,14 @@ class ItemForm extends Form {
    * @return bool
    */
   public static function region_select($regions = null, $item = null, $generate_all = false) {
-    if($item==null) { 
-      $item = osc_item(); 
+    if($item==null) {
+      $item = osc_item();
     }
-    
+
     $country_id = (Session::newInstance()->_getForm('countryId') <> '' ? Session::newInstance()->_getForm('countryId') : @$item['fk_c_country_code']);
 
     $generate_blank = false;
-    
+
     if($regions == null || !is_array($regions) || @empty($regions)) {
       if($country_id <> '') {
         $regions = Region::newInstance()->findByCountry($country_id);
@@ -726,19 +733,19 @@ class ItemForm extends Form {
         $generate_blank = true;
       }
     }
-    
+
     if((is_array($regions) && count($regions) >= 1) || $generate_blank == true) {
       if(Session::newInstance()->_getForm('regionId') > 0) {
         $item['fk_i_region_id'] = Session::newInstance()->_getForm('regionId');
       }
-      
+
       parent::generic_select('regionId', $regions, 'pk_i_id', 's_name', __('Select a region...'), isset($item['fk_i_region_id']) ? $item['fk_i_region_id'] : null);
       return true;
     } else {
       if(Session::newInstance()->_getForm('region') != '') {
         $item['s_region'] = Session::newInstance()->_getForm('region');
       }
-      
+
       parent::generic_input_text('region', isset($item['s_region']) ? $item['s_region'] : null);
       return true;
     }
@@ -752,16 +759,16 @@ class ItemForm extends Form {
    * @return bool
    */
   public static function city_select($cities = null, $item = null) {
-    if($item==null) { 
-      $item = osc_item(); 
+    if($item==null) {
+      $item = osc_item();
     }
-    
+
     $country_id = (Session::newInstance()->_getForm('countryId') <> '' ? Session::newInstance()->_getForm('countryId') : @$item['fk_c_country_code']);
     $region_id = (Session::newInstance()->_getForm('regionId') > 0 ? Session::newInstance()->_getForm('regionId') : @$item['fk_i_region_id']);
 
     $generate_blank = false;
-    
-    
+
+
     if($cities == null || !is_array($cities) || @empty($cities)) {
       if($region_id > 0) {
         $cities = City::newInstance()->findByRegion($region_id);
@@ -769,13 +776,13 @@ class ItemForm extends Form {
         $generate_blank = true;
       }
     }
-    
+
 
     if((is_array($cities) && count($cities) >= 1) || $generate_blank == true) {
       if(Session::newInstance()->_getForm('cityId') > 0) {
         $item['fk_i_city_id'] = Session::newInstance()->_getForm('cityId');
       }
-     
+
       parent::generic_select('cityId', $cities, 'pk_i_id', 's_name', __('Select a city...'), isset($item['fk_i_city_id']) ? $item['fk_i_city_id'] : null);
       return true;
     } else {
@@ -812,7 +819,7 @@ class ItemForm extends Form {
     if(Session::newInstance()->_getForm('city') != '') {
       $item['s_city'] = Session::newInstance()->_getForm('city');
     }
-    
+
     parent::generic_input_text('city', isset($item['s_city']) ? $item['s_city'] : null);
     parent::generic_input_hidden('cityId', (isset($item['fk_i_city_id']) && $item['fk_i_city_id']!=null)?$item['fk_i_city_id']:'');
     return true;
@@ -828,7 +835,7 @@ class ItemForm extends Form {
     if(Session::newInstance()->_getForm('cityArea') != '') {
       $item['s_city_area'] = Session::newInstance()->_getForm('cityArea');
     }
-    
+
     parent::generic_input_text('cityArea', isset($item['s_city_area']) ? $item['s_city_area'] : null);
     parent::generic_input_hidden('cityAreaId', (isset($item['fk_i_city_area_id']) && $item['fk_i_city_area_id']!=null)?$item['fk_i_city_area_id']:'');
     return true;
@@ -844,11 +851,11 @@ class ItemForm extends Form {
     if(Session::newInstance()->_getForm('address') != '') {
       $item['s_address'] = Session::newInstance()->_getForm('address');
     }
-    
+
     parent::generic_input_text('address', isset($item['s_address']) ? $item['s_address'] : null);
     return true;
   }
-  
+
   /**
   * @param null $item
   *
@@ -859,11 +866,11 @@ class ItemForm extends Form {
     if(Session::newInstance()->_getForm('latitude') != '') {
       $item['d_coord_lat'] = Session::newInstance()->_getForm('latitude');
     }
-    
+
     parent::generic_input_text('latitude', isset($item['d_coord_lat']) ? $item['d_coord_lat'] : null);
     return true;
   }
-  
+
   /**
   * @param null $item
   *
@@ -874,7 +881,7 @@ class ItemForm extends Form {
     if(Session::newInstance()->_getForm('longitude') != '') {
       $item['d_coord_long'] = Session::newInstance()->_getForm('longitude');
     }
-    
+
     parent::generic_input_text('longitude', isset($item['d_coord_long']) ? $item['d_coord_long'] : null);
     return true;
   }
@@ -889,7 +896,7 @@ class ItemForm extends Form {
     if(Session::newInstance()->_getForm('zip') != '') {
       $item['s_zip'] = Session::newInstance()->_getForm('zip');
     }
-    
+
     parent::generic_input_text('zip', isset($item['s_zip']) ? $item['s_zip'] : null);
     return true;
   }
@@ -904,7 +911,7 @@ class ItemForm extends Form {
     if(Session::newInstance()->_getForm('contactName') != '') {
       $item['s_contact_name'] = Session::newInstance()->_getForm('contactName');
     }
-    
+
     parent::generic_input_text('contactName', isset($item['s_contact_name']) ? $item['s_contact_name'] : null);
     return true;
   }
@@ -914,7 +921,7 @@ class ItemForm extends Form {
     if(Session::newInstance()->_getForm('contactPhone') != '') {
       $item['s_contact_phone'] = Session::newInstance()->_getForm('contactPhone');
     }
-    
+
     parent::generic_input_text('contactPhone', isset($item['s_contact_phone']) ? $item['s_contact_phone'] : null);
     return true;
   }
@@ -924,7 +931,7 @@ class ItemForm extends Form {
     if(Session::newInstance()->_getForm('contactOther') != '') {
       $item['s_contact_other'] = Session::newInstance()->_getForm('contactOther');
     }
-    
+
     parent::generic_input_text('contactOther', isset($item['s_contact_other']) ? $item['s_contact_other'] : null);
     return true;
   }
@@ -939,7 +946,7 @@ class ItemForm extends Form {
     if(Session::newInstance()->_getForm('contactEmail') != '') {
       $item['s_contact_email'] = Session::newInstance()->_getForm('contactEmail');
     }
-    
+
     parent::generic_input_text('contactEmail', isset($item['s_contact_email']) ? $item['s_contact_email'] : null);
     return true;
   }
@@ -970,7 +977,7 @@ class ItemForm extends Form {
     if(Session::newInstance()->_getForm('b_show_email') == 1) {
       $item['b_show_email'] = true;
     }
-    
+
     parent::generic_input_checkbox('showEmail', '1', isset($item['b_show_email']) ? $item['b_show_email'] : false);
     return true;
   }
@@ -978,16 +985,14 @@ class ItemForm extends Form {
 
   public static function show_phone_checkbox($item = null) {
     if($item==null) { $item = osc_item(); }
-    
+
     if(Session::newInstance()->_getForm('showPhone') == 1) {
       $item['b_show_phone'] = true;
     }
-    
+
     parent::generic_input_checkbox('showPhone', '1', isset($item['b_show_phone']) ? $item['b_show_phone'] : true);
     return true;
   }
-
-
 
 
   /**
@@ -996,7 +1001,7 @@ class ItemForm extends Form {
   public static function phone_currency_autoload() {
     $countries = array();
     $list = (is_array(osc_get_countries()) ? osc_get_countries() : array());
-    
+
     if(is_array($list) && count($list) > 0) {
       foreach($list as $c) {
         if(isset($c['pk_c_code'])) {
@@ -1008,7 +1013,7 @@ class ItemForm extends Form {
       }
     }
   ?>
-  
+
   <script type="text/javascript">
   var cList = JSON.parse('<?php echo json_encode($countries); ?>');
   $(document).ready(function(){
@@ -1080,7 +1085,7 @@ class ItemForm extends Form {
         } else {
           var country = $('#country').val();
         }
-        
+
         $(this).autocomplete({
           source: "<?php echo osc_base_url(true); ?>?page=ajax&action=location_regions&country="+country,
           minLength: 2,
@@ -1099,7 +1104,7 @@ class ItemForm extends Form {
         } else {
           var region = $('#region').val();
         }
-        
+
         $(this).autocomplete({
           source: "<?php echo osc_base_url(true); ?>?page=ajax&action=location_cities&region="+region,
           minLength: 2,
@@ -1118,7 +1123,7 @@ class ItemForm extends Form {
         "minstriptags",
         function(value, element) {
           altered_input = strip_tags(value);
-          if (altered_input.length < 3) {
+          if(altered_input.length < 3) {
             return false;
           } else {
             return true;
@@ -1126,10 +1131,11 @@ class ItemForm extends Form {
         },
         '<?php echo osc_esc_js(__('Description needs to be longer')); ?>.'
       );
-      
-      <?php osc_run_hook('item_form_new_validation_top'); ?>
 
-      // Code for form validation
+      <?php osc_run_hook('item_form_new_validation_top'); ?>
+      <?php self::category_cascade_jquery_validation_method(); ?>
+
+      // Code for form validation - location_javascript_new
       $("form[name=item]").validate({
         rules: {
           "title[<?php echo osc_current_user_locale(); ?>]": {
@@ -1144,6 +1150,7 @@ class ItemForm extends Form {
             required: true,
             digits: true
           },
+          <?php self::category_cascade_jquery_validation_rules(); ?>
           <?php if(osc_price_enabled_at_items()) { ?>
           price: {
             maxlength: 25
@@ -1164,24 +1171,26 @@ class ItemForm extends Form {
             required: true,
             email: true
           },
-          <?php } ?>
           address: {
             minlength: 3,
             maxlength: 100
-          }
+          },
+          <?php } ?>
+
           <?php osc_run_hook('item_form_new_validation_rules'); ?>
         },
-        
+
         messages: {
           "title[<?php echo osc_current_user_locale(); ?>]": {
-              required: '<?php echo osc_esc_js(__('Title: this field is required')); ?>',
+              required: '<?php echo osc_esc_js(sprintf(__('%s is required'), __('Title'))); ?>',
               minlength: '<?php echo osc_esc_js(__('Title: enter at least 5 characters')); ?>'
           },
           "description[<?php echo osc_current_user_locale(); ?>]": {
-              required: '<?php echo osc_esc_js(__('Description: this field is required')); ?>',
+              required: '<?php echo osc_esc_js(sprintf(__('%s is required'), __('Description'))); ?>',
               minlength: '<?php echo osc_esc_js(__('Description: enter at least 10 characters')); ?>'
           },
           catId: "<?php echo osc_esc_js(__('Choose one category')); ?>.",
+          <?php self::category_cascade_jquery_validation_messages(); ?>
           <?php if(osc_price_enabled_at_items()) { ?>
           price: {
             maxlength: "<?php echo osc_esc_js(__('Price: no more than 25 characters')); ?>."
@@ -1199,17 +1208,18 @@ class ItemForm extends Form {
             maxlength: "<?php echo osc_esc_js(__('Name: no more than 35 characters')); ?>."
           },
           contactEmail: {
-            required: "<?php echo osc_esc_js(__('Email: this field is required')); ?>.",
-            email: "<?php echo osc_esc_js(__('Invalid email address')); ?>."
+            required: "<?php echo osc_esc_js(sprintf(__('%s is required'), __('Email'))); ?>.",
+            email: "<?php echo osc_esc_js(__('The email is not valid')); ?>."
           },
-          <?php } ?>
           address: {
             minlength: "<?php echo osc_esc_js(__('Address: enter at least 3 characters')); ?>.",
             maxlength: "<?php echo osc_esc_js(__('Address: no more than 100 characters')); ?>."
-          }
+          },
+          <?php } ?>
+
           <?php osc_run_hook('item_form_new_validation_messages'); ?>
         },
-        
+
         <?php osc_run_hook('item_form_new_validation_attributes'); ?>
         errorLabelContainer: "#error_list",
         ignore: ":disabled, :hidden, .ignore",
@@ -1218,7 +1228,7 @@ class ItemForm extends Form {
         invalidHandler: function(form, validator) {
           $('html,body').animate({ scrollTop: $('h1').offset().top }, { duration: 250, easing: 'swing'});
         },
-        
+
         submitHandler: function(form){
           form.find('button[type=submit], input[type=submit], .submit-item-form').addClass('disabled').attr('disabled', 'disabled');
           setTimeout("form.find('button[type=submit], input[type=submit], .submit-item-form').removeClass('disabled').removeAttr('disabled')", 5000);
@@ -1229,12 +1239,12 @@ class ItemForm extends Form {
 
     // Strip HTML tags to count number of visible characters.
     function strip_tags(html) {
-      if (arguments.length < 3) {
+      if(arguments.length < 3) {
         html=html.replace(/<\/?(?!\!)[^>]*>/gi, '');
       } else {
         var allowed = arguments[1];
         var specified = eval("["+arguments[2]+"]");
-        if (allowed){
+        if(allowed){
           var regex='</?(?!(' + specified.join('|') + '))\b[^>]*>';
           html=html.replace(new RegExp(regex, 'gi'), '');
         } else{
@@ -1242,13 +1252,13 @@ class ItemForm extends Form {
           html=html.replace(new RegExp(regex, 'gi'), '');
         }
       }
-      
+
       return html;
     }
 
     function delete_image(id, item_id,name, secret) {
       //alert(id + " - "+ item_id + " - "+name+" - "+secret);
-      var result = confirm('<?php echo osc_esc_js(__("This action can't be undone. Are you sure you want to continue?")); ?>');
+      var result = confirm('<?php echo osc_esc_js(__("This action cannot be undone. Are you sure you want to continue?")); ?>');
       if(result) {
         $.ajax({
           type: "POST",
@@ -1305,7 +1315,7 @@ class ItemForm extends Form {
                 result += '<option selected value=""><?php echo osc_esc_js(__('Select a region...')); ?></option>';
                 for(key in data) {
                   var vname = data[key].s_name;
-                  if(data[key].hasOwnProperty('s_name_native')) { 
+                  if(data[key].hasOwnProperty('s_name_native')) {
                     if(data[key].s_name_native != '' && data[key].s_name_native != 'null' && data[key].s_name_native != null && locationsNative == "1") {
                       vname = data[key].s_name_native;
                     }
@@ -1424,7 +1434,7 @@ class ItemForm extends Form {
         "minstriptags",
         function(value, element) {
           altered_input = strip_tags(value);
-          if (altered_input.length < 3) {
+          if(altered_input.length < 3) {
             return false;
           } else {
             return true;
@@ -1432,10 +1442,11 @@ class ItemForm extends Form {
         },
         "<?php echo osc_esc_js(__('Description needs to be longer')); ?>."
       );
-      
-      <?php osc_run_hook('item_form_validation_top'); ?>
 
-      // Code for form validation
+      <?php osc_run_hook('item_form_validation_top'); ?>
+      <?php self::category_cascade_jquery_validation_method(); ?>
+
+      // Code for form validation - location_javascript
       $("form[name=item]").validate({
         rules: {
           "title[<?php echo osc_current_user_locale(); ?>]": {
@@ -1450,6 +1461,7 @@ class ItemForm extends Form {
             required: true,
             digits: true
           },
+          <?php self::category_cascade_jquery_validation_rules(); ?>
           <?php if(osc_price_enabled_at_items()) { ?>
           price: {
             maxlength: 25
@@ -1470,7 +1482,6 @@ class ItemForm extends Form {
             required: true,
             email: true
           },
-          <?php } ?>
           regionId: {
             required: true,
             digits: true
@@ -1486,20 +1497,23 @@ class ItemForm extends Form {
           address: {
             minlength: 3,
             maxlength: 100
-          }
+          },
+          <?php } ?>
+
           <?php osc_run_hook('item_form_validation_rules'); ?>
         },
-        
+
         messages: {
           "title[<?php echo osc_current_user_locale(); ?>]": {
-              required: '<?php echo osc_esc_js(__('Title: this field is required')); ?>',
+              required: '<?php echo osc_esc_js(sprintf(__('%s is required'), __('Title'))); ?>',
               minlength: '<?php echo osc_esc_js(__('Title: enter at least 5 characters')); ?>'
           },
           "description[<?php echo osc_current_user_locale(); ?>]": {
-              required: '<?php echo osc_esc_js(__('Description: this field is required')); ?>',
+              required: '<?php echo osc_esc_js(sprintf(__('%s is required'), __('Description'))); ?>',
               minlength: '<?php echo osc_esc_js(__('Description: enter at least 10 characters')); ?>'
           },
           catId: "<?php echo osc_esc_js(__('Choose one category')); ?>.",
+          <?php self::category_cascade_jquery_validation_messages(); ?>
           <?php if(osc_price_enabled_at_items()) { ?>
           price: {
             maxlength: "<?php echo osc_esc_js(__('Price: no more than 25 characters')); ?>."
@@ -1517,10 +1531,9 @@ class ItemForm extends Form {
             maxlength: "<?php echo osc_esc_js(__('Name: no more than 35 characters')); ?>."
           },
           contactEmail: {
-            required: "<?php echo osc_esc_js(__('Email: this field is required')); ?>.",
-            email: "<?php echo osc_esc_js(__('Invalid email address')); ?>."
+            required: "<?php echo osc_esc_js(sprintf(__('%s is required'), __('Email'))); ?>.",
+            email: "<?php echo osc_esc_js(__('The email is not valid')); ?>."
           },
-          <?php } ?>
           regionId: "<?php echo osc_esc_js(__('Select a region')); ?>.",
           cityId: "<?php echo osc_esc_js(__('Select a city')); ?>.",
           cityArea: {
@@ -1530,10 +1543,12 @@ class ItemForm extends Form {
           address: {
             minlength: "<?php echo osc_esc_js(__('Address: enter at least 3 characters')); ?>.",
             maxlength: "<?php echo osc_esc_js(__('Address: no more than 100 characters')); ?>."
-          }
+          },
+          <?php } ?>
+
           <?php osc_run_hook('item_form_validation_messages'); ?>
         },
-        
+
         <?php osc_run_hook('item_form_validation_attributes'); ?>
         errorLabelContainer: "#error_list",
         ignore: ":disabled, :hidden, .ignore",
@@ -1542,7 +1557,7 @@ class ItemForm extends Form {
         invalidHandler: function(form, validator) {
           $('html,body').animate({ scrollTop: $('h1').offset().top }, { duration: 250, easing: 'swing'});
         },
-        
+
         submitHandler: function(form){
           $('button[type=submit], input[type=submit]').attr('disabled', 'disabled');
           setTimeout("$('button[type=submit], input[type=submit]').removeAttr('disabled')", 5000);
@@ -1553,12 +1568,12 @@ class ItemForm extends Form {
 
     // Strip HTML tags to count number of visible characters.
     function strip_tags(html) {
-      if (arguments.length < 3) {
+      if(arguments.length < 3) {
         html=html.replace(/<\/?(?!\!)[^>]*>/gi, '');
       } else {
         var allowed = arguments[1];
         var specified = eval("["+arguments[2]+"]");
-        if (allowed){
+        if(allowed){
           var regex='</?(?!(' + specified.join('|') + '))\b[^>]*>';
           html=html.replace(new RegExp(regex, 'gi'), '');
         } else{
@@ -1566,13 +1581,13 @@ class ItemForm extends Form {
           html=html.replace(new RegExp(regex, 'gi'), '');
         }
       }
-      
+
       return html;
     }
 
     function delete_image(id, item_id,name, secret) {
       //alert(id + " - "+ item_id + " - "+name+" - "+secret);
-      var result = confirm('<?php echo osc_esc_js(__("This action can't be undone. Are you sure you want to continue?")); ?>');
+      var result = confirm('<?php echo osc_esc_js(__("This action cannot be undone. Are you sure you want to continue?")); ?>');
       if(result) {
         $.ajax({
           type: "POST",
@@ -1609,25 +1624,25 @@ class ItemForm extends Form {
     if($variant_hook == '' && $variant_param == '') {
       $categories = Category::newInstance()->listAll(false);
     }
-    
+
     $hook = ($is_edit ? 'item_edit' : 'item_form');
     $item_param = ($is_edit ? '&itemId=' . $item_id : '');
 
     $variant_hook = trim((string)$variant_hook);
     $variant_param = trim((string)$variant_param);
-    
+
     $variant_hook_mod = ($variant_hook != '' ? '_' . $variant_hook : '');
     $variant_param_mod = ($variant_param != '' ? '&variant=' . $variant_param : '');
   ?>
   <script type="text/javascript">
-    <?php 
+    <?php
       $cat_data = array();
 
-      if(is_array($categories) && count($categories) > 0) { 
+      if(is_array($categories) && count($categories) > 0) {
         foreach($categories as $c) {
           $cat_data[$c['pk_i_id']] = ($c['b_price_enabled'] == 1 ? 1 : 0);
         }
-        
+
         echo 'var catPriceEnabled = ' . json_encode($cat_data) . ';' . PHP_EOL;
       }
     ?>
@@ -1646,7 +1661,7 @@ class ItemForm extends Form {
           $('#price').closest('div').show();
           $('.block-with-price').show();
           $('#price').trigger('show-price');
-          
+
         } else {
           $('#price').closest('div').hide();
           $('.block-with-price').hide();
@@ -1662,7 +1677,7 @@ class ItemForm extends Form {
           success: function(data){
             if(variantHook == '' && variantParam == '') {
               $('#plugin-hook, .plugin-hook-data:not([data-variant-hook]):not([data-variant-param])').html(data);
-              
+
             } else if(variantHook != '') {
               $('#plugin-hook-' + variantHook + ', .plugin-hook-data[data-variant-hook="' + variantHook + '"], .plugin-hook-data.variant-hook-' + variantHook).html(data);
 
@@ -1674,8 +1689,8 @@ class ItemForm extends Form {
         });
       }
     });
-    
-    
+
+
     // Get plugin data on page load
     $(document).ready(function(){
       var catId = $('#catId, [name="catId"], .cat-id-input').val();
@@ -1703,7 +1718,7 @@ class ItemForm extends Form {
           success: function(data){
             if(variantHook == '' && variantParam == '') {
               $('#plugin-hook, .plugin-hook-data:not([data-variant-hook]):not([data-variant-param])').html(data);
-              
+
             } else if(variantHook != '') {
               $('#plugin-hook-' + variantHook + ', .plugin-hook-data[data-variant-hook="' + variantHook + '"], .plugin-hook-data.variant-hook-' + variantHook).html(data);
 
@@ -1719,12 +1734,12 @@ class ItemForm extends Form {
 
   <?php if($variant_hook == '' && $variant_param == '') { ?>
     <div id="plugin-hook" class="plugin-hook-data"></div>
-  <?php } else if ($variant_hook != '') { ?>
+  <?php } elseif($variant_hook != '') { ?>
     <div id="plugin-hook-<?php echo osc_esc_html($variant_hook); ?>" class="plugin-hook-data" data-variant-hook="<?php echo osc_esc_html($variant_hook); ?>"></div>
-  <?php } else if ($variant_param != '') { ?>
+  <?php } elseif($variant_param != '') { ?>
     <div id="plugin-hook-<?php echo osc_esc_html($variant_param); ?>" class="plugin-hook-data" data-variant-param="<?php echo osc_esc_html($variant_param); ?>"></div>
   <?php } ?>
-  
+
   <?php
   }
 
@@ -1733,12 +1748,11 @@ class ItemForm extends Form {
   public static function plugin_post_item($variant_hook = '', $variant_param = '') {
     self::plugin_post_edit_item(false, null, $variant_hook, $variant_param);
   }
-  
+
   // EDIT PAGE
   public static function plugin_edit_item($variant_hook = '', $variant_param = '') {
     self::plugin_post_edit_item(true, osc_item_id(), $variant_hook, $variant_param);
   }
-
 
 
   /************************************************ IMAGE UPLOADER SECTION ************************************************/
@@ -1746,11 +1760,11 @@ class ItemForm extends Form {
   * @param array $resources
   */
   public static function photos($resources = null) {
-    if($resources==null) { 
-      $resources = osc_get_item_resources(); 
+    if($resources==null) {
+      $resources = osc_get_item_resources();
     }
 
-    if($resources!=null && is_array($resources) && count($resources)>0) { 
+    if($resources!=null && is_array($resources) && count($resources)>0) {
     ?>
       <div class="photos_div">
         <?php foreach($resources as $_r) { ?>
@@ -1760,44 +1774,44 @@ class ItemForm extends Form {
           </div>
         <?php } ?>
       </div>
-    <?php 
+    <?php
     }
   }
-  
-  
+
+
   /**
   * @param null $resources
   * @throws \Exception
   */
   public static function ajax_photos($resources = null) {
-    if (osc_image_upload_library() == 'UPPY') {
+    if(osc_image_upload_library() == 'UPPY') {
       $is_debug = false;
-      
+
       if(defined('OSC_DEBUG') && OSC_DEBUG === true) {
         $is_debug = true;
       }
-      
-      if($resources==null) { 
-        $resources = osc_get_item_resources(); 
+
+      if($resources==null) {
+        $resources = osc_get_item_resources();
       }
-      
+
       $aImages = array();
-      
+
       if(Session::newInstance()->_getForm('photos') != '') {
         $aImages = Session::newInstance()->_getForm('photos');
-        
-        if (isset($aImages['name'])) {
+
+        if(isset($aImages['name'])) {
           $aImages = $aImages['name'];
         } else {
           $aImages = array();
         }
-        
+
         Session::newInstance()->_drop('photos');
         Session::newInstance()->_dropKeepForm('photos');
       }
 
       $aExt = explode(',', osc_allowed_extension());
-      
+
       foreach($aExt as $key => $val) {
         $aExt[$key] = "'image/" . $val . "'";
       }
@@ -1805,12 +1819,12 @@ class ItemForm extends Form {
       $allowed_extensions = implode(',', $aExt);
       $images_size_limit = (int)(osc_max_size_kb() * 1024);
       $images_limit = (int)osc_max_images_per_item();
-      
+
       $note_extensions = '.' . implode(', .', explode(',', osc_allowed_extension()));
       $note_message = sprintf(__('Allowed image extensions: %s. Max. image size: %skb. Limit: %s image(s).'), $note_extensions, osc_max_size_kb(), osc_max_images_per_item());
     ?>
       <style>.qq-upload-list li.qq-placeholder:before {content:"<?php echo osc_esc_html(__('Image will be moved to this position')); ?>";}</style>
-      
+
       <div id="restricted-fine-uploader" class="uppy-uploader">
         <div class="qq-uploader">
           <div class="qq-upload-drop-area">
@@ -1834,12 +1848,12 @@ class ItemForm extends Form {
                   <?php if(osc_image_upload_reorder()) { ?>
                     <span class="qq-upload-move" title="<?php echo osc_esc_html(__('Reorder')); ?>"><i class="fa fa-arrows-alt"></i></span>
                   <?php } ?>
-                  
+
                   <img src="<?php echo osc_apply_filter('resource_thumbnail_url', osc_apply_filter('resource_path', osc_base_url().$_r['s_path']).$_r['pk_i_id'].'_thumbnail.'.$_r['s_extension']); ?>" alt="<?php echo osc_esc_html($img); ?>">
                 </div>
               </li>
             <?php } ?>
-            
+
             <?php foreach($aImages as $img){ ?>
               <?php $img = trim(osc_esc_html($img)); ?>
 
@@ -1851,7 +1865,7 @@ class ItemForm extends Form {
                     <?php if(osc_image_upload_reorder()) { ?>
                       <span class="qq-upload-move" title="<?php echo osc_esc_html(__('Reorder')); ?>"><i class="fa fa-arrows-alt"></i></span>
                     <?php } ?>
-                    
+
                     <img src="<?php echo osc_base_url() . OC_CONTENT_FOLDER; ?>/uploads/temp/<?php echo $img; ?>" alt="<?php echo $img; ?>">
                   </div>
                   <input type="hidden" name="ajax_photos[]" value="new-<?php echo $img; ?>">
@@ -1870,12 +1884,12 @@ class ItemForm extends Form {
         var maxItemsUppy = parseInt(<?php echo $images_limit; ?>) - parseInt($(".qq-upload-list input[name='ajax_photos[]']").length);
         var uppyDisabled = (maxItemsUppy <= 0 ? true : false);
         maxItemsUppy = Math.max(maxItemsUppy, 1);
-        
-        const uppy = new Uppy.Uppy({ 
+
+        const uppy = new Uppy.Uppy({
           locale: osLocale,
           autoProceed: false,
           restrictions: {
-            maxFileSize: <?php echo $images_size_limit; ?>,   
+            maxFileSize: <?php echo $images_size_limit; ?>,
             maxNumberOfFiles: maxItemsUppy,
             allowedFileTypes: [<?php echo $allowed_extensions; ?>]
           },
@@ -1884,29 +1898,29 @@ class ItemForm extends Form {
             // runs check each time before file is added to uploader (not uploaded!)
             var alreadyAdded = parseInt(Object.keys(files).length);
 
-            if(maxItemsUppy - alreadyAdded > 0) { 
+            if(maxItemsUppy - alreadyAdded > 0) {
               return true;
             } else {
               <?php if($is_debug) { ?>console.log('[onBeforeFileAdded] Image limit reached: ' + maxItems);<?php } ?>
-              uppy.info('<?php echo osc_esc_js(__('Some images were not added. Image limit reached:')); ?>' + ' ' + maxItems, 'error', 5000);
+              uppy.info('<?php echo osc_esc_js(__('You cannot upload more images. Image limit reached:')); ?>' + ' ' + maxItems, 'error', 5000);
               return false;
             }
           },
-          
+
           onBeforeUpload: (files) => {
             // runs check each time before file is uploaded to osclass temp folder
             var alreadyUploaded = parseInt(Object.keys(files).length);
 
-            if(maxItemsUppy - (alreadyUploaded-1) > 0) { 
+            if(maxItemsUppy - (alreadyUploaded-1) > 0) {
               return true;
             } else {
               <?php if($is_debug) { ?>console.log('[onBeforeUpload] Image limit reached: ' + maxItems);<?php } ?>
-              uppy.info('<?php echo osc_esc_js(__('Some images were not uploaded. Image limit reached:')); ?>' + ' ' + maxItems, 'error', 5000);
+              uppy.info('<?php echo osc_esc_js(__('You cannot upload more images. Image limit reached:')); ?>' + ' ' + maxItems, 'error', 5000);
               return false;
             }
           }
-          
-        }).use(Uppy.Dashboard, { 
+
+        }).use(Uppy.Dashboard, {
           inline: false,
           trigger: '#uppy-upload-button',
           showProgressDetails: true,
@@ -1915,10 +1929,10 @@ class ItemForm extends Form {
           singleFileFullScreen: false,
           closeAfterFinish: true,
           disabled: uppyDisabled
-          
-        }).use(Uppy.ImageEditor, { 
+
+        }).use(Uppy.ImageEditor, {
           target: Uppy.Dashboard
-          
+
         }).use(Uppy.XHRUpload, {
           endpoint: '<?php echo osc_base_url(true) . '?page=ajax&action=ajax_upload'; ?>',
           method: 'post',
@@ -1929,12 +1943,12 @@ class ItemForm extends Form {
             console.log('[getResponseError] ' + JSON.parse(responseText).error);
             return new Error(JSON.parse(responseText).error);
           }
-          
-        }).use(Uppy.Webcam, { 
+
+        }).use(Uppy.Webcam, {
           target: Uppy.Dashboard,
           modes: ['picture'],
           countdown: 3
-          
+
         <?php if(osc_optimize_uploaded_images() == 1) { ?>
         }).use(Uppy.Compressor, {
           <?php if(osc_uploader_max_image_size() !== false) { ?>
@@ -1943,7 +1957,7 @@ class ItemForm extends Form {
           <?php } ?>
           quality: <?php echo osc_apply_filter('image_uploader_compression', 0.85, 'uppy'); ?>
         <?php } ?>
-        
+
         }).on('upload-success', (file, response) => {
 
           // Create new image box
@@ -1951,7 +1965,7 @@ class ItemForm extends Form {
           elem += '<span class="qq-upload-file">' + file.name + '</span>';
           elem += '<a class="qq-upload-delete" href="#" ajaxfile="' + response.body.uploadName + '" style="display: inline; cursor:pointer;"><?php echo osc_esc_js(__('Delete')); ?></a>';
           elem += '<div class="ajax_preview_img">';
-          
+
           <?php if(osc_image_upload_reorder()) { ?>
           elem += '<span class="qq-upload-move" title="<?php echo osc_esc_js(__('Reorder')); ?>"><i class="fa fa-arrows-alt"></i></span>';
           <?php } ?>
@@ -1960,9 +1974,9 @@ class ItemForm extends Form {
           elem += '</div>';
           elem += '<input type="hidden" name="ajax_photos[]" value="' + response.body.uploadName + '"/>';
           elem += '</li>';
-          
+
           $('.qq-upload-list').append(elem);
-          
+
           <?php if(osc_image_upload_reorder()) { ?>
           // Trigger sort update, once element is added
           if(typeof $.fn.sortable !== 'undefined') {
@@ -1976,30 +1990,30 @@ class ItemForm extends Form {
           var itemsUploaded = setUppyLimit(uppy, 'MODALOPEN');
           maxItemsUppy = parseInt(itemsUploaded);  // - parseInt($(".qq-upload-list input[name='ajax_photos[]']").length);
           <?php if($is_debug) { ?>console.log('[dashboard:modal-open] Remaining images limit: ' + maxItemsUppy);<?php } ?>
-          
+
         }).on('complete', (result) => {
           uppy.cancelAll();
-          
+
           <?php if($is_debug) { ?>
           console.log('Successful files:', result.successful);
           console.log('Failed files:', result.failed);
           <?php } ?>
         });
-        
-      
+
+
         // Remove image
         $('body').on('click', '.qq-upload-delete', function(e) {
           e.preventDefault();
           var parent = $(this).parent()
-          var result = confirm('<?php echo osc_esc_js(__("This action can't be undone. Are you sure you want to continue?")); ?>');
+          var result = confirm('<?php echo osc_esc_js(__("This action cannot be undone. Are you sure you want to continue?")); ?>');
           var urlrequest = '';
-          
+
           if($(this).attr('ajaxfile') != undefined) {
             urlrequest = 'ajax_photo='+$(this).attr('ajaxfile');
           } else {
             urlrequest = 'id='+$(this).attr('photoid')+'&item='+$(this).attr('itemid')+'&code='+$(this).attr('photoname')+'&secret='+$(this).attr('photosecret');
           }
-        
+
           if(result) {
             $.ajax({
               type: "POST",
@@ -2007,11 +2021,11 @@ class ItemForm extends Form {
               dataType: 'json',
               success: function(data){
                 parent.remove();
-                
+
                 var itemsUploaded = setUppyLimit(uppy);
-                maxItemsUppy = parseInt(itemsUploaded); 
+                maxItemsUppy = parseInt(itemsUploaded);
                 <?php if($is_debug) { ?>console.log('[delete_image] Recalculate remaining images limit: ' + maxItemsUppy);<?php } ?>
-                
+
                 <?php if(osc_image_upload_reorder()) { ?>
                 // Trigger sort update, once element is completely removed
                 if(typeof $.fn.sortable !== 'undefined') {
@@ -2022,11 +2036,11 @@ class ItemForm extends Form {
             });
           }
         });
-        
+
         // Calculate remaining images to upload
         function caclRemainingImages() {
           var checkJson = uploadCanContinue(0);
-          
+
           if(checkJson.success) {
             var totalUploaded = parseInt(checkJson.count) + $(".qq-upload-list input[name='ajax_photos[]']").length;
             return Math.max(parseInt(maxItems - totalUploaded), 0);
@@ -2035,34 +2049,34 @@ class ItemForm extends Form {
             return Math.max(parseInt(maxItems - totalUploaded), 0);
           }
         }
-        
+
         // Set limit to uppy
         function setUppyLimit(uppy, type = '') {
           var limit = caclRemainingImages();
           var block = (limit <= 0 ? true : false);
-          
+
           uppy.setOptions({
             restrictions: {maxNumberOfFiles: Math.max(limit, 1)}
           });
-          
+
           if(block) {
             (uppy.getPlugin('Dashboard')).setOptions({disabled: true});
-            
+
             if(type == 'MODALOPEN') {
-              uppy.info('<?php echo osc_esc_js(__('You cannot upload more images. Image limit reached!')); ?>', 'warning', 5000);
+              uppy.info('<?php echo osc_esc_js(__('You cannot upload more images. Image limit reached.')); ?>', 'warning', 5000);
             }
           } else {
             (uppy.getPlugin('Dashboard')).setOptions({disabled: false});
           }
-          
+
           return limit;
         }
-        
+
         // Check if upload can continue
         function uploadCanContinue(numUpload) {
           var checkUrl = "<?php echo osc_base_url(true) . '?page=ajax&action=ajax_validate&id=' . osc_item_id() . '&secret=' . osc_item_secret(); ?>";
           var response = {};
-          
+
           jQuery.ajax({
             type: 'GET',
             cache: false,
@@ -2073,10 +2087,10 @@ class ItemForm extends Form {
             },
             async:false
           });
-          
+
           var json = JSON.parse(response);
           var total = parseInt(json.count) + $(".qq-upload-list input[name='ajax_photos[]']").length + (numUpload);
-          
+
           <?php if($images_limit>0) { ?>
             if(total<=<?php echo $images_limit;?>) {
               json.success = true;
@@ -2089,7 +2103,7 @@ class ItemForm extends Form {
           <?php } ?>
           return json;
         }
-        
+
         <?php if(osc_image_upload_reorder()) { ?>
         // Enable sorting of images
         $(document).ready(function() {
@@ -2098,7 +2112,7 @@ class ItemForm extends Form {
               placeholder: "qq-placeholder",
               handle: ".qq-upload-move",
               //containment: ".upload-photos",     // boundary element, ideal especially on mobiles to avoid oversizing page
-              
+
               create: function(event, ui) {
                 $('input[name="ajax_order_list"]').val($(this).sortable('toArray').toString());
                 <?php if($is_debug) { ?>console.log('Initial order of images: ' + $(this).sortable('toArray').toString());<?php } ?>
@@ -2108,12 +2122,12 @@ class ItemForm extends Form {
                 //console.log('New order of images: ' + $(this).sortable('toArray').toString());
               }
             });
-            
+
             $('ul.qq-upload-list').on('sortupdate',function() {
               $('input[name="ajax_order_list"]').val($(this).sortable('toArray').toString());
               <?php if($is_debug) { ?>console.log('New order of images: ' + $(this).sortable('toArray').toString());<?php } ?>
             });
-            
+
             $('ul.qq-upload-list').disableSelection();
           } else {
             <?php if($is_debug) { ?>console.log('Sortable function not available, jQuery UI is not embedded');<?php } ?>
@@ -2121,7 +2135,7 @@ class ItemForm extends Form {
         });
         <?php } ?>
       </script>
-      
+
     <?php
     } else if(osc_image_upload_library() == 'LEGACY') {
     ?>
@@ -2130,7 +2144,7 @@ class ItemForm extends Form {
           <?php self::photos(); ?>
         </div>
       <?php } ?>
-      
+
       <div id="photos" class="legacy upload-photo">
         <?php if(osc_is_publish_page() || (osc_is_edit_page() && (osc_max_images_per_item()==0 || (osc_max_images_per_item()!=0 && osc_count_item_resources()<  osc_max_images_per_item())))) { ?>
           <div class="row">
@@ -2138,37 +2152,37 @@ class ItemForm extends Form {
           </div>
         <?php } ?>
       </div>
-      
-      <a href="#" onclick="addNewPhoto(); if (typeof uniform_input_file == 'function') { uniform_input_file(); }; return false;"><?php _e('Add a new photo'); ?></a>
+
+      <a href="#" onclick="addNewPhoto(); if(typeof uniform_input_file == 'function') { uniform_input_file(); }; return false;"><?php _e('Add a new photo'); ?></a>
 
     <?php
-    } else {                    
-      if($resources==null) { 
-        $resources = osc_get_item_resources(); 
+    } else {
+      if($resources==null) {
+        $resources = osc_get_item_resources();
       }
-      
+
       $aImages = array();
-      
+
       if(Session::newInstance()->_getForm('photos') != '') {
         $aImages = Session::newInstance()->_getForm('photos');
-        
-        if (isset($aImages['name'])) {
+
+        if(isset($aImages['name'])) {
           $aImages = $aImages['name'];
         } else {
           $aImages = array();
         }
-        
+
         Session::newInstance()->_drop('photos');
         Session::newInstance()->_dropKeepForm('photos');
       }
       ?>
-      
+
       <div id="restricted-fine-uploader"></div>
       <div style="clear:both;"></div>
-      
+
       <?php if(count($aImages)>0 || ($resources!=null && is_array($resources) && count($resources)>0)) { ?>
         <h3><?php _e('Images already uploaded');?></h3>
-        
+
         <ul class="qq-upload-list">
           <?php foreach($resources as $_r) {
             $img = $_r['pk_i_id'].'.'.$_r['s_extension']; ?>
@@ -2194,7 +2208,7 @@ class ItemForm extends Form {
 
       <?php
       $aExt = explode(',', osc_allowed_extension());
-      
+
       foreach($aExt as $key => $value) {
         $aExt[$key] = "'".$value."'";
       }
@@ -2209,15 +2223,15 @@ class ItemForm extends Form {
           $('.qq-upload-delete').on('click', function(evt) {
             evt.preventDefault();
             var parent = $(this).parent()
-            var result = confirm('<?php echo osc_esc_js(__("This action can't be undone. Are you sure you want to continue?")); ?>');
+            var result = confirm('<?php echo osc_esc_js(__("This action cannot be undone. Are you sure you want to continue?")); ?>');
             var urlrequest = '';
-            
+
             if($(this).attr('ajaxfile')!=undefined) {
               urlrequest = 'ajax_photo='+$(this).attr('ajaxfile');
             } else {
               urlrequest = 'id='+$(this).attr('photoid')+'&item='+$(this).attr('itemid')+'&code='+$(this).attr('photoname')+'&secret='+$(this).attr('photosecret');
             }
-            
+
             if(result) {
               $.ajax({
                 type: "POST",
@@ -2248,7 +2262,7 @@ class ItemForm extends Form {
               angle += 90;
               img.addClass('disabled');
 
-              img.rotate({ 
+              img.rotate({
                 animateTo: angle,
                 duration: 300,
                 callback: function() {
@@ -2267,7 +2281,7 @@ class ItemForm extends Form {
                 }
               });
             }
-            
+
             img.attr('data-angle', angle);
           });
 
@@ -2381,7 +2395,7 @@ class ItemForm extends Form {
           }).on('statusChange', function(event, id, old_status, new_status) {
             $(".alert.alert-error").remove();
           }).on('complete', function(event, id, fileName, responseJSON) {
-            if (responseJSON.success) {
+            if(responseJSON.success) {
               var new_id = id - removed_images;
               var li = $('.qq-upload-list li')[new_id];
               <?php if(Params::getParam('action') === 'item_add') { ?>
@@ -2422,10 +2436,10 @@ class ItemForm extends Form {
               },
               async:false
             });
-            
+
             var json = JSON.parse(strReturn);
             var total = parseInt(json.count) + $("#restricted-fine-uploader input[name='ajax_photos[]']").length + (numUpload);
-            
+
             <?php if($maxImages>0) { ?>
               if(total<=<?php echo $maxImages;?>) {
                 json.success = true;
@@ -2457,19 +2471,19 @@ class ItemForm extends Form {
         var photoIndex = 0;
         function gebi(id) { return document.getElementById(id); }
         function ce(name) { return document.createElement(name); }
-        
+
         function re(id) {
           var e = gebi(id);
           e.parentNode.removeChild(e);
         }
-        
+
         function addNewPhoto() {
           var max = <?php echo osc_max_images_per_item(); ?>;
           var num_img = $('input[name="photos[]"]').length + $("a.delete").length;
           if((max!=0 && num_img<max) || max==0) {
             var id = 'p-' + photoIndex++;
             var i = ce('input');
-            
+
             i.setAttribute('type', 'file');
             i.setAttribute('name', 'photos[]');
 
@@ -2493,28 +2507,155 @@ class ItemForm extends Form {
             alert('<?php echo osc_esc_js(__('Sorry, you have reached the maximum number of images per listing')); ?>');
           }
         }
-        
+
         // Listener: automatically add new file field when the visible ones are full.
         setInterval("add_file_field()", 250);
-        
+
         // Timed: if there are no empty file fields, add new file field.
         function add_file_field() {
           var count = 0;
           $('input[name="photos[]"]').each(function(index) {
-            if ($(this).val() == '') {
+            if($(this).val() == '') {
               count++;
             }
           });
-          
+
           var max = <?php echo osc_max_images_per_item(); ?>;
           var num_img = $('input[name="photos[]"]').length + $("a.delete").length;
-          
-          if (count == 0 && (max==0 || (max!=0 && num_img<max))) {
+
+          if(count == 0 && (max==0 || (max!=0 && num_img<max))) {
             addNewPhoto();
           }
         }
       </script>
       <?php
+    }
+  }
+
+
+  // Cascade leaf validation when selectable_parent_categories is disabled (not enabled)
+  public static function category_cascade_validation_enabled($parent_selectable = false) {
+    if($parent_selectable) {
+      return false;
+    }
+    return ((int)osc_selectable_parent_categories() !== 1);
+  }
+
+
+  // Escaped message for cascade category jquery-validate
+  public static function category_cascade_validation_message() {
+    return osc_esc_js(__('Category: you must choose the most detailed category'));
+  }
+
+
+  // Register jquery-validate method for cascade category selects (select_1, select_2, ...)
+  public static function category_cascade_jquery_validation_method() {
+    if(!self::category_cascade_validation_enabled()) {
+      return;
+    }
+    ?>
+    if(typeof $.validator.methods.oscCategoryLeafSelect === 'undefined') {
+      $.validator.addMethod('oscCategoryLeafSelect', function(value, element) {
+        var $el = $(element);
+        var elName = $el.attr('name') || '';
+        if(!$el.is('select') || elName.indexOf('select_') !== 0) {
+          return true;
+        }
+        if(value === '' || value === null) {
+          return false;
+        }
+        var parentId = $el.attr('data-parent-id');
+        if(parentId === undefined || parentId === null) {
+          var depthOnly = parseInt($el.attr('depth'), 10);
+          if(!isNaN(depthOnly) && depthOnly === 1) {
+            return parseInt(value, 10) > 0;
+          }
+          return false;
+        }
+        if(String(parentId) === '0') {
+          if(parseInt(value, 10) <= 0) {
+            return false;
+          }
+        } else if(String(value) === String(parentId)) {
+          return false;
+        }
+        var depth = parseInt($el.attr('depth'), 10);
+        if(!isNaN(depth) && $('#select_' + (depth + 1)).length === 0) {
+          var children = window['categories_' + value];
+          if(children != null && $.isArray(children) && children.length > 0) {
+            return false;
+          }
+        }
+        return true;
+      }, '<?php echo self::category_cascade_validation_message(); ?>.');
+    }
+    <?php
+  }
+
+
+  // Attach cascade rules to form[name=item] when validator initializes after cascade markup
+  public static function category_cascade_jquery_validation_attach_script() {
+    if(!self::category_cascade_validation_enabled()) {
+      return;
+    }
+    $max = max(4, (int)osc_num_category_levels());
+    $msg = self::category_cascade_validation_message();
+    self::category_cascade_jquery_validation_method();
+    ?>
+    oscCategoryCascadeAttachFormValidation = function() {
+      var $form = $('form[name=item]');
+      if($form.length === 0 || typeof $.validator === 'undefined') {
+        return false;
+      }
+      var validator = $form.data('validator');
+      if(!validator) {
+        return false;
+      }
+      var cascadeMsg = '<?php echo $msg; ?>.';
+      var cascadeMax = <?php echo (int)$max; ?>;
+      var i;
+      for(i = 1; i <= cascadeMax; i++) {
+        validator.settings.rules['select_' + i] = { oscCategoryLeafSelect: true };
+        validator.settings.messages['select_' + i] = { oscCategoryLeafSelect: cascadeMsg };
+      }
+      return true;
+    };
+
+    oscCategoryCascadeStartAttach = function() {
+      var attachTicks = 0;
+      var attachTimer = window.setInterval(function() {
+        attachTicks++;
+        oscCategoryCascadeAttachFormValidation();
+        if(attachTicks >= 50) {
+          window.clearInterval(attachTimer);
+        }
+      }, 100);
+    };
+    <?php
+  }
+
+
+  // jquery-validate rules for all cascade category levels (only elements in the DOM are checked)
+  public static function category_cascade_jquery_validation_rules() {
+    if(!self::category_cascade_validation_enabled()) {
+      return;
+    }
+    $max = max(4, (int)osc_num_category_levels());
+    for($i = 1; $i <= $max; $i++) {
+      echo 'select_' . $i . ': { oscCategoryLeafSelect: true },' . PHP_EOL;
+    }
+  }
+
+
+  // jquery-validate messages for cascade category selects
+  public static function category_cascade_jquery_validation_messages() {
+    if(!self::category_cascade_validation_enabled()) {
+      return;
+    }
+    $msg = self::category_cascade_validation_message();
+    $max = max(4, (int)osc_num_category_levels());
+    for($i = 1; $i <= $max; $i++) {
+      echo 'select_' . $i . ': { oscCategoryLeafSelect: "' . $msg . '." },' . PHP_EOL;
     }
   }
 }

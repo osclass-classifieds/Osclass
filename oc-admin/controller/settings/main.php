@@ -33,7 +33,7 @@ class CAdminSettingsMain extends AdminSecBaseModel {
             osc_set_preference('update_core_json', '');
           }
         }
-        
+
         osc_admin_toolbar_update_core(true);
         osc_admin_toolbar_update_themes(true);
         osc_admin_toolbar_update_plugins(true);
@@ -43,27 +43,27 @@ class CAdminSettingsMain extends AdminSecBaseModel {
 
         $this->redirectTo(osc_admin_base_url(true) . '?page=settings');
         break;
-        
+
       case('validate_api_key'):
         $data = osc_file_get_contents_json(osc_market_url('validate_api_key'));
 
         if(isset($data['error']) && $data['error'] <> '') {
           osc_add_flash_error_message(_m(sprintf(_m('API key validation error: %s'), $data['error'])), 'admin');
-          
+
         } else if(isset($data['success']) && $data['success'] <> '') {
           osc_add_flash_ok_message($data['success'], 'admin');
-          
+
         } else {
           $msg = sprintf(_m('API key "%s" validation failed, invalid response from server'), osc_update_api_key());
           $msg .= ((isset($data['status']) && $data['status'] == 'ERR') ? ' (' . $data['message'] . ')' : '');
-          
+
           osc_add_flash_warning_message($msg, 'admin');
         }
-        
+
         $this->redirectTo(osc_admin_base_url(true) . '?page=settings');
         break;
-        
-        
+
+
       case('update'):
         // update index view
         osc_csrf_check();
@@ -88,8 +88,10 @@ class CAdminSettingsMain extends AdminSecBaseModel {
         $searchPatternMethod = Params::getParam('search_pattern_method');
         $numItemsSearch = Params::getParam('default_results_per_page');
         $webContactFormDisabled = Params::getParam('web_contact_form_disabled');
+        $webContactCreateReport = Params::getParam('web_contact_create_report');
         $contactAttachment = Params::getParam('enabled_attachment');
         $selectableParent = Params::getParam('selectable_parent_categories');
+        $aCategoryBulkExpiration = Params::getParam('category_bulk_expiration_options');
         $adminTheme = Params::getParam('admin_theme');
         $adminColorScheme = Params::getParam('admin_color_scheme');
         $jqueryVersion = Params::getParam('jquery_version');
@@ -106,6 +108,8 @@ class CAdminSettingsMain extends AdminSecBaseModel {
         $bLoggingEnabled = Params::getParam('logging_enabled');
         $bLoggingAutoCleanup = Params::getParam('logging_auto_cleanup');
         $iLoggingMonth = (int)Params::getParam('logging_months');
+        $iCleanupThresholdDays = (int)Params::getParam('cleanup_threshold_days');
+        $aCleanupAutoTypes = Params::getParam('cleanup_auto_types');
 
 
         // preparing parameters
@@ -114,12 +118,12 @@ class CAdminSettingsMain extends AdminSecBaseModel {
         $sContactEmail = trim(strip_tags($sContactEmail));
         $sLanguage = trim(strip_tags($sLanguage));
         $bLocaleToBaseUrl = ($bLocaleToBaseUrl != '' ? true : false);
-        
+
         if(osc_subdomain_type() == 'language' && $bLocaleToBaseUrl) {
           osc_add_flash_error_message(_m('Option "Add language code into base URL" is not supported when subdomain type "Language" is enabled!'), 'admin');
           $bLocaleToBaseUrl = false;
         }
-        
+
         $sLocaleToBaseUrlType = trim(strip_tags($sLocaleToBaseUrlType));
         $sDateFormat = trim(strip_tags($sDateFormat));
         $sCurrency = trim(strip_tags($sCurrency));
@@ -134,6 +138,7 @@ class CAdminSettingsMain extends AdminSecBaseModel {
         $bRssEnabled = ($bRssEnabled != '' ? true : false);
         $searchPatternLocale = ($searchPatternLocale != '' ? true : false);
         $webContactFormDisabled = ($webContactFormDisabled != '' ? true : false);
+        $webContactCreateReport = ($webContactCreateReport != '' ? true : false);
         $contactAttachment = ($contactAttachment != '' ? true : false);
         $updateIncludeOccontent = ($updateIncludeOccontent != '' ? true : false);
         $structuredData = ($structuredData != '' ? true : false);
@@ -145,16 +150,63 @@ class CAdminSettingsMain extends AdminSecBaseModel {
         $hideGenerator = ($hideGenerator != '' ? true : false);
         $bLoggingEnabled = ($bLoggingEnabled != '' ? true : false);
         $bLoggingAutoCleanup = ($bLoggingAutoCleanup != '' ? true : false);
-        
+        $iCleanupThresholdDays = max(0, $iCleanupThresholdDays);
+
+        if(!is_array($aCleanupAutoTypes)) {
+          $aCleanupAutoTypes = array();
+        }
+
+        $aAllowedCleanupTypes = osc_cleanup_available_types(false);
+        $aCleanupTypes = array();
+
+        foreach($aCleanupAutoTypes as $cleanupType) {
+          $cleanupType = trim((string)$cleanupType);
+
+          if($cleanupType != '' && in_array($cleanupType, $aAllowedCleanupTypes, true) && !in_array($cleanupType, $aCleanupTypes, true)) {
+            $aCleanupTypes[] = $cleanupType;
+          }
+        }
+
+        $sCleanupAutoTypes = implode(',', $aCleanupTypes);
+
+        if(!is_array($aCategoryBulkExpiration)) {
+          $aCategoryBulkExpiration = array();
+        }
+        $aCategoryBulkExpirationDefs = osc_category_bulk_expiration_option_defs();
+        $aCategoryBulkExpirationKeys = array();
+        foreach($aCategoryBulkExpiration as $expKey) {
+          $expKey = trim((string)$expKey);
+          if($expKey !== '' && isset($aCategoryBulkExpirationDefs[$expKey]) && !in_array($expKey, $aCategoryBulkExpirationKeys, true)) {
+            $aCategoryBulkExpirationKeys[] = $expKey;
+          }
+        }
+        if(count($aCategoryBulkExpirationKeys) === 0) {
+          $aCategoryBulkExpirationKeys = osc_category_bulk_expiration_options_default();
+        }
+        $aCategoryBulkExpirationKeys = osc_apply_filter('osc_category_bulk_expiration_options_save', $aCategoryBulkExpirationKeys);
+        if(!is_array($aCategoryBulkExpirationKeys)) {
+          $aCategoryBulkExpirationKeys = osc_category_bulk_expiration_options_default();
+        }
+        $aCategoryBulkExpirationKeysValid = array();
+        foreach($aCategoryBulkExpirationKeys as $expKey) {
+          $expKey = trim((string)$expKey);
+          if($expKey !== '' && isset($aCategoryBulkExpirationDefs[$expKey]) && !in_array($expKey, $aCategoryBulkExpirationKeysValid, true)) {
+            $aCategoryBulkExpirationKeysValid[] = $expKey;
+          }
+        }
+        if(count($aCategoryBulkExpirationKeysValid) === 0) {
+          $aCategoryBulkExpirationKeysValid = osc_category_bulk_expiration_options_default();
+        }
+        $sCategoryBulkExpiration = implode(',', $aCategoryBulkExpirationKeysValid);
 
         $error = "";
 
         $msg = '';
         if(!osc_validate_text($sPageTitle)) {
-          $msg .= _m("Page title field is required")."<br/>";
+          $msg .= sprintf(_m('%s is required'), __('Page title'))."<br/>";
         }
         if(!osc_validate_text($sContactEmail)) {
-          $msg .= _m("Contact email field is required")."<br/>";
+          $msg .= sprintf(_m('%s is required'), __('Contact email'))."<br/>";
         }
         if(!osc_validate_int($sNumRssItems)) {
           $msg .= _m("Number of listings in the RSS has to be a numeric value")."<br/>";
@@ -179,7 +231,7 @@ class CAdminSettingsMain extends AdminSecBaseModel {
         if(!defined('DEMO')) {
           $iUpdated += osc_set_preference('contactEmail', $sContactEmail);
         }
-        
+
         $iUpdated += osc_set_preference('language', $sLanguage);
         $iUpdated += osc_set_preference('locale_to_base_url_enabled', $bLocaleToBaseUrl);
         $iUpdated += osc_set_preference('locale_to_base_url_type', $sLocaleToBaseUrlType);
@@ -199,7 +251,7 @@ class CAdminSettingsMain extends AdminSecBaseModel {
           if($error != '') $error .= "</p><p>";
           $error .= _m('Number of listings in the RSS must be an integer');
         }
-        
+
         if(is_int($maxLatestItems)) {
           $iUpdated += osc_set_preference('maxLatestItems@home', $maxLatestItems);
         } else {
@@ -212,6 +264,7 @@ class CAdminSettingsMain extends AdminSecBaseModel {
         $iUpdated += osc_set_preference('defaultResultsPerPage@search', $numItemsSearch);
         $iUpdated += osc_set_preference('enable_rss', $bRssEnabled);
         $iUpdated += osc_set_preference('web_contact_form_disabled', $webContactFormDisabled);
+        $iUpdated += osc_set_preference('web_contact_create_report', $webContactCreateReport);
         $iUpdated += osc_set_preference('search_pattern_locale', $searchPatternLocale);
         $iUpdated += osc_set_preference('contact_attachment', $contactAttachment);
         $iUpdated += osc_set_preference('search_pattern_method', $searchPatternMethod);
@@ -222,21 +275,24 @@ class CAdminSettingsMain extends AdminSecBaseModel {
         $iUpdated += osc_set_preference('gen_hreflang_tags', $bGenerateHreflangTags);
         $iUpdated += osc_set_preference('hide_generator', $hideGenerator);
         $iUpdated += osc_set_preference('selectable_parent_categories', $selectableParent);
+        $iUpdated += osc_set_preference('category_bulk_expiration_options', $sCategoryBulkExpiration);
         $iUpdated += osc_set_preference('admin_theme', $adminTheme);
         $iUpdated += osc_set_preference('admin_color_scheme', $adminColorScheme);
         $iUpdated += osc_set_preference('jquery_version', $jqueryVersion);
         $iUpdated += osc_set_preference('logging_enabled', $bLoggingEnabled);
         $iUpdated += osc_set_preference('logging_auto_cleanup', $bLoggingAutoCleanup);
-        
+
         $iLoggingMonth = max(1, min(120, $iLoggingMonth));  // retention monthsbetween 1 and 120
         $iUpdated += osc_set_preference('logging_months', $iLoggingMonth);
-       
+        $iUpdated += osc_set_preference('cleanup_threshold_days', $iCleanupThresholdDays, 'osclass', 'INTEGER');
+        $iUpdated += osc_set_preference('cleanup_auto_types', $sCleanupAutoTypes);
+
 
         if($iUpdated > 0) {
           if($error != '') {
-          osc_add_flash_error_message($error . "</p><p>" . _m('General settings have been updated'), 'admin');
+          osc_add_flash_error_message($error . "</p><p>" . _m('Settings have been updated'), 'admin');
           } else {
-          osc_add_flash_ok_message(_m('General settings have been updated'), 'admin');
+          osc_add_flash_ok_message(_m('Settings have been updated'), 'admin');
           }
         } else if($error != '') {
           osc_add_flash_error_message($error, 'admin');
@@ -244,8 +300,8 @@ class CAdminSettingsMain extends AdminSecBaseModel {
 
         $this->redirectTo(osc_admin_base_url(true) . '?page=settings');
         break;
-        
-        
+
+
       default:
         // calling the view
         $aLanguages = OSCLocale::newInstance()->listAllEnabled();

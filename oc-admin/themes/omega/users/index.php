@@ -18,18 +18,18 @@ if(!defined('ABS_PATH')) exit('ABS_PATH is not loaded. Direct access is not allo
 
 
 function addHelp() {
-  echo '<p>' . __('Add, edit or delete information associated to registered users. Keep in mind that deleting a user also deletes all the listings the user published.') . '</p>';
+  echo '<p>' . __('Add, edit, or delete registered users. Deleting a user also deletes all listings they published. Manage ban rules and alerts from the Users menu.') . '</p>';
 }
 
 osc_add_hook('help_box','addHelp');
 
 
-function customPageHeader(){ 
+function customPageHeader(){
   ?>
   <h1><?php _e('Users'); ?>
     <a href="<?php echo osc_admin_base_url(true) . '?page=users&action=settings'; ?>" class="btn ico ico-32 ico-engine float-right"></a>
     <a href="#" class="btn ico ico-32 ico-help float-right"></a>
-    <a href="<?php echo osc_admin_base_url(true) . '?page=users&action=create'; ?>" class="btn btn-green ico ico-add-white float-right"><?php _e('Add'); ?></a>
+    <a href="<?php echo osc_admin_base_url(true) . '?page=users&action=create'; ?>" class="btn btn-green ico ico-add-white float-right"><?php _e('Add user'); ?></a>
   </h1>
   <?php
 }
@@ -44,7 +44,7 @@ function customPageTitle($string) {
 osc_add_filter('admin_title', 'customPageTitle');
 
 //customize Head
-function customHead() { 
+function customHead() {
   ?>
   <script type="text/javascript">
   $(document).ready(function(){
@@ -71,7 +71,7 @@ function customHead() {
     $("#check_all").change(function(){
       var isChecked = $(this).prop("checked");
       $('.col-bulkactions input').each( function() {
-        if( isChecked == 1 ) {
+        if(isChecked == 1 ) {
           this.checked = true;
         } else {
           this.checked = false;
@@ -86,11 +86,11 @@ function customHead() {
     });
 
     var dialogWidth = 680;
-    
+
     if($(window).width() < 720) {
       dialogWidth = $(window).width() - 40;
     }
-  
+
     // dialog filters
     $('#display-filters').dialog({
       autoOpen: false,
@@ -98,7 +98,7 @@ function customHead() {
       width: dialogWidth,
       title: '<?php echo osc_esc_js( __('Filters') ); ?>'
     });
-    
+
     $('#btn-display-filters').click(function(){
       $('#display-filters').dialog('open');
       return false;
@@ -109,23 +109,23 @@ function customHead() {
       autoOpen: false,
       modal: true
     });
-    
+
     $("#bulk-actions-submit").click(function() {
       $("#datatablesForm").submit();
     });
-    
+
     $("#bulk-actions-cancel").click(function() {
       $("#datatablesForm").attr('data-dialog-open', 'false');
       $('#dialog-bulk-actions').dialog('close');
     });
-    
+
     // dialog bulk actions function
     $("#datatablesForm").submit(function() {
-      if( $("#bulk_actions option:selected").val() == "" ) {
+      if($("#bulk_actions option:selected").val() == "" ) {
         return false;
       }
 
-      if( $("#datatablesForm").attr('data-dialog-open') == "true" ) {
+      if($("#datatablesForm").attr('data-dialog-open') == "true" ) {
         return true;
       }
 
@@ -158,6 +158,8 @@ $sort = Params::getParam('sort');
 $direction = Params::getParam('direction');
 
 $columns = $aData['aColumns'];
+$columnSources = (isset($aData['aColumnSources']) ? $aData['aColumnSources'] : array());
+$sortableColumns = (isset($aData['aSortableColumns']) ? $aData['aSortableColumns'] : array());
 $rows = $aData['aRows'];
 $withFilters = __get('withFilters');
 ?>
@@ -180,7 +182,7 @@ $withFilters = __get('withFilters');
               <input id="s_email" name="s_email" type="text" value="<?php echo osc_esc_html(Params::getParam('s_email')); ?>" />
             </div>
           </div>
-          
+
           <div class="form-row">
             <div class="form-label">
               <?php _e('Name'); ?>
@@ -189,7 +191,7 @@ $withFilters = __get('withFilters');
               <input id="s_name" name="s_name" type="text" value="<?php echo osc_esc_html(Params::getParam('s_name')); ?>" />
             </div>
           </div>
-          
+
           <div class="form-row">
             <div class="form-label">
               <?php _e('Username'); ?>
@@ -198,7 +200,7 @@ $withFilters = __get('withFilters');
               <input id="s_username" name="s_username" type="text" value="<?php echo osc_esc_html(Params::getParam('s_username')); ?>" />
             </div>
           </div>
-          
+
           <div class="form-row">
             <div class="form-label">
               <?php _e('Phone'); ?>
@@ -207,7 +209,7 @@ $withFilters = __get('withFilters');
               <input id="s_phone" name="s_phone" type="text" value="<?php echo osc_esc_html(Params::getParam('s_phone')); ?>" />
             </div>
           </div>
-          
+
           <div class="form-row">
             <div class="form-label">
               <?php _e('Active'); ?>
@@ -222,7 +224,7 @@ $withFilters = __get('withFilters');
           </div>
         </div>
       </div>
-      
+
       <div class="grid-row grid-50">
         <div class="row-wrapper">
           <div class="form-row">
@@ -234,7 +236,7 @@ $withFilters = __get('withFilters');
               <input id="countryId" name="countryId" type="hidden" value="<?php echo osc_esc_html(Params::getParam('countryId')); ?>" />
             </div>
           </div>
-          
+
           <div class="form-row">
             <div class="form-label">
               <?php _e('Region'); ?>
@@ -244,7 +246,7 @@ $withFilters = __get('withFilters');
               <input id="regionId" name="regionId" type="hidden" value="<?php echo osc_esc_html(Params::getParam('regionId')); ?>" />
             </div>
           </div>
-          
+
           <div class="form-row">
             <div class="form-label">
               <?php _e('City'); ?>
@@ -254,7 +256,7 @@ $withFilters = __get('withFilters');
               <input id="cityId" name="cityId" type="hidden" value="<?php echo osc_esc_html(Params::getParam('cityId')); ?>" />
             </div>
           </div>
-          
+
           <div class="form-row">
             <div class="form-label">
               <?php _e('ZIP'); ?>
@@ -263,7 +265,7 @@ $withFilters = __get('withFilters');
               <input id="s_zip" name="s_zip" type="text" value="<?php echo osc_esc_html(Params::getParam('s_zip')); ?>" />
             </div>
           </div>
-          
+
           <div class="form-row">
             <div class="form-label">
               <?php _e('Block'); ?>
@@ -278,18 +280,18 @@ $withFilters = __get('withFilters');
           </div>
         </div>
       </div>
-      
+
       <div class="clear"></div>
       <?php osc_run_hook('filters_manage_user_search'); ?>
 
       <div class="clear"></div>
 
       <div class="form-row form-search-help"><?php _e('Use double quotes for exact match (ie "John"). By default search is wildcard'); ?></div>
-      
+
       <div class="clear"></div>
     </div>
   </div>
-  
+
   <div class="form-actions">
     <div class="wrapper">
       <input id="show-filters" type="submit" value="<?php echo osc_esc_html( __('Apply filters') ); ?>" class="btn btn-submit" />
@@ -303,34 +305,34 @@ $withFilters = __get('withFilters');
   <div id="users-toolbar" class="table-toolbar">
     <div class="float-right">
       <form method="get" action="<?php echo osc_admin_base_url(true); ?>"  class="inline nocsrf">
-        <?php foreach( Params::getParamsAsArray('get') as $key => $value ) { ?>
+        <?php foreach(Params::getParamsAsArray('get') as $key => $value ) { ?>
         <?php if($key != 'iDisplayLength') { ?>
         <input type="hidden" name="<?php echo osc_esc_html(strip_tags($key)); ?>" value="<?php echo osc_esc_html(strip_tags($value)); ?>" />
         <?php } } ?>
-        
+
         <select name="iDisplayLength" class="select-box-extra select-box-medium float-left" onchange="this.form.submit();" >
-          <option value="10" <?php if( Params::getParam('iDisplayLength') == 10 ) echo 'selected'; ?> ><?php printf(__('%d Users'), 10); ?></option>
-          <option value="25" <?php if( Params::getParam('iDisplayLength') == 25 ) echo 'selected'; ?> ><?php printf(__('%d Users'), 25); ?></option>
-          <option value="50" <?php if( Params::getParam('iDisplayLength') == 50 ) echo 'selected'; ?> ><?php printf(__('%d Users'), 50); ?></option>
-          <option value="100" <?php if( Params::getParam('iDisplayLength') == 100 ) echo 'selected'; ?> ><?php printf(__('%d Users'), 100); ?></option>
-          <option value="500" <?php if( Params::getParam('iDisplayLength') == 500 ) echo 'selected'; ?> ><?php printf(__('%d Users'), 500); ?></option>
+          <option value="10" <?php if(Params::getParam('iDisplayLength') == 10 ) echo 'selected'; ?> ><?php printf(__('%d Users'), 10); ?></option>
+          <option value="25" <?php if(Params::getParam('iDisplayLength') == 25 ) echo 'selected'; ?> ><?php printf(__('%d Users'), 25); ?></option>
+          <option value="50" <?php if(Params::getParam('iDisplayLength') == 50 ) echo 'selected'; ?> ><?php printf(__('%d Users'), 50); ?></option>
+          <option value="100" <?php if(Params::getParam('iDisplayLength') == 100 ) echo 'selected'; ?> ><?php printf(__('%d Users'), 100); ?></option>
+          <option value="500" <?php if(Params::getParam('iDisplayLength') == 500 ) echo 'selected'; ?> ><?php printf(__('%d Users'), 500); ?></option>
         </select>
       </form>
       <form method="get" action="<?php echo osc_admin_base_url(true); ?>" id="shortcut-filters" class="inline nocsrf">
         <input type="hidden" name="page" value="users" />
-        
+
         <?php if($withFilters) { ?>
           <a id="btn-hide-filters" href="<?php echo osc_admin_base_url(true).'?page=users'; ?>" class="btn"><?php _e('Reset filters'); ?></a>
         <?php } ?>
-        
+
         <a id="btn-display-filters" href="#" class="btn <?php if($withFilters) { echo 'btn-red'; } ?>"><?php _e('Show filters'); ?></a>
-        <input id="fUser" name="user" type="text" class="fUser input-text input-actions" value="<?php echo osc_esc_html(Params::getParam('user')); ?>" />
+        <input id="fUser" name="user" type="text" class="fUser input-text input-actions" value="<?php echo osc_esc_html(Params::getParam('user')); ?>" placeholder="<?php echo osc_esc_html(__('Search user')); ?>" />
         <input id="fUserId" name="userId" type="hidden" value="<?php echo osc_esc_html(Params::getParam('userId')); ?>" />
         <input type="submit" class="btn submit-right" value="<?php echo osc_esc_html( __('Find') ); ?>">
       </form>
     </div>
   </div>
-  
+
   <form class="" id="datatablesForm" action="<?php echo osc_admin_base_url(true); ?>" method="post">
     <input type="hidden" name="page" value="users" />
 
@@ -340,36 +342,38 @@ $withFilters = __get('withFilters');
         <input type="submit" id="bulk_apply" class="btn" value="<?php echo osc_esc_html( __('Apply') ); ?>" />
       </label>
     </div>
-    
+
     <div class="table-contains-actions">
       <table class="table" cellpadding="0" cellspacing="0">
         <thead>
           <tr>
             <?php foreach($columns as $k => $v) {
-              echo '<th class="col-'.$k.' '.($sort==$k?($direction=='desc'?'sorting_desc':'sorting_asc'):'').'">'.$v.'</th>';
-            }; ?>
+              $sourceCol = (isset($columnSources[$k]) ? $columnSources[$k] : '');
+              $isSortable = ((in_array($k, $sortableColumns, true) || strpos((string)$v, 'sort=') !== false) ? 'is-sortable' : '');
+              echo '<th class="col-'.$k.' '.$isSortable.' '.($sort==$k?($direction=='desc'?'sort-desc':'sort-asc'):'').'" data-source-col="' . osc_esc_html($sourceCol) . '">' . $v . '</th>';
+            } ?>
           </tr>
         </thead>
-        
+
         <tbody>
-        <?php if( count($rows) > 0 ) { ?>
+        <?php if(count($rows) > 0 ) { ?>
           <?php foreach($rows as $key => $row) { ?>
             <tr class="<?php echo implode(' ', osc_apply_filter('datatable_user_class', array(), $aRawRows[$key], $row)); ?>">
               <?php foreach($row as $k => $v) { ?>
                 <td class="col-<?php echo $k; ?>"><?php echo $v; ?></td>
-              <?php }; ?>
+              <?php } ?>
             </tr>
-          <?php }; ?>
+          <?php } ?>
         <?php } else { ?>
           <tr>
-            <td colspan="9" class="text-center">
+            <td colspan="<?php echo max(1, count($columns)); ?>" class="text-center">
             <p><?php _e('No data available in table'); ?></p>
             </td>
           </tr>
         <?php } ?>
         </tbody>
       </table>
-      
+
       <div id="table-row-actions"></div> <!-- used for table actions -->
     </div>
   </form>
@@ -383,6 +387,22 @@ $withFilters = __get('withFilters');
   osc_add_hook('before_show_pagination_admin','showingResults');
   osc_show_pagination_admin($aData);
 ?>
+<div class="display-select-bottom">
+  <form method="get" action="<?php echo osc_admin_base_url(true); ?>" class="inline nocsrf">
+    <?php foreach(Params::getParamsAsArray('get') as $key => $value) { ?>
+      <?php if($key != 'iDisplayLength') { ?>
+        <input type="hidden" name="<?php echo osc_esc_html(strip_tags($key)); ?>" value="<?php echo osc_esc_html(strip_tags($value)); ?>" />
+      <?php } ?>
+    <?php } ?>
+    <select name="iDisplayLength" class="select-box-extra select-box-medium float-left" onchange="this.form.submit();" >
+      <option value="10" <?php if(Params::getParam('iDisplayLength') == 10) echo 'selected'; ?> ><?php printf(__('%d Users'), 10); ?></option>
+      <option value="25" <?php if(Params::getParam('iDisplayLength') == 25) echo 'selected'; ?> ><?php printf(__('%d Users'), 25); ?></option>
+      <option value="50" <?php if(Params::getParam('iDisplayLength') == 50) echo 'selected'; ?> ><?php printf(__('%d Users'), 50); ?></option>
+      <option value="100" <?php if(Params::getParam('iDisplayLength') == 100) echo 'selected'; ?> ><?php printf(__('%d Users'), 100); ?></option>
+      <option value="500" <?php if(Params::getParam('iDisplayLength') == 500) echo 'selected'; ?> ><?php printf(__('%d Users'), 500); ?></option>
+    </select>
+  </form>
+</div>
 <form id="dialog-user-delete" method="get" action="<?php echo osc_admin_base_url(true); ?>" class="has-form-actions hide" title="<?php echo osc_esc_html(__('Delete user')); ?>">
   <input type="hidden" name="page" value="users" />
   <input type="hidden" name="action" value="delete" />
@@ -477,4 +497,4 @@ $(document).ready(function(){
 });
 </script>
 
-<?php osc_current_admin_theme_path( 'parts/footer.php' ); ?>
+<?php osc_current_admin_theme_path( 'parts/footer.php' );

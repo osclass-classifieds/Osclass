@@ -149,7 +149,7 @@ class Item extends DAO {
       $item_extend = $this->extendDataSingle($item);
       return $item_extend;
     }
-    
+
     return array();
   }
 
@@ -182,7 +182,7 @@ class Item extends DAO {
   public function listWhere() {
     $argv = func_get_args();
     $sql = null;
-    switch (func_num_args ()) {
+    switch(func_num_args ()) {
       case 0: return array();
         break;
       case 1: $sql = $argv[0];
@@ -200,22 +200,22 @@ class Item extends DAO {
     $key = md5(osc_base_url().'Item::listWhere'.(string)$sql.(string)osc_current_user_locale());
     $found = null;
     $cache = osc_cache_get($key, $found);
-    
+
     if($cache===false) {
       $this->dao->select('l.*, i.*');
       $this->dao->from($this->getTableName().' i, '.DB_TABLE_PREFIX.'t_item_location l');
       $this->dao->where('l.fk_i_item_id = i.pk_i_id');
       $this->dao->where($sql);
       $result = $this->dao->get();
-      
+
       if($result == false) {
         return array();
       }
-      
+
       $items = $result->result();
       $items_extend = $this->extendData($items);
       osc_cache_set($key, $items_extend, OSC_CACHE_TTL);
-      
+
       return $items_extend;
     } else {
       return $cache;
@@ -302,7 +302,7 @@ class Item extends DAO {
       $options = explode('|' , $options);
     }
     foreach($options as $option) {
-      switch ($option) {
+      switch($option) {
         case 'ACTIVE':
           $this->dao->where('i.b_active', 1);
           break;
@@ -457,6 +457,29 @@ class Item extends DAO {
   }
 
   /**
+   * Legacy Mark as counter. Stats columns were removed with Reports; always returns 0.
+   * Kept so old plugins/themes calling Item::countByMarkas() do not fatal.
+   *
+   * @param string $type spam, repeated, bad_classified, offensive, expired
+   * @return int
+   */
+  public function countByMarkas($type) {
+    return 0;
+  }
+
+  /**
+   * Legacy clear of Mark as stats. Columns were removed with Reports.
+   * Kept so old plugins/admin code calling clearStat() do not fatal.
+   *
+   * @param int $id
+   * @param string $stat spam, duplicated, bad, offensive, expired, all
+   * @return bool
+   */
+  public function clearStat($id, $stat) {
+    return true;
+  }
+
+  /**
    * Find enabled items belong to an user given its id
    *
    * @access public
@@ -470,15 +493,15 @@ class Item extends DAO {
     $this->dao->select('l.*, i.*');
     $this->dao->from($this->getTableName().' i, '.DB_TABLE_PREFIX.'t_item_location l');
     $this->dao->where('l.fk_i_item_id = i.pk_i_id');
-    
+
     $array_where = array(
       'i.b_enabled'     => 1,
       'i.fk_i_user_id' => $userId
     );
-    
+
     $this->dao->where($array_where);
     $this->dao->orderBy('i.pk_i_id', 'DESC');
-    
+
     if($end!=null) {
       $this->dao->limit($start, $end);
     } else if($start > 0) {
@@ -489,12 +512,11 @@ class Item extends DAO {
     if($result == false) {
       return array();
     }
-    
+
     $items  = $result->result();
     return $this->extendData($items);
   }
-  
-  
+
 
   /**
    * Find blocked items belong to an user given its id
@@ -510,15 +532,15 @@ class Item extends DAO {
     $this->dao->select('l.*, i.*');
     $this->dao->from($this->getTableName().' i, '.DB_TABLE_PREFIX.'t_item_location l');
     $this->dao->where('l.fk_i_item_id = i.pk_i_id');
-    
+
     $array_where = array(
       'i.b_enabled'     => 0,
       'i.fk_i_user_id' => $userId
     );
-    
+
     $this->dao->where($array_where);
     $this->dao->orderBy('i.pk_i_id', 'DESC');
-    
+
     if($end!=null) {
       $this->dao->limit($start, $end);
     } else if($start > 0) {
@@ -529,11 +551,11 @@ class Item extends DAO {
     if($result == false) {
       return array();
     }
-    
+
     $items  = $result->result();
     return $this->extendData($items);
   }
-  
+
 
   /**
    * Find enabled items which are going to expire in XY hours from now
@@ -548,10 +570,10 @@ class Item extends DAO {
   public function findItemsWarnExpiration($type = 'HOURLY', $in_days = 1, $range_hours = 1) {
     $range_hours = ($range_hours >= 1 ? $range_hours : 1);
     $range_hours = $range_hours - 1;      // as $to is calculated at H:59:59 of hour
-    
+
     $from = date('Y-m-d H:00:00', strtotime('+' . $in_days . ' days'));
     $to = date('Y-m-d H:59:59', strtotime('+' . $range_hours . ' hours', strtotime($from)));
-    
+
     $this->dao->select('l.*, i.*');
     $this->dao->from($this->getTableName() . ' as i, ' . DB_TABLE_PREFIX . 't_item_location as l');
     $this->dao->where('i.b_enabled = 1');
@@ -559,17 +581,17 @@ class Item extends DAO {
     $this->dao->where('i.b_spam = 0');
     $this->dao->where('l.fk_i_item_id = i.pk_i_id');
     // $this->dao->where('TIMESTAMPDIFF(HOUR, NOW(), i.dt_expiration) = ' . $hours);
-    
+
     $this->dao->where(sprintf('i.dt_expiration BETWEEN "%s" and "%s"', $from, $to));
 
     $result = $this->dao->get();
-    
+
     if($result == false) {
       return array();
     }
-    
+
     $items = $result->result();
-    
+
     return $this->extendData($items);
   }
 
@@ -585,7 +607,7 @@ class Item extends DAO {
   public function countByUserIDEnabled($userId) {
     return $this->countItemTypesByUserID($userId, 'enabled');
   }
-  
+
   /**
    * Count enabled items belong to an user given its id
    *
@@ -603,37 +625,37 @@ class Item extends DAO {
   public function findUserItems($user_id, $email = '', $options = array()) {
     $count = (isset($options['count']) ? (bool)$options['count'] : false);
     $item_type = (isset($options['item_type']) ? $options['item_type'] : false);
-    
+
     if($user_id <= 0 && $email == '') {
       return ($count ? 0 : array());
     }
 
     $options = osc_apply_filter('find_item_types_by_user_id_options', $options, $user_id, $email);
-    
+
     if($count === true) {
       $this->dao->select('COUNT(DISTINCT i.pk_i_id) as i_count');
     } else {
       $this->dao->select('i.*');
     }
-    
+
     $this->dao->from($this->getTableName() . ' as i');
     $this->dao->join(sprintf('%st_item_location as l', DB_TABLE_PREFIX), 'l.fk_i_item_id = i.pk_i_id', 'LEFT OUTER');
 
     if($user_id > 0) {
       $this->dao->where('i.fk_i_user_id', (int)$user_id);
-      
+
     } else if($email != '') {
       $this->dao->where('i.s_contact_email', $email);
-      
+
     } else {
       $this->dao->where('1=2');  // invalid user
     }
-    
+
     // Filter by type of item
     if($item_type !== false && $item_type !== '') {
       if($item_type === 'blocked') {
         $this->dao->where('i.b_enabled', 0);
-        
+
       } elseif($item_type !== 'all') {
         $this->dao->where('i.b_enabled', 1);
       }
@@ -662,12 +684,12 @@ class Item extends DAO {
 
     // Pattern filter
     if(isset($options['pattern']) && trim((string)$options['pattern']) != '') {
-      $pattern = trim((string)$options['pattern']);
- 
+      $pattern = $this->dao->escapeStr(trim((string)$options['pattern']));
+
       $this->dao->join(sprintf('%st_item_description as d', DB_TABLE_PREFIX), 'd.fk_i_item_id = i.pk_i_id', 'LEFT OUTER');
 
       $locale_code = '';
-      
+
       if(osc_search_pattern_current_locale_only()) {
         if(OC_ADMIN) {
           $locale_code = osc_current_admin_locale();
@@ -675,25 +697,25 @@ class Item extends DAO {
           $locale_code = osc_current_user_locale();
         }
       }
-      
+
       if($locale_code != '') {
         $this->dao->where(sprintf('d.fk_c_locale_code LIKE "%s"', $locale_code));
       }
-      
+
       $search_pattern_cond = '';
-      
+
       if(osc_search_pattern_method() == '') {
         $search_pattern_cond = sprintf("MATCH(d.s_title, d.s_description) AGAINST('%s' IN BOOLEAN MODE)", $pattern);
-        
+
       } else if(osc_search_pattern_method() == 'nlp') {
         $search_pattern_cond = sprintf("MATCH(d.s_title, d.s_description) AGAINST('%s' IN NATURAL LANGUAGE MODE)", $pattern);
-        
+
       } else if(osc_search_pattern_method() == 'like') {
         $search_pattern_cond = sprintf("lower(concat(d.s_title, d.s_description)) like '%%%s%%'", strtolower(trim((string)$pattern)));
       }
 
       $search_pattern_cond = osc_apply_filter('user_items_search_cond_pattern', $search_pattern_cond, $pattern);
-      
+
       if($search_pattern_cond != '') {
         $this->dao->where($search_pattern_cond);
       }
@@ -704,14 +726,14 @@ class Item extends DAO {
     if(isset($options['item_id'])) {
       if(is_array($options['item_id'])) {
         $item_ids = implode(',', array_filter(array_unique(array_map('trim', $options['item_id']))));
-        
+
         if($item_ids != '') {
           $this->dao->where(sprintf('i.pk_i_id in (%s)', $item_ids));
         }
 
       } else {
         $item_id = (int)$options['item_id'];
-        
+
         if($item_id > 0) {
           $this->dao->where('i.pk_i_id', $item_id);
         }
@@ -736,13 +758,13 @@ class Item extends DAO {
       } else {
         $cat_id = (int)$category;
       }
-      
+
       $subtree = Category::newInstance()->toSubTree($cat_id);
-      
+
       $cat_ids = $this->pruneBranches($subtree);
       $cat_ids[] = $cat_id;
       $cat_ids_filter = implode(',', array_filter(array_unique($cat_ids)));
-      
+
       if($cat_ids_filter != '') {
         $this->dao->where('i.fk_i_category_id IN (' . $cat_ids_filter . ')');
       }
@@ -752,11 +774,11 @@ class Item extends DAO {
     // Country
     if(isset($options['country'])) {
       $country = $options['country'];
-      
+
       if(is_array($country) && count($country) > 0) {
         foreach($country as $c) {
           $c = trim((string)$c);
-          
+
           if($c != '') {
             if(strlen($c) == 2) {
               $this->dao->where(sprintf("l.fk_c_country_code = '%s' ", strtolower($this->dao->escapeStr($c))));
@@ -767,7 +789,7 @@ class Item extends DAO {
         }
       } else {
         $country = trim((string)$country);
-        
+
         if($country != '') {
           if(strlen($country) == 2) {
             $this->dao->where(sprintf("l.fk_c_country_code = '%s' ", strtolower($this->dao->escapeStr($country))));
@@ -777,15 +799,15 @@ class Item extends DAO {
         }
       }
     }
-    
+
     // Region
     if(isset($options['region'])) {
       $region = $options['region'];
-      
+
       if(is_array($region) && count($region) > 0) {
         foreach($region as $r) {
           $r = trim((string)$r);
-          
+
           if($r != '') {
             if(is_numeric($r)) {
               $this->dao->where(sprintf('l.fk_i_region_id = %d ', $this->dao->escapeStr($r)));
@@ -796,7 +818,7 @@ class Item extends DAO {
         }
       } else {
         $region = trim((string)$region);
-        
+
         if($region != '') {
           if(is_numeric($region)) {
             $this->dao->where(sprintf('l.fk_i_region_id = %d ', $this->dao->escapeStr($region)));
@@ -806,16 +828,16 @@ class Item extends DAO {
         }
       }
     }
-    
-    
+
+
     // City
     if(isset($options['city'])) {
       $city = $options['city'];
-      
+
       if(is_array($city) && count($city) > 0) {
         foreach($city as $c) {
           $c = trim((string)$c);
-          
+
           if($c!='') {
             if(is_numeric($c)) {
               $this->dao->where(sprintf('l.fk_i_city_id = %d ', $this->dao->escapeStr($c)));
@@ -826,7 +848,7 @@ class Item extends DAO {
         }
       } else {
         $city = trim((string)$city);
-        
+
         if($city != '') {
           if(is_numeric($city)) {
             $this->dao->where(sprintf('l.fk_i_city_id = %d ', $this->dao->escapeStr($city)));
@@ -836,8 +858,8 @@ class Item extends DAO {
         }
       }
     }
-    
-    
+
+
     // Price min
     if(isset($options['price_min'])) {
       if(is_numeric($options['price_min']) && $options['price_min'] != 0) {
@@ -870,7 +892,7 @@ class Item extends DAO {
     // Custom condition - OR
     if(isset($options['custom_conditions_or']) && is_array($options['custom_conditions_or'])) {
       $conditions_or = implode(' OR ', $options['custom_conditions_or']);
-      
+
       if($conditions_or != '') {
         $this->dao->where('(' . $conditions_or . ')');
       }
@@ -880,7 +902,7 @@ class Item extends DAO {
     // Custom condition - AND
     if(isset($options['custom_conditions_and']) && is_array($options['custom_conditions_and'])) {
       $conditions_and = implode(' AND ', $options['custom_conditions_and']);
-      
+
       if($conditions_and != '') {
         $this->dao->where('(' . $conditions_and . ')');
       }
@@ -889,8 +911,14 @@ class Item extends DAO {
 
     if($count !== true) {
       // Sorting
+      $has_pattern = (isset($options['pattern']) && trim((string)$options['pattern']) != '');
       $order_column = (isset($options['order_column']) ? $options['order_column'] : 'dt_pub_date');
       $order_direction = (isset($options['order_direction']) ? $options['order_direction'] : 'DESC');
+      $allowed_columns = Search::getAllowedColumnsForSorting($has_pattern);
+
+      if(!in_array($order_column, $allowed_columns, true)) {
+        $order_column = 'dt_pub_date';
+      }
 
       if($order_column != '' && $order_column !== false) {
         $this->dao->orderBy($order_column, $order_direction);
@@ -900,14 +928,14 @@ class Item extends DAO {
       $start = (isset($options['start']) ? (int)$options['start'] : 0);
       $page = (isset($options['page']) ? (int)$options['page'] : 0);
       $per_page = (isset($options['per_page']) ? (int)$options['per_page'] : 0);
-      
+
       if($page > 0) {
         $start = $page * $per_page;
       }
 
       if($per_page > 0) {
         $this->dao->limit($start, $per_page);
-        
+
       } else if($start > 0) {
         $this->dao->limit($start);
       }
@@ -917,23 +945,23 @@ class Item extends DAO {
 
 
     $result = $this->dao->get();
-    
+
     if($result == false) {
       if($count === true) {
         return 0;
-        
+
       } else {
         return array();
       }
     }
-    
+
     if($count === true) {
       $data = $result->row();
 
       if(isset($data['i_count'])) {
         return (int)$data['i_count'];
       }
-      
+
       return 0;
 
     } else {
@@ -967,11 +995,11 @@ class Item extends DAO {
     $options['start'] = $start;
     $options['per_page'] = $per_page;
     $options['item_type'] = $item_type;
-    
+
     return $this->findUserItems($user_id, '', $options);
   }
 
-  
+
   /**
    * Count items by User Id according the
    *
@@ -985,13 +1013,13 @@ class Item extends DAO {
   public function countItemTypesByUserID($user_id, $item_type = false, $options = array()) {
     $options['item_type'] = $item_type;
     $options['count'] = true;
-    
+
     return $this->findUserItems($user_id, '', $options);
-  
+
 
     /*
     // OLD CODE HERE
-    
+
     $this->dao->select('count(pk_i_id) as total');
     $this->dao->from($this->getTableName());
     $this->dao->where("fk_i_user_id = $userId");
@@ -1037,24 +1065,22 @@ class Item extends DAO {
   }
 
 
-
-
   // MINE CATEGORY IDS FROM TREE
   private function pruneBranches($branches = null, $ids = array()) {
     if($branches != null && is_array($branches) && count($branches) > 0) {
       foreach($branches as $branch) {
         $ids[] = $branch['pk_i_id'];
-        
+
         if(isset($branch['categories'])) {
           $ids_child = $this->pruneBranches($branch['categories']);
-          
+
           if(is_array($ids_child) && count($ids_child) > 0) {
             $ids = array_merge($ids, $ids_child);
           }
         }
       }
     }
-    
+
     return array_filter(array_unique($ids));
   }
 
@@ -1073,11 +1099,11 @@ class Item extends DAO {
   public function countItemTypesByEmail($email, $item_type = false, $options = array()) {
     $options['item_type'] = $item_type;
     $options['count'] = true;
-    
+
     return $this->findUserItems(0, $email, $options);
 
 
-    /* 
+    /*
     // OLD CODE
 
     $this->dao->select('count(pk_i_id) as total');
@@ -1123,49 +1149,6 @@ class Item extends DAO {
   }
 
   /**
-   * Clear item stat given item id and stat to clear
-   * $stat array('spam', 'duplicated', 'bad', 'offensive', 'expired', 'all')
-   *
-   * @access public
-   * @since unknown
-   * @param int $id
-   * @param string $stat
-   * @return mixed int if updated correctly or false when error occurs
-   */
-  public function clearStat($id, $stat) {
-    switch($stat) {
-      case 'spam':
-        $array_set  = array('i_num_spam' => 0);
-        break;
-      case 'duplicated':
-        $array_set  = array('i_num_repeated' => 0);
-        break;
-      case 'bad':
-        $array_set  = array('i_num_bad_classified' => 0);
-        break;
-      case 'offensive':
-        $array_set  = array('i_num_offensive' => 0);
-        break;
-      case 'expired':
-        $array_set  = array('i_num_expired' => 0);
-        break;
-      case 'all':
-        $array_set = array(
-          'i_num_spam'      => 0,
-          'i_num_repeated'    => 0,
-          'i_num_bad_classified'  => 0,
-          'i_num_offensive'     => 0,
-          'i_num_expired'     => 0
-        );
-        break;
-      default:
-        break;
-    }
-    $array_conditions = array('fk_i_item_id' => $id);
-    return $this->dao->update(DB_TABLE_PREFIX.'t_item_stats', $array_set, $array_conditions);
-  }
-
-  /**
    * Update title and description given a item id and locale.
    *
    * @access public
@@ -1196,6 +1179,8 @@ class Item extends DAO {
    * @throws \Exception
    */
   public function updateExpirationDate($id, $expiration_time, $do_stats = true) {
+    $expiration_time = osc_normalize_dt_expiration($expiration_time);
+
     if($expiration_time == '') {
       return false;
     }
@@ -1276,50 +1261,6 @@ class Item extends DAO {
   }
 
   /**
-   * Return the number of items marked as $type
-   *
-   * @param string $type spam, repeated, bad_classified, offensive, expired
-   * @return int
-   */
-  public function countByMarkas($type) {
-    $this->dao->select('count(*) as total');
-    $this->dao->from($this->getTableName().' i');
-    $this->dao->from(DB_TABLE_PREFIX.'t_item_stats s');
-
-    $this->dao->where('i.pk_i_id = s.fk_i_item_id');
-    // i_num_spam, i_num_repeated, i_num_bad_classified, i_num_offensive, i_num_expired
-    if(null !== $type) {
-      switch ($type) {
-        case 'spam':
-          $this->dao->where('s.i_num_spam > 0 AND i.b_spam = 0');
-        break;
-        case 'repeated':
-          $this->dao->where('s.i_num_repeated > 0');
-        break;
-        case 'bad_classified':
-          $this->dao->where('s.i_num_bad_classified > 0');
-        break;
-        case 'offensive':
-          $this->dao->where('s.i_num_offensive > 0');
-        break;
-        case 'expired':
-          $this->dao->where('s.i_num_expired > 0');
-        break;
-        default:
-      }
-    } else {
-      return 0;
-    }
-
-    $result = $this->dao->get();
-    if($result == false) {
-      return 0;
-    }
-    $total_ads = $result->row();
-    return $total_ads['total'];
-  }
-
-  /**
    * Return meta fields for a given item
    *
    * @access public
@@ -1339,7 +1280,7 @@ class Item extends DAO {
     );
     $this->dao->where($array_where);
     $this->dao->orderBy('mf.i_order', 'ASC');
-    
+
     $result = $this->dao->get();
     if($result == false) {
       return array();
@@ -1376,7 +1317,7 @@ class Item extends DAO {
 */
   public function deleteByPrimaryKey($id) {
     $item = $this->findByPrimaryKey($id);
-    
+
     if(null === $item) {
       return false;
     }
@@ -1387,7 +1328,7 @@ class Item extends DAO {
       if($item['fk_i_user_id'] > 0) {
         User::newInstance()->decreaseNumItems($item['fk_i_user_id']);
       }
-      
+
       CategoryStats::newInstance()->decreaseNumItems($item['fk_i_category_id']);
       CountryStats::newInstance()->decreaseNumItems($item['fk_c_country_code']);
       RegionStats::newInstance()->decreaseNumItems($item['fk_i_region_id']);
@@ -1402,6 +1343,9 @@ class Item extends DAO {
     $this->dao->delete(DB_TABLE_PREFIX.'t_item_location', "fk_i_item_id = $id");
     $this->dao->delete(DB_TABLE_PREFIX.'t_item_stats'   , "fk_i_item_id = $id");
     $this->dao->delete(DB_TABLE_PREFIX.'t_item_meta'  , "fk_i_item_id = $id");
+
+    // Keep reports when item is removed, just clear item relation
+    Report::newInstance()->clearItemRelation($id);
 
     osc_run_hook('delete_item', $id);
 
@@ -1515,22 +1459,22 @@ class Item extends DAO {
     $this->dao->select();
     $this->dao->from(DB_TABLE_PREFIX.'t_item_description');
     $this->dao->where(DB_TABLE_PREFIX.'t_item_description.fk_i_item_id', $item['pk_i_id']);
-    
+
     if(defined('THEME_ITEM_TABLE') && THEME_ITEM_TABLE != '') {
       $this->dao->select(DB_TABLE_PREFIX . THEME_ITEM_TABLE . '.*, 1 as theme_item_table_loaded');
       $this->dao->from(DB_TABLE_PREFIX . THEME_ITEM_TABLE);
       $this->dao->where(DB_TABLE_PREFIX . THEME_ITEM_TABLE . '.fk_i_item_id', $item['pk_i_id']);
     }
-      
+
     $result = $this->dao->get();
     $descriptions = $result->result();
 
     $item['locale'] = array();
-    foreach ($descriptions as $desc) {
+    foreach($descriptions as $desc) {
       foreach($desc as $key => $val) {
         $item[$key] = $val;
       }
-      
+
       if($desc['s_title'] != '' || $desc['s_description'] != '') {
         $desc['s_title'] = osc_apply_filter('item_title', $desc['s_title']);                   // update 420
         $desc['s_description'] = osc_apply_filter('item_description', $desc['s_description']); // update 421 - removed nl2br
@@ -1544,22 +1488,22 @@ class Item extends DAO {
     // add category object - update 450
     $aCategory = osc_get_category_row($item['fk_i_category_id']);
     $item['category'] = $aCategory;
-      
+
     if(isset($item['locale'][$prefLocale]) && $is_itemLanguageAvailable) {
       $item['s_title'] = $item['locale'][$prefLocale]['s_title'];
       $item['s_description'] = $item['locale'][$prefLocale]['s_description'];
     } else {
       $title = $aCategory['s_name'];
-      
+
       $loc = '';
       if(isset($item['s_city'])) {
         $loc = trim(implode(' ', array_filter(array($item['s_country'], $item['s_region'], $item['s_city']))));
       }
-      
+
       if($loc != '') {
         $title = sprintf(__('%s in %s'), $title, $loc);
       }
-     
+
       $item['s_title'] = $title;
       $item['s_description'] = __('There\'s no description available in your language');
       unset($data);
@@ -1584,17 +1528,17 @@ class Item extends DAO {
     }
 
     $results = array();
-    foreach ($items as $item) {
+    foreach($items as $item) {
       $this->dao->select('fk_c_locale_code, s_name as s_category_name');
       $this->dao->from(DB_TABLE_PREFIX.'t_category_description');
       $this->dao->where('fk_i_category_id', $item['fk_i_category_id']);
       $result = $this->dao->get();
       $descriptions = $result->result();
 
-      foreach ($descriptions as $desc) {
+      foreach($descriptions as $desc) {
         $item['locale'][$desc['fk_c_locale_code']]['s_category_name'] = $desc['s_category_name'];
       }
-      
+
       if(isset($item['locale'][$prefLocale]['s_category_name'])) {
         $item['s_category_name'] = $item['locale'][$prefLocale]['s_category_name'];
       } else {
@@ -1606,10 +1550,10 @@ class Item extends DAO {
         }
         unset($data);
       }
-      
+
       $results[] = $item;
     }
-    
+
     return $results;
   }
 
@@ -1630,7 +1574,7 @@ class Item extends DAO {
 
     $results = array();
 
-    foreach ($items as $item) {
+    foreach($items as $item) {
       $this->dao->select();
       $this->dao->from(DB_TABLE_PREFIX.'t_item_description');
       $this->dao->where(DB_TABLE_PREFIX.'t_item_description.fk_i_item_id', $item['pk_i_id']);
@@ -1638,27 +1582,27 @@ class Item extends DAO {
       // add category object - update 450
       $aCategory = osc_get_category_row($item['fk_i_category_id']);
       $item['category'] = $aCategory;
-      
-      
+
+
       $result = $this->dao->get();
       $descriptions = $result->result();
 
       $item['locale'] = array();
-      foreach ($descriptions as $desc) {
+      foreach($descriptions as $desc) {
         if($desc['s_title'] != '' || $desc['s_description'] != '') {
           $desc['s_title'] = osc_apply_filter('item_title', $desc['s_title']);                       // update 420
           $desc['s_description'] = nl2br(osc_apply_filter('item_description', $desc['s_description']));     // update 420
-          
+
           $item['locale'][$desc['fk_c_locale_code']] = $desc;
         }
       }
-      
+
       if(isset($item['locale'][$prefLocale])) {
         $item['s_title'] = $item['locale'][$prefLocale]['s_title'];
         $item['s_description'] = $item['locale'][$prefLocale]['s_description'];
       } else {
         $data = current($item['locale']);
-        
+
         if($data !== false && is_array($data)) {
           $item['s_title'] = $data['s_title'];
           $item['s_description'] = $data['s_description'];
@@ -1666,20 +1610,15 @@ class Item extends DAO {
           $item['s_title'] = '';
           $item['s_description'] = '';
         }
-        
+
         unset($data);
       }
 
       // populate locations and category_name
       $this->dao->select(DB_TABLE_PREFIX.'t_item_location.*, cd.s_name as s_category_name');
-      
+
       // select sum item_stats
       $this->dao->select('SUM(s.i_num_views) as i_num_views');
-      $this->dao->select('SUM(s.i_num_spam) as i_num_spam');
-      $this->dao->select('SUM(s.i_num_bad_classified) as i_num_bad_classified');
-      $this->dao->select('SUM(s.i_num_repeated) as i_num_repeated');
-      $this->dao->select('SUM(s.i_num_offensive) as i_num_offensive');
-      $this->dao->select('SUM(s.i_num_expired) as i_num_expired ');
       $this->dao->select('SUM(s.i_num_premium_views) as i_num_premium_views');
 
       $this->dao->from(DB_TABLE_PREFIX.'t_item_location');
@@ -1690,10 +1629,10 @@ class Item extends DAO {
       $this->dao->where('s.fk_i_item_id', $item['pk_i_id']);
       $this->dao->where('cd.fk_i_category_id', $item['fk_i_category_id']);
       $this->dao->where('cd.fk_c_locale_code', $prefLocale);
-      
+
       // group by item_id
       $this->dao->groupBy(DB_TABLE_PREFIX.'t_item_location.fk_i_item_id');
-      
+
       if(defined('THEME_ITEM_TABLE') && THEME_ITEM_TABLE != '') {
         $this->dao->select(DB_TABLE_PREFIX . THEME_ITEM_TABLE . '.*, 1 as theme_item_table_loaded');
         $this->dao->from(DB_TABLE_PREFIX . THEME_ITEM_TABLE);

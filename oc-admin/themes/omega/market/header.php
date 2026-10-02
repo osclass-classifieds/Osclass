@@ -16,4 +16,4 @@ function customPageHeader() {
 osc_add_hook('admin_page_header','customPageHeader');
 
 osc_current_admin_theme_path( 'parts/header.php' );
-?>
+

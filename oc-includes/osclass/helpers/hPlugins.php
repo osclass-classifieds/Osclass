@@ -234,7 +234,7 @@ function osc_ajax_hook_url($hook = '', $params = array()) {
  * @return string
  */
 function _osc_ajax_hook_url($admin, $hook, $params) {
-  if( $admin ) {
+  if($admin ) {
     $url = osc_admin_base_url(true);
   } else {
     $url = osc_base_url(true);
@@ -242,11 +242,11 @@ function _osc_ajax_hook_url($admin, $hook, $params) {
 
   $url .= '?page=ajax&action=runhook';
 
-  if( $hook != '' ) {
+  if($hook != '' ) {
     $url .= '&hook=' . $hook;
   }
 
-  if( is_array($params) ) {
+  if(is_array($params) ) {
     $url_params = array();
     foreach($params as $k => $v) {
       $url_params[] = sprintf('%s=%s', $k, $v);

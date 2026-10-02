@@ -33,20 +33,20 @@ function osc_get_country_row($code, $cache = true) {
   if(trim((string)$code) == '') {
     return false;
   }
-  
+
   $code = strtoupper(trim((string)$code));
 
   if($cache === true && View::newInstance()->_exists('country_' . $code)) {
     return View::newInstance()->_get('country_' . $code);
   }
-  
-  if(OPTIMIZE_COUNTRIES === true) { 
+
+  if(OPTIMIZE_COUNTRIES === true) {
     $countries = osc_get_countries();
-    
+
     // Search country in session data
     if(is_array($countries) && count($countries) > 0) {
       $search_index = array_search((string)$code, array_column($countries, 'pk_c_code'), true);
-      
+
       if($search_index !== false) {
         $country = $countries[$search_index];
         View::newInstance()->_exportVariableToView('country_' . $code, $country);
@@ -58,7 +58,7 @@ function osc_get_country_row($code, $cache = true) {
   // Search in database
   $country = Country::newInstance()->findByCode($code);
   View::newInstance()->_exportVariableToView('country_' . $code, $country);
-  
+
   return $country;
 }
 
@@ -72,20 +72,20 @@ function osc_get_country_row_by_slug($slug, $cache = true) {
   if(trim((string)$slug) == '') {
     return false;
   }
-  
+
   $slug = strtolower(trim((string)$slug));
 
   if($cache === true && View::newInstance()->_exists('country_' . $slug)) {
     return View::newInstance()->_get('country_' . $slug);
   }
-  
-  if(OPTIMIZE_COUNTRIES === true) { 
+
+  if(OPTIMIZE_COUNTRIES === true) {
     $countries = osc_get_countries();
 
     // Search country in session data
     if(is_array($countries) && count($countries) > 0) {
       $search_index = array_search((string)$slug, array_column($countries, 's_slug'), true);
-      
+
       if($search_index !== false) {
         $country = $countries[$search_index];
         View::newInstance()->_exportVariableToView('country_' . $slug, $country);
@@ -97,7 +97,7 @@ function osc_get_country_row_by_slug($slug, $cache = true) {
   // Search in database
   $country = Country::newInstance()->findBySlug($slug);
   View::newInstance()->_exportVariableToView('country_' . $slug, $country);
-  
+
   return $country;
 }
 
@@ -114,7 +114,7 @@ function osc_count_countries_all() {
 
   $count = Country::newInstance()->count();
   View::newInstance()->_exportVariableToView('count_countries', (int)$count);
-  
+
   return (int)$count;
 }
 
@@ -128,7 +128,7 @@ function osc_get_region_row($id, $cache = true) {
   if($id <= 0) {
     return false;
   }
-  
+
   $id = (int)$id;
 
   if($cache === true && View::newInstance()->_exists('region_' . $id)) {
@@ -154,10 +154,9 @@ function osc_get_region_row($id, $cache = true) {
   // Search in database
   $region = Region::newInstance()->findByPrimaryKey($id);
   View::newInstance()->_exportVariableToView('region_' . $id, $region);
-  
+
   return $region;
 }
-
 
 
 /**
@@ -169,13 +168,13 @@ function osc_get_region_row_by_slug($slug, $cache = true) {
   if(trim((string)$slug) == '') {
     return false;
   }
-  
+
   $slug = strtolower(trim((string)$slug));
 
   if($cache === true && View::newInstance()->_exists('region_' . $slug)) {
     return View::newInstance()->_get('region_' . $slug);
   }
-  
+
   // If there is more regions in DB, it's not effective way
   if(OPTIMIZE_REGIONS === true && osc_count_regions_all() < OPTIMIZE_REGIONS_LIMIT) {
     $regions = osc_get_regions();
@@ -183,7 +182,7 @@ function osc_get_region_row_by_slug($slug, $cache = true) {
     // Search region in session data
     if(is_array($regions) && count($regions) > 0) {
       $search_index = array_search((string)$slug, array_column($regions, 's_slug'), true);
-      
+
       if($search_index !== false) {
         $region = $regions[$search_index];
         View::newInstance()->_exportVariableToView('region_' . $slug, $region);
@@ -195,7 +194,7 @@ function osc_get_region_row_by_slug($slug, $cache = true) {
   // Search in database
   $region = Region::newInstance()->findBySlug($slug);
   View::newInstance()->_exportVariableToView('region_' . $slug, $region);
-  
+
   return $region;
 }
 
@@ -212,10 +211,9 @@ function osc_count_regions_all() {
 
   $count = Region::newInstance()->count();
   View::newInstance()->_exportVariableToView('count_regions', (int)$count);
-  
+
   return (int)$count;
 }
-
 
 
 /**
@@ -227,7 +225,7 @@ function osc_get_city_row($id, $cache = true) {
   if($id <= 0) {
     return false;
   }
-  
+
   $id = (int)$id;
 
   if($cache === true && View::newInstance()->_exists('city_' . $id)) {
@@ -241,7 +239,7 @@ function osc_get_city_row($id, $cache = true) {
     // Search city in session data
     if(is_array($cities) && count($cities) > 0) {
       $search_index = array_search((string)$id, array_column($cities, 'pk_i_id'), true);
-      
+
       if($search_index !== false) {
         $city = $cities[$search_index];
         View::newInstance()->_exportVariableToView('city_' . $id, $city);
@@ -253,7 +251,7 @@ function osc_get_city_row($id, $cache = true) {
   // Search in database
   $city = City::newInstance()->findByPrimaryKey($id);
   View::newInstance()->_exportVariableToView('city_' . $id, $city);
-  
+
   return $city;
 }
 
@@ -267,13 +265,13 @@ function osc_get_city_row_by_slug($slug, $cache = true) {
   if(trim((string)$slug) == '') {
     return false;
   }
-  
+
   $slug = strtolower(trim((string)$slug));
 
   if($cache === true && View::newInstance()->_exists('city_' . $slug)) {
     return View::newInstance()->_get('city_' . $slug);
   }
-  
+
   // If there is more cities in DB, it's not effective way
   if(OPTIMIZE_CITIES === true && osc_count_cities_all() < OPTIMIZE_CITIES_LIMIT) {
     $cities = osc_get_cities();
@@ -281,7 +279,7 @@ function osc_get_city_row_by_slug($slug, $cache = true) {
     // Search city in session data
     if(is_array($cities) && count($cities) > 0) {
       $search_index = array_search((string)$slug, array_column($cities, 's_slug'), true);
-      
+
       if($search_index !== false) {
         $city = $cities[$search_index];
         View::newInstance()->_exportVariableToView('city_' . $slug, $city);
@@ -293,7 +291,7 @@ function osc_get_city_row_by_slug($slug, $cache = true) {
   // Search in database
   $city = City::newInstance()->findBySlug($slug);
   View::newInstance()->_exportVariableToView('city_' . $slug, $city);
-  
+
   return $city;
 }
 
@@ -310,10 +308,9 @@ function osc_count_cities_all() {
 
   $count = City::newInstance()->count();
   View::newInstance()->_exportVariableToView('count_cities', (int)$count);
-  
+
   return (int)$count;
 }
-
 
 
 /**
@@ -327,7 +324,7 @@ function osc_get_countries() {
     View::newInstance()->_exportVariableToView('countries', $countries);
     return $countries;
   }
-  
+
   return View::newInstance()->_get('countries');
 }
 
@@ -345,12 +342,12 @@ function osc_get_regions($country = '') {
     } else {
       $regions = Region::newInstance()->findByCountry($country);
     }
-    
+
     View::newInstance()->_exportVariableToView('regions' . $country, $regions);
     return $regions;
   }
-  
-  
+
+
   return View::newInstance()->_get('regions' . $country);
 }
 
@@ -368,23 +365,22 @@ function osc_get_cities($region = '') {
     } else {
       $cities = City::newInstance()->findByRegion($region);
     }
-    
+
     View::newInstance()->_exportVariableToView('cities' . $region, $cities);
     return $cities;
   }
-  
+
   return View::newInstance()->_get('cities' . $region);
 }
 
 
-  
 /**
  * Gets current country
  *
  * @return array|string
  */
 function osc_country() {
-  if (View::newInstance()->_exists('countries')) {
+  if(View::newInstance()->_exists('countries')) {
     return View::newInstance()->_current('countries');
   } else {
     return null;
@@ -398,7 +394,7 @@ function osc_country() {
  * @return array|string
  */
 function osc_region() {
-  if (View::newInstance()->_exists('regions')) {
+  if(View::newInstance()->_exists('regions')) {
     return View::newInstance()->_current('regions');
   } else {
     return null;
@@ -412,7 +408,7 @@ function osc_region() {
  * @return array|string
  */
 function osc_city() {
-  if (View::newInstance()->_exists('cities')) {
+  if(View::newInstance()->_exists('cities')) {
     return View::newInstance()->_current('cities');
   } else {
     return null;
@@ -426,7 +422,7 @@ function osc_city() {
  * @return array|string
  */
 function osc_city_area() {
-  if (View::newInstance()->_exists('city_areas')) {
+  if(View::newInstance()->_exists('city_areas')) {
     return View::newInstance()->_current('city_areas');
   } else {
     return null;
@@ -440,7 +436,7 @@ function osc_city_area() {
  * @return bool
  */
 function osc_has_countries() {
-  if ( !View::newInstance()->_exists('countries') ) {
+  if(!View::newInstance()->_exists('countries') ) {
     View::newInstance()->_exportVariableToView('countries', Search::newInstance()->listCountries( '>=' , 'country_name ASC' ) );
   }
   return View::newInstance()->_next('countries');
@@ -456,7 +452,7 @@ function osc_has_countries() {
  * @throws \Exception
  */
 function osc_has_regions($country = '%%%%') {
-  if ( !View::newInstance()->_exists('regions') ) {
+  if(!View::newInstance()->_exists('regions') ) {
     View::newInstance()->_exportVariableToView('regions', Search::newInstance()->listRegions( $country, '>=' , 'region_name ASC' ) );
   }
   return View::newInstance()->_next('regions');
@@ -472,12 +468,12 @@ function osc_has_regions($country = '%%%%') {
  * @throws \Exception
  */
 function osc_has_cities($region = '%%%%') {
-  if ( !View::newInstance()->_exists('cities') ) {
+  if(!View::newInstance()->_exists('cities') ) {
     View::newInstance()->_exportVariableToView('cities', Search::newInstance()->listCities( $region, '>=' ) );
   }
   $result = View::newInstance()->_next('cities');
 
-  if ( ! $result ) {
+  if(! $result ) {
     View::newInstance()->_erase( 'cities' );
   }
   return $result;
@@ -491,12 +487,12 @@ function osc_has_cities($region = '%%%%') {
  * @return bool
  */
 function osc_has_city_areas($city = '%%%%') {
-  if ( !View::newInstance()->_exists('city_areas') ) {
+  if(!View::newInstance()->_exists('city_areas') ) {
     View::newInstance()->_exportVariableToView('city_areas', Search::newInstance()->listCityAreas( $city, '>=' , 'city_area_name ASC' ) );
   }
   $result = View::newInstance()->_next('city_areas');
 
-  if ( ! $result ) {
+  if(! $result ) {
     View::newInstance()->_erase( 'city_areas' );
   }
   return $result;
@@ -508,7 +504,7 @@ function osc_has_city_areas($city = '%%%%') {
  * @return int
  */
 function osc_count_countries() {
-  if ( !View::newInstance()->_exists('contries') ) {
+  if(!View::newInstance()->_exists('contries') ) {
     View::newInstance()->_exportVariableToView('countries', Search::newInstance()->listCountries( '>' , 'country_name ASC' ) );   // replacing >= with > to improve performance drastically
   }
   return View::newInstance()->_count('countries');
@@ -524,7 +520,7 @@ function osc_count_countries() {
  * @throws \Exception
  */
 function osc_count_regions($country = '%%%%') {
-  if ( !View::newInstance()->_exists('regions') ) {
+  if(!View::newInstance()->_exists('regions') ) {
     View::newInstance()->_exportVariableToView('regions', Search::newInstance()->listRegions( $country, '>' , 'region_name ASC' ) );   // replacing >= with > to improve performance drastically
   }
   return View::newInstance()->_count('regions');
@@ -540,7 +536,7 @@ function osc_count_regions($country = '%%%%') {
  * @throws \Exception
  */
 function osc_count_cities($region = '%%%%') {
-  if ( !View::newInstance()->_exists('cities') ) {
+  if(!View::newInstance()->_exists('cities') ) {
     View::newInstance()->_exportVariableToView('cities', Search::newInstance()->listCities( $region, '>' ) );   // replacing >= with > to improve performance drastically
   }
   return View::newInstance()->_count('cities');
@@ -554,7 +550,7 @@ function osc_count_cities($region = '%%%%') {
  * @return int
  */
 function osc_count_city_areas($city = '%%%%') {
-  if ( !View::newInstance()->_exists('city_areas') ) {
+  if(!View::newInstance()->_exists('city_areas') ) {
     View::newInstance()->_exportVariableToView('city_areas', Search::newInstance()->listCityAreas( $city, '>' , 'city_area_name ASC' ) );   // replacing >= with > to improve performance drastically
   }
   return View::newInstance()->_count('city_areas');
@@ -697,13 +693,13 @@ function osc_city_area_url() {
  */
 function osc_get_user_item_countries($user_id = null) {
   $user_id = (int)($user_id === null ? osc_logged_user_id() : $user_id);
-  
+
   if(!View::newInstance()->_exists('user_item_countries')) {
     $countries = Country::newInstance()->listUser($user_id);
     View::newInstance()->_exportVariableToView('user_item_countries', $countries);
     return $countries;
   }
-  
+
   return View::newInstance()->_get('user_item_countries');
 }
 
@@ -714,13 +710,13 @@ function osc_get_user_item_countries($user_id = null) {
  */
 function osc_get_user_item_regions($user_id = null) {
   $user_id = (int)($user_id === null ? osc_logged_user_id() : $user_id);
-  
+
   if(!View::newInstance()->_exists('user_item_regions')) {
     $regions = Region::newInstance()->listUser($user_id);
     View::newInstance()->_exportVariableToView('user_item_regions', $regions);
     return $regions;
   }
-  
+
   return View::newInstance()->_get('user_item_regions');
 }
 
@@ -731,12 +727,12 @@ function osc_get_user_item_regions($user_id = null) {
  */
 function osc_get_user_item_cities($user_id = null) {
   $user_id = (int)($user_id === null ? osc_logged_user_id() : $user_id);
-  
+
   if(!View::newInstance()->_exists('user_item_cities')) {
     $cities = City::newInstance()->listUser($user_id);
     View::newInstance()->_exportVariableToView('user_item_cities', $cities);
     return $cities;
   }
-  
+
   return View::newInstance()->_get('user_item_cities');
 }

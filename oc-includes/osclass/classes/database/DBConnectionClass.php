@@ -139,7 +139,7 @@ class DBConnectionClass {
     if(!self::$instance instanceof self) {
       self::$instance = new self ($server, $user, $password, $database, $is_install);
     }
-    
+
     return self::$instance;
   }
 
@@ -166,13 +166,13 @@ class DBConnectionClass {
    */
   public function __destruct() {
     $is_admin_logged = false;  // update 420 - probably osclass installation in progress
-    
+
     if(!defined('OSC_INSTALLING')) {
       if(function_exists('osc_is_admin_user_logged_in') && class_exists('Admin') && class_exists('Session')) {
         $is_admin_logged = osc_is_admin_user_logged_in();
       }
     }
-    
+
     $printFrontend = OSC_DEBUG_DB ? $is_admin_logged : false;
     $this->releaseOsclassDb();
     $this->debug($printFrontend);
@@ -264,7 +264,7 @@ class DBConnectionClass {
   public function connectToOsclassDb() {
     $conn = $this->_connectToDb($this->dbHost, $this->dbUser, $this->dbPassword, $this->db);
 
-    if ($conn == false) {
+    if($conn == false) {
       $this->errorConnection();
       $this->releaseOsclassDb();
 
@@ -272,11 +272,11 @@ class DBConnectionClass {
         require_once LIB_PATH . 'osclass/helpers/hErrors.php';
         $title = 'Osclass Error';
         $message = 'Osclass database server is not available. <a href="https://forums.osclasspoint.com/">Need more help?</a>';
-        
+
         if(OSC_DEBUG && $this->getErrorConnectionLevel() != 0) {
           $message .= '<br/>' . $this->getErrorConnectionLevel() . ' - ' . $this->getErrorConnectionDesc();
         }
-        
+
         osc_die($title, $message);
       } else {
         return false;
@@ -291,8 +291,8 @@ class DBConnectionClass {
     }
 
     $selectDb = $this->selectOsclassDb();
-    
-    if ($selectDb == false) {
+
+    if($selectDb == false) {
       $this->errorReport();
       $this->releaseOsclassDb();
 
@@ -372,17 +372,17 @@ class DBConnectionClass {
 
     try {
       $connId = $this->db = @new mysqli($host, $user, $password);
-    } catch (mysqli_sql_exception $e) {
+    } catch(mysqli_sql_exception $e) {
       $this->errorLevel = $this->connErrorLevel = $e->getCode();
       $this->errorDesc = $this->connErrorDesc = $e->getMessage();
 
       return false;
     }
-    
-    if ($this->db->connect_errno) {
+
+    if($this->db->connect_errno) {
       return false;
     }
-    
+
     $this->set_sql_mode(array(), $this->db);
     return true;
   }
@@ -394,21 +394,21 @@ class DBConnectionClass {
    * @param     $connId
    */
   public function set_sql_mode($modes = array(), &$connId = NULL) {
-    if (empty($modes)) {
+    if(empty($modes)) {
       $res = mysqli_query($connId, 'SELECT @@SESSION.sql_mode');
 
-      if (empty($res)) {
+      if(empty($res)) {
         return;
       }
 
       $modes_array = mysqli_fetch_array($res);
-      if (empty($modes_array[0])) {
+      if(empty($modes_array[0])) {
         return;
       }
       $modes_str = $modes_array[0];
 
 
-      if (empty($modes_str)) {
+      if(empty($modes_str)) {
         return;
       }
 
@@ -417,8 +417,8 @@ class DBConnectionClass {
 
     $modes = array_change_key_case($modes, CASE_UPPER);
     $incompatible_modes = $this->incompatible_modes;
-    foreach ($modes as $i => $mode) {
-      if (in_array($mode, $incompatible_modes)) {
+    foreach($modes as $i => $mode) {
+      if(in_array($mode, $incompatible_modes)) {
         unset($modes[ $i ]);
       }
     }
@@ -449,11 +449,10 @@ class DBConnectionClass {
     }
 
     // if((defined('IS_AJAX') || Params::getParam('ajaxRequest') == 1 || Params::getParam('nolog') == 1) && !OSC_DEBUG_DB_LOG && !OSC_DEBUG_DB_AJAX_PRINT) {
-    if(
-      !OSC_DEBUG_DB_LOG 
+    if(!OSC_DEBUG_DB_LOG
       && !OSC_DEBUG_DB_AJAX_PRINT
       && (
-        defined('IS_AJAX') 
+        defined('IS_AJAX')
         || (class_exists('Params') && Params::getParam('ajaxRequest') == 1 || isset($_GET['ajaxRequest']) && $_GET['ajaxRequest'] == 1 || isset($_POST['ajaxRequest']) && $_POST['ajaxRequest'] ==1)
         || (class_exists('Params') && Params::getParam('nolog') == 1 || isset($_GET['nolog']) && $_GET['nolog'] == 1 || isset($_POST['nolog']) && $_POST['nolog'] ==1)
       )
@@ -484,7 +483,7 @@ class DBConnectionClass {
    * @return boolean It returns true if the database has been selected or false if not
    */
   public function _selectDb($dbName, &$connId) {
-    if ($connId->connect_errno) {
+    if($connId->connect_errno) {
       return false;
     }
 
@@ -531,12 +530,12 @@ class DBConnectionClass {
       // This would return error: $connId->connect_error;
       return true;
     }
-    
+
     // update osclass 801
     if($connId->errno) {
       return true;
-    } 
-    
+    }
+
     return @$connId->close();
   }
 

@@ -29,7 +29,7 @@ if(View::newInstance()->_exists('listClass')){
   $loopClass = View::newInstance()->_get('listClass');
 }
 
-if(trim($loopClass) == '' || trim($loopClass) == 'premium-list' || trim($loopClass) == 'listing-list') {
+if(trim((string)$loopClass) == '' || trim((string)$loopClass) == 'premium-list' || trim((string)$loopClass) == 'listing-list') {
   $loopClass = 'listing-list ' . $type;
 } else {
   $loopClass = 'listing-grid ' . $type;
@@ -41,7 +41,7 @@ if(trim($loopClass) == '' || trim($loopClass) == 'premium-list' || trim($loopCla
         $i = 0;
 
         if($type == 'latestItems'){
-            while ( osc_has_latest_items() ) {
+            while(osc_has_latest_items() ) {
                 $class = '';
                 if($i%3 == 0){
                     $class = 'first';
@@ -50,7 +50,7 @@ if(trim($loopClass) == '' || trim($loopClass) == 'premium-list' || trim($loopCla
                 $i++;
             }
         } elseif($type == 'premiums'){
-            while ( osc_has_premiums() ) {
+            while(osc_has_premiums() ) {
                 $class = '';
                 if($i%3 == 0){
                     $class = 'first';

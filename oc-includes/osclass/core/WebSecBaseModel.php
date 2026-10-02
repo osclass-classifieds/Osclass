@@ -46,7 +46,7 @@ class WebSecBaseModel extends SecBaseModel
     Session::newInstance()->session_start();
     Session::newInstance()->_set( 'userLocale', $locale);
     osc_run_hook('user_locale_changed', $locale);
-    
+
     Cookie::newInstance()->pop('oc_userId');
     Cookie::newInstance()->pop('oc_userSecret');
     Cookie::newInstance()->set();
@@ -54,7 +54,7 @@ class WebSecBaseModel extends SecBaseModel
 
   public function showAuthFailPage()
   {
-    if( Params::getParam('page') === 'ajax') {
+    if(Params::getParam('page') === 'ajax') {
       echo json_encode(array('error' => 1, 'msg' => __('Session timed out')));
       exit;
     } else {

@@ -52,7 +52,11 @@ $(function(){
     var $rowActions = $('#table-row-actions');
     $(this).parents('tr').mouseenter(function(event){
       event.preventDefault();
-      var $containterOffset = $('.table-contains-actions').offset();
+      var $container = $(this).closest('table.table-contains-actions, div.table-contains-actions');
+      var $containterOffset = ($container.length ? $container.offset() : null);
+      if(!$containterOffset) {
+        $containterOffset = $('.table-contains-actions').first().offset();
+      }
       $thisOffset = $(this).offset();
 	  var extra_offset = 0;
 	  colStatusBorderOuterWidth = $('td.col-status-border').outerWidth();
@@ -73,7 +77,7 @@ $(function(){
         left: extra_offset
       }).show();
       $('tr').removeClass('collapsed-hover');
-      if($(this).parents('div.table-contains-actions').hasClass('table-collapsed')){
+      if($(this).closest('div.table-contains-actions, .table-contains-actions-wrap').hasClass('table-collapsed')){
         var thatRow = $(this);
         thatRow.next().addClass('collapsed-hover');
         $rowActions.mouseleave(function(){
@@ -82,7 +86,7 @@ $(function(){
       }
     });
   });
-  $('.table-contains-actions').mouseleave(function(){
+  $('.table-contains-actions-wrap, div.table-contains-actions').mouseleave(function(){
     $('tr').removeClass('collapsed-hover');
     $('#table-row-actions').hide();
   });
@@ -256,7 +260,7 @@ function adminMenuSticky() {
   var contentHeight = $('#content-page').height();
   var menuScroll = 0;
 
-  if(windowWidth > 980) {
+  if(windowWidth > 827) {   // used to be 980
     if(boxHeight > windowHeight) {
       if(contentHeight < boxHeight - 68) {
         $('#content-page').css('min-height', boxHeight - 68);

@@ -46,7 +46,7 @@ function addHelp() {
 osc_add_hook('help_box','addHelp');
 
 
-function customPageHeader(){ 
+function customPageHeader(){
   ?>
   <h1><?php _e('Statistics'); ?>
     <a href="#" class="btn ico ico-32 ico-help float-right"></a>
@@ -58,7 +58,7 @@ osc_add_hook('admin_page_header','customPageHeader');
 
 
 function customPageTitle($string) {
-  return sprintf(__('Report Statistics - %s'), $string);
+  return sprintf(__('%s - %s'), __('Report statistics'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');
@@ -102,7 +102,7 @@ function customHead() {
 
       // Instantiate and draw our chart, passing in some options.
       var chart = new google.visualization.ColumnChart(document.getElementById('placeholder'));
-      var options = 
+      var options =
         {
         colors:['<?php echo omg_current_color_scheme_chart(); ?>','<?php echo omg_current_color_scheme_chart(); ?>'],
           areaOpacity: 0.15,
@@ -125,7 +125,7 @@ function customHead() {
             color: '#8C8C8C',
             fontName: 'Calibri',
             fontSize: 12
-          },      
+          },
           gridlines: {
             color: '#ddd',
             count: 4
@@ -149,21 +149,21 @@ function customHead() {
     }
     </script>
   <?php } ?>
-  <?php 
+  <?php
 }
 
 osc_add_hook('admin_header', 'customHead', 10);
 
-osc_current_admin_theme_path( 'parts/header.php' ); 
+osc_current_admin_theme_path( 'parts/header.php' );
 ?>
 
 <div class="grid-system" id="stats-page">
-  <div class="grid-row grid-50">
+  <div class="grid-row grid-30">
     <div class="row-wrapper">
-      <h2 class="render-title"><?php _e('Report Statistics'); ?></h2>
+      <h2 class="render-title"><?php _e('Report statistics'); ?></h2>
     </div>
   </div>
-  <div class="grid-row grid-50">
+  <div class="grid-row grid-70">
     <div class="row-wrapper">
       <a id="monthly" class="btn float-right <?php if($type=='month') echo 'btn-green';?>" href="<?php echo osc_admin_base_url(true); ?>?page=stats&amp;action=reports&amp;type_stat=month"><?php _e('Last 10 months'); ?></a>
       <a id="weekly"  class="btn float-right <?php if($type=='week') echo 'btn-green';?>" href="<?php echo osc_admin_base_url(true); ?>?page=stats&amp;action=reports&amp;type_stat=week"><?php _e('Last 10 weeks'); ?></a>
@@ -177,9 +177,8 @@ osc_current_admin_theme_path( 'parts/header.php' );
           <h3><?php _e('Total number of reports'); ?></h3>
         </div>
         <div class="widget-box-content">
-          <b class="stats-title"></b>
           <div id="placeholder" class="graph-placeholder">
-            <?php if( count($reports) == 0 ) {
+            <?php if(count($reports) == 0 ) {
               _e("There are no statistics yet");
             } ?>
           </div>
@@ -189,4 +188,4 @@ osc_current_admin_theme_path( 'parts/header.php' );
   </div>
   <div class="clear"></div>
 </div>
-<?php osc_current_admin_theme_path( 'parts/footer.php' ); ?>
+<?php osc_current_admin_theme_path( 'parts/footer.php' );

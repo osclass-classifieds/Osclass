@@ -22,8 +22,8 @@ define('SIGMA_THEME_VERSION', '133');
 function sigma_home_latest() {
   if(osc_is_home_page()) {
     osc_reset_latest_items();
-    
-    if(osc_count_latest_items() > 0) { 
+
+    if(osc_count_latest_items() > 0) {
       ?>
       <div class="home-latest">
         <h2><?php _e('Latest Listings', 'sigma') ; ?></h2>
@@ -33,15 +33,15 @@ function sigma_home_latest() {
           osc_current_web_theme_path('loop.php');
         ?>
       </div>
-      <?php 
-    } 
+      <?php
+    }
   }
 }
 
 osc_add_hook('before-main', 'sigma_home_latest');
 
 
-if( (string)osc_get_preference('keyword_placeholder', 'sigma')=="" ) {
+if((string)osc_get_preference('keyword_placeholder', 'sigma')=="" ) {
   Params::setParam('keyword_placeholder', __('ie. PHP Programmer', 'sigma') ) ;
 }
 
@@ -85,7 +85,7 @@ FUNCTIONS
 */
 
 // install options
-if( !function_exists('sigma_theme_install') ) {
+if(!function_exists('sigma_theme_install') ) {
   function sigma_theme_install() {
     osc_set_preference('logo', 'sigma_logo.png', 'sigma');
     osc_set_preference('keyword_placeholder', Params::getParam('keyword_placeholder'), 'sigma');
@@ -100,7 +100,7 @@ if( !function_exists('sigma_theme_install') ) {
   }
 }
 // update options
-if( !function_exists('sigma_theme_update') ) {
+if(!function_exists('sigma_theme_update') ) {
   function sigma_theme_update($current_version) {
     osc_set_preference('version', SIGMA_THEME_VERSION, 'sigma');
   }
@@ -109,7 +109,7 @@ if(!function_exists('check_install_sigma_theme')) {
   function check_install_sigma_theme() {
     $current_version = osc_get_preference('version', 'sigma');
     //check if current version is installed or need an update<
-    if( $current_version=='' ) {
+    if($current_version=='' ) {
       sigma_theme_install();
     } else if($current_version < SIGMA_THEME_VERSION){
       sigma_theme_update($current_version);
@@ -180,7 +180,7 @@ if(!function_exists('sigma_nofollow_construct')) {
 
   }
 }
-if( !function_exists('sigma_follow_construct') ) {
+if(!function_exists('sigma_follow_construct') ) {
   /**
   * Hook for header, meta tags robots follow
   */
@@ -191,12 +191,12 @@ if( !function_exists('sigma_follow_construct') ) {
   }
 }
 /* logo */
-if( !function_exists('logo_header') ) {
+if(!function_exists('logo_header') ) {
   function logo_header() {
      $logo = osc_get_preference('logo','sigma');
-     
+
      $html = '<a href="'.osc_base_url().'"><img border="0" alt="' . osc_page_title() . '" src="' . sigma_logo_url() . '"></a>';
-     if( $logo!='' && file_exists( osc_uploads_path() . $logo ) ) {
+     if($logo!='' && file_exists( osc_uploads_path() . $logo ) ) {
       return $html;
      } else {
       return '<a href="'.osc_base_url().'">'.osc_page_title().'</a>';
@@ -204,7 +204,7 @@ if( !function_exists('logo_header') ) {
   }
 }
 /* logo */
-if( !function_exists('sigma_logo_url') ) {
+if(!function_exists('sigma_logo_url') ) {
   function sigma_logo_url() {
     $logo = osc_get_preference('logo','sigma');
 
@@ -214,7 +214,7 @@ if( !function_exists('sigma_logo_url') ) {
     return false;
   }
 }
-if( !function_exists('sigma_draw_item') ) {
+if(!function_exists('sigma_draw_item') ) {
   function sigma_draw_item($class = false,$admin = false, $premium = false) {
     $filename = 'loop-single';
     if($premium){
@@ -223,34 +223,34 @@ if( !function_exists('sigma_draw_item') ) {
     require WebThemes::newInstance()->getCurrentThemePath().$filename.'.php';
   }
 }
-if( !function_exists('sigma_show_as') ){
+if(!function_exists('sigma_show_as') ){
   function sigma_show_as(){
 
     $p_sShowAs  = Params::getParam('sShowAs');
     $aValidShowAsValues = array('list', 'gallery');
-    if (!in_array($p_sShowAs, $aValidShowAsValues)) {
+    if(!in_array($p_sShowAs, $aValidShowAsValues)) {
       $p_sShowAs = sigma_default_show_as();
     }
 
     return $p_sShowAs;
   }
 }
-if( !function_exists('sigma_default_direction') ){
+if(!function_exists('sigma_default_direction') ){
   function sigma_default_direction(){
     return getPreference('rtl','sigma');
   }
 }
-if( !function_exists('sigma_default_show_as') ){
+if(!function_exists('sigma_default_show_as') ){
   function sigma_default_show_as(){
     return getPreference('defaultShowAs@all','sigma');
   }
 }
-if( !function_exists('sigma_default_location_show_as') ){
+if(!function_exists('sigma_default_location_show_as') ){
   function sigma_default_location_show_as(){
     return osc_get_preference('defaultLocationShowAs','sigma');
   }
 }
-if( !function_exists('sigma_draw_categories_list') ) {
+if(!function_exists('sigma_draw_categories_list') ) {
   function sigma_draw_categories_list(){ ?>
   <?php if(!osc_is_home_page()){ echo '<div class="resp-wrapper">'; } ?>
    <?php
@@ -261,7 +261,7 @@ if( !function_exists('sigma_draw_categories_list') ) {
    osc_goto_first_category();
    $i    = 0;
 
-   while ( osc_has_categories() ) {
+   while(osc_has_categories() ) {
    ?>
   <?php
     if($i%$col1_max_cat == 0){
@@ -281,7 +281,7 @@ if( !function_exists('sigma_draw_categories_list') ) {
         $_url     = osc_search_category_url();
         $_name    = osc_category_name();
         $_total_items = osc_category_total_items();
-        if ( osc_count_subcategories() > 0 ) { ?>
+        if(osc_count_subcategories() > 0 ) { ?>
         <span class="collapse resp-toogle"><i class="fa fa-caret-right fa-lg"></i></span>
         <?php } ?>
         <?php if($_total_items > 0) { ?>
@@ -290,11 +290,11 @@ if( !function_exists('sigma_draw_categories_list') ) {
         <a class="category <?php echo $_slug; ?>" href="#"><?php echo $_name ; ?></a> <span>(<?php echo $_total_items ; ?>)</span>
         <?php } ?>
        </h1>
-       <?php if ( osc_count_subcategories() > 0 ) { ?>
+       <?php if(osc_count_subcategories() > 0 ) { ?>
          <ul>
-           <?php while ( osc_has_subcategories() ) { ?>
+           <?php while(osc_has_subcategories() ) { ?>
              <li>
-             <?php if( osc_category_total_items() > 0 ) { ?>
+             <?php if(osc_category_total_items() > 0 ) { ?>
                <a class="category sub-category <?php echo osc_category_slug() ; ?>" href="<?php echo osc_search_category_url() ; ?>"><?php echo osc_category_name() ; ?></a> <span>(<?php echo osc_category_total_items() ; ?>)</span>
              <?php } else { ?>
                <a class="category sub-category <?php echo osc_category_slug() ; ?>" href="#"><?php echo osc_category_name() ; ?></a> <span>(<?php echo osc_category_total_items() ; ?>)</span>
@@ -314,7 +314,7 @@ if( !function_exists('sigma_draw_categories_list') ) {
   <?php
   }
 }
-if( !function_exists('sigma_search_number') ) {
+if(!function_exists('sigma_search_number') ) {
   /**
     *
     * @return array
@@ -322,7 +322,7 @@ if( !function_exists('sigma_search_number') ) {
   function sigma_search_number() {
     $search_from = ((osc_search_page() * osc_default_results_per_page_at_search()) + 1);
     $search_to   = ((osc_search_page() + 1) * osc_default_results_per_page_at_search());
-    if( $search_to > osc_search_total_items() ) {
+    if($search_to > osc_search_total_items() ) {
       $search_to = osc_search_total_items();
     }
 
@@ -336,13 +336,13 @@ if( !function_exists('sigma_search_number') ) {
 /*
  * Helpers used at view
  */
-if( !function_exists('sigma_item_title') ) {
+if(!function_exists('sigma_item_title') ) {
   function sigma_item_title() {
     $title = osc_item_title();
-    foreach( osc_get_locales() as $locale ) {
-      if( Session::newInstance()->_getForm('title') != "" ) {
+    foreach(osc_get_locales() as $locale ) {
+      if(Session::newInstance()->_getForm('title') != "" ) {
         $title_ = Session::newInstance()->_getForm('title');
-        if( @$title_[$locale['pk_c_code']] != "" ){
+        if(@$title_[$locale['pk_c_code']] != "" ){
           $title = $title_[$locale['pk_c_code']];
         }
       }
@@ -350,13 +350,13 @@ if( !function_exists('sigma_item_title') ) {
     return $title;
   }
 }
-if( !function_exists('sigma_item_description') ) {
+if(!function_exists('sigma_item_description') ) {
   function sigma_item_description() {
     $description = osc_item_description();
-    foreach( osc_get_locales() as $locale ) {
-      if( Session::newInstance()->_getForm('description') != "" ) {
+    foreach(osc_get_locales() as $locale ) {
+      if(Session::newInstance()->_getForm('description') != "" ) {
         $description_ = Session::newInstance()->_getForm('description');
-        if( @$description_[$locale['pk_c_code']] != "" ){
+        if(@$description_[$locale['pk_c_code']] != "" ){
           $description = $description_[$locale['pk_c_code']];
         }
       }
@@ -364,7 +364,7 @@ if( !function_exists('sigma_item_description') ) {
     return $description;
   }
 }
-if( !function_exists('related_listings') ) {
+if(!function_exists('related_listings') ) {
   function related_listings() {
     View::newInstance()->_exportVariableToView('items', array());
 
@@ -376,7 +376,7 @@ if( !function_exists('related_listings') ) {
 
     $aItems    = $mSearch->doSearch();
     $iTotalItems = count($aItems);
-    if( $iTotalItems == 3 ) {
+    if($iTotalItems == 3 ) {
       View::newInstance()->_exportVariableToView('items', $aItems);
       return $iTotalItems;
     }
@@ -389,7 +389,7 @@ if( !function_exists('related_listings') ) {
 
     $aItems = $mSearch->doSearch();
     $iTotalItems = count($aItems);
-    if( $iTotalItems > 0 ) {
+    if($iTotalItems > 0 ) {
       View::newInstance()->_exportVariableToView('items', $aItems);
       return $iTotalItems;
     }
@@ -399,9 +399,9 @@ if( !function_exists('related_listings') ) {
   }
 }
 
-if( !function_exists('osc_is_contact_page') ) {
+if(!function_exists('osc_is_contact_page') ) {
   function osc_is_contact_page() {
-    if( Rewrite::newInstance()->get_location() === 'contact' ) {
+    if(Rewrite::newInstance()->get_location() === 'contact' ) {
       return true;
     }
 
@@ -409,7 +409,7 @@ if( !function_exists('osc_is_contact_page') ) {
   }
 }
 
-if( !function_exists('get_breadcrumb_lang') ) {
+if(!function_exists('get_breadcrumb_lang') ) {
   function get_breadcrumb_lang() {
     $lang = array();
     $lang['item_add']         = __('Publish a listing', 'sigma');
@@ -450,7 +450,7 @@ if(!function_exists('user_dashboard_redirect')) {
   osc_add_hook('init', 'user_dashboard_redirect');
 }
 
-if( !function_exists('get_user_menu') ) {
+if(!function_exists('get_user_menu') ) {
   function get_user_menu() {
     $options   = array();
     $options[] = array(
@@ -463,11 +463,13 @@ if( !function_exists('get_user_menu') ) {
       'url'   => osc_user_list_items_url(),
       'class' => 'opt_items'
     );
-    $options[] = array(
-      'name' => __('Alerts', 'sigma'),
-      'url' => osc_user_alerts_url(),
-      'class' => 'opt_alerts'
-    );
+    if(osc_alerts_enabled()) {
+      $options[] = array(
+        'name' => __('Alerts', 'sigma'),
+        'url' => osc_user_alerts_url(),
+        'class' => 'opt_alerts'
+      );
+    }
     $options[] = array(
       'name'  => __('Account', 'sigma'),
       'url'   => osc_user_profile_url(),
@@ -498,23 +500,23 @@ if( !function_exists('get_user_menu') ) {
   }
 }
 
-if( !function_exists('delete_user_js') ) {
+if(!function_exists('delete_user_js') ) {
   function delete_user_js() {
     $location = Rewrite::newInstance()->get_location();
     $section  = Rewrite::newInstance()->get_section();
-    if( ($location === 'user' && in_array($section, array('dashboard', 'profile', 'alerts', 'change_email', 'change_username',  'change_password', 'items'))) || (Params::getParam('page') ==='custom' && Params::getParam('in_user_menu')==true ) ) {
+    if(($location === 'user' && in_array($section, array('dashboard', 'profile', 'alerts', 'change_email', 'change_username',  'change_password', 'items'))) || (Params::getParam('page') ==='custom' && Params::getParam('in_user_menu')==true ) ) {
       osc_enqueue_script('delete-user-js');
     }
   }
   osc_add_hook('header', 'delete_user_js', 1);
 }
 
-if( !function_exists('user_info_js') ) {
+if(!function_exists('user_info_js') ) {
   function user_info_js() {
     $location = Rewrite::newInstance()->get_location();
     $section  = Rewrite::newInstance()->get_section();
 
-    if( $location === 'user' && in_array($section, array('dashboard', 'profile', 'alerts', 'change_email', 'change_username',  'change_password', 'items')) ) {
+    if($location === 'user' && in_array($section, array('dashboard', 'profile', 'alerts', 'change_email', 'change_username',  'change_password', 'items')) ) {
       $user = User::newInstance()->findByPrimaryKey( Session::newInstance()->_get('userId') );
       View::newInstance()->_exportVariableToView('user', $user);
       ?>
@@ -530,14 +532,14 @@ sigma.user.secret = '<?php echo osc_user_field("s_secret"); ?>';
 
 function theme_sigma_actions_admin() {
   //if(OC_ADMIN)
-  if( Params::getParam('file') == 'oc-content/themes/sigma/admin/settings.php' ) {
-    if( Params::getParam('donation') == 'successful' ) {
+  if(Params::getParam('file') == 'oc-content/themes/sigma/admin/settings.php' ) {
+    if(Params::getParam('donation') == 'successful' ) {
       osc_set_preference('donation', '1', 'sigma');
       osc_reset_preferences();
     }
   }
 
-  switch( Params::getParam('action_specific') ) {
+  switch(Params::getParam('action_specific') ) {
     case('settings'):
       $footerLink  = Params::getParam('footer_link');
 
@@ -556,12 +558,12 @@ function theme_sigma_actions_admin() {
 
       osc_set_preference('rtl', (Params::getParam('rtl') ? '1' : '0'), 'sigma');
 
-      osc_add_flash_ok_message(__('Theme settings updated correctly', 'sigma'), 'admin');
+      osc_add_flash_ok_message(__('Settings have been updated', 'sigma'), 'admin');
       osc_redirect_to(osc_admin_render_theme_url('oc-content/themes/sigma/admin/settings.php'));
     break;
     case('upload_logo'):
       $package = Params::getFiles('logo');
-      if( $package['error'] == UPLOAD_ERR_OK ) {
+      if($package['error'] == UPLOAD_ERR_OK ) {
         $img = ImageProcessing::fromFile($package['tmp_name']);
         $ext = $img->getExt();
         $logo_name   = 'sigma_logo';
@@ -571,9 +573,9 @@ function theme_sigma_actions_admin() {
 
         osc_set_preference('logo', $logo_name, 'sigma');
 
-        osc_add_flash_ok_message(__('The logo image has been uploaded correctly', 'sigma'), 'admin');
+        osc_add_flash_ok_message(__('The logo image has been uploaded', 'sigma'), 'admin');
       } else {
-        osc_add_flash_error_message(__("An error has occurred, please try again", 'sigma'), 'admin');
+        osc_add_flash_error_message(__('An error occurred. Please try again', 'sigma'), 'admin');
       }
       osc_redirect_to(osc_admin_render_theme_url('oc-content/themes/sigma/admin/header.php'));
     break;
@@ -595,7 +597,7 @@ function theme_sigma_actions_admin() {
 
 function sigma_redirect_user_dashboard()
 {
-  if( (Rewrite::newInstance()->get_location() === 'user') && (Rewrite::newInstance()->get_section() === 'dashboard') ) {
+  if((Rewrite::newInstance()->get_location() === 'user') && (Rewrite::newInstance()->get_section() === 'dashboard') ) {
     header('Location: ' .osc_user_list_items_url());
     exit;
   }
@@ -617,14 +619,12 @@ function sigma_admin_menu_links() {
 osc_add_hook('init_admin', 'sigma_admin_menu_links');
 
 
-
-
 //TRIGGER FUNCTIONS
 check_install_sigma_theme();
 
 // if(osc_is_home_page()){
 //   osc_add_hook('inside-main','sigma_draw_categories_list');
-// } else if( osc_is_static_page() || osc_is_contact_page() ){
+// } else if(osc_is_static_page() || osc_is_contact_page() ){
 //   osc_add_hook('before-content','sigma_draw_categories_list');
 // }
 
@@ -734,7 +734,7 @@ class sigmaBodyClass
 
   public static function newInstance()
   {
-    if (  !self::$instance instanceof self)
+    if(!self::$instance instanceof self)
     {
       self::$instance = new self;
     }
@@ -755,11 +755,11 @@ class sigmaBodyClass
 function osc_theme_check_compatibility_branch() {
   $osclass_version = (int)str_replace('.', '', OSCLASS_VERSION);
   $osclass_author = (!defined('OSCLASS_AUTHOR') ? 'NONE' : strtoupper(OSCLASS_AUTHOR));
-  
+
   if($osclass_version >= 420 && $osclass_author <> 'OSCLASSPOINT') {
     osc_add_flash_error_message('Theme is not compatible with your osclass version or branch! You cannot use this theme as it would generate errors on your installation. Download and install supported osclass version: <a href="https://osclass-classifieds.com/download">https://osclass-classifieds.com/download</a>');
   }
-} 
+}
 
 osc_add_hook('header', 'osc_theme_check_compatibility_branch', 1);
 
@@ -769,10 +769,10 @@ osc_add_hook('header', 'osc_theme_check_compatibility_branch', 1);
 HELPERS
 
 */
-if( !function_exists('osc_uploads_url')) {
+if(!function_exists('osc_uploads_url')) {
   function osc_uploads_url($item = '') {
     $logo = osc_get_preference('logo', 'sigma');
-    if ($logo != '' && file_exists(osc_uploads_path() . $logo)) {
+    if($logo != '' && file_exists(osc_uploads_path() . $logo)) {
       $path = str_replace(ABS_PATH, '', osc_uploads_path() . '/');
       $path = str_replace('//', '/', $path);
       return osc_base_url() . $path . $item;
@@ -785,7 +785,7 @@ if( !function_exists('osc_uploads_url')) {
   ads  SEARCH
 
  */
-if (!function_exists('search_ads_listing_top_fn')) {
+if(!function_exists('search_ads_listing_top_fn')) {
   function search_ads_listing_top_fn() {
     if(osc_get_preference('search-results-top-728x90', 'sigma')!='') {
       echo '<div class="clear"></div>' . PHP_EOL;
@@ -797,7 +797,7 @@ if (!function_exists('search_ads_listing_top_fn')) {
 }
 //osc_add_hook('search_ads_listing_top', 'search_ads_listing_top_fn');
 
-if (!function_exists('search_ads_listing_medium_fn')) {
+if(!function_exists('search_ads_listing_medium_fn')) {
   function search_ads_listing_medium_fn() {
     if(osc_get_preference('search-results-middle-728x90', 'sigma')!='') {
       echo '<div class="clear"></div>' . PHP_EOL;
@@ -808,4 +808,4 @@ if (!function_exists('search_ads_listing_medium_fn')) {
   }
 }
 osc_add_hook('search_ads_listing_medium', 'search_ads_listing_medium_fn');
-?>
+

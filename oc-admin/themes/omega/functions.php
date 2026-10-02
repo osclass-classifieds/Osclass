@@ -16,21 +16,21 @@ if(!defined('ABS_PATH')) exit('ABS_PATH is not loaded. Direct access is not allo
  * warranties or conditions of any kind, either express or implied. Do not remove
  * this NOTICE section as it contains license information and copyrights.
  */
- 
+
 
 // INFORM ADMIN ABOUT MINIMUM PHP VERSION NOT MET
 function omg_warn_php_version() {
   // Defined in oc-includes/osclass/install.php
-  $php_min = (defined('PHP_MIN') ? PHP_MIN : '7.2');
+  $php_min = (defined('PHP_MIN') ? PHP_MIN : '7.4');
   $php_max = (defined('PHP_MAX') ? PHP_MAX : '');
 
-  
+
   if($php_min != '' && !version_compare(PHP_VERSION, $php_min . '.0', '>=')) {
   ?>
     <div id="flashmessage" class="flashmessage flashmessage-error">
       <?php echo sprintf(__('Your server does not meet minimum PHP version requirements. Your version is %s, minimum required version is %s! Please update your PHP version in order to avoid errors.'), PHP_VERSION, $php_min . '.0'); ?>
     </div>
-  <?php 
+  <?php
   }
 
 
@@ -39,7 +39,7 @@ function omg_warn_php_version() {
     <div id="flashmessage" class="flashmessage flashmessage-error">
       <?php echo sprintf(__('PHP %s is latest version supported by Osclass. You may talk with your hosting to downgrade your PHP version.'), $php_max); ?>
     </div>
-  <?php 
+  <?php
   }
 }
 
@@ -54,7 +54,7 @@ function omg_warn_maintenance() {
       <?php _e('Your website has mainentance mode enabled, customers will not be able to access you website.'); ?>
       <a href="<?php echo osc_admin_base_url(true); ?>?page=tools&amp;action=maintenance"><?php _e('Manage maintanance mode'); ?></a>.</div>
     </div>
-  <?php 
+  <?php
   }
 }
 
@@ -73,7 +73,7 @@ function omg_color_schemes() {
     array('id' => 'midnight', 'name' => __('Midnight'), 'colors' => array('#25282b', '#363b3f', '#69a8bb', '#e14d43'), 'chart' => '#e14d43'),
     array('id' => 'ocean', 'name' => __('Ocean'), 'colors' => array('#627c83', '#738e96', '#9ebaa0', '#aa9d88'), 'chart' => '#627c83'),
     array('id' => 'sunrise', 'name' => __('Sunrise'), 'colors' => array('#b43c38', '#cf4944', '#dd823b', '#ccaf0b'), 'chart' => '#b43c38')
-  );  
+  );
 }
 
 function omg_current_color_scheme() {
@@ -85,18 +85,18 @@ function omg_current_color_scheme() {
       return $scheme;
     }
   }
-  
-  return array();  
+
+  return array();
 }
 
 
 function omg_current_color_scheme_chart() {
   $current_scheme = omg_current_color_scheme();
-  
+
   if(isset($current_scheme['chart']) && $current_scheme['chart'] != '') {
     return $current_scheme['chart'];
   }
-  
+
   return '#0073aa';
 }
 
@@ -135,7 +135,7 @@ function admin_compact_mode_class($args){
   if($compactMode == true){
     $args[] = 'compact';
   }
-  
+
   return $args;
 }
 
@@ -144,16 +144,15 @@ osc_add_filter('admin_body_class', 'admin_compact_mode_class');
 
 function admin_color_scheme_class($args){
   $scheme = osc_get_preference('admin_color_scheme');
-  
+
   if($scheme != '' && $scheme != 'default') {
     $args[] = 'scheme-' . $scheme;
   }
-  
+
   return $args;
 }
 
 osc_add_filter('admin_body_class', 'admin_color_scheme_class');
-
 
 
 function modern_compactmode_actions(){
@@ -200,10 +199,10 @@ function admin_header_favicons() {
 
   $favicons = osc_apply_filter('admin_favicons', $favicons);
 
-  foreach($favicons as $f) { 
+  foreach($favicons as $f) {
     ?>
     <link <?php if($f['rel'] !== '') { ?>rel="<?php echo $f['rel']; ?>" <?php } if($f['sizes'] !== '') { ?>sizes="<?php echo $f['sizes']; ?>" <?php } ?>href="<?php echo $f['href']; ?>">
-    <?php 
+    <?php
    }
 }
 osc_add_hook('admin_header', 'admin_header_favicons');
@@ -261,17 +260,17 @@ function printLocaleTitle($locales = null, $item = null) {
   foreach($locales as $locale) {
     echo '<div class="input-has-placeholder input-title-wide"><label for="title">' . __('Title') . ' *</label>';
     $title = (isset($item) && isset($item['locale'][$locale['pk_c_code']]) && isset($item['locale'][$locale['pk_c_code']]['s_title'])) ? $item['locale'][$locale['pk_c_code']]['s_title'] : '';
-    if( Session::newInstance()->_getForm('title') != "" ) {
+    if(Session::newInstance()->_getForm('title') != "" ) {
       $title_ = Session::newInstance()->_getForm('title');
-      if( $title_[$locale['pk_c_code']] != "" ){
+      if($title_[$locale['pk_c_code']] != "" ){
         $title = $title_[$locale['pk_c_code']];
       }
     }
-    
+
     $title = osc_apply_filter('admin_item_title', $title, $item, $locale);
 
     $name = 'title'. '[' . $locale['pk_c_code'] . ']';
-    echo '<input id="' . $name . '" type="text" name="' . $name . '" value="' . osc_esc_html(htmlentities($title, ENT_COMPAT, "UTF-8")) . '"  />';
+    echo '<input id="' . $name . '" type="text" name="' . $name . '" value="' . osc_esc_html(html_entity_decode((string)$title, ENT_QUOTES, 'UTF-8')) . '"  />';
     echo '</div>';
   }
 }
@@ -287,7 +286,7 @@ function printLocaleTitlePage($locales = null,$page = null) {
     if(isset($page['locale'][$locale['pk_c_code']])) {
       $title = $page['locale'][$locale['pk_c_code']]['s_title'];
     }
-    if( isset($aFieldsDescription[$locale['pk_c_code']]) && isset($aFieldsDescription[$locale['pk_c_code']]['s_title']) &&$aFieldsDescription[$locale['pk_c_code']]['s_title'] != '' ) {
+    if(isset($aFieldsDescription[$locale['pk_c_code']]) && isset($aFieldsDescription[$locale['pk_c_code']]['s_title']) &&$aFieldsDescription[$locale['pk_c_code']]['s_title'] != '' ) {
       $title = $aFieldsDescription[$locale['pk_c_code']]['s_title'];
     }
     $name = $locale['pk_c_code'] . '#s_title';
@@ -310,9 +309,9 @@ function printLocaleDescription($locales = null, $item = null) {
     echo '<div><label for="description">' . __('Description') . ' *</label>';
     $description = (isset($item) && isset($item['locale'][$locale['pk_c_code']]) && isset($item['locale'][$locale['pk_c_code']]['s_description'])) ? $item['locale'][$locale['pk_c_code']]['s_description'] : '';
 
-    if( Session::newInstance()->_getForm('description') != "" ) {
+    if(Session::newInstance()->_getForm('description') != "" ) {
       $description_ = Session::newInstance()->_getForm('description');
-      if( $description_[$locale['pk_c_code']] != "" ){
+      if($description_[$locale['pk_c_code']] != "" ){
         $description = $description_[$locale['pk_c_code']];
       }
     }
@@ -333,7 +332,7 @@ function printLocaleDescriptionPage($locales = null, $page = null) {
     if(isset($page['locale'][$locale['pk_c_code']])) {
       $description = $page['locale'][$locale['pk_c_code']]['s_text'];
     }
-    if( isset($aFieldsDescription[$locale['pk_c_code']]) && isset($aFieldsDescription[$locale['pk_c_code']]['s_text']) &&$aFieldsDescription[$locale['pk_c_code']]['s_text'] != '' ) {
+    if(isset($aFieldsDescription[$locale['pk_c_code']]) && isset($aFieldsDescription[$locale['pk_c_code']]['s_text']) &&$aFieldsDescription[$locale['pk_c_code']]['s_text'] != '' ) {
       $description = $aFieldsDescription[$locale['pk_c_code']]['s_text'];
     }
 
@@ -345,9 +344,25 @@ function printLocaleDescriptionPage($locales = null, $page = null) {
   }
 }
 
+function printLocaleContentWidget($locales = null, $widget = null) {
+  if($locales==null) { $locales = osc_get_locales(); }
+  $current = osc_current_admin_locale();
+
+  foreach($locales as $locale) {
+    $content = '';
+    if(isset($widget['locale'][$locale['pk_c_code']]['s_content'])) {
+      $content = $widget['locale'][$locale['pk_c_code']]['s_content'];
+    }
+    $name = $locale['pk_c_code'] . '#s_content';
+    $currentClass = ($locale['pk_c_code'] == $current ? ' widget-locale-current' : '');
+    echo '<div class="widget-locale-content' . $currentClass . '"><label for="' . osc_esc_html($name) . '">' . __('Content') . '</label>';
+    echo '<textarea class="widget-html" id="' . $name . '" name="' . $name . '" rows="10">' . $content . '</textarea></div>';
+  }
+}
+
 
 function check_version_admin_footer() {
-  if( (time() - osc_last_version_check()) > (24 * 3600) ) {
+  if((time() - osc_last_version_check()) > (24 * 3600) ) {
     ?>
     <script type="text/javascript">
       $(document).ready(function() {
@@ -412,14 +427,13 @@ function check_plugins_admin_footer() {
 function backtheme_check_compatibility_branch() {
   $osclass_version = (int)str_replace('.', '', OSCLASS_VERSION);
   $osclass_author = (!defined('OSCLASS_AUTHOR') ? 'NONE' : strtoupper(OSCLASS_AUTHOR));
-  
+
   if($osclass_version >= 420 && $osclass_author <> 'OSCLASSPOINT') {
     osc_add_flash_error_message('Theme is not compatible with your osclass version or branch! You cannot use this theme as it would generate errors on your installation. Download and install supported osclass version: <a href="https://osclass-classifieds.com/download">https://osclass-classifieds.com/download</a>', 'admin');
   }
-} 
+}
 
 osc_add_hook('admin_header', 'backtheme_check_compatibility_branch', 1);
-
 
 
 function phpinfo2array() {
@@ -433,17 +447,17 @@ function phpinfo2array() {
     $titlePlainText = function($input) use ($plainText) {
     return '# '.$plainText($input);
   };
-   
+
   ob_start();
   phpinfo(-1);
-   
+
   $phpinfo = array('phpinfo' => array());
 
   // Strip everything after the <h1>Configuration</h1> tag (other h1's)
-  if (!preg_match('#(.*<h1[^>]*>\s*Configuration.*)<h1#s', ob_get_clean(), $matches)) {
+  if(!preg_match('#(.*<h1[^>]*>\s*Configuration.*)<h1#s', ob_get_clean(), $matches)) {
     return array();
   }
-   
+
   $input = $matches[1];
   $matches = array();
 
@@ -454,11 +468,11 @@ function phpinfo2array() {
     $matches,
     PREG_SET_ORDER
   )) {
-    foreach ($matches as $match) {
+    foreach($matches as $match) {
       $fn = strpos($match[0], '<th') === false ? $plainText : $titlePlainText;
-      if (strlen($match[1])) {
+      if(strlen($match[1])) {
         $phpinfo[$match[1]] = array();
-      } elseif (isset($match[3])) {
+      } elseif(isset($match[3])) {
         $keys1 = array_keys($phpinfo);
         $phpinfo[end($keys1)][$fn($match[2])] = isset($match[4]) ? array($fn($match[3]), $fn($match[4])) : $fn($match[3]);
       } else {
@@ -467,8 +481,38 @@ function phpinfo2array() {
       }
     }
   }
-   
+
   return $phpinfo;
+}
+
+
+// Build web server software string for tools info page
+function osc_admin_info_server_software($php = array()) {
+  if(isset($php['apache2handler']['Apache Version']) && trim($php['apache2handler']['Apache Version']) != '') {
+    $version = trim($php['apache2handler']['Apache Version']);
+
+    if(isset($php['apache2handler']['Apache API Version']) && trim($php['apache2handler']['Apache API Version']) != '') {
+      $version .= ' (' . trim($php['apache2handler']['Apache API Version']) . ')';
+    }
+
+    return $version;
+  }
+
+  if(isset($php['apache']['Apache Version']) && trim($php['apache']['Apache Version']) != '') {
+    return trim($php['apache']['Apache Version']);
+  }
+
+  if(isset($_SERVER['SERVER_SOFTWARE']) && trim($_SERVER['SERVER_SOFTWARE']) != '') {
+    return trim($_SERVER['SERVER_SOFTWARE']);
+  }
+
+  return '-';
+}
+
+
+// Check if PHP extension is loaded for tools info page
+function osc_admin_info_extension_status($extension) {
+  return extension_loaded($extension) ? __('Enabled') : __('Disabled');
 }
 
 /* end of file */

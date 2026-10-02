@@ -23,6 +23,32 @@
 * @author Osclass
 */
 
+// Safe string helpers (also defined in hUtils.php; install may load this file alone)
+if(!function_exists('osc_strlen')) {
+  function osc_strlen($str, $encoding = 'UTF-8') {
+    return (extension_loaded('mbstring') ? mb_strlen((string)$str, $encoding) : strlen((string)$str));
+  }
+}
+
+if(!function_exists('osc_substr')) {
+  function osc_substr($str, $start, $length = null, $encoding = 'UTF-8') {
+    $str = (string)$str;
+    if(extension_loaded('mbstring')) {
+      if($length === null) {
+        return mb_substr($str, $start, mb_strlen($str, $encoding), $encoding);
+      }
+      return mb_substr($str, $start, $length, $encoding);
+    }
+    return ($length === null ? substr($str, $start) : substr($str, $start, $length));
+  }
+}
+
+if(!function_exists('osc_strtolower')) {
+  function osc_strtolower($str, $encoding = 'UTF-8') {
+    return (extension_loaded('mbstring') ? mb_strtolower((string)$str, $encoding) : strtolower((string)$str));
+  }
+}
+
 /**
  * Validate the text with a minimum of non-punctuation characters (international)
  *
@@ -31,9 +57,9 @@
  * @param boolean $required
  * @return boolean
  */
-function osc_validate_text ($value = '', $count = 1, $required = true) {
-  if ($required || $value) {
-    if ( !preg_match("/([\p{L}\p{N}]){".$count . '}/iu' , strip_tags( $value)) ) {
+function osc_validate_text($value = '', $count = 1, $required = true) {
+  if($required || $value) {
+    if(!preg_match("/([\p{L}\p{N}]){".$count . '}/iu' , strip_tags( $value)) ) {
       return false;
     }
   }
@@ -46,8 +72,8 @@ function osc_validate_text ($value = '', $count = 1, $required = true) {
  * @param string $value
  * @return boolean
  */
-function osc_validate_int ($value) {
-  if ( preg_match( '/^[0-9]+$/' , $value) ) {
+function osc_validate_int($value) {
+  if(preg_match( '/^[0-9]+$/' , $value) ) {
     return true;
   }
   return false;
@@ -59,7 +85,7 @@ function osc_validate_int ($value) {
  * @param string $value
  * @return boolean
  */
-function osc_validate_nozero ($value) {
+function osc_validate_nozero($value) {
   return preg_match( '/^[0-9]+$/' , $value ) && $value > 0;
 }
 
@@ -71,12 +97,12 @@ function osc_validate_nozero ($value) {
  * @return boolean
  */
 function osc_validate_number($value = null, $required = false) {
-  if ($required || strlen((string)$value) > 0) {
-    if (!is_numeric($value) ) {
+  if($required || strlen((string)$value) > 0) {
+    if(!is_numeric($value) ) {
       return false;
     }
   }
-  
+
   return true;
 }
 
@@ -90,8 +116,8 @@ function osc_validate_number($value = null, $required = false) {
  * @return boolean
  */
 function osc_validate_phone($value = null, $count = 10, $required = false) {
-  if ($required || mb_strlen($value, 'UTF-8') > 0) {
-    if ( !preg_match("/([\p{Nd}][^\p{Nd}]*){".$count . '}/i' , strip_tags( $value)) ) {
+  if($required || osc_strlen($value) > 0) {
+    if(!preg_match("/([\p{Nd}][^\p{Nd}]*){".$count . '}/i' , strip_tags( $value)) ) {
       return false;
     }
   }
@@ -106,7 +132,7 @@ function osc_validate_phone($value = null, $count = 10, $required = false) {
  * @return boolean
  */
 function osc_validate_min($value = null, $min = 6) {
-  return ! ( mb_strlen( $value , 'UTF-8' ) < $min );
+  return !(osc_strlen($value) < $min);
 }
 
 /**
@@ -116,7 +142,7 @@ function osc_validate_min($value = null, $min = 6) {
  * @return boolean
  */
 function osc_validate_max($value = null, $max = 255) {
-  return ! ( mb_strlen( $value , 'UTF-8' ) > $max );
+  return !(osc_strlen($value) > $max);
 }
 
 /**
@@ -127,7 +153,8 @@ function osc_validate_max($value = null, $max = 255) {
  * @return boolean
  */
 function osc_validate_range($value, $min = 6, $max = 255) {
-  return mb_strlen( $value , 'UTF-8' ) >= $min && mb_strlen( $value , 'UTF-8' ) <= $max;
+  $len = osc_strlen($value);
+  return $len >= $min && $len <= $max;
 }
 
 
@@ -144,27 +171,27 @@ function osc_validate_range($value, $min = 6, $max = 255) {
  * @return boolean
  */
 function osc_validate_location($city,$sCity,$region,$sRegion,$country,$sCountry) {
-  if ( osc_validate_nozero($city) && osc_validate_nozero($region) && osc_validate_text($country,2) ) {
+  if(osc_validate_nozero($city) && osc_validate_nozero($region) && osc_validate_text($country,2) ) {
     $data = Country::newInstance()->findByCode($country);
     $countryId = $data['pk_c_code'];
-    
-    if ( $countryId  ) {
+
+    if($countryId  ) {
       $data = osc_get_region_row($region);
       $regionId = $data['pk_i_id'];
-      
-      if ( $data['b_active'] == 1 ) {
+
+      if($data['b_active'] == 1 ) {
         $data = osc_get_city_row($city);
-        if ($data['b_active'] == 1 && $data['fk_i_region_id'] == $regionId && strtolower($data['fk_c_country_code']) == strtolower($countryId)) {
+        if($data['b_active'] == 1 && $data['fk_i_region_id'] == $regionId && strtolower($data['fk_c_country_code']) == strtolower($countryId)) {
           return true;
         }
       }
     }
-    
+
   } else if(osc_validate_nozero($region) && osc_validate_text($country,2) && $sCity != '' ) {
     return true;
-  } else if( $sRegion != '' && osc_validate_text( $country, 2) && $sCity != '' ) {
+  } else if($sRegion != '' && osc_validate_text( $country, 2) && $sCity != '' ) {
     return true;
-  } else if( $sRegion != '' && $sCountry != '' && $sCity != '' ){
+  } else if($sRegion != '' && $sCountry != '' && $sCity != '' ){
     return true;
   }
   return false;
@@ -179,11 +206,11 @@ function osc_validate_location($city,$sCity,$region,$sRegion,$country,$sCountry)
  * @return boolean
  * @throws \Exception
  */
-function osc_validate_category ($value) {
-  if ( osc_validate_nozero($value) ) {
+function osc_validate_category($value) {
+  if(osc_validate_nozero($value) ) {
     $data = osc_get_category_row($value);
-    
-    if (isset($data['b_enabled']) && $data['b_enabled'] == 1) {
+
+    if(isset($data['b_enabled']) && $data['b_enabled'] == 1) {
       if(osc_selectable_parent_categories()){
         return true;
       } else {
@@ -205,21 +232,21 @@ function osc_validate_category ($value) {
  * @return boolean
  */
 function osc_validate_url($value, $required = false, $get_headers = false) {
-  if ($required || mb_strlen($value, 'UTF-8') > 0) {
+  if($required || osc_strlen($value) > 0) {
     $value = osc_sanitize_url($value);
     // if(!function_exists('filter_var')) {
       // $success = preg_match('|^(http\:\/\/[a-zA-Z0-9_\-]+(?:\.[a-zA-Z0-9_\-]+)*\.[a-zA-Z]{2,4}(?:\/[a-zA-Z0-9_]+)*(?:\/[a-zA-Z0-9_]+\.[a-zA-Z]{2,4}(?:\?[a-zA-Z0-9_]+\=[a-zA-Z0-9_]+)?)?(?:\&[a-zA-Z0-9_]+\=[a-zA-Z0-9_]+)*)$|', $value, $m);
     // } else {
       // $success = filter_var($value, FILTER_VALIDATE_URL);
     // }
-    
+
     // update 421
     $success = filter_var($value, FILTER_VALIDATE_URL);
 
-    if ($success) {
+    if($success) {
       if($get_headers) {
         @$headers = get_headers($value);
-        if (!preg_match('/^HTTP\/\d\.\d\s+(200|301|302)/', $headers[0])) {
+        if(!preg_match('/^HTTP\/\d\.\d\s+(200|301|302)/', $headers[0])) {
           return false;
         }
       }
@@ -238,7 +265,7 @@ function osc_validate_url($value, $required = false, $get_headers = false) {
  * @return boolean
  */
 function osc_validate_spam_delay($type = 'item') {
-  if ( $type === 'item') {
+  if($type === 'item') {
     $delay = osc_item_spam_delay();
     $saved_as = 'last_submit_item';
   } else {
@@ -258,51 +285,51 @@ function osc_validate_spam_delay($type = 'item') {
  * @param boolean $required
  * @return boolean
  */
-function osc_validate_email ($email, $required = true)
+function osc_validate_email($email, $required = true)
 {
-  if ($required || strlen($email) > 0) {
+  if($required || strlen($email) > 0) {
     // Test for the minimum length the email can be
-    if (strlen($email) < 3) {
+    if(strlen($email) < 3) {
       return false;
     }
 
     // Test for an @ character after the first position
-    if (strpos($email, '@', 1) === false) {
+    if(strpos($email, '@', 1) === false) {
       return false;
     }
 
     // Split out the local and domain parts
     list($local, $domain) = explode('@', $email, 2);
-    
+
     // LOCAL PART
     // Test for invalid characters
-    if (!preg_match('/^[a-zA-Z0-9!#$%&\'*+\/=?^_`{|}~\.-]+$/', $local)) {
+    if(!preg_match('/^[a-zA-Z0-9!#$%&\'*+\/=?^_`{|}~\.-]+$/', $local)) {
       return false;
     }
 
     // DOMAIN PART
     // Test for sequences of periods
-    if (preg_match('/\.{2,}/', $domain)) {
+    if(preg_match('/\.{2,}/', $domain)) {
       return false;
     }
     // Test for leading and trailing periods and whitespace
-    if (trim($domain, " \t\n\r\0\x0B.") !== $domain) {
+    if(trim($domain, " \t\n\r\0\x0B.") !== $domain) {
       return false;
     }
     // Split the domain into subs
     $subs = explode('.', $domain);
     // Assume the domain will have at least two subs
-    if (2 > count($subs)) {
+    if(2 > count($subs)) {
       return false;
     }
     // Loop through each sub
-    foreach ($subs as $sub) {
+    foreach($subs as $sub) {
       // Test for leading and trailing hyphens and whitespace
-      if (trim($sub, " \t\n\r\0\x0B-") !== $sub) {
+      if(trim($sub, " \t\n\r\0\x0B-") !== $sub) {
         return false;
       }
       // Test for invalid characters
-      if (!preg_match('/^[a-z0-9-]+$/i', $sub)) {
+      if(!preg_match('/^[a-z0-9-]+$/i', $sub)) {
         return false;
       }
     }
@@ -322,5 +349,5 @@ function osc_validate_email ($email, $required = true)
  * @return bool
  */
 function osc_validate_username( $value, $min = 1 ) {
-  return mb_strlen( $value , 'UTF-8' ) >= $min && preg_match( '/^[A-Za-z0-9_]+$/' , $value );
+  return osc_strlen($value) >= $min && preg_match( '/^[A-Za-z0-9_]+$/' , $value );
 }

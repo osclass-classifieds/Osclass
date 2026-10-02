@@ -30,7 +30,7 @@ class SendFriendForm extends Form {
    * @return bool
    */
   public static function your_name() {
-    if( Session::newInstance()->_getForm( 'yourName' ) != '' ){
+    if(Session::newInstance()->_getForm( 'yourName' ) != '' ){
       $yourName = Session::newInstance()->_getForm( 'yourName' );
       parent::generic_input_text( 'yourName' , $yourName);
     } else {
@@ -43,7 +43,7 @@ class SendFriendForm extends Form {
    * @return bool
    */
   public static function your_email() {
-    if( Session::newInstance()->_getForm( 'yourEmail' ) != '' ){
+    if(Session::newInstance()->_getForm( 'yourEmail' ) != '' ){
       $yourEmail = Session::newInstance()->_getForm( 'yourEmail' );
       parent::generic_input_text( 'yourEmail' , $yourEmail);
     } else {
@@ -56,7 +56,7 @@ class SendFriendForm extends Form {
    * @return bool
    */
   public static function friend_name() {
-    if( Session::newInstance()->_getForm( 'friendName' ) != '' ){
+    if(Session::newInstance()->_getForm( 'friendName' ) != '' ){
       $friendName = Session::newInstance()->_getForm( 'friendName' );
       parent::generic_input_text( 'friendName' , $friendName);
     } else {
@@ -69,7 +69,7 @@ class SendFriendForm extends Form {
    * @return bool
    */
   public static function friend_email() {
-    if( Session::newInstance()->_getForm( 'friendEmail' ) != '' ){
+    if(Session::newInstance()->_getForm( 'friendEmail' ) != '' ){
       $friendEmail = Session::newInstance()->_getForm( 'friendEmail' );
       parent::generic_input_text( 'friendEmail' , $friendEmail);
     } else {
@@ -82,7 +82,7 @@ class SendFriendForm extends Form {
    * @return bool
    */
   public static function your_message() {
-    if( Session::newInstance()->_getForm( 'message_body' ) != '' ){
+    if(Session::newInstance()->_getForm( 'message_body' ) != '' ){
       $message_body = Session::newInstance()->_getForm( 'message_body' );
       parent::generic_textarea( 'message' , $message_body );
     } else {
@@ -118,20 +118,20 @@ class SendFriendForm extends Form {
           },
           messages: {
             yourName: {
-              required: "<?php _e( 'Your name: this field is required' ); ?>."
+              required: "<?php echo sprintf(__('%s is required'), __('Your name')); ?>."
             },
             yourEmail: {
-              email: "<?php _e( 'Invalid email address' ); ?>.",
-              required: "<?php _e( 'Email: this field is required' ); ?>."
+              email: "<?php _e( 'The email is not valid' ); ?>.",
+              required: "<?php echo sprintf(__('%s is required'), __('Email')); ?>."
             },
             friendName: {
-              required: "<?php _e("Friend's name: this field is required"); ?>."
+              required: "<?php echo sprintf(__('%s is required'), __("Friend's name")); ?>."
             },
             friendEmail: {
-              required: "<?php _e("Friend's email: this field is required"); ?>.",
+              required: "<?php echo sprintf(__('%s is required'), __("Friend's email")); ?>.",
               email: "<?php _e("Invalid friend's email address"); ?>."
             },
-            message: "<?php _e( 'Message: this field is required' ); ?>."
+            message: "<?php echo sprintf(__('%s is required'), __('Message')); ?>."
 
           },
           //onfocusout: function(element) { $(element).valid(); },

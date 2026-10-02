@@ -27,19 +27,19 @@ use PHPMailer\PHPMailer\POP3;
 // Get correct user id
 function osc_resolve_user_id($user_id = NULL) {
   $user_id = (int)osc_apply_filter('osc_resolve_user_id', $user_id);
-  
+
   if($user_id > 0) {
     return $user_id;
   }
-  
+
   $loc = osc_get_osclass_location();
   $sec = osc_get_osclass_section();
-  
+
   // User public profile
   if($loc == 'user' && $sec == 'pub_profile') {
     $user_id = (int)osc_esc_html(Params::getParam('id'));
     $user_id = ($user_id > 0 ? $user_id : osc_user_id());
-    
+
     return ($user_id > 0 ? $user_id : false);
 
   // User items + other user pages
@@ -52,7 +52,7 @@ function osc_resolve_user_id($user_id = NULL) {
     $user_id = (int)osc_item_user_id();
     return ($user_id > 0 ? $user_id : false);
   }
-  
+
   $user_id = (int)osc_user_id();
   return ($user_id > 0 ? $user_id : false);
 }
@@ -61,11 +61,11 @@ function osc_resolve_user_id($user_id = NULL) {
 // Check if user is real visitor based on user agent
 function osc_visitor_is_real_user() {
   $visitor_agent = Params::getServerParam('HTTP_USER_AGENT');
-  
+
   if($visitor_agent == false || $visitor_agent == '') {
     return false;
   }
-  
+
   // List of common bot/crawler keywords (case-insensitive)
   $bot_pattern = '/bot|crawl|spider|slurp|mediapartners|facebookexternalhit|pingdom|crawler|wget|curl|python|java|libwww-perl/i';
 
@@ -73,13 +73,13 @@ function osc_visitor_is_real_user() {
   if(preg_match($bot_pattern, $visitor_agent)) {
     return false;
   }
-  
+
   foreach(osc_user_agents() as $agent) {
     if(preg_match('|' . $agent . '|', $visitor_agent)) {
       return true;
     }
   }
-  
+
   return false;
 }
 
@@ -98,7 +98,7 @@ function osc_allowed_mime_types() {
     'text/csv',
     'application/msword'
   );
-  
+
   return osc_apply_filter('allowed_mime_types', $mime_types);
 }
 
@@ -130,7 +130,7 @@ function osc_user_agents() {
     'SamsungBrowser',
     'UCBrowser'
   );
-  
+
   return osc_apply_filter('user_agents', $user_agents);
 }
 
@@ -147,6 +147,54 @@ function osc_ip_lookup_url($ip) {
   return osc_apply_filter('osc_ip_lookup_url', $url, $ip);
 }
 
+
+// Check if item expiration value is valid for persistence.
+function osc_is_valid_dt_expiration($dt_expiration) {
+  if($dt_expiration === null) {
+    return false;
+  }
+
+  $dt_expiration = trim((string)$dt_expiration);
+
+  if($dt_expiration == '' || strtolower($dt_expiration) == 'null') {
+    return false;
+  }
+
+  if(ctype_digit($dt_expiration)) {
+    return ((int)$dt_expiration > 0);
+  }
+
+  if(preg_match('|^([0-9]{4})-([0-9]{2})-([0-9]{2})$|', $dt_expiration)) {
+    $dt_expiration .= ' 23:59:59';
+  }
+
+  if(!preg_match('|^([0-9]{4})-([0-9]{2})-([0-9]{2}) ([0-9]{2}):([0-9]{2}):([0-9]{2})$|', $dt_expiration)) {
+    return false;
+  }
+
+  $dt_expiration_cmp = str_replace(array(' ', '-', ':'), '', $dt_expiration);
+
+  return ($dt_expiration_cmp >= '20000101000000');
+}
+
+// Return valid expiration value or non-expiring sentinel.
+function osc_normalize_dt_expiration($dt_expiration) {
+  if(osc_is_valid_dt_expiration($dt_expiration)) {
+    $dt_expiration = trim((string)$dt_expiration);
+
+    if(ctype_digit($dt_expiration)) {
+      return $dt_expiration;
+    }
+
+    if(preg_match('|^([0-9]{4})-([0-9]{2})-([0-9]{2})$|', $dt_expiration)) {
+      return $dt_expiration . ' 23:59:59';
+    }
+
+    return $dt_expiration;
+  }
+
+  return '9999-12-31 23:59:59';
+}
 
 /**
  * check if the item is expired
@@ -189,7 +237,7 @@ function osc_deleteResource($id, $admin) {
     );
 
     $backtracel = '';
-    foreach (debug_backtrace() as $k => $v) {
+    foreach(debug_backtrace() as $k => $v) {
       if($v['function'] === 'include' || $v['function'] === 'include_once' || $v['function'] === 'require_once' || $v['function'] === 'require') {
         $backtracel .= '#' . $k . ' ' . $v['function'] . '(' . $v['args'][0] . ') called@ [' . $v['file'] . ':' . $v['line'] . '] / ';
       } else {
@@ -251,7 +299,7 @@ function osc_deleteDir($path) {
     return false;
   }
 
-  while ($file = @readdir($fd)) {
+  while($file = @readdir($fd)) {
     if($file !== '.' && $file !== '..') {
       if(!is_dir($path . '/' . $file)) {
         @chmod($path . '/' . $file, 0755);
@@ -411,7 +459,7 @@ function is_serialized($data) {
   if(!preg_match('/^([adObis]):/', $data, $badions)) {
     return false;
   }
-  switch ($badions[1]) {
+  switch($badions[1]) {
     case 'a':
     case 'O':
     case 's':
@@ -433,59 +481,133 @@ function is_serialized($data) {
 
 
 /**
- * VERY BASIC
- * Perform a POST request, so we could launch fake-cron calls and other core-system calls without annoying the user
+ * Perform a POST request (curl first, then fsockopen).
+ * Used for install pings, fake-cron, search-engine pings and similar core calls.
  *
- * @param $url   string
- * @param $_data array
+ * @param string $url
+ * @param array  $_data
+ * @param int    $timeout Max seconds for connect + transfer (1-5, default 5)
+ * @param bool   $follow_redirects Follow HTTP redirects (disable for auto-cron so page=cron is not lost)
  *
- * @return bool false on error or number of bytes sent.
+ * @return bool|int false on error or number of bytes sent (at least 1 on success)
  */
-function osc_doRequest($url, $_data) {
-  if(ini_get('allow_url_fopen') === false) {
-    error_log('enable allow_url_fopen in php.ini' . PHP_EOL);
+function osc_doRequest($url, $_data, $timeout = 5, $follow_redirects = true) {
+  try {
+    if(!is_array($_data)) {
+      $_data = array();
+    }
+
+    $timeout = (int)$timeout;
+    if($timeout < 1) {
+      $timeout = 1;
+    }
+    if($timeout > 5) {
+      $timeout = 5;
+    }
+
+    $data = http_build_query($_data);
+    $version = '';
+    if(function_exists('osc_version')) {
+      $version = (string)osc_version();
+    } else if(defined('OSCLASS_VERSION')) {
+      $version = (string)OSCLASS_VERSION;
+    }
+    $referer = 'Osclass' . ($version != '' ? ' ' . $version : '');
+
+    // Prefer curl for reliable HTTPS on shared hosting
+    if(function_exists('curl_init') && function_exists('curl_exec')) {
+      $ch = curl_init();
+      if($ch !== false) {
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
+        curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
+        curl_setopt($ch, CURLOPT_USERAGENT, 'Osclass' . ($version != '' ? ' (v.' . $version . ')' : ''));
+        curl_setopt($ch, CURLOPT_REFERER, $referer);
+        @curl_setopt($ch, CURLOPT_FOLLOWLOCATION, (bool)$follow_redirects);
+
+        if(stripos($url, 'https') !== false) {
+          curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+          curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+        }
+
+        $response = curl_exec($ch);
+        $http_code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if($response !== false && $http_code >= 200 && $http_code < 300) {
+          return (strlen($data) > 0 ? strlen($data) : 1);
+        }
+      }
+    }
+
+    $parsed = parse_url($url);
+    if(!isset($parsed['host'], $parsed['path']) || $parsed === false) {
+      return false;
+    }
+
+    $host = $parsed['host'];
+    $path = $parsed['path'];
+    if(isset($parsed['query']) && $parsed['query'] != '') {
+      $path .= '?' . $parsed['query'];
+    }
+    $port = 80;
+
+    if(isset($parsed['port'])) {
+      $port = $parsed['port'];
+    }
+
+    if(isset($parsed['scheme']) && $parsed['scheme'] === 'https' && !filter_var($host, FILTER_VALIDATE_IP)) {
+      $host = 'ssl://' . $host;
+      $port = 443;
+    }
+
+    $errno = 0;
+    $errstr = '';
+    $fp = @fsockopen($host, $port, $errno, $errstr, $timeout);
+    if($fp === false) {
+      return false;
+    }
+
+    stream_set_timeout($fp, $timeout);
+
+    $out = 'POST ' . $path . ' HTTP/1.1' . PHP_EOL;
+    $out .= 'Host: ' . $parsed['host'] . PHP_EOL;
+    $out .= 'Referer: ' . $referer . PHP_EOL;
+    $out .= 'Content-type: application/x-www-form-urlencoded' . PHP_EOL;
+    $out .= 'Content-Length: ' . strlen($data) . PHP_EOL;
+    $out .= 'Connection: close' . PHP_EOL . PHP_EOL;
+    $out .= $data;
+
+    $number_bytes_sent = @fwrite($fp, $out);
+    @fclose($fp);
+
+    if($number_bytes_sent === false || (int)$number_bytes_sent <= 0) {
+      return false;
+    }
+
+    return $number_bytes_sent;
+  } catch(Exception $e) {
+    return false;
+  } catch(Throwable $e) {
     return false;
   }
-  
-  // parse the given URL
-  $url = parse_url($url);
-  if(!isset($url['host'], $url['path']) || $url === false) {
-    return false;
-  }
-  
-  // extract host, path, port:
-  $host = $url['host'];
-  $path = $url['path'];
-  $port = 80;
-  
-  if(isset($url['port'])) {
-    $port = $url['port'];
-  }
+}
 
-  if(isset($url['scheme']) && $url['scheme'] === 'https' && !filter_var($host, FILTER_VALIDATE_IP)) {
-    $host = 'ssl://' . $host;
-    $port = 443;
-  }
-  
-  $fp = @fsockopen($host, $port);
 
-  if($fp === false) {
-    return false;
-  }
-  
-  $data = http_build_query($_data);
-  $out = 'POST ' . $path . ' HTTP/1.1' . PHP_EOL;
-  $out .= 'Host: ' . $url['host'] . PHP_EOL;
-  $out .= 'Referer: Osclass ' . osc_version() . PHP_EOL;
-  $out .= 'Content-type: application/x-www-form-urlencoded' . PHP_EOL;
-  $out .= 'Content-Length: ' . strlen($data) . PHP_EOL;
-  $out .= 'Connection: close' . PHP_EOL . PHP_EOL;
-  $out .= $data;
-  
-  $number_bytes_sent = fwrite($fp, $out);
-  fclose($fp);
-
-  return $number_bytes_sent; // or false on fwrite() error
+/**
+ * Fire-and-forget POST with short connection timeout.
+ *
+ * @param string $url
+ * @param array  $_data
+ * @param int    $timeout seconds (1-5)
+ *
+ * @return bool|int false on error or number of bytes sent
+ */
+function osc_doRequestQuick($url, $_data, $timeout = 2) {
+  return osc_doRequest($url, $_data, $timeout);
 }
 
 
@@ -499,14 +621,14 @@ function osc_sendMail($params, $type = '') {
   if(defined('DEMO')) {
     return false;
   }
-  
+
   // Check if sending mail was not explicitely stopped by some process
   $check = osc_apply_filter('pre_send_mail_filter', $params, $type);
 
   if(is_array($check) && isset($check['stop']) && $check['stop'] === true) {
     return false;
   }
-  
+
   osc_run_hook('pre_send_email', $params, $type);
 
   $mail = new PHPMailer(true);
@@ -517,7 +639,7 @@ function osc_sendMail($params, $type = '') {
   $mail->clearCCs();
   $mail->clearCustomHeaders();
   $mail->clearReplyTos();
-  
+
   if(OSC_DEBUG && PHPMAILER_DEBUG_LEVEL >= 1 && PHPMAILER_DEBUG_LEVEL <= 4) {
     $mail->SMTPDebug = PHPMAILER_DEBUG_LEVEL;   // 1 - client only, 2 - client and server (default), 3 - client, server and connection, 4 - low-level information
 
@@ -525,7 +647,7 @@ function osc_sendMail($params, $type = '') {
       file_put_contents(osc_content_path() . 'debug.log', gmdate('Y-m-d H:i:s'). "\t$level\t$str\n", FILE_APPEND | LOCK_EX);
     };
   }
-  
+
   /** @var \PHPMailer $mail */
   $mail = osc_apply_filter('init_send_mail', $mail, $params);
 
@@ -567,7 +689,7 @@ function osc_sendMail($params, $type = '') {
   if(array_key_exists('password', $params)) {
     $smtpSecure = $params['ssl'];
   }
-  
+
   if($smtpSecure != '') {
     $mail->SMTPSecure = $smtpSecure;
   }
@@ -576,7 +698,7 @@ function osc_sendMail($params, $type = '') {
   if(array_key_exists('username', $params)) {
     $stmpUsername = $params['username'];
   }
-  
+
   if($stmpUsername != '') {
     $mail->Username = $stmpUsername;
   }
@@ -585,7 +707,7 @@ function osc_sendMail($params, $type = '') {
   if(array_key_exists('password', $params)) {
     $smtpPassword = $params['password'];
   }
-  
+
   if($smtpPassword != '') {
     $mail->Password = $smtpPassword;
   }
@@ -594,7 +716,7 @@ function osc_sendMail($params, $type = '') {
   if(array_key_exists('host', $params)) {
     $smtpHost = $params['host'];
   }
-  
+
   if($smtpHost != '') {
     $mail->Host = $smtpHost;
   }
@@ -603,7 +725,7 @@ function osc_sendMail($params, $type = '') {
   if(array_key_exists('port', $params)) {
     $smtpPort = $params['port'];
   }
-  
+
   if($smtpPort != '') {
     $mail->Port = $smtpPort;
   }
@@ -650,13 +772,13 @@ function osc_sendMail($params, $type = '') {
     //error_log();
     return false;
   }
-  
+
   if(array_key_exists('add_bcc', $params)) {
     if(!is_array($params['add_bcc']) && $params['add_bcc'] != '') {
       $params['add_bcc'] = array($params['add_bcc']);
     }
 
-    foreach ($params['add_bcc'] as $bcc) {
+    foreach($params['add_bcc'] as $bcc) {
       $mail->addBCC($bcc);
     }
   }
@@ -675,19 +797,19 @@ function osc_sendMail($params, $type = '') {
       $params['attachment'] = array($params['attachment']);
     }
 
-    foreach ($params['attachment'] as $attachment) {
+    foreach($params['attachment'] as $attachment) {
       if(is_array($attachment)) {
         if(isset($attachment['path']) && isset($attachment['name'])) {
           try {
             $mail->addAttachment($attachment['path'], $attachment['name']);
-          } catch (phpmailerException $e) {
+          } catch(phpmailerException $e) {
             continue;
           }
         }
       } else {
         try {
           $mail->addAttachment($attachment);
-        } catch (phpmailerException $e) {
+        } catch(phpmailerException $e) {
           continue;
         }
       }
@@ -698,7 +820,7 @@ function osc_sendMail($params, $type = '') {
   $mail->isHTML();
 
   $mail = osc_apply_filter('pre_send_mail', $mail, $params, $type);
-  
+
   // Check if $mail was not invalidated in filter
   if($mail === false) {
     return false;
@@ -709,12 +831,12 @@ function osc_sendMail($params, $type = '') {
   // Send email!
   try {
     $mail->send();
-    
-  } catch (phpmailerException $e) {
+
+  } catch(phpmailerException $e) {
     trigger_error($e->errorMessage(), (OSC_DEBUG ? E_USER_NOTICE : E_USER_WARNING));      // E_USER_NOTICE, E_USER_WARNING, E_USER_ERROR
     return false;
-    
-  } catch (Exception $e) {
+
+  } catch(Exception $e) {
     trigger_error($e->errorMessage(), (OSC_DEBUG ? E_USER_NOTICE : E_USER_WARNING));      // E_USER_NOTICE, E_USER_WARNING, E_USER_ERROR
     return false;
   }
@@ -733,7 +855,7 @@ function osc_sendMail($params, $type = '') {
  */
 function osc_mailBeauty($text, $params) {
   $text = str_ireplace($params[0], $params[1], $text);
-  
+
   $kwords = array(
     '{WEB_URL}',
     '{WEB_TITLE}',
@@ -744,7 +866,7 @@ function osc_mailBeauty($text, $params) {
     '{LOCALE_CODE}',
     '{LOCALE_SHORT_CODE}'
   );
-  
+
   $rwords = array(
     osc_base_url(),
     osc_page_title(),
@@ -755,7 +877,7 @@ function osc_mailBeauty($text, $params) {
     osc_current_user_locale_code(),
     substr(osc_current_user_locale_code(), 0, 2)
   );
-  
+
   $text = str_ireplace($kwords, $rwords, $text);
 
   return $text;
@@ -773,11 +895,11 @@ function osc_mkdir($dir, $mode = 0755, $recursive = true) {
   if($dir === null || $dir === '') {
     return false;
   }
-  
+
   if(is_dir($dir) || $dir === '/') {
     return true;
   }
-  
+
   if(osc_mkdir(dirname($dir), $mode, $recursive)) {
     return @mkdir($dir, $mode);
   }
@@ -795,7 +917,7 @@ function osc_mkdir($dir, $mode = 0755, $recursive = true) {
  */
 function osc_copy($source, $dest, $options = array('folderPermission' => 0755, 'filePermission' => 0755)) {
   $result = true;
-  
+
   if(is_file($source)) {
     if($dest[strlen($dest) - 1] === '/') {
       if(!file_exists($dest)) {
@@ -839,7 +961,7 @@ function osc_copy($source, $dest, $options = array('folderPermission' => 0755, '
 
     $dirHandle = opendir($source);
     $result = true;
-    while ($file = readdir($dirHandle)) {
+    while($file = readdir($dirHandle)) {
       if($file !== '.' && $file !== '..') {
         if(!is_dir($source . '/' . $file)) {
           $__dest = $dest . '/' . $file;
@@ -915,7 +1037,7 @@ function osc_rename_dir($path, $old_dir, $new_dir, $clean_before_rename = false)
         new RecursiveDirectoryIterator($dst, RecursiveDirectoryIterator::SKIP_DOTS),
         RecursiveIteratorIterator::CHILD_FIRST
       );
-      
+
       foreach($it as $file) {
         if($file->isDir()) {
           @rmdir($file->getRealPath());
@@ -923,21 +1045,21 @@ function osc_rename_dir($path, $old_dir, $new_dir, $clean_before_rename = false)
           @unlink($file->getRealPath());
         }
       }
-      
+
       @rmdir($dst);
-      
+
       // Rename normally
       if(!@rename($src, $dst)) {
         return 4;
       }
-      
+
     } else {
       // Merge src into dst
       $it = new RecursiveIteratorIterator(
         new RecursiveDirectoryIterator($src, RecursiveDirectoryIterator::SKIP_DOTS),
         RecursiveIteratorIterator::SELF_FIRST
       );
-      
+
       foreach($it as $item) {
         $destPath = $dst . substr($item->getRealPath(), strlen($src));
         if($item->isDir()) {
@@ -948,13 +1070,13 @@ function osc_rename_dir($path, $old_dir, $new_dir, $clean_before_rename = false)
           @copy($item->getRealPath(), $destPath);
         }
       }
-      
+
       // Delete original src after merge
       $it = new RecursiveIteratorIterator(
         new RecursiveDirectoryIterator($src, RecursiveDirectoryIterator::SKIP_DOTS),
         RecursiveIteratorIterator::CHILD_FIRST
       );
-      
+
       foreach($it as $file) {
         if($file->isDir()) {
           @rmdir($file->getRealPath());
@@ -962,10 +1084,10 @@ function osc_rename_dir($path, $old_dir, $new_dir, $clean_before_rename = false)
           @unlink($file->getRealPath());
         }
       }
-      
+
       @rmdir($src);
     }
-    
+
   } else {
     // Destination does not exist - do normal rename
     if(!@rename($src, $dst)) {
@@ -974,11 +1096,11 @@ function osc_rename_dir($path, $old_dir, $new_dir, $clean_before_rename = false)
         new RecursiveDirectoryIterator($src, RecursiveDirectoryIterator::SKIP_DOTS),
         RecursiveIteratorIterator::CHILD_FIRST
       );
-      
+
       foreach($it as $file) {
         @chmod($file->getRealPath(), 0755);
       }
-      
+
       @chmod($src, 0755);
 
       if(!@rename($src, $dst)) {
@@ -1008,7 +1130,7 @@ function osc_dbdump($path, $file) {
   if(!is_writable($path)) {
     return -4;
   }
-  
+
   if($path == '') {
     return -1;
   }
@@ -1041,7 +1163,7 @@ function osc_dbdump($path, $file) {
   fclose($f);
 
   $tables = array();
-  foreach ($result as $_table) {
+  foreach($result as $_table) {
     $tableName = current($_table);
     $tables[$tableName] = $tableName;
   }
@@ -1054,6 +1176,7 @@ function osc_dbdump($path, $file) {
     't_city',
     't_city_area',
     't_widget',
+    't_widget_description',
     't_admin',
     't_user',
     't_user_description',
@@ -1078,9 +1201,9 @@ function osc_dbdump($path, $file) {
     't_meta_categories',
     't_item_meta'
   );
-  
+
   // Backup default Osclass tables in order, so no problem when importing them back
-  foreach ($tables_order as $table) {
+  foreach($tables_order as $table) {
     if(array_key_exists(DB_TABLE_PREFIX . $table, $tables)) {
       $dump->table_structure($path, DB_TABLE_PREFIX . $table);
       $dump->table_data($path, DB_TABLE_PREFIX . $table);
@@ -1089,7 +1212,7 @@ function osc_dbdump($path, $file) {
   }
 
   // Backup the rest of tables
-  foreach ($tables as $table) {
+  foreach($tables as $table) {
     $dump->table_structure($path, $table);
     $dump->table_data($path, $table);
   }
@@ -1107,7 +1230,7 @@ function testCurl() {
   if(function_exists('curl_init') && function_exists('curl_exec')) {
     return true;
   }
-  
+
   return false;
 }
 
@@ -1143,7 +1266,7 @@ if(!function_exists('http_chunked_decode')) {
     $pos = 0;
     $len = strlen($chunk);
     $dechunk = null;
-    while (($pos < $len)
+    while(($pos < $len)
       && ($chunkLenHex = substr($chunk, $pos, ($newlineAt = strpos($chunk, "\n", $pos + 1)) - $pos))) {
       if(!is_hex($chunkLenHex)) {
         trigger_error('Value is not properly chunk encoded', E_USER_WARNING);
@@ -1217,7 +1340,7 @@ function processHeaders($headers) {
   $tmpHeaders = $headers;
   $headers = array();
 
-  foreach ($tmpHeaders as $aux) {
+  foreach($tmpHeaders as $aux) {
     if(preg_match('/^(.*):\s(.*)$/', $aux, $matches)) {
       $headers[strtolower($matches[1])] = $matches[2];
     }
@@ -1243,7 +1366,7 @@ function download_fsockopen($sourceFile, $fileout = null, $post_data = null) {
   $aUrl = parse_url($sourceFile);
   $host = (isset($aUrl['host']) ? $aUrl['host'] : 'localhost');
   $headers = osc_req_headers();
-  
+
   if('localhost' === strtolower($host)) {
     $host = '127.0.0.1';
   }
@@ -1255,7 +1378,7 @@ function download_fsockopen($sourceFile, $fileout = null, $post_data = null) {
   }
 
   $fp = @fsockopen($host, 80, $errno, $errstr, 30);
-  
+
   if(!$fp) {
     return false;
   }
@@ -1265,7 +1388,7 @@ function download_fsockopen($sourceFile, $fileout = null, $post_data = null) {
   $out .= "Host: $host\r\n";
   $out .= "User-Agent: $ua\r\n";
   $out .= "Connection: Close\r\n";
-  
+
   if(!empty($headers)) {
     $out .= implode("\r\n", $headers) . "\r\n";
   }
@@ -1275,11 +1398,11 @@ function download_fsockopen($sourceFile, $fileout = null, $post_data = null) {
   if($post_data != null && is_array($post_data)) {
     $out .= http_build_query($post_data);
   }
-  
+
   fwrite($fp, $out);
 
   $contents = '';
-  while (!feof($fp)) {
+  while(!feof($fp)) {
     $contents .= fgets($fp, 1024);
   }
 
@@ -1344,10 +1467,10 @@ function osc_downloadFile($sourceFile, $downloadedFile, $post_data = null) {
   if(testCurl()) {
     @set_time_limit(0);
     $fp = @fopen(osc_content_path() . 'downloads/' . $downloadedFile, 'wb+');
-    
+
     if($fp) {
       $ch = curl_init($sourceFile);
-      
+
       @curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
       curl_setopt($ch, CURLOPT_USERAGENT, Params::getServerParam('HTTP_USER_AGENT') . ' Osclass (v.' . osc_version() . ')');
       curl_setopt($ch, CURLOPT_FILE, $fp);
@@ -1392,21 +1515,21 @@ function osc_file_get_contents($url, $post_data = '', $time_limit_ms = 0, $forma
   $response = null;
   $http_code = null;
   $body = null;
-  
+
   $post_data = ($post_data == '' ? null : $post_data);
   $time_limit_ms = ($time_limit_ms > 0 ? $time_limit_ms : 10000);
-  
+
   if(testCurl()) {
     $ch = curl_init();
-    
+
     curl_setopt($ch, CURLOPT_URL, $url);
     @curl_setopt($ch, CURLOPT_CONNECTTIMEOUT_MS, $time_limit_ms);
     curl_setopt($ch, CURLOPT_USERAGENT, Params::getServerParam('HTTP_USER_AGENT') . ' Osclass (v.' . osc_version() . ')');
-    
+
     if(!defined('CURLOPT_RETURNTRANSFER')) {
       define('CURLOPT_RETURNTRANSFER', 1);
     }
-    
+
     @curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
     curl_setopt($ch, CURLOPT_REFERER, osc_base_url());
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -1430,7 +1553,7 @@ function osc_file_get_contents($url, $post_data = '', $time_limit_ms = 0, $forma
 
     // print_r($response); exit;
     //echo '<p><strong>' . sprintf(__('Load took %s seconds'), round(@curl_getinfo($ch)['total_time'], 2)) . '</strong></p>';
-    
+
   } elseif(testFsockopen()) {
     $response = download_fsockopen($url, null, $post_data);
   }
@@ -1439,15 +1562,15 @@ function osc_file_get_contents($url, $post_data = '', $time_limit_ms = 0, $forma
   if($format == 'json') {
     if($response != '') {
       $response_arr = json_decode($response, true);
-    
+
       if(json_last_error() === JSON_ERROR_NONE && is_array($response_arr)) {
         return $response_arr;
       }
     }
-    
+
     // Json is invalid, add some additional info
     $msg = osc_esc_html(trim(preg_replace('/\s+/', ' ', (strip_tags((string)($body != '' ? $body : $response))))));
-    
+
     $output = array(
       'status' => 'ERR',
       'message' => '[' . $http_code . '] ' . ($msg != '' ? $msg : _m('Empty server response')),
@@ -1457,7 +1580,7 @@ function osc_file_get_contents($url, $post_data = '', $time_limit_ms = 0, $forma
       'json_error_code' => json_last_error(),
       'json_error_message' => json_last_error_msg()
     );
-    
+
     return $output;
   }
 
@@ -1476,14 +1599,14 @@ function osc_req_headers() {
   $headers = array(
     'X-Request-Id: ' . osc_csrfguard_generate_token(),      // bin2hex(random_bytes(8))
     'X-Api-Version: 3.0',
-    'X-Api-Key: ' . rawurlencode(osc_get_preference('osclasspoint_api_key', 'osclass')),
-    'X-Email: ' . rawurlencode(osc_contact_email()),
-    'X-Ip-Address: ' . rawurlencode(osc_get_ip()),
-    'X-Osclass-Version: ' . rawurlencode(osc_version(true)),
-    'X-Url: ' . rawurlencode(osc_base_url()),
-    'X-Domain: ' . rawurlencode(osc_get_parent_domain()),
+    'X-Api-Key: ' . rawurlencode((string)osc_get_preference('osclasspoint_api_key', 'osclass')),
+    'X-Email: ' . rawurlencode((string)osc_contact_email()),
+    'X-Ip-Address: ' . rawurlencode((string)osc_get_ip()),
+    'X-Osclass-Version: ' . rawurlencode((string)osc_version(true)),
+    'X-Url: ' . rawurlencode((string)osc_base_url()),
+    'X-Domain: ' . rawurlencode((string)osc_get_parent_domain()),
     'X-Subdomain-Enabled: ' . rawurlencode((string)(osc_subdomain_enabled() ? 1 : 0)),
-    'X-Subdomain-Type: ' . rawurlencode(osc_subdomain_type())
+    'X-Subdomain-Type: ' . rawurlencode((string)osc_subdomain_type())
   );
 
   return $headers;
@@ -1499,17 +1622,17 @@ function osc_req_headers() {
 function apache_mod_loaded($mod) {
   if(function_exists('apache_get_modules')) {
     $modules = apache_get_modules();
-    
+
     if(in_array($mod, $modules)) {
       return true;
     }
-    
+
   } elseif(function_exists('phpinfo')) {
     ob_start();
     phpinfo(INFO_MODULES);
-    
+
     $content = ob_get_clean();
-    
+
     if(stripos($content, $mod) !== false) {
       return true;
     }
@@ -1539,7 +1662,7 @@ function osc_changeVersionTo($version = null) {
  */
 function strip_slashes_extended($array) {
   if(is_array($array)) {
-    foreach ($array as $k => &$v) {
+    foreach($array as $k => &$v) {
       $v = strip_slashes_extended($v);
     }
   } else {
@@ -1600,24 +1723,30 @@ function _unzip_file_ziparchive($file, $to) {
   }
 
   $zip = new ZipArchive();
-  $zipopen = $zip->open($file, 4);
+  // $zipopen = $zip->open($file, 4);
+  $zipopen = $zip->open($file, ZipArchive::CREATE);     // ZipArchive::OVERWRITE before Osclass 8.3.2
 
   if($zipopen !== true) {
     return 2;
   }
-  
+
   // The zip is empty
   if($zip->numFiles == 0) {
     return 2;
   }
 
-  for ($i = 0; $i < $zip->numFiles; $i++) {
+  for($i = 0; $i < $zip->numFiles; $i++) {
     $file = $zip->statIndex($i);
+
+    // Normalize backslash separators (zips created on some tools use \ instead of /)
+    if(isset($file['name'])) {
+      $file['name'] = str_replace('\\', '/', $file['name']);
+    }
 
     // Fix language problem - when parent directory is not identified
     if($i == 0 && isset($file['name']) && isset($file['crc']) && $file['crc'] > 0) {   // is not dir
       $name_with_folder = explode('/', $file['name']);
-      
+
       //if(count($name_with_folder) > 1 && strlen((string)$name_with_folder[0]) == 5) {  // it's language folder
       if(count($name_with_folder) > 1) {   // First file is path already, missing creation of parent dir
         $folder = $name_with_folder[0];
@@ -1648,6 +1777,8 @@ function _unzip_file_ziparchive($file, $to) {
       return -1;
     }
 
+    @mkdir(dirname($to . $file['name']), 0755, true);
+
     $fp = @fopen($to . $file['name'], 'wb');
     if(!$fp) {
       return -1;
@@ -1677,7 +1808,8 @@ function _unzip_file_pclzip($zip_file, $to) {
   }
 
   $archive = new PclZip($zip_file);
-  $files = $archive->extract(PCLZIP_OPT_EXTRACT_AS_STRING);
+  $files = $archive->extract(PCLZIP_OPT_EXTRACT_AS_STRING);  // PCLZIP_OPT_STOP_ON_ERROR ?
+
   if(($files) == false) {
     return 2;
   }
@@ -1688,7 +1820,7 @@ function _unzip_file_pclzip($zip_file, $to) {
   }
 
   // Extract the files from the zip
-  foreach ($files as $file) {
+  foreach($files as $file) {
     if(strpos($file['filename'], '__MACOSX/') === 0) {
       continue;
     }
@@ -1761,13 +1893,15 @@ function _zip_folder_ziparchive($archive_folder, $archive_name) {
     $dir = preg_replace('/[\/]{2,}/', '/', $archive_folder . '/');
 
     $dirs = array($dir);
-    while (count($dirs)) {
+    while(count($dirs)) {
       $dir = current($dirs);
       $zip->addEmptyDir(str_replace(ABS_PATH, '', $dir));
 
       $dh = opendir($dir);
-      while (false !== ($_file = readdir($dh))) {
-        if($_file !== '.' && $_file !== '..' && stripos($_file, 'Osclass_backup.') === false) {
+      while(false !== ($_file = readdir($dh))) {
+        $is_backup_file = (stripos($_file, 'Osclass_backup.') !== false || stripos($_file, 'osclass_file_backup_') === 0 || stripos($_file, 'osclass_db_backup_') === 0);
+
+        if($_file !== '.' && $_file !== '..' && !$is_backup_file) {
           if(is_file($dir . $_file)) {
             $zip->addFile($dir . $_file, str_replace(ABS_PATH, '', $dir . $_file));
           } elseif(is_dir($dir . $_file)) {
@@ -1814,7 +1948,7 @@ function _zip_folder_pclzip($archive_folder, $archive_name) {
     if($v_dir[1] === ':') {
       $v_remove = substr($v_dir, 2);
     }
-    $v_list = $zip->create($dir, PCLZIP_OPT_REMOVE_PATH, $v_remove);
+    $v_list = $zip->create($dir, PCLZIP_OPT_REMOVE_PATH, $v_remove, PCLZIP_OPT_BY_EREG, '(Osclass_backup\.|osclass_file_backup_|osclass_db_backup_)');
 
     return !($v_list == 0);
   }
@@ -1830,13 +1964,13 @@ function osc_check_recaptcha() {
   if(!osc_recaptcha_enabled() || trim(osc_recaptcha_private_key()) == '') {
     return true;
   }
-  
+
   $gReCaptchaResponse = Params::getParam('g-recaptcha-response');
-  
+
   if($gReCaptchaResponse !== '' || $gReCaptchaResponse !== false || $gReCaptchaResponse !== 0) {
     $recaptcha = new ReCaptcha(osc_recaptcha_private_key());
     $resp = $recaptcha->verify($gReCaptchaResponse, osc_get_ip());
-    
+
     if($resp->isSuccess()) {
       return true;
     }
@@ -1870,7 +2004,7 @@ function osc_check_dir_writable($dir = ABS_PATH) {
 
   clearstatcache();
   if($dh = opendir($dir)) {
-    while (($file = readdir($dh)) !== false) {
+    while(($file = readdir($dh)) !== false) {
       if($file !== '.' && $file !== '..') {
         if(is_dir(osc_replace_double_slash($dir . '/' . $file))) {
           if(osc_replace_double_slash($dir) === (osc_content_path() . 'themes')) {
@@ -1928,7 +2062,7 @@ function osc_change_permissions($dir = ABS_PATH) {
 
   clearstatcache();
   if($dh = opendir($dir)) {
-    while (($file = readdir($dh)) !== false) {
+    while(($file = readdir($dh)) !== false) {
       if($file !== '.' && $file !== '..' && $file[0] !== '.') {
         // Update os812 make sure file does not get 755
         if(is_dir(osc_replace_double_slash($dir . '/' . $file)) && !is_writable(osc_replace_double_slash($dir . '/' . $file))) {
@@ -1999,13 +2133,13 @@ function osc_save_permissions($dir = ABS_PATH) {
   $perms = array();
   $perms[$dir] = fileperms($dir);
   clearstatcache();
-  
+
   if($dh = opendir($dir)) {
-    while (($file = readdir($dh)) !== false) {
+    while(($file = readdir($dh)) !== false) {
       if($file !== '.' && $file !== '..') {
         if(is_dir(str_replace('//', '/', $dir . '/' . $file))) {
           $res = osc_save_permissions(str_replace('//', '/', $dir . '/' . $file));
-          foreach ($res as $k => $v) {
+          foreach($res as $k => $v) {
             $perms[$k] = $v;
           }
         } else {
@@ -2029,7 +2163,7 @@ function osc_prepare_price($price) {
   if(is_numeric($price)) {
     return number_format((float)$price / 1000000, osc_locale_num_dec(), osc_locale_dec_point(), osc_locale_thousands_sep());
   }
-  
+
   return $price;
 }
 
@@ -2051,12 +2185,12 @@ function rglob($pattern, $flags = 0, $path = '') {
 
     return rglob(basename($pattern), $flags, $dir . '/');
   }
-  
+
   /**
    *
    * $paths = glob($path . '*', GLOB_ONLYDIR | GLOB_NOSORT);
    * $files = glob($path . $pattern, $flags);
-   * foreach ($paths as $p) {
+   * foreach($paths as $p) {
    * $files = array_merge($files, rglob($pattern, $flags, $p . '/'));
    * }
    */
@@ -2065,11 +2199,11 @@ function rglob($pattern, $flags = 0, $path = '') {
 
   $paths = glob($path . '*', GLOB_ONLYDIR | GLOB_NOSORT);
   $files = glob($path . $pattern, $flags);
-  
-  foreach ($paths as $p) {
+
+  foreach($paths as $p) {
     $files[] = rglob($pattern, $flags, $p . '/');
   }
-  
+
   $files = array_merge([], $files);
 
   return $files;
@@ -2086,7 +2220,7 @@ function rglob($pattern, $flags = 0, $path = '') {
  */
 function osc_check_plugin_update($product_key, $version = null) {
   $uri = _get_market_url('check_version', $product_key);
-  
+
   if($uri != false) {
     return _need_update($product_key, $version);
   }
@@ -2103,7 +2237,7 @@ function osc_check_plugin_update($product_key, $version = null) {
  */
 function osc_check_theme_update($product_key, $version = null) {
   $uri = _get_market_url('check_version', $product_key);
-  
+
   if($uri != false) {
     return _need_update($product_key, $version);
   }
@@ -2178,13 +2312,13 @@ function _need_update($product_key, $version, $use_cache = false) {
     $products = isset($prepare['data']) ? $prepare['data'] : array();
   } else {
     $products = osc_file_get_contents_json(_get_market_url('products_version', $product_key));
-    
+
     osc_set_preference('market_products_version', json_encode(array('date' => date('Y-m-d H:i:s'), 'data' => $products)));
     osc_reset_preferences();
   }
 
   $product = (isset($products[$product_key]) ? $products[$product_key] : false);
-  
+
   if($product !== false) {
     $version_new = (@$product['s_version'] <> '' ? @$product['s_version'] : @$product['version']);
 
@@ -2216,16 +2350,16 @@ function version_compare2($a, $b) {
   if(count(explode('.', $a)) <= 1) {
     $a = implode('.', str_split($a));
   }
-  
+
   // in case $b is integer (420), change it to 4.2.0
   if(count(explode('.', $b)) <= 1) {
     $b = implode('.', str_split($b));
   }
-  
+
   $aA = explode('.', rtrim($a, '.0')); //Split version into pieces and remove trailing .0
   $aB = explode('.', rtrim($b, '.0')); //Split version into pieces and remove trailing .0
-  
-  foreach ($aA as $depth => $aVal) { //Iterate over each piece of A
+
+  foreach($aA as $depth => $aVal) { //Iterate over each piece of A
     if(isset($aB[$depth])) { //If B matches A to this depth, compare the values
       if($aVal > $aB[$depth]) {
         return 1;     // returns A > B
@@ -2233,7 +2367,7 @@ function version_compare2($a, $b) {
 
       if($aVal < $aB[$depth]) {
         return -1;   // returns B > A
-      } 
+      }
       //An equal result is inconclusive at this point
     } else { //If B does not match A to this depth, then A comes after B in sort order
       if($aVal > 0) {
@@ -2258,7 +2392,7 @@ function version_compare2($a, $b) {
 function _recursive_category_stats(&$aux, &$categoryTotal) {
   $count_items = Item::newInstance()->numItems($aux);
   if(is_array($aux['categories'])) {
-    foreach ($aux['categories'] as &$cat) {
+    foreach($aux['categories'] as &$cat) {
       $count_items += _recursive_category_stats($cat, $categoryTotal);
     }
     unset($cat);
@@ -2278,7 +2412,7 @@ function osc_update_cat_stats() {
   $categoryTotal = array();
   $aCategories = Category::newInstance()->toTreeAll();
 
-  foreach ($aCategories as &$category) {
+  foreach($aCategories as &$category) {
     if($category['fk_i_parent_id'] === null) {
       _recursive_category_stats($category, $categoryTotal);
     }
@@ -2287,7 +2421,7 @@ function osc_update_cat_stats() {
 
   $sql = 'REPLACE INTO ' . DB_TABLE_PREFIX . 't_category_stats (fk_i_category_id, i_num_items) VALUES ';
   $aValues = array();
-  foreach ($categoryTotal as $k => $v) {
+  foreach($categoryTotal as $k => $v) {
     $aValues[] = "($k, $v)";
   }
   $sql .= implode(',', $aValues);
@@ -2309,7 +2443,7 @@ function osc_update_cat_stats_id($id) {
 
   if(count($aCategories) > 0) {
     // sumar items de la categoría
-    foreach ($aCategories as $subcategory) {
+    foreach($aCategories as $subcategory) {
       $total = Item::newInstance()->numItems($subcategory);
       $categoryTotal += $total;
     }
@@ -2350,12 +2484,12 @@ function osc_update_location_stats($force = false, $limit = 1000) {
       $limit = max(1000, ceil($total_cities / 22));
     }
     $aLocations = $loctmp->getLocations($limit);
-    foreach ($aLocations as $location) {
+    foreach($aLocations as $location) {
       $id = $location['id_location'];
       $type = $location['e_type'];
       $data = 0;
       // update locations stats
-      switch ($type) {
+      switch($type) {
         case 'COUNTRY':
           $numItems = CountryStats::newInstance()->calculateNumItems($id);
           $data = CountryStats::newInstance()->setNumItems($id, $numItems);
@@ -2374,7 +2508,7 @@ function osc_update_location_stats($force = false, $limit = 1000) {
         default:
           break;
       }
-      if($data >= 0) {
+      if($data === true) {
         $loctmp->delete(array(
           'e_type' => $location['e_type'],
           'id_location' => $location['id_location']
@@ -2385,14 +2519,14 @@ function osc_update_location_stats($force = false, $limit = 1000) {
     // we need to populate location tmp table
     $aCountry = Country::newInstance()->listAll();
 
-    foreach ($aCountry as $country) {
+    foreach($aCountry as $country) {
       $aRegionsCountry = Region::newInstance()->findByCountry($country['pk_c_code']);
       $loctmp->insert(array('id_location' => $country['pk_c_code'], 'e_type' => 'COUNTRY'));
-      foreach ($aRegionsCountry as $region) {
+      foreach($aRegionsCountry as $region) {
         $aCitiesRegion = City::newInstance()->findByRegion($region['pk_i_id']);
         $loctmp->insert(array('id_location' => $region['pk_i_id'], 'e_type' => 'REGION'));
         $batchCities = array();
-        foreach ($aCitiesRegion as $city) {
+        foreach($aCitiesRegion as $city) {
           $batchCities[] = $city['pk_i_id'];
         }
         unset($aCitiesRegion);
@@ -2422,11 +2556,11 @@ function osc_translate_categories($locale) {
   $catManager = Category::newInstance();
   $old_categories = $catManager->_findNameIDByLocale($old_locale);
   $tmp_categories = $catManager->_findNameIDByLocale($locale);
-  foreach ($tmp_categories as $category) {
+  foreach($tmp_categories as $category) {
     $new_categories[$category['pk_i_id']] = $category['s_name'];
   }
   unset($tmp_categories);
-  foreach ($old_categories as $category) {
+  foreach($old_categories as $category) {
     if(!isset($new_categories[$category['pk_i_id']])) {
       $fieldsDescription['s_name'] = __($category['s_name'], 'cat_' . $locale);
       $fieldsDescription['s_description'] = '';
@@ -2434,13 +2568,13 @@ function osc_translate_categories($locale) {
       $fieldsDescription['fk_c_locale_code'] = $locale;
       $slug_tmp = $slug = osc_sanitizeString(osc_apply_filter('slug', $fieldsDescription['s_name']));
       $slug_unique = 1;
-      
-      while (true) {
+
+      while(true) {
         if(!$catManager->findBySlug($slug)) {
           break;
         }
 
-        $slug = $slug_tmp . '_' . $slug_unique;
+        $slug = $slug_tmp . '-' . $slug_unique;
         $slug_unique++;
       }
       $fieldsDescription['s_slug'] = $slug;
@@ -2456,7 +2590,7 @@ function osc_translate_categories($locale) {
  */
 function get_ip() {
   return osc_get_ip();
-  
+
   /*
   //DISABLED IN V440
   if(Params::getServerParam('HTTP_CLIENT_IP') != '') {
@@ -2465,7 +2599,7 @@ function get_ip() {
 
   if(Params::getServerParam('HTTP_X_FORWARDED_FOR') != '') {
     $ip_array = explode(',', Params::getServerParam('HTTP_X_FORWARDED_FOR'));
-    foreach ($ip_array as $ip) {
+    foreach($ip_array as $ip) {
       return trim($ip);
     }
   }
@@ -2484,7 +2618,7 @@ function osc_get_ip() {
     $_SERVER['REMOTE_ADDR'] = $_SERVER["HTTP_CF_CONNECTING_IP"];
     $_SERVER['HTTP_CLIENT_IP'] = $_SERVER["HTTP_CF_CONNECTING_IP"];
   }
-  
+
   $client = @$_SERVER['HTTP_CLIENT_IP'];
   $forward = @$_SERVER['HTTP_X_FORWARDED_FOR'];
   $remote = @$_SERVER['REMOTE_ADDR'];
@@ -2508,7 +2642,7 @@ function osc_get_ip() {
 function osc_csrfguard_generate_token() {
   // update 420
   $token = Session::newInstance()->_get('octoken');
-  
+
   if($token != '') {
     return $token;
   }
@@ -2516,8 +2650,8 @@ function osc_csrfguard_generate_token() {
   $token = strtolower(osc_genRandomPassword(12));
   Session::newInstance()->_set('octoken', $token);
   return $token;
-  
-  
+
+
   // $token_name = Session::newInstance()->_get('token_name');
   // if($token_name != '' && Session::newInstance()->_get($token_name) != '') {
     // return array($token_name, Session::newInstance()->_get($token_name));
@@ -2527,7 +2661,7 @@ function osc_csrfguard_generate_token() {
     // $token = hash('sha512', mt_rand(0, mt_getrandmax()));
   // } else {
     // $token = '';
-    // for ($i = 0; $i < 128; ++$i) {
+    // for($i = 0; $i < 128; ++$i) {
       // $r = mt_rand(0, 35);
       // if($r < 26) {
         // $c = chr(ord('a') + $r);
@@ -2556,7 +2690,7 @@ function osc_csrfguard_generate_token() {
  *
  * @return bool
  */
- 
+
   //function osc_csrfguard_validate_token($unique_form_name, $token_value)
   // {
     // $name = Session::newInstance()->_get('token_name');
@@ -2584,7 +2718,7 @@ function osc_csrfguard_validate_token($token) {
 function osc_csrfguard_replace_forms($form_data_html) {
   $count = preg_match_all('/<form(.*?)>/is', $form_data_html, $matches, PREG_SET_ORDER);
   if(is_array($matches)) {
-    foreach ($matches as $m) {
+    foreach($matches as $m) {
       if(strpos($m[1], 'nocsrf') !== false || strpos($m[1], 'notoken') !== false || strpos($m[1], 'nooctoken') !== false) {
         continue;
       }
@@ -2606,7 +2740,7 @@ function osc_csrfguard_inject() {
 function osc_csrfguard_start() {
   ob_start();
   $functions = osc_apply_filter('shutdown_functions', array('osc_csrfguard_inject'));
-  foreach ($functions as $f) {
+  foreach($functions as $f) {
     register_shutdown_function($f);
   }
 }
@@ -2623,21 +2757,21 @@ function osc_redirect_to($url, $code = null) {
   if(ob_get_length() > 0) {
     ob_end_flush();
   }
-  
+
   // Solution suggested by ChatGPT
   // if(ob_get_level() > 0 && ob_get_length() > 0) {
     // ob_clean();
   // }
-  
+
   Cookie::newInstance()->_setRefererHistory();
   Cookie::newInstance()->_setRefererHistory($url);
-  
+
   if($code !== null) {
     header('Location: ' . $url, true, $code);
   } else {
     header('Location: ' . $url);
   }
-  
+
   exit;
 }
 
@@ -2649,7 +2783,7 @@ function osc_redirect_to($url, $code = null) {
  */
 function osc_calculate_location_slug($type) {
   $field = 'pk_i_id';
-  switch ($type) {
+  switch($type) {
     case 'country':
       $manager = Country::newInstance();
       $field = 'pk_c_code';
@@ -2666,10 +2800,10 @@ function osc_calculate_location_slug($type) {
   }
   $locations = $manager->listByEmptySlug();
   $locations_changed = 0;
-  foreach ($locations as $location) {
+  foreach($locations as $location) {
     $slug_tmp = $slug = osc_sanitizeString($location['s_name']);
     $slug_unique = 1;
-    while (true) {
+    while(true) {
       $location_slug = $manager->findBySlug($slug);
       if(!isset($location_slug[$field])) {
         break;
@@ -2689,7 +2823,7 @@ function osc_calculate_location_slug($type) {
  * @param $input
  */
 function osc_prune_array(&$input) {
-  foreach ($input as $key => &$value) {
+  foreach($input as $key => &$value) {
     if(is_array($value)) {
       osc_prune_array($value);
       if(empty($input[$key])) {
@@ -2734,20 +2868,20 @@ function osc_do_upgrade() {
       if(@!mkdir($concurrentDirectory = osc_content_path() . 'downloads/oc-temp/', 0755) && !is_dir($concurrentDirectory)) {
         throw new RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
       }
-      
+
       if(@!mkdir($tmp_path, 0755) && !is_dir($tmp_path)) {
         throw new RuntimeException(sprintf('Directory "%s" was not created', $tmp_path));
       }
-      
+
       $res = osc_unzip_file(osc_content_path() . 'downloads/' . $filename, $tmp_path);
-      
+
       // Unzip successful
       if($res == 1) {
         // Oc-admin folder is renamed
         if(defined('OC_ADMIN_FOLDER') && OC_ADMIN_FOLDER != 'oc-admin') {
           osc_rename_dir($tmp_path, 'oc-admin', OC_ADMIN_FOLDER);
         }
-        
+
         // Oc-content folder is renamed
         if(defined('OC_CONTENT_FOLDER') && OC_CONTENT_FOLDER != 'oc-content') {
           osc_rename_dir($tmp_path, 'oc-content', OC_CONTENT_FOLDER);
@@ -2757,34 +2891,34 @@ function osc_do_upgrade() {
         if(defined('OC_INCLUDES_FOLDER') && OC_INCLUDES_FOLDER != 'oc-includes') {
           osc_rename_dir($tmp_path, 'oc-includes', OC_INCLUDES_FOLDER);
         }
-        
+
         // Copy files from extracted zip in temp folder
         $fail = -1;
-        
+
         if($handle = opendir($tmp_path)) {
           $fail = 0;
-          
+
           while(false !== ($_file = readdir($handle))) {
             if($_file !== '.' && $_file !== '..' && (($_file !== OC_CONTENT_FOLDER && $_file !== 'oc-content') || osc_update_occontent())) {  // this will block sigma theme update
               $data = osc_copy($tmp_path . $_file, ABS_PATH . $_file);
-              
+
               if($data == false) {
                 $fail = 1;
               }
             }
           }
-          
+
           closedir($handle);
-          
+
           // Remove zip package
           @unlink(osc_content_path() . 'downloads/' . $filename);
 
           // Replace files from temp folder to osclass live files was successful
           if($fail == 0) {
-            
+
             // Upgrade database
             $error_queries = array();
-            
+
             // Run upgrade DB from struct.sql (usually disabled)
             if(UPGRADE_SKIP_DB === false && file_exists(osc_lib_path() . 'osclass/installer/struct.sql')) {
               $sql = file_get_contents(osc_lib_path() . 'osclass/installer/struct.sql');
@@ -2793,20 +2927,20 @@ function osc_do_upgrade() {
               $c_db = $conn->getOsclassDb();
               $comm = new DBCommandClass($c_db);
               $error_queries = $comm->updateDB(str_replace('/*TABLE_PREFIX*/', DB_TABLE_PREFIX, $sql));
-              
+
             } else {
               $error_queries[0] = true;
             }
-            
-            
+
+
             if(UPGRADE_SKIP_DB === true || $error_queries[0]) {
               // Run upgrade func
               osc_set_preference('update_core_json', '');
-              
+
               if(file_exists(osc_lib_path() . 'osclass/upgrade-funcs.php')) {
                 require_once osc_lib_path() . 'osclass/upgrade-funcs.php';
               }
-              
+
               // Additional actions is not important for the rest of the proccess
               // We will inform the user of the problems but the upgrade could continue
 
@@ -2823,52 +2957,52 @@ function osc_do_upgrade() {
                   $rm_errors++;
                 }
               }
-              
+
               if(!rmdir($tmp_path)) {
                 $rm_errors++;
               }
-              
+
               $deleted = @unlink(ABS_PATH . '.maintenance');
-              
+
               if($rm_errors == 0) {
                 $message = __('Everything looks good! Your Osclass installation is up-to-date');
                 osc_add_flash_ok_message($message, 'admin');
-                
+
               } else {
                 $message = sprintf(__('Nearly everything looks good! Your Osclass installation is up-to-date, but there were some errors removing temporary files. Please manually remove the "%s/downloads/oc-temp" folder'), OC_CONTENT_FOLDER);
                 osc_add_flash_warning_message($message, 'admin');
                 $error = 6; // Some errors removing files
               }
-              
+
             } else {
               $sql_error_msg = $error_queries[2];
               $message = __('Problems when upgrading the database');
               $error = 5; // Problems upgrading the database
             }
-            
+
           } else {
             $message = __('Problems when copying files. Please check your permissions. ');
             $error = 4; // Problems copying files. Maybe permissions are not correct
           }
-          
+
         } else {
           $message = __('Nothing to copy');
           $error = 99; // Nothing to copy. THIS SHOULD NEVER HAPPEN, means we don't update any file!
           $deleted = @unlink(ABS_PATH . '.maintenance');
         }
-        
+
       } else {
         $message = __('Unzip failed');
         $error = 3; // Unzip failed
         $deleted = @unlink(ABS_PATH . '.maintenance');
       }
-      
+
     } else {
       $message = __('Download failed');
       $error = 2; // Download failed
       unlink(ABS_PATH . '.maintenance');
     }
-    
+
   } else {
     $message = __('Missing download URL');
     $error = 1; // Missing download URL
@@ -2879,15 +3013,15 @@ function osc_do_upgrade() {
     $message .= '<br /><br />' . __('We had some errors upgrading your database. The following queries failed:') . implode('<br />', $sql_error_msg);
   }
 
-  foreach ($perms as $k => $v) {
+  foreach($perms as $k => $v) {
     @chmod($k, $v);
   }
-  
+
   osc_run_hook('after_upgrade', $error);
 
   return array(
-    'error' => $error, 
-    'message' => $message, 
+    'error' => $error,
+    'message' => $message,
     'version' => @$data['s_name']
   );
 }
@@ -2921,7 +3055,7 @@ function osc_do_auto_upgrade() {
             osc_run_hook('after_auto_upgrade', $result);
             osc_set_preference('update_core_json', '');
           }
-          
+
         } elseif(substr($json['version'], 1, 1) !== substr(osc_version(), 1, 1)) {
           // MAJOR RELEASE
           if(strpos(osc_auto_update(), 'branch') !== false || strpos(osc_auto_update(), 'major') !== false) {
@@ -2931,7 +3065,7 @@ function osc_do_auto_upgrade() {
             osc_run_hook('after_auto_upgrade', $result);
             osc_set_preference('update_core_json', '');
           }
-          
+
         } elseif(substr($json['version'], 2, 1) !== substr(osc_version(), 2, 1)) {
           // MINOR RELEASE
           if(strpos(osc_auto_update(), 'branch') !== false || strpos(osc_auto_update(), 'major') !== false || strpos(osc_auto_update(), 'minor') !== false) {
@@ -2943,13 +3077,13 @@ function osc_do_auto_upgrade() {
           }
         }
       }
-      
+
     } else {
       osc_set_preference('update_core_json', '');
     }
-    
+
     osc_set_preference('last_version_check', time());
-    
+
   } else {
     osc_set_preference('update_core_json', '');
     osc_set_preference('last_version_check', time() - 23 * 3600);
@@ -2957,13 +3091,13 @@ function osc_do_auto_upgrade() {
 
   // Core has been updated correctly or there was no core update at all
   if($result['error'] == 0 || $result['error'] == 6) {
-    if(strpos(osc_auto_update(), 'plugins') !== false) { 
+    if(strpos(osc_auto_update(), 'plugins') !== false) {
       $total = osc_check_plugins_update(true);
-      
+
       if($total > 0) {
         $elements = osc_get_preference('plugins_to_update');
-        
-        foreach ($elements as $element) {   // element is product key
+
+        foreach($elements as $element) {   // element is product key
           if(osc_is_update_compatible('check_version', $element, $json['version_string'])) {
             osc_market('plugins', $element);
             $plugins_updated = $total;
@@ -2972,13 +3106,13 @@ function osc_do_auto_upgrade() {
       }
     }
 
-    if(strpos(osc_auto_update(), 'themes') !== false) { 
+    if(strpos(osc_auto_update(), 'themes') !== false) {
       $total = osc_check_themes_update(true);
-      
+
       if($total > 0) {
         $elements = osc_get_preference('themes_to_update');
-        
-        foreach ($elements as $element) {   // element is product key
+
+        foreach($elements as $element) {   // element is product key
           if(osc_is_update_compatible('check_version', $element, $json['version_string'])) {
             osc_market('themes', $element);
             $themes_updated = $total;
@@ -2987,13 +3121,13 @@ function osc_do_auto_upgrade() {
       }
     }
 
-    if(strpos(osc_auto_update(), 'languages') !== false) { 
+    if(strpos(osc_auto_update(), 'languages') !== false) {
       $total = osc_check_languages_update(true);
-      
+
       if($total > 0) {
         $elements = osc_get_preference('languages_to_update');
-        
-        foreach ($elements as $element) {    // element is language code
+
+        foreach($elements as $element) {    // element is language code
           $lang_row = OSCLocale::newInstance()->findByCode($element);
           if(!isset($lang_row['s_version']) || osc_is_update_compatible('languages', $element, @$lang_row['s_version'])) {
             osc_market('languages', $element);
@@ -3012,21 +3146,21 @@ function osc_do_auto_upgrade() {
       $body .= '<p>' . __('Let us inform you, that your osclass website {WEB_TITLE} on {WEB_URL} has been auto-upgraded. List of upgraded items is bellow.') . '</p>';
 
       if($core_updated > 0) {
-        $body .= '<p>' . __('Osclass core has been updated') . '</p>';
+        $body .= '<p>' . __('Osclass has been updated') . '</p>';
         $body .= '<p>' . __('Old version') . ': <strong>{OLD_VERSION}</strong></p>';
         $body .= '<p>' . __('Current version') . ': <strong>{NEW_VERSION}</strong></p>';
       }
 
       if($plugins_updated > 0) {
-        $body .= '<p>' . sprintf(__('%s plugin(s) has been updated'), '<strong>' . $plugins_updated . '</strong>') . '</p>';
+        $body .= '<p>' . sprintf(__('%s plugin(s) have been updated'), '<strong>' . $plugins_updated . '</strong>') . '</p>';
       }
 
       if($themes_updated > 0) {
-        $body .= '<p>' . sprintf(__('%s theme(s) has been updated'), '<strong>' . $themes_updated . '</strong>') . '</p>';
+        $body .= '<p>' . sprintf(__('%s theme(s) have been updated'), '<strong>' . $themes_updated . '</strong>') . '</p>';
       }
 
       if($languages_updated > 0) {
-        $body .= '<p>' . sprintf(__('%s plugin(s) has been updated'), '<strong>' . $languages_updated . '</strong>') . '</p>';
+        $body .= '<p>' . sprintf(__('%s plugin(s) have been updated'), '<strong>' . $languages_updated . '</strong>') . '</p>';
       }
 
       $body .= '<p><br/></p>';
@@ -3039,7 +3173,7 @@ function osc_do_auto_upgrade() {
 
       $title = osc_mailBeauty($title, $words);
       $body = osc_mailBeauty($body, $words);
-    
+
       $emailParams = array(
         'subject' => $title,
         'to' => osc_contact_email(),
@@ -3075,7 +3209,7 @@ function osc_is_update_compatible($section, $product_key, $osclass_version = OSC
         if($result == -1) {
           // market have a newer version of this language
           $result = version_compare2($data['s_version'], $osclass_version);
-          
+
           if($result == 0 || $result == -1) {    // A <= B
             // market version is compatible with current osclass version
             return true;
@@ -3099,7 +3233,7 @@ function osc_is_update_compatible($section, $product_key, $osclass_version = OSC
               return false;
             }
           }
-          
+
           return true;
         } else {
           return false;
@@ -3153,7 +3287,7 @@ function osc_market($type, $product_key, $install = 0) {
     if($type == 'languages') {
       if(isset($data[$product_key])) {
         $data = $data[$product_key];
-      }      
+      }
     }
 
     /***********************
@@ -3171,7 +3305,7 @@ function osc_market($type, $product_key, $install = 0) {
       } else if($data['type'] == 'plugin') {
         $folder = osc_content_path() . 'plugins/';
         $plugin = osc_find_by_product_key($data['product_key'], 'plugin');
-        
+
         if($plugin!=false) {
           if(Plugins::isEnabled($plugin)) {
             Plugins::runHook($plugin.'_disable');
@@ -3182,7 +3316,7 @@ function osc_market($type, $product_key, $install = 0) {
       } else if($data['type'] == 'language') {
         $folder = osc_content_path() . 'languages/';
       }
-      
+
       if($type == 'languages') {
         $filename = $data['full_name'];
         $url_source_file = $data['url'];
@@ -3218,7 +3352,7 @@ function osc_market($type, $product_key, $install = 0) {
               }
 
               $fail = 0;
-              while (false !== ($_file = readdir($handle))) {
+              while(false !== ($_file = readdir($handle))) {
                 if($_file != '.' && $_file != '..') {
                   $copyprocess = osc_copy(osc_content_path() . "downloads/oc-temp/" . $_file, $folder_dest . $_file);
                   if($copyprocess == false) {
@@ -3238,7 +3372,7 @@ function osc_market($type, $product_key, $install = 0) {
               $path = osc_content_path() . 'downloads/oc-temp';
               $rm_errors = 0;
               $dir = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($path), RecursiveIteratorIterator::CHILD_FIRST);
-              for ($dir->rewind(); $dir->valid(); $dir->next()) {
+              for($dir->rewind(); $dir->valid(); $dir->next()) {
                 if($dir->isDir()) {
                   if($dir->getFilename() != '.' && $dir->getFilename() != '..') {
                     if(!rmdir($dir->getPathname())) {
@@ -3300,27 +3434,27 @@ function osc_market($type, $product_key, $install = 0) {
               }
             } else {
               $message = __('Nothing to copy'); // Should never happen
-              $error = 99; 
+              $error = 99;
             }
           } else {
             $message = __('Unzip failed');
-            $error = 3; 
+            $error = 3;
           }
         } else {
           $message = __('Download failed');
-          $error = 2; 
+          $error = 2;
         }
       } else {
         $message = $check['error'];
-        $error = 29; 
+        $error = 29;
       }
     } else {
       if(isset($data['s_buy_url']) && isset($data['b_paid']) && $data['s_buy_url']!='' && $data['b_paid']==0) {
         $message = __('This is a paid item, you need to buy it before you are able to download it');
-        $error = 8; 
+        $error = 8;
       } else {
         $message = __('Login has failed');
-        $error = 7; 
+        $error = 7;
       }
     }
   } else {
@@ -3371,7 +3505,6 @@ function osc_utf8mb4_sqls($dryRun = true) {
 }
 
 
-
 /**
  * @return bool
  */
@@ -3395,7 +3528,7 @@ if(!function_exists('hex2b64')) {
    */
   function hex2b64($str){
     $raw = '';
-    for ($i = 0, $iMax = strlen($str); $i < $iMax; $i += 2) {
+    for($i = 0, $iMax = strlen($str); $i < $iMax; $i += 2) {
       $raw .= chr(hexdec(substr($str, $i, 2)));
     }
 
@@ -3417,11 +3550,11 @@ if(!function_exists('hmacsha1')) {
   function hmacsha1($key, $data) {
     $blocksize = 64;
     $hashfunc = 'sha1';
-    
+
     if(strlen($key) > $blocksize) {
       $key = pack('H*', $hashfunc($key));
     }
-    
+
     $key = str_pad($key, $blocksize, chr(0x00));
     $ipad = str_repeat(chr(0x36), $blocksize);
     $opad = str_repeat(chr(0x5c), $blocksize);

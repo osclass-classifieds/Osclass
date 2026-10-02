@@ -26,14 +26,11 @@ if(!defined('ABS_PATH')) exit('ABS_PATH is not loaded. Direct access is not allo
  * @subpackage classes
  * @author Osclass
  */
-class ItemsDataTable extends DataTable
-{
-
+class ItemsDataTable extends DataTable {
   private $mSearch;
   private $withFilters = false;
 
-  public function __construct()
-  {
+  public function __construct() {
     parent::__construct();
     osc_add_filter('datatable_listing_class', array(&$this, 'row_class'));
   }
@@ -44,211 +41,54 @@ class ItemsDataTable extends DataTable
    * @return array
    * @throws \Exception
    */
-  public function table( $params )
-  {
+  public function table($params) {
     $this->addTableHeader();
     $this->mSearch = new Search(true);
     $this->getDBParams($params);
-    
+
     // add more conditions here
     osc_run_hook('manage_item_search_conditions', $this->mSearch);
 
     // do Search
     $this->processData(Item::newInstance()->extendCategoryName($this->mSearch->doSearch()));
-    $this->totalFiltered = $this->mSearch->countAll();
-    $this->total = $this->mSearch->count();
+    $this->total = $this->mSearch->countAll();
+    $this->totalFiltered = $this->mSearch->count();
 
     return $this->getData();
   }
 
-  /**
-   * @param $params
-   *
-   * @return array
-   * @throws \Exception
-   */
-  public function tableReported( $params )
-  {
-    $this->addTableHeaderReported();
-    $this->mSearch = new Search(true, true);
-    $this->getDBParams($params);
-    // only some fields can be ordered
-    $direction  = Params::getParam('direction');
-    $arrayDirection = array('desc', 'asc');
-    if( !in_array($direction, $arrayDirection) ) {
-      Params::setParam('direction', 'desc');
-      $direction = 'desc';
-    }
-
-    $sort = Params::getParam('sort');
-    $arraySortColumns = array(
-      'spam'  => 'i_num_spam',
-      'bad'   => 'i_num_bad_classified',
-      'rep'   => 'i_num_repeated',
-      'off'   => 'i_num_offensive',
-      'exp'   => 'i_num_expired',
-      'date'  => 'dt_pub_date',
-      'expiration'  => 'dt_expiration'
-      );
-      
-    // Column sort
-    /* Replaced with simple block in osclass 810
-    if ( !array_key_exists( $sort , $arraySortColumns )) {
-      $sort = 'dt_pub_date';
-      $this->mSearch->addHaving('sum(s.i_num_spam) > 0 OR sum(s.i_num_bad_classified) > 0 OR sum(s.i_num_repeated) > 0 OR sum(s.i_num_offensive) > 0 OR sum(s.i_num_expired) > 0');
-    } else {
-      $sort = $arraySortColumns[$sort];
-      if( $sort !== 'dt_pub_date' && 1==2) {
-        $this->mSearch->addHaving('sum(' . $sort.') > 0');
-      } else {
-        $this->mSearch->addHaving('sum(s.i_num_spam) > 0 OR sum(s.i_num_bad_classified) > 0 OR sum(s.i_num_repeated) > 0 OR sum(s.i_num_offensive) > 0 OR sum(s.i_num_expired) > 0');
-      }
-    }
-    */
-    
-    if (!array_key_exists($sort, $arraySortColumns)) {
-      $sort = 'dt_pub_date';
-    } else {
-      $sort = $arraySortColumns[$sort];
-    }
-    
-    $this->mSearch->addHaving('sum(s.i_num_spam) > 0 OR sum(s.i_num_bad_classified) > 0 OR sum(s.i_num_repeated) > 0 OR sum(s.i_num_offensive) > 0 OR sum(s.i_num_expired) > 0');
-    $this->mSearch->order($sort, $direction);
-
-    $this->mSearch->addTable(sprintf( '%st_item_stats s' , DB_TABLE_PREFIX));
-    $this->mSearch->addField('SUM(s.i_num_spam) as i_num_spam');
-    $this->mSearch->addField('SUM(s.i_num_bad_classified) as i_num_bad_classified');
-    $this->mSearch->addField('SUM(s.i_num_repeated) as i_num_repeated');
-    $this->mSearch->addField('SUM(s.i_num_offensive) as i_num_offensive');
-    $this->mSearch->addField('SUM(s.i_num_expired) as i_num_expired');
-
-    // having
-
-
-    $this->mSearch->addConditions(sprintf( ' %st_item.pk_i_id ' , DB_TABLE_PREFIX));
-    $this->mSearch->addConditions(sprintf( ' %st_item.pk_i_id = s.fk_i_item_id' , DB_TABLE_PREFIX));
-    $this->mSearch->addGroupBy(sprintf( ' %st_item.pk_i_id ' , DB_TABLE_PREFIX));
-    // do Search
-    $this->processDataReported(Item::newInstance()->extendCategoryName($this->mSearch->doSearch()));
-    $this->totalFiltered = $this->mSearch->countAll();
-    $this->total = $this->mSearch->count();
-
-    return $this->getData();
-  }
-
-  private function addTableHeader()
-  {
-
-    $arg_date = '&sort=date';
-    if( Params::getParam('sort') === 'date') {
-      if( Params::getParam('direction') === 'desc') {
-        $arg_date .= '&direction=asc';
-      }
-    }
-    $arg_expiration = '&sort=expiration';
-    if( Params::getParam('sort') === 'expiration') {
-      if( Params::getParam('direction') === 'desc') {
-        $arg_expiration .= '&direction=asc';
-      }
-    }
-
+  private function addTableHeader() {
     Rewrite::newInstance()->init();
-    $page  = (int)Params::getParam('iPage');
+    $page = (int)Params::getParam('iPage');
     if($page==0) { $page = 1; }
     Params::setParam('iPage', $page);
     $url_base = preg_replace('|&direction=([^&]*)|', '', preg_replace('|&sort=([^&]*)|', '', osc_base_url().Rewrite::newInstance()->get_raw_request_uri()));
+    $sort = Params::getParam('sort');
+    $direction = Params::getParam('direction');
 
+    $this->clearSortColumns();
+    $this->clearSourceColumns();
+    $this->setDefaultSort('date', 'desc');
+    // List of sortable columns in datatable
+    $this->registerMainSortColumns();
+    // Source columns used by data-source-col in table header
+    $this->registerMainSourceColumns();
+    osc_run_hook('admin_items_sort_columns', $this);
+
+    // Table header columns rendered in admin
     $this->addColumn('status-border', '');
     $this->addColumn('status', __('Status'));
     $this->addColumn('bulkactions', '<input id="check_all" type="checkbox" />');
-    $this->addColumn('title', __('Title'));
-    $this->addColumn('user', __('User'));
-    $this->addColumn('category', __('Category'));
-    $this->addColumn('location', __('Location'));
-    $this->addColumn('date', '<a href="'.osc_esc_html($url_base.$arg_date).'">'.__('Date').'</a>');
-    $this->addColumn('expiration', '<a href="'.osc_esc_html($url_base.$arg_expiration).'">'.__('Expiration date').'</a>');
-    $this->addColumn('views', __('Views'));
+    $this->addColumn('title', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('title', $sort, $direction)) . '">' . __('Title') . '</a>');
+    $this->addColumn('user', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('user', $sort, $direction)) . '">' . __('User') . '</a>');
+    $this->addColumn('category', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('category', $sort, $direction)) . '">' . __('Category') . '</a>');
+    $this->addColumn('location', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('location', $sort, $direction)) . '">' . __('Location') . '</a>');
+    $this->addColumn('date', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('date', $sort, $direction)) . '">' . __('Publish date') . '</a>');
+    $this->addColumn('expiration', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('expiration', $sort, $direction)) . '">' . __('Expiration date') . '</a>');
+    $this->addColumn('views', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('views', $sort, $direction)) . '">' . __('Views') . '</a>');
 
     $dummy = &$this;
     osc_run_hook( 'admin_items_table' , $dummy);
-  }
-
-  private function addTableHeaderReported()
-  {
-
-    Rewrite::newInstance()->init();
-    $page  = (int)Params::getParam('iPage');
-    if($page==0) { $page = 1; }
-    Params::setParam('iPage', $page);
-    $url_base = preg_replace('|&direction=([^&]*)|', '', preg_replace('|&sort=([^&]*)|', '', osc_base_url().Rewrite::newInstance()->get_raw_request_uri()));
-    $arg_spam   = '&sort=spam'; $arg_bad  = '&sort=bad';
-    $arg_rep  = '&sort=rep';  $arg_off  = '&sort=off';
-    $arg_exp  = '&sort=exp';  $arg_date   = '&sort=date';
-    $arg_expiration = '&sort=expiration';
-    $sort     = Params::getParam( 'sort' );
-    $direction  = Params::getParam( 'direction' );
-
-    switch ($sort) {
-      case('spam'):
-        if ( $direction === 'desc' || $direction == '' ) {
-          $arg_spam .= '&direction=asc';
-        }
-        break;
-      case('bad'):
-        if ( $direction === 'desc' || $direction == '' ) {
-          $arg_bad .= '&direction=asc';
-        }
-        break;
-      case('rep'):
-        if ( $direction === 'desc' || $direction == '' ) {
-          $arg_rep .= '&direction=asc';
-        }
-        break;
-      case('off'):
-        if ( $direction === 'desc' || $direction == '' ) {
-          $arg_off .= '&direction=asc';
-        }
-        break;
-      case('exp'):
-        if ( $direction === 'desc' || $direction == '' ) {
-          $arg_exp .= '&direction=asc';
-        }
-        break;
-      case('date'):
-        if ( $direction === 'desc' || $direction == '' ) {
-          $arg_date .= '&direction=asc';
-        }
-        break;
-      case('expiration'):
-        if ( $direction === 'desc' || $direction == '' ) {
-          $arg_expiration .= '&direction=asc';
-        }
-        break;
-      default:
-        break;
-    }
-
-    $url_spam = $url_base.$arg_spam;
-    $url_bad = $url_base.$arg_bad;
-    $url_rep = $url_base.$arg_rep;
-    $url_off = $url_base.$arg_off;
-    $url_exp = $url_base.$arg_exp;
-    $url_date = $url_base.$arg_date;
-    $url_expiration = $url_base.$arg_expiration;
-
-    $this->addColumn('bulkactions', '<input id="check_all" type="checkbox" />');
-    $this->addColumn('title', __('Title'));
-    $this->addColumn('user', __('User'));
-    $this->addColumn('spam', '<a id="order_spam" href="'.osc_esc_html($url_spam).'">'.__('Spam').'</a>');
-    $this->addColumn('bad', '<a id="order_bad" href="'.osc_esc_html($url_bad).'">'.__('Misclassified').'</a>');
-    $this->addColumn('rep', '<a id="order_rep" href="'.osc_esc_html($url_rep).'">'.__('Duplicated').'</a>');
-    $this->addColumn('exp', '<a id="order_exp" href="'.osc_esc_html($url_exp).'">'.__('Expired').'</a>');
-    $this->addColumn('off', '<a id="order_off" href="'.osc_esc_html($url_off).'">'.__('Offensive').'</a>');
-    $this->addColumn('date', '<a id="order_date" href="'.osc_esc_html($url_date).'">'.__('Date').'</a>');
-    $this->addColumn('expiration', '<a id="order_expiration" href="'.osc_esc_html($url_expiration).'">'.__('Expiration date').'</a>');
-
-    $dummy = &$this;
-    osc_run_hook( 'admin_items_reported_table' , $dummy);
   }
 
   /**
@@ -256,8 +96,7 @@ class ItemsDataTable extends DataTable
    *
    * @throws \Exception
    */
-  private function processData( $items )
-  {
+  private function processData($items) {
     if(!empty($items)) {
 
       $csrf_token_url = osc_csrf_token_url();
@@ -267,7 +106,7 @@ class ItemsDataTable extends DataTable
         $options = array();
         // -- prepare data --
         // prepare item title
-        $title = mb_substr($aRow['s_title'], 0, 30, 'UTF-8');
+        $title = osc_substr($aRow['s_title'], 0, 30);
         if($title != $aRow['s_title']) {
           $title .= '...';
         }
@@ -302,7 +141,7 @@ class ItemsDataTable extends DataTable
         if(osc_renewal_items_enabled()) {
           if($aRow['b_premium'] == 1 || osc_isExpired($aRow['dt_expiration'])) {
             $renewed_count = (int)$aRow['i_renewed'];
-            
+
             if((osc_renewal_limit() > 0 && $renewed_count < osc_renewal_limit()) || osc_renewal_limit() <= 0) {
               $options_more[] = '<a href="' . osc_admin_base_url(true) . '?page=items&amp;action=renew&amp;id=' . $aRow['pk_i_id'] . '&amp;' . $csrf_token_url . '&amp;value=1">' . __('Renew') .'</a>';
             }
@@ -312,35 +151,17 @@ class ItemsDataTable extends DataTable
         // general options
         $options[] = '<a href="' . osc_admin_base_url(true) . '?page=items&amp;action=item_edit&amp;id=' . $aRow['pk_i_id'] . '">' . __('Edit') . '</a>';
         $options[] = '<a onclick="return delete_dialog(\'' . $aRow['pk_i_id'] . '\');" href="' . osc_admin_base_url(true) . '?page=items&amp;action=delete&amp;id[]=' . $aRow['pk_i_id'] . '">' . __('Delete') . '</a>';
+        if(isset($aRow['fk_i_user_id']) && (int)$aRow['fk_i_user_id'] > 0) {
+          $options[] = '<a href="' . osc_admin_base_url(true) . '?page=users&amp;action=edit&amp;id=' . (int)$aRow['fk_i_user_id'] . '">' . __('Edit user') . '</a>';
+        }
 
-        // only show if there are data
-        if(ItemComment::newInstance()->totalComments( $aRow['pk_i_id'] ) > 0) {
-          $options[] = '<a href="' . osc_admin_base_url(true) . '?page=comments&amp;action=list&amp;itemId=' . $aRow['pk_i_id'] . '">' . __('View comments') . '</a>';
-        }
-        if(ItemResource::newInstance()->countResources( $aRow['pk_i_id'] ) > 0) {
-          $options[] = '<a href="' . osc_admin_base_url(true) . '?page=media&amp;action=list&amp;resourceId=' . $aRow['pk_i_id'] . '">' . __('View media') . '</a>';
-        }
+        $options_force_more = array();
+        $options_force_more[] = '<a href="' . osc_admin_base_url(true) . '?page=comments&amp;itemId=' . $aRow['pk_i_id'] . '">' . __('View comments') . '</a>';
+        $options_force_more[] = '<a href="' . osc_admin_base_url(true) . '?page=media&amp;itemId=' . $aRow['pk_i_id'] . '">' . __('View media') . '</a>';
 
         $options_more = osc_apply_filter('more_actions_manage_items', $options_more, $aRow);
-        // more actions
-        $moreOptions = '<li class="show-more">'.PHP_EOL.'<a href="#" class="show-more-trigger">'. __('Show more') .'...</a>'. PHP_EOL .'<ul>'. PHP_EOL;
-        foreach( $options_more as $actual) {
-          $moreOptions .= '<li>'.$actual . '</li>' . PHP_EOL;
-        }
-        $moreOptions .= '</ul>'. PHP_EOL .'</li>'.PHP_EOL;
-
         $options = osc_apply_filter('actions_manage_items', $options, $aRow);
-        // create list of actions
-        $auxOptions = '<ul>'.PHP_EOL;
-        foreach( $options as $actual) {
-          $auxOptions .= '<li>'.$actual.'</li>'.PHP_EOL;
-        }
-        if(!empty($options_more)) {
-          $auxOptions  .= $moreOptions;
-        }
-        $auxOptions  .= '</ul>'.PHP_EOL;
-
-        $actions = '<div class="actions">'.$auxOptions.'</div>'.PHP_EOL;
+        $actions = $this->buildRowActions($options, $options_more, 8, $options_force_more);
 
         // fill a row
         $row['id'] = $aRow['pk_i_id'];
@@ -349,17 +170,28 @@ class ItemsDataTable extends DataTable
         $row['status-border'] = '';
         $row['status'] = $status['text'];
         $row['title'] = '<a href="' . osc_item_url() . '" target="_blank">' . $title. '</a>'. $actions;
-        if($aRow['fk_i_user_id']!=null) {
-          $row['user'] = '<a href="' . osc_admin_base_url(true) . '?page=users&action=edit&id=' . $aRow['fk_i_user_id'] . '" target="_blank">' . $aRow['s_user_name'] . '</a>';
+        if(isset($aRow['fk_i_user_id']) && (int)$aRow['fk_i_user_id'] > 0) {
+          $userFilterName = '';
+          if(isset($aRow['s_contact_email']) && trim((string)$aRow['s_contact_email']) != '') {
+            $userFilterName = (string)$aRow['s_contact_email'];
+          } else if(isset($aRow['s_user_name']) && trim((string)$aRow['s_user_name']) != '') {
+            $userFilterName = (string)$aRow['s_user_name'];
+          }
+
+          $row['user'] = '<a href="' . osc_esc_html($this->build_item_filter_url(array('page' => 'items', 'userId' => (int)$aRow['fk_i_user_id'], 'user' => $userFilterName))) . '">' . osc_esc_html($aRow['s_user_name']) . '</a>';
         } else {
-          $row['user'] = $aRow['s_user_name'];
+          if(isset($aRow['s_contact_email']) && trim((string)$aRow['s_contact_email']) != '') {
+            $row['user'] = '<a href="' . osc_esc_html($this->build_item_filter_url(array('page' => 'items', 'user' => (string)$aRow['s_contact_email']))) . '">' . osc_esc_html($aRow['s_user_name']) . '</a>';
+          } else {
+            $row['user'] = osc_esc_html($aRow['s_user_name']);
+          }
         }
-        $row['category'] = $aRow['s_category_name'];
-        $row['location'] = $this->get_row_location();
+        $row['category'] = $this->get_row_category($aRow);
+        $row['location'] = $this->get_row_location($aRow);
         $row['date'] = osc_format_date($aRow['dt_pub_date'], osc_date_format() . ' ' . osc_time_format() );
         $row['expiration'] = ( $aRow['dt_expiration'] !== '9999-12-31 23:59:59') ? osc_format_date( $aRow['dt_expiration'], osc_date_format() . ' ' . osc_time_format() ) : __( 'Never expires');
         $row['views'] = (isset($aRow['i_num_views']) ? $aRow['i_num_views'] : 0) . 'x';
-        
+
         if(isset($aRow['b_premium']) && $aRow['b_premium'] == 1) {
           $row['views'] .= (isset($aRow['i_num_premium_views']) ? ' / ' . $aRow['i_num_premium_views'] : 0) . 'x';
         }
@@ -374,163 +206,139 @@ class ItemsDataTable extends DataTable
   }
 
   /**
-   * @param $items
-   *
-   * @throws \Exception
+   * @param $params
    */
-  private function processDataReported( $items )
-  {
-    if(!empty($items)) {
-
-      $csrf_token_url = osc_csrf_token_url();
-      foreach($items as $aRow) {
-        View::newInstance()->_exportVariableToView('item', $aRow);
-        $row   = array();
-        $options = array();
-        // -- prepare data --
-        // prepare item title
-        $title = mb_substr($aRow['s_title'], 0, 30, 'UTF-8');
-        if($title != $aRow['s_title']) {
-          $title .= '...';
-        }
-
-        $options[] = '<a href="' . osc_admin_base_url(true) . '?page=items&amp;action=clear_stat&amp;id=' . $aRow['pk_i_id'] . '&amp;' . $csrf_token_url . '&amp;stat=all">' . __('Clear All') .'</a>';
-        if( $aRow['i_num_spam'] > 0 ) {
-          $options[] = '<a href="' . osc_admin_base_url(true) . '?page=items&amp;action=clear_stat&amp;id=' . $aRow['pk_i_id'] . '&amp;' . $csrf_token_url . '&amp;stat=spam">' . __('Clear Spam') .'</a>';
-        }
-        if( $aRow['i_num_bad_classified'] > 0 ) {
-          $options[] = '<a href="' . osc_admin_base_url(true) . '?page=items&amp;action=clear_stat&amp;id=' . $aRow['pk_i_id'] . '&amp;' . $csrf_token_url . '&amp;stat=bad">' . __('Clear Misclassified') .'</a>';
-        }
-        if( $aRow['i_num_repeated'] > 0 ) {
-          $options[] = '<a href="' . osc_admin_base_url(true) . '?page=items&amp;action=clear_stat&amp;id=' . $aRow['pk_i_id'] . '&amp;' . $csrf_token_url . '&amp;stat=duplicated">' . __('Clear Duplicated') .'</a>';
-        }
-        if( $aRow['i_num_offensive'] > 0 ) {
-          $options[] = '<a href="' . osc_admin_base_url(true) . '?page=items&amp;action=clear_stat&amp;id=' . $aRow['pk_i_id'] . '&amp;' . $csrf_token_url . '&amp;stat=offensive">' . __('Clear Offensive') .'</a>';
-        }
-        if( $aRow['i_num_expired'] > 0 ) {
-          $options[] = '<a href="' . osc_admin_base_url(true) . '?page=items&amp;action=clear_stat&amp;id=' . $aRow['pk_i_id'] . '&amp;' . $csrf_token_url . '&amp;stat=expired">' . __('Clear Expired') .'</a>';
-        }
-        if(count($options) > 0) {
-          $options[] = '<a href="' . osc_admin_base_url(true) . '?page=items&amp;action=item_edit&amp;id=' . $aRow['pk_i_id'] . '">' . __('Edit') . '</a>';
-          $options[] = '<a onclick="return delete_dialog(\'' . $aRow['pk_i_id'] . '\');" href="' . osc_admin_base_url(true) . '?page=items&amp;action=delete&amp;id[]=' . $aRow['pk_i_id'] . '&amp;' . $csrf_token_url . '">' . __('Delete') . '</a>';
-        }
-
-        // create list of actions
-        $auxOptions = '<ul>'.PHP_EOL;
-        foreach( $options as $actual ) {
-          $auxOptions .= '<li>'.$actual.'</li>'.PHP_EOL;
-        }
-        $auxOptions  .= '</ul>'.PHP_EOL;
-
-        $actions = '<div class="actions">'.$auxOptions.'</div>'.PHP_EOL;
-
-        // fill a row
-        $row['bulkactions'] = '<input type="checkbox" name="id[]" value="' . $aRow['pk_i_id'] . '" active="' . $aRow['b_active'] . '" blocked="' . $aRow['b_enabled'] . '"/>';
-        $row['title'] = '<a href="' . osc_item_url().'" target="_blank">' . $title . '</a>'. $actions;
-        $row['user'] = $aRow['s_user_name'];
-        $row['spam'] = $aRow['i_num_spam'];
-        $row['bad'] = $aRow['i_num_bad_classified'];
-        $row['rep'] = $aRow['i_num_repeated'];
-        $row['exp'] = $aRow['i_num_expired'];
-        $row['off'] = $aRow['i_num_offensive'];
-        $row['date'] = osc_format_date($aRow['dt_pub_date'], osc_date_format() . ' ' . osc_time_format() );
-        $row['expiration'] = ( $aRow['dt_expiration'] !== '9999-12-31 23:59:59') ? osc_format_date( $aRow['dt_expiration'], osc_date_format() . ' ' . osc_time_format() ) : __( 'Never expires') ;
-
-        $row = osc_apply_filter('items_processing_reported_row', $row, $aRow);
-
-        $this->addRow($row);
-        $this->rawRows[] = $aRow;
-      }
-
+  private function getDBParams($params, $withSort = true) {
+    if(!isset($params['iDisplayStart'])) {
+      $params['iDisplayStart'] = 0;
     }
-  }
-
-  /**
-   * @param $_get
-   */
-  private function getDBParams( $_get )
-  {
-
-    if(!isset($_get['iDisplayStart'])) {
-      $_get['iDisplayStart'] = 0;
-    }
-    if(!isset($_get['iDisplayLength'])) {
-      $_get['iDisplayLength'] = 10;
+    if(!isset($params['iDisplayLength'])) {
+      $params['iDisplayLength'] = 10;
     }
 
-    if(!is_numeric($_get['iPage']) || $_get['iPage'] < 1) {
-      Params::setParam('iPage', 1 );
+    if(!isset($params['iPage']) || !is_numeric($params['iPage']) || $params['iPage'] < 1) {
+      Params::setParam('iPage', 1);
       $this->iPage = 1;
     } else {
-      $this->iPage = $_get['iPage'];
+      $this->iPage = $params['iPage'];
     }
 
     $withUserId   = false;
     $no_user_email  = '';
+    $shortcutFilter = (isset($params['shortcut-filter']) ? (string)$params['shortcut-filter'] : 'oPattern');
     // get & set values
-    foreach($_get as $k => $v) {
-      if( $k === 'sSearch' && $v != '') {
-        $this->mSearch->addPattern($v);
+    foreach($params as $k => $v) {
+      if($k === 'sSearch' && $v != '') {
+        $v = trim((string)$v);
+        if($v == '') {
+          continue;
+        }
+        if($shortcutFilter == 'oCategory') {
+          $cat = Search::newInstance()->dao->escapeStr(str_replace('*', '%', $v));
+          if(strpos($cat, '%') === false) {
+            $cat = '%' . $cat . '%';
+          }
+          $this->mSearch->addItemConditions(DB_TABLE_PREFIX . "t_item.fk_i_category_id IN (SELECT cd.fk_i_category_id FROM " . DB_TABLE_PREFIX . "t_category_description cd WHERE cd.s_name LIKE '" . $cat . "')");
+        } else if($shortcutFilter == 'oLocation') {
+          $location = Search::newInstance()->dao->escapeStr(str_replace('*', '%', $v));
+          if(strpos($location, '%') === false) {
+            $location = '%' . $location . '%';
+          }
+          $this->mSearch->addItemConditions("(" . DB_TABLE_PREFIX . "t_item_location.s_city LIKE '" . $location . "' OR " . DB_TABLE_PREFIX . "t_item_location.s_region LIKE '" . $location . "' OR " . DB_TABLE_PREFIX . "t_item_location.s_country LIKE '" . $location . "' OR " . DB_TABLE_PREFIX . "t_item_location.s_zip LIKE '" . $location . "' OR " . DB_TABLE_PREFIX . "t_item_location.s_address LIKE '" . $location . "')");
+        } else if($shortcutFilter == 'oPublishDate') {
+          $publish = Search::newInstance()->dao->escapeStr(str_replace('*', '%', $v));
+          if(strpos($publish, '%') === false) {
+            $publish = '%' . $publish . '%';
+          }
+          $this->mSearch->addItemConditions(DB_TABLE_PREFIX . "t_item.dt_pub_date LIKE '" . $publish . "'");
+        } else if($shortcutFilter == 'oExpirationDate') {
+          $exp = Search::newInstance()->dao->escapeStr(str_replace('*', '%', $v));
+          if(strpos($exp, '%') === false) {
+            $exp = '%' . $exp . '%';
+          }
+          $this->mSearch->addItemConditions(DB_TABLE_PREFIX . "t_item.dt_expiration LIKE '" . $exp . "'");
+        } else {
+          $this->mSearch->addPattern($v);
+        }
+
         $this->withFilters = true;
       }
 
       // filters
-      if( $k === 'userId' && $v != '') {
+      if($k === 'userId' && $v != '') {
         $this->mSearch->fromUser($v);
         $this->withFilters = true;
         $withUserId = true;
       }
-      if( $k === 'itemId' && $v != '') {
+      if($k === 'itemId' && $v != '') {
         $this->mSearch->addItemId($v);
         $this->withFilters = true;
       }
-      if( $k === 'countryId' && $v != '') {
+      if($k === 'countryId' && $v != '') {
         $this->mSearch->addCountry($v);
         $this->withFilters = true;
       }
-      if( $k === 'regionId' && $v != '') {
+      if($k === 'regionId' && $v != '') {
         $this->mSearch->addRegion($v);
         $this->withFilters = true;
       }
-      if( $k === 'cityId' && $v != '') {
+      if($k === 'cityId' && $v != '') {
         $this->mSearch->addCity($v);
         $this->withFilters = true;
       }
-      if( $k === 'country' && $v != '') {
+      if($k === 'country' && $v != '') {
         $this->mSearch->addCountry($v);
         $this->withFilters = true;
       }
-      if( $k === 'region' && $v != '') {
+      if($k === 'region' && $v != '') {
         $this->mSearch->addRegion($v);
         $this->withFilters = true;
       }
 
-      if( $k === 'city' && $v != '') {
+      if($k === 'city' && $v != '') {
         $this->mSearch->addCity($v);
         $this->withFilters = true;
       }
-      if( $k === 'catId' && $v != '') {
+      if($k === 'catId' && $v != '') {
         $this->mSearch->addCategory($v);
         $this->withFilters = true;
       }
-      if( $k === 'b_premium' && $v != '') {
+      if($k === 'b_premium' && $v != '') {
         $this->mSearch->addItemConditions(DB_TABLE_PREFIX.'t_item.b_premium = '.$v);
         $this->withFilters = true;
       }
-      if( $k === 'b_active' && $v != '') {
+      if($k === 'b_active' && $v != '') {
         $this->mSearch->addItemConditions(DB_TABLE_PREFIX.'t_item.b_active = '.$v);
         $this->withFilters = true;
       }
-      if( $k === 'b_enabled' && $v != '') {
+      if($k === 'b_enabled' && $v != '') {
         $this->mSearch->addItemConditions(DB_TABLE_PREFIX.'t_item.b_enabled = '.$v);
         $this->withFilters = true;
       }
-      if( $k === 'b_spam' && $v != '') {
+      if($k === 'b_spam' && $v != '') {
         $this->mSearch->addItemConditions(DB_TABLE_PREFIX.'t_item.b_spam = '.$v);
         $this->withFilters = true;
       }
-      if( $k === 'user' && $v != '') {
-        $no_user_email = $v;
+      if($k === 'contactName' && $v != '') {
+        $contactName = Search::newInstance()->dao->escapeStr(str_replace('*', '%', $v));
+        if(strpos($contactName, '%') === false) {
+          $contactName = '%' . $contactName . '%';
+        }
+        $this->mSearch->addItemConditions(DB_TABLE_PREFIX . "t_item.s_contact_name LIKE '" . $contactName . "'");
+        $this->withFilters = true;
+      }
+
+      if($k === 'user' && $v != '') {
+        if($shortcutFilter == 'oContactName') {
+          $contactName = Search::newInstance()->dao->escapeStr(str_replace('*', '%', $v));
+          if(strpos($contactName, '%') === false) {
+            $contactName = '%' . $contactName . '%';
+          }
+          $this->mSearch->addItemConditions(DB_TABLE_PREFIX . "t_item.s_contact_name LIKE '" . $contactName . "'");
+          $this->withFilters = true;
+        } else {
+          $no_user_email = $v;
+        }
       }
     }
 
@@ -541,32 +349,89 @@ class ItemsDataTable extends DataTable
     }
 
     // set start and limit using iPage param
-    $start = ($this->iPage - 1) * $_get['iDisplayLength'];
+    $start = ($this->iPage - 1) * $params['iDisplayLength'];
 
     $this->start = (int) $start;
-    $this->limit = (int) $_get[ 'iDisplayLength' ];
+    $this->limit = (int)$params['iDisplayLength'];
     $this->mSearch->limit($this->start, $this->limit);
 
-    $direction = $_get['direction'];
-    $arrayDirection = array('desc', 'asc');
-    
-    if(!in_array($direction, $arrayDirection)) {
-      Params::setParam('direction', 'desc');
-      $direction = 'desc';
+    if($withSort) {
+      $sortData = $this->resolveSort($params);
+      $sortData = osc_apply_filter('admin_items_sort_resolved', $sortData, $this, $params);
+      Params::setParam('sort', $sortData['key']);
+      Params::setParam('direction', $sortData['direction']);
+      $this->mSearch->order($sortData['column'], $sortData['direction']);
     }
+  }
 
-    // column sort
-    $sort = $_get['sort'];
-    $arraySortColumns = array('date'  => 'dt_pub_date', 'expiration'  => 'dt_expiration');
-    
-    if(!array_key_exists($sort, $arraySortColumns)) {
-      $sort     = 'dt_pub_date';
-    } else {
-      $sort = $arraySortColumns[$sort];
+  private function registerMainSortColumns() {
+    $adminLocale = preg_replace('/[^a-zA-Z0-9_\-]/', '', osc_current_admin_locale());
+    $titleCurrentLocale = '(SELECT td.s_title FROM ' . DB_TABLE_PREFIX . 't_item_description td WHERE td.fk_i_item_id = ' . DB_TABLE_PREFIX . 't_item.pk_i_id AND td.fk_c_locale_code = \'' . $adminLocale . '\' LIMIT 1)';
+    $titleAnyLocale = '(SELECT td2.s_title FROM ' . DB_TABLE_PREFIX . 't_item_description td2 WHERE td2.fk_i_item_id = ' . DB_TABLE_PREFIX . 't_item.pk_i_id LIMIT 1)';
+    $titleColumn = 'COALESCE(' . $titleCurrentLocale . ', ' . $titleAnyLocale . ')';
+    $categoryCurrentLocale = '(SELECT cd.s_name FROM ' . DB_TABLE_PREFIX . 't_category_description cd WHERE cd.fk_i_category_id = ' . DB_TABLE_PREFIX . 't_item.fk_i_category_id AND cd.fk_c_locale_code = \'' . $adminLocale . '\' LIMIT 1)';
+    $categoryAnyLocale = '(SELECT cd2.s_name FROM ' . DB_TABLE_PREFIX . 't_category_description cd2 WHERE cd2.fk_i_category_id = ' . DB_TABLE_PREFIX . 't_item.fk_i_category_id LIMIT 1)';
+    $categoryColumn = 'COALESCE(' . $categoryCurrentLocale . ', ' . $categoryAnyLocale . ')';
+
+    $sortColumns = array(
+      'title' => array(
+        'column' => $titleColumn,
+        'coalesce' => false
+      ),
+      'user' => array(
+        'column' => DB_TABLE_PREFIX . 't_item.s_contact_name',
+        'coalesce' => true
+      ),
+      'category' => array(
+        'column' => $categoryColumn,
+        'coalesce' => false
+      ),
+      'location' => array(
+        'column' => 'CONCAT_WS(\', \', COALESCE(' . DB_TABLE_PREFIX . 't_item_location.s_city, \'\'), COALESCE(' . DB_TABLE_PREFIX . 't_item_location.s_region, \'\'), COALESCE(' . DB_TABLE_PREFIX . 't_item_location.s_country, \'\'))',
+        'coalesce' => false
+      ),
+      'date' => array(
+        'column' => DB_TABLE_PREFIX . 't_item.dt_pub_date',
+        'coalesce' => false
+      ),
+      'expiration' => array(
+        'column' => DB_TABLE_PREFIX . 't_item.dt_expiration',
+        'coalesce' => false
+      ),
+      'views' => array(
+        'column' => '(SELECT COALESCE(SUM(st.i_num_views), 0) FROM ' . DB_TABLE_PREFIX . 't_item_stats st WHERE st.fk_i_item_id = ' . DB_TABLE_PREFIX . 't_item.pk_i_id)',
+        'coalesce' => false
+      )
+    );
+
+    $sortColumns = osc_apply_filter('admin_items_sort_columns', $sortColumns, $this);
+
+    // List of sortable columns in datatable
+    foreach($sortColumns as $key => $data) {
+      if(is_array($data) && isset($data['column'])) {
+        $this->addSortColumn($key, $data['column'], (isset($data['coalesce']) ? $data['coalesce'] : false));
+      } else if(is_string($data)) {
+        $this->addSortColumn($key, $data);
+      }
     }
-    
-    // only some fields can be ordered
-    $this->mSearch->order($sort, $direction);
+  }
+
+  private function registerMainSourceColumns() {
+    $sources = array(
+      'title' => 's_title',
+      'user' => 's_contact_name',
+      'category' => 's_name',
+      'location' => 's_country|s_region|s_city',
+      'date' => 'dt_pub_date',
+      'expiration' => 'dt_expiration',
+      'views' => 'i_num_views'
+    );
+    $sources = osc_apply_filter('admin_items_source_columns', $sources, $this);
+
+    // Source columns used by data-source-col in table header
+    foreach($sources as $key => $source) {
+      $this->addSourceColumn($key, $source);
+    }
   }
 
   /**
@@ -617,31 +482,31 @@ class ItemsDataTable extends DataTable
    */
   private function get_row_status() {
     $data = array('class' => '', 'text' => '');
-    
+
     if(osc_item_is_spam()) {
       $data = array(
         'class' => 'status-spam',
         'text'  => __('Spam')
       );
-      
+
     } else if(!osc_item_is_enabled()) {
       $data = array(
         'class' => 'status-blocked',
         'text'  => __('Blocked')
       );
-      
+
     } else if(osc_item_is_expired()) {
       $data = array(
         'class' => 'status-expired',
         'text'  => __('Expired')
       );
-      
+
     } else if(!osc_item_is_active()) {
       $data = array(
         'class' => 'status-inactive',
         'text'  => __('Inactive')
       );
-      
+
     } else if(osc_item_is_premium()) {
       $data = array(
         'class' => 'status-premium',
@@ -653,7 +518,7 @@ class ItemsDataTable extends DataTable
         'text'  => __('Active')
       );
     }
-    
+
     return osc_apply_filter('item_table_row_status', $data);
   }
 
@@ -664,20 +529,55 @@ class ItemsDataTable extends DataTable
    *
    * @return string Location separated by commas
    */
-  private function get_row_location() {
+  private function get_row_location($item) {
     $location = array();
-    if(osc_item_city() !== '') {
-      $location[] = osc_item_city();
+    if(isset($item['s_city']) && trim((string)$item['s_city']) !== '') {
+      $params = array('page' => 'items', 'city' => $item['s_city']);
+      if(isset($item['fk_i_city_id']) && (int)$item['fk_i_city_id'] > 0) {
+        $params = array('page' => 'items', 'cityId' => (int)$item['fk_i_city_id']);
+      }
+      $location[] = '<a href="' . osc_esc_html($this->build_item_filter_url($params)) . '">' . osc_esc_html($item['s_city']) . '</a>';
     }
-    
-    if(osc_item_region() !== '') {
-      $location[] = osc_item_region();
+
+    if(isset($item['s_region']) && trim((string)$item['s_region']) !== '') {
+      $params = array('page' => 'items', 'region' => $item['s_region']);
+      if(isset($item['fk_i_region_id']) && (int)$item['fk_i_region_id'] > 0) {
+        $params = array('page' => 'items', 'regionId' => (int)$item['fk_i_region_id']);
+      }
+      $location[] = '<a href="' . osc_esc_html($this->build_item_filter_url($params)) . '">' . osc_esc_html($item['s_region']) . '</a>';
     }
-    
-    if(osc_item_country() !== '') {
-      $location[] = osc_item_country();
+
+    if(isset($item['s_country']) && trim((string)$item['s_country']) !== '') {
+      $params = array('page' => 'items', 'country' => $item['s_country']);
+      if(isset($item['fk_c_country_code']) && trim((string)$item['fk_c_country_code']) !== '') {
+        $params = array('page' => 'items', 'countryId' => $item['fk_c_country_code']);
+      }
+      $location[] = '<a href="' . osc_esc_html($this->build_item_filter_url($params)) . '">' . osc_esc_html($item['s_country']) . '</a>';
     }
 
     return implode(', ', $location);
+  }
+
+  private function get_row_category($item) {
+    $name = (isset($item['s_category_name']) ? (string)$item['s_category_name'] : '');
+    if($name == '') {
+      return '';
+    }
+
+    if(isset($item['fk_i_category_id']) && (int)$item['fk_i_category_id'] > 0) {
+      $url = $this->build_item_filter_url(array('page' => 'items', 'catId' => (int)$item['fk_i_category_id']));
+      return '<a href="' . osc_esc_html($url) . '">' . osc_esc_html($name) . '</a>';
+    }
+
+    return osc_esc_html($name);
+  }
+
+  private function build_item_filter_url($params = array()) {
+    $url = osc_admin_base_url(true);
+    if(!is_array($params) || count($params) == 0) {
+      return $url;
+    }
+
+    return $url . '?' . http_build_query($params);
   }
 }

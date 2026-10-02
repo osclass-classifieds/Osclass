@@ -38,4 +38,4 @@ function sigma_theme_info() {
     ,'locations' => array()
   );
 }
-?>
+

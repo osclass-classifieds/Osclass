@@ -30,7 +30,7 @@ class AdminThemes extends Themes
    */
   public static function newInstance()
   {
-    if (!self::$instance instanceof self) {
+    if(!self::$instance instanceof self) {
       self::$instance = new self;
     }
 
@@ -45,7 +45,7 @@ class AdminThemes extends Themes
 
   public function setCurrentThemeUrl()
   {
-    if ($this->theme_exists) {
+    if($this->theme_exists) {
       $this->theme_url = osc_admin_base_url() . 'themes/' . $this->theme . '/';
     } else {
       $this->theme_url = osc_admin_base_url() . 'themes/modern/';
@@ -55,7 +55,7 @@ class AdminThemes extends Themes
 
   public function setCurrentThemePath()
   {
-    if ($this->theme <> '' && file_exists(osc_admin_base_path() . 'themes/' . $this->theme . '/')) {
+    if($this->theme <> '' && file_exists(osc_admin_base_path() . 'themes/' . $this->theme . '/')) {
       $this->theme_exists = true;
       $this->theme_path   = osc_admin_base_path() . 'themes/' . $this->theme . '/';
     } else {
@@ -69,73 +69,73 @@ class AdminThemes extends Themes
    *
    * @param  $theme
    *
-   * @return array|bool 
+   * @return array|bool
    */
   public function loadThemeInfo($theme)
-  { 
+  {
     $path = $this->theme_path . 'index.php';
-    if( !file_exists($path) ) {
+    if(!file_exists($path) ) {
       return false;
     }
 
     // NEW CODE FOR THEME INFO
     $s_info = file_get_contents($path);
     $info   = array();
-    if( preg_match('|Theme Name:([^\\r\\t\\n]*)|i', $s_info, $match) ) {
+    if(preg_match('|Theme Name:([^\\r\\t\\n]*)|i', $s_info, $match) ) {
       $info['name'] = trim($match[1]);
     } else {
       $info['name'] = '';
     }
 
-    if( preg_match('|Parent Theme:([^\\r\\t\\n]*)|i', $s_info, $match) ) {
+    if(preg_match('|Parent Theme:([^\\r\\t\\n]*)|i', $s_info, $match) ) {
       $info['template'] = trim($match[1]);
     } else {
       $info['template'] = '';
     }
 
-    if( preg_match('|Theme URI:([^\\r\\t\\n]*)|i', $s_info, $match) ) {
+    if(preg_match('|Theme URI:([^\\r\\t\\n]*)|i', $s_info, $match) ) {
       $info['theme_uri'] = trim($match[1]);
     } else {
       $info['theme_uri'] = '';
     }
 
-    if( preg_match('|Theme update URI:([^\\r\\t\\n]*)|i', $s_info, $match) ) {
+    if(preg_match('|Theme update URI:([^\\r\\t\\n]*)|i', $s_info, $match) ) {
       $info['theme_update_uri'] = trim($match[1]);
     } else {
       $info['theme_update_uri'] = '';
     }
 
-    if( preg_match('|Description:([^\\r\\t\\n]*)|i', $s_info, $match) ) {
+    if(preg_match('|Description:([^\\r\\t\\n]*)|i', $s_info, $match) ) {
       $info['description'] = trim($match[1]);
     } else {
       $info['description'] = '';
     }
 
-    if( preg_match('|Version:([^\\r\\t\\n]*)|i', $s_info, $match) ) {
+    if(preg_match('|Version:([^\\r\\t\\n]*)|i', $s_info, $match) ) {
       $info['version'] = trim($match[1]);
     } else {
       $info['version'] = '';
     }
 
-    if( preg_match('|Author:([^\\r\\t\\n]*)|i', $s_info, $match) ) {
+    if(preg_match('|Author:([^\\r\\t\\n]*)|i', $s_info, $match) ) {
       $info['author_name'] = trim($match[1]);
     } else {
       $info['author_name'] = '';
     }
 
-    if( preg_match('|Author URI:([^\\r\\t\\n]*)|i', $s_info, $match) ) {
+    if(preg_match('|Author URI:([^\\r\\t\\n]*)|i', $s_info, $match) ) {
       $info['author_url'] = trim($match[1]);
     } else {
       $info['author_url'] = '';
     }
 
-    if( preg_match('|Product Key:([^\\r\\t\\n]*)|i', $s_info, $match) ) {
+    if(preg_match('|Product Key:([^\\r\\t\\n]*)|i', $s_info, $match) ) {
       $info['product_key'] = trim($match[1]);
     } else {
       $info['product_key'] = '';
     }
 
-    if( preg_match('|Widgets:([^\\r\\t\\n]*)|i', $s_info, $match) ) {
+    if(preg_match('|Widgets:([^\\r\\t\\n]*)|i', $s_info, $match) ) {
       $info['locations'] = explode( ',' , str_replace( ' ' , '' , $match[1]));
     } else {
       $info['locations'] = array();
@@ -150,7 +150,7 @@ class AdminThemes extends Themes
     // OLD CODE INFO
     require_once $path;
     $fxName = $theme . '_theme_info';
-    if (!function_exists($fxName)) {
+    if(!function_exists($fxName)) {
       return false;
     }
     $result       = $fxName();

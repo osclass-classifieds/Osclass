@@ -18,14 +18,14 @@ if(!defined('ABS_PATH')) exit('ABS_PATH is not loaded. Direct access is not allo
 
 
 function addHelp() {
-  echo '<p>' . __("View logs created by Osclass, themes, or plugins detailing actions performed on your items, users, and other elements..") . '</p>';
+  echo '<p>' . __('View action logs created by Osclass, themes, or plugins for items, users, and other elements. For PHP errors, use Tools > Debug/Error log.') . '</p>';
 }
 
 osc_add_hook('help_box','addHelp');
 
 
-function customPageHeader(){ 
-  ?> 
+function customPageHeader(){
+  ?>
   <h1><?php _e('Action logs'); ?>
     <a href="#" class="btn ico ico-32 ico-help float-right"></a>
   </h1>
@@ -36,13 +36,13 @@ osc_add_hook('admin_page_header','customPageHeader');
 
 
 function customPageTitle($string) {
-  return sprintf(__('Tools - %s'), $string);
+  return sprintf(__('%s - %s'), __('Tools'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');
 
 //customize Head
-function customHead() { 
+function customHead() {
   ?>
   <script type="text/javascript">
     $(document).ready(function(){
@@ -69,16 +69,16 @@ function customHead() {
         autoOpen: false,
         modal: true
       });
-      
+
       $("#bulk-actions-submit").click(function() {
         $("#datatablesForm").submit();
       });
-      
+
       $("#bulk-actions-cancel").click(function() {
         $("#datatablesForm").attr('data-dialog-open', 'false');
         $('#dialog-bulk-actions').dialog('close');
       });
-      
+
       // dialog bulk actions function
       $("#datatablesForm").submit(function() {
         if($("#bulk_actions option:selected").val() == "") {
@@ -93,7 +93,7 @@ function customHead() {
         $("#bulk-actions-submit").html($("#bulk_actions option:selected").text());
         $("#datatablesForm").attr('data-dialog-open', 'true');
         $("#dialog-bulk-actions").dialog('open');
-        
+
         return false;
       });
       // dialog bulk actions
@@ -105,18 +105,25 @@ function customHead() {
       $("#dialog-log-delete").dialog('open');
       return false;
     }
-    
+
     // show/hide details (json)
     function show_hide_log_details(elem, uniqueId) {
-      var htmlShow = document.getElementById("details-" + uniqueId);
-
-      if(htmlShow.style.display === "none") {
-        htmlShow.style.display = "block";
-      } else {
-        htmlShow.style.display = "none";
+      var htmlShow = $("#details-" + uniqueId);
+      if(htmlShow.length === 0) {
+        return false;
       }
-      
-      window.scrollBy(0, 26);     // fix toolbar
+
+      var showText = $(elem).attr('data-show');
+      var hideText = $(elem).attr('data-hide');
+      var detailLinks = $('a[data-detail-id="' + uniqueId + '"]');
+
+      if(htmlShow.is(':visible')) {
+        htmlShow.hide();
+        detailLinks.text(showText);
+      } else {
+        htmlShow.show();
+        detailLinks.text(hideText);
+      }
 
       return false;
     }
@@ -134,38 +141,50 @@ $sort = Params::getParam('sort');
 $direction = Params::getParam('direction');
 
 $columns = $aData['aColumns'];
+$columnSources = (isset($aData['aColumnSources']) ? $aData['aColumnSources'] : array());
+$sortableColumns = (isset($aData['aSortableColumns']) ? $aData['aSortableColumns'] : array());
 $rows = $aData['aRows'];
+$withFilters = __get('withFilters');
+$hasActiveFilters = $withFilters;
 
-osc_current_admin_theme_path('parts/header.php'); 
+osc_current_admin_theme_path('parts/header.php');
 ?>
 
 <h2 class="render-title"><?php _e('Manage logs'); ?></h2>
 <div class="relative" id="logs-list">
-  <div id="users-toolbar" class="table-toolbar">
-    <div class="float-right"></div>
-
-    <div class="display-select-top">
-      <form method="get" action="<?php echo osc_admin_base_url(true); ?>" class="inline nocsrf" id="shortcut-filters">
+  <div id="logs-toolbar" class="table-toolbar">
+    <div class="float-right">
+      <form method="get" action="<?php echo osc_admin_base_url(true); ?>" class="inline nocsrf">
         <?php foreach(Params::getParamsAsArray('get') as $key => $value) { ?>
-          <?php if($key != 'iDisplayLength' && $key != 'sSearch') { ?>
+          <?php if($key != 'iDisplayLength') { ?>
             <input type="hidden" name="<?php echo osc_esc_html(strip_tags($key)); ?>" value="<?php echo osc_esc_html(strip_tags($value)); ?>" />
           <?php } ?>
         <?php } ?>
-        
-        <input type="text" name="sSearch" id="fPattern" class="input-text input-actions" value="<?php echo osc_esc_html(strip_tags(Params::getParam('sSearch'))); ?>" placeholder="<?php echo osc_esc_html(__('Search for a log')); ?>" />
-        <input type="submit" class="btn submit-right" value="<?php echo osc_esc_html(__('Find')); ?>">
-        
-        <select name="iDisplayLength" class="select-box-extra select-box-medium float-left" onchange="this.form.submit();" >
-          <option value="10" <?php if(Params::getParam('iDisplayLength') == 10) echo 'selected'; ?> ><?php printf(__('%d logs'), 10); ?></option>
-          <option value="25" <?php if(Params::getParam('iDisplayLength') == 25) echo 'selected'; ?> ><?php printf(__('%d logs'), 25); ?></option>
-          <option value="50" <?php if(Params::getParam('iDisplayLength') == 50) echo 'selected'; ?> ><?php printf(__('%d logs'), 50); ?></option>
-          <option value="100" <?php if(Params::getParam('iDisplayLength') == 100) echo 'selected'; ?> ><?php printf(__('%d logs'), 100); ?></option>
-          <option value="500" <?php if(Params::getParam('iDisplayLength') == 500) echo 'selected'; ?> ><?php printf(__('%d logs'), 500); ?></option>
+        <select name="iDisplayLength" class="select-box-extra select-box-medium float-left" onchange="this.form.submit();">
+          <option value="10" <?php if(Params::getParam('iDisplayLength') == 10) echo 'selected'; ?>><?php printf(__('%d logs'), 10); ?></option>
+          <option value="25" <?php if(Params::getParam('iDisplayLength') == 25) echo 'selected'; ?>><?php printf(__('%d logs'), 25); ?></option>
+          <option value="50" <?php if(Params::getParam('iDisplayLength') == 50) echo 'selected'; ?>><?php printf(__('%d logs'), 50); ?></option>
+          <option value="100" <?php if(Params::getParam('iDisplayLength') == 100) echo 'selected'; ?>><?php printf(__('%d logs'), 100); ?></option>
+          <option value="500" <?php if(Params::getParam('iDisplayLength') == 500) echo 'selected'; ?>><?php printf(__('%d logs'), 500); ?></option>
         </select>
+      </form>
+      <form method="get" action="<?php echo osc_admin_base_url(true); ?>" class="inline nocsrf" id="shortcut-filters">
+        <input type="hidden" name="page" value="tools" />
+        <input type="hidden" name="action" value="logs" />
+        <?php foreach(Params::getParamsAsArray('get') as $key => $value) { ?>
+          <?php if($key != 'sSearch' && $key != 'page' && $key != 'action') { ?>
+            <input type="hidden" name="<?php echo osc_esc_html(strip_tags($key)); ?>" value="<?php echo osc_esc_html(strip_tags($value)); ?>" />
+          <?php } ?>
+        <?php } ?>
+        <?php if($hasActiveFilters) { ?>
+          <a id="btn-hide-filters" href="<?php echo osc_admin_base_url(true); ?>?page=tools&action=logs" class="btn"><?php _e('Reset filters'); ?></a>
+        <?php } ?>
+        <input type="text" name="sSearch" id="fPattern" class="input-text input-actions" value="<?php echo osc_esc_html(strip_tags(Params::getParam('sSearch'))); ?>" placeholder="<?php echo osc_esc_html(__('Search in data, comment, IP...')); ?>" />
+        <input type="submit" class="btn submit-right" value="<?php echo osc_esc_html(__('Find')); ?>">
       </form>
     </div>
   </div>
-  
+
   <form class="" id="datatablesForm" action="<?php echo osc_admin_base_url(true); ?>" method="post">
     <input type="hidden" name="page" value="tools" />
 
@@ -180,8 +199,10 @@ osc_current_admin_theme_path('parts/header.php');
         <thead>
           <tr>
             <?php foreach($columns as $k => $v) {
-              echo '<th class="col-'.$k.' '.($sort==$k?($direction=='desc'?'sorting_desc':'sorting_asc'):'').'">'.$v.'</th>';
-            }; ?>
+              $sourceCol = (isset($columnSources[$k]) ? $columnSources[$k] : '');
+              $isSortable = ((in_array($k, $sortableColumns, true) || strpos((string)$v, 'sort=') !== false) ? 'is-sortable' : '');
+              echo '<th class="col-'.$k.' '.$isSortable.' '.($sort==$k?($direction=='desc'?'sort-desc':'sort-asc'):'').'" data-source-col="' . osc_esc_html($sourceCol) . '">' . $v . '</th>';
+            } ?>
           </tr>
         </thead>
         <tbody>
@@ -190,12 +211,12 @@ osc_current_admin_theme_path('parts/header.php');
               <tr>
                 <?php foreach($row as $k => $v) { ?>
                   <td class="col-<?php echo $k; ?>"><?php echo $v; ?></td>
-                <?php }; ?>
+                <?php } ?>
               </tr>
-            <?php }; ?>
+            <?php } ?>
           <?php } else { ?>
             <tr>
-              <td colspan="5" class="text-center">
+              <td colspan="<?php echo max(1, count($columns)); ?>" class="text-center">
               <p><?php _e('No data available in table'); ?></p>
               </td>
             </tr>
@@ -224,7 +245,7 @@ osc_current_admin_theme_path('parts/header.php');
           <input type="hidden" name="<?php echo osc_esc_html(strip_tags($key)); ?>" value="<?php echo osc_esc_html(strip_tags($value)); ?>" />
         <?php } ?>
       <?php } ?>
-      
+
       <select name="iDisplayLength" class="select-box-extra select-box-medium float-left" onchange="this.form.submit();" >
         <option value="10" <?php if(Params::getParam('iDisplayLength') == 10) echo 'selected'; ?> ><?php printf(__('%d logs'), 10); ?></option>
         <option value="25" <?php if(Params::getParam('iDisplayLength') == 25) echo 'selected'; ?> ><?php printf(__('%d logs'), 25); ?></option>
@@ -266,4 +287,4 @@ osc_current_admin_theme_path('parts/header.php');
   </div>
 </div>
 
-<?php osc_current_admin_theme_path('parts/footer.php'); ?>
+<?php osc_current_admin_theme_path('parts/footer.php');

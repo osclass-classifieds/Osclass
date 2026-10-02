@@ -18,17 +18,22 @@ if(!defined('ABS_PATH')) exit('ABS_PATH is not loaded. Direct access is not allo
 
 
 function addHelp() {
-  echo '<p>' . __('Manage the comments that users publish on the listings on your site. You can also edit, delete, activate or block comments.') . '</p>';
+  echo '<p>' . __('Manage comments published on listings: approve or deactivate, block or unblock, edit, or delete. Filter by item, user, or status.') . '</p>';
 }
 
 osc_add_hook('help_box','addHelp');
 
 
-function customPageHeader(){ 
+function customPageHeader(){
+  $add_comment_url = osc_admin_base_url(true) . '?page=comments&action=comment_add';
+  if(Params::getParam('itemId') > 0) {
+    $add_comment_url .= '&itemId=' . (int)Params::getParam('itemId');
+  }
   ?>
   <h1><?php _e('Listings'); ?>
     <a href="<?php echo osc_admin_base_url(true) . '?page=settings&action=comments'; ?>" class="btn btn-green ico float-right"><?php _e('Settings'); ?></a>
     <a href="#" class="btn ico ico-32 ico-help float-right"></a>
+    <a href="<?php echo $add_comment_url; ?>" class="btn btn-green ico ico-add-white float-right"><?php _e('Add comment'); ?></a>
   </h1>
   <?php
 }
@@ -37,7 +42,7 @@ osc_add_hook('admin_page_header','customPageHeader');
 
 
 function customPageTitle($string) {
-  return sprintf(__('Comments - %s'), $string);
+  return sprintf(__('%s - %s'), __('Manage comments'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');
@@ -52,7 +57,7 @@ function customHead() { ?>
       $("#check_all").change(function(){
         var isChecked = $(this).prop("checked");
         $('.col-bulkactions input').each( function() {
-          if( isChecked == 1 ) {
+          if(isChecked == 1 ) {
             this.checked = true;
           } else {
             this.checked = false;
@@ -80,11 +85,11 @@ function customHead() { ?>
       });
       // dialog bulk actions function
       $("#datatablesForm").submit(function() {
-        if( $("#bulk_actions option:selected").val() == "" ) {
+        if($("#bulk_actions option:selected").val() == "" ) {
           return false;
         }
 
-        if( $("#datatablesForm").attr('data-dialog-open') == "true" ) {
+        if($("#datatablesForm").attr('data-dialog-open') == "true" ) {
           return true;
         }
 
@@ -116,29 +121,84 @@ $sort     = Params::getParam('sort');
 $direction  = Params::getParam('direction');
 
 $columns  = $aData['aColumns'];
+$columnSources = (isset($aData['aColumnSources']) ? $aData['aColumnSources'] : array());
+$sortableColumns = (isset($aData['aSortableColumns']) ? $aData['aSortableColumns'] : array());
 $rows     = $aData['aRows'];
+$hasActiveFilters = false;
+$filterExclude = array('page', 'action', 'iDisplayLength', 'sort', 'direction', 'iPage');
+
+foreach(Params::getParamsAsArray('get') as $key => $value) {
+  if(in_array($key, $filterExclude, true)) {
+    continue;
+  }
+
+  if(is_array($value)) {
+    foreach($value as $v) {
+      if(trim((string)$v) != '') {
+        $hasActiveFilters = true;
+        break 2;
+      }
+    }
+  } else if(trim((string)$value) != '') {
+    $hasActiveFilters = true;
+    break;
+  }
+}
 
 $reply_cond = (Params::getParam('replyId') > 0 ? '&replyId=' . Params::getParam('replyId') : '');
 
-osc_current_admin_theme_path( 'parts/header.php' ); 
+osc_current_admin_theme_path( 'parts/header.php' );
 ?>
 
 <h2 class="render-title">
-  <?php 
+  <?php
     if(Params::getParam('itemId') > 0) {
-      echo sprintf(__('Comments on item #%d'), Params::getParam('itemId'));
+      echo sprintf(__('Comments on listing #%d'), Params::getParam('itemId'));
     } else if(Params::getParam('replyId') > 0) {
       echo sprintf(__('Replies to comment #%d'), Params::getParam('replyId'));
     } else {
-      _e('Comments'); 
+      _e('Manage comments');
     }
   ?>
+  <?php
+    $add_comment_url = osc_admin_base_url(true) . '?page=comments&action=comment_add';
+    if(Params::getParam('itemId') > 0) {
+      $add_comment_url .= '&itemId=' . (int)Params::getParam('itemId');
+    }
+  ?>
+  <a href="<?php echo $add_comment_url; ?>" class="btn btn-mini"><?php _e('Add new'); ?></a>
 </h2>
 <div class="relative">
   <div id="listing-toolbar">
     <div class="float-right">
+      <form method="get" action="<?php echo osc_admin_base_url(true); ?>" class="inline nocsrf">
+        <?php foreach(Params::getParamsAsArray('get') as $key => $value ) { ?>
+          <?php if($key != 'iDisplayLength') { ?>
+            <input type="hidden" name="<?php echo osc_esc_html(strip_tags($key)); ?>" value="<?php echo osc_esc_html(strip_tags($value)); ?>" />
+          <?php } ?>
+        <?php } ?>
+        <select name="iDisplayLength" class="select-box-extra select-box-medium float-left" onchange="this.form.submit();" >
+          <option value="10" <?php if(Params::getParam('iDisplayLength') == 10 ) echo 'selected'; ?> ><?php printf(__('%d Comments'), 10); ?></option>
+          <option value="25" <?php if(Params::getParam('iDisplayLength') == 25 ) echo 'selected'; ?> ><?php printf(__('%d Comments'), 25); ?></option>
+          <option value="50" <?php if(Params::getParam('iDisplayLength') == 50 ) echo 'selected'; ?> ><?php printf(__('%d Comments'), 50); ?></option>
+          <option value="100" <?php if(Params::getParam('iDisplayLength') == 100 ) echo 'selected'; ?> ><?php printf(__('%d Comments'), 100); ?></option>
+        </select>
+      </form>
+      <?php if($hasActiveFilters) { ?>
+        <a id="btn-hide-filters" href="<?php echo osc_admin_base_url(true); ?>?page=comments" class="btn"><?php _e('Reset filters'); ?></a>
+      <?php } ?>
+      <form method="get" action="<?php echo osc_admin_base_url(true); ?>" id="shortcut-filters" class="inline nocsrf">
+        <input type="hidden" name="page" value="comments" />
+        <?php if(Params::getParam('showAll') == 'off') { ?><input type="hidden" name="showAll" value="off" /><?php } ?>
+        <?php if(Params::getParam('itemId') != '') { ?><input type="hidden" name="itemId" value="<?php echo (int)Params::getParam('itemId'); ?>" /><?php } ?>
+        <?php if(Params::getParam('replyId') != '') { ?><input type="hidden" name="replyId" value="<?php echo (int)Params::getParam('replyId'); ?>" /><?php } ?>
+        <?php if(Params::getParam('userId') != '') { ?><input type="hidden" name="userId" value="<?php echo (int)Params::getParam('userId'); ?>" /><?php } ?>
+        <input type="hidden" name="iDisplayLength" value="<?php echo (int)Params::getParam('iDisplayLength'); ?>" />
+        <input id="fPattern" type="text" name="sSearch" value="<?php echo osc_esc_html(Params::getParam('sSearch')); ?>" class="input-text input-actions" placeholder="<?php echo osc_esc_html(__('Search comment')); ?>" />
+        <input type="submit" class="btn submit-right" value="<?php echo osc_esc_html(__('Find')); ?>">
+      </form>
       <?php if(Params::getParam('showAll') != 'off') { ?>
-      <a href="<?php echo osc_admin_base_url(true) . '?page=comments&showAll=off' . $reply_cond; ?>" class="btn"><?php _e('Hidden comments');?></a>
+      <a href="<?php echo osc_admin_base_url(true) . '?page=comments&showAll=off' . $reply_cond; ?>" class="btn hidden-commetns"><?php _e('Hidden comments');?></a>
       <?php } else { ?>
       <a href="<?php echo osc_admin_base_url(true) . '?page=comments' . $reply_cond; ?>" class="btn"><?php _e('All comments');?></a>
       <?php } ?>
@@ -158,22 +218,24 @@ osc_current_admin_theme_path( 'parts/header.php' );
         <thead>
           <tr>
             <?php foreach($columns as $k => $v) {
-              echo '<th class="col-'.$k.' '.($sort==$k?($direction=='desc'?'sorting_desc':'sorting_asc'):'').'">'.$v.'</th>';
-            }; ?>
+              $sourceCol = (isset($columnSources[$k]) ? $columnSources[$k] : '');
+              $isSortable = ((in_array($k, $sortableColumns, true) || strpos((string)$v, 'sort=') !== false) ? 'is-sortable' : '');
+              echo '<th class="col-'.$k.' '.$isSortable.' '.($sort==$k?($direction=='desc'?'sort-desc':'sort-asc'):'').'" data-source-col="' . osc_esc_html($sourceCol) . '">' . $v . '</th>';
+            } ?>
           </tr>
         </thead>
         <tbody>
-        <?php if( count($rows) > 0 ) { ?>
+        <?php if(count($rows) > 0 ) { ?>
           <?php foreach($rows as $key => $row) { ?>
             <tr class="<?php echo implode(' ', osc_apply_filter('datatable_comment_class', array(), $aRawRows[$key], $row)); ?>">
               <?php foreach($row as $k => $v) { ?>
                 <td class="col-<?php echo $k; ?>"><?php echo $v; ?></td>
-              <?php }; ?>
+              <?php } ?>
             </tr>
-          <?php }; ?>
+          <?php } ?>
         <?php } else { ?>
           <tr>
-            <td colspan="6" class="text-center">
+            <td colspan="<?php echo max(1, count($columns)); ?>" class="text-center">
             <p><?php _e('No data available in table'); ?></p>
             </td>
           </tr>
@@ -192,6 +254,21 @@ osc_current_admin_theme_path( 'parts/header.php' );
   osc_add_hook('before_show_pagination_admin','showingResults');
   osc_show_pagination_admin($aData);
 ?>
+<div class="display-select-bottom">
+  <form method="get" action="<?php echo osc_admin_base_url(true); ?>" class="inline nocsrf">
+    <?php foreach(Params::getParamsAsArray('get') as $key => $value ) { ?>
+      <?php if($key != 'iDisplayLength') { ?>
+        <input type="hidden" name="<?php echo osc_esc_html(strip_tags($key)); ?>" value="<?php echo osc_esc_html(strip_tags($value)); ?>" />
+      <?php } ?>
+    <?php } ?>
+    <select name="iDisplayLength" class="select-box-extra select-box-medium float-left" onchange="this.form.submit();" >
+      <option value="10" <?php if(Params::getParam('iDisplayLength') == 10 ) echo 'selected'; ?> ><?php printf(__('%d Comments'), 10); ?></option>
+      <option value="25" <?php if(Params::getParam('iDisplayLength') == 25 ) echo 'selected'; ?> ><?php printf(__('%d Comments'), 25); ?></option>
+      <option value="50" <?php if(Params::getParam('iDisplayLength') == 50 ) echo 'selected'; ?> ><?php printf(__('%d Comments'), 50); ?></option>
+      <option value="100" <?php if(Params::getParam('iDisplayLength') == 100 ) echo 'selected'; ?> ><?php printf(__('%d Comments'), 100); ?></option>
+    </select>
+  </form>
+</div>
 <form id="dialog-comment-delete" method="get" action="<?php echo osc_admin_base_url(true); ?>" class="has-form-actions hide" title="<?php echo osc_esc_html(__('Delete comment')); ?>">
   <input type="hidden" name="page" value="comments" />
   <input type="hidden" name="action" value="delete" />
@@ -220,4 +297,4 @@ osc_current_admin_theme_path( 'parts/header.php' );
     </div>
   </div>
 </div>
-<?php osc_current_admin_theme_path( 'parts/footer.php' ); ?>
+<?php osc_current_admin_theme_path( 'parts/footer.php' );

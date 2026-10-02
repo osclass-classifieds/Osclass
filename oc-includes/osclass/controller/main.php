@@ -44,13 +44,13 @@ class CWebMain extends BaseModel {
 
         $this->redirectTo(osc_base_url());
         break;
-        
+
       default:
         // update 422 - avoid misuse action param for injections
         if(Params::getParam('action') <> '') {
           $this->redirectTo(osc_base_url());
         }
-        
+
         $this->doView('main.php');
     }
   }

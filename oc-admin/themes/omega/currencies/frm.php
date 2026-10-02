@@ -20,7 +20,7 @@ if(!defined('ABS_PATH')) exit('ABS_PATH is not loaded. Direct access is not allo
 osc_enqueue_script('jquery-validate');
 
 //customize Head
-function customHead() { 
+function customHead() {
   ?>
   <script type="text/javascript">
   $(document).ready(function(){
@@ -43,16 +43,16 @@ function customHead() {
       },
       messages: {
         pk_c_code: {
-          required: '<?php echo osc_esc_js(__('Currency code: this field is required')); ?>.',
+          required: '<?php echo osc_esc_js(sprintf(__('%s is required'), __('Currency code'))); ?>.',
           minlength: '<?php echo osc_esc_js(__('Currency code: length of code must be exactly 3 characters')); ?>.',
           maxlength: '<?php echo osc_esc_js(__('Currency code: length of code must be exactly 3 characters')); ?>.'
         },
         s_description: {
-          required: '<?php echo osc_esc_js(__('Currency symbol: this field is required')); ?>.',
+          required: '<?php echo osc_esc_js(sprintf(__('%s is required'), __('Currency symbol'))); ?>.',
           minlength: '<?php echo osc_esc_js(__('Currency symbol: length of symbol must be at least 1 character')); ?>.'
         },
         s_name: {
-          required: '<?php echo osc_esc_js(__('Name: this field is required')); ?>.',
+          required: '<?php echo osc_esc_js(sprintf(__('%s is required'), __('Name'))); ?>.',
           minlength: '<?php echo osc_esc_js(__('Name: length of currency name must be at least 1 character')); ?>.'
         }
       },
@@ -74,9 +74,9 @@ function customHead() {
 osc_add_hook('admin_header','customHead', 10);
 
 
-function customPageHeader(){ 
+function customPageHeader(){
   ?>
-  <h1><?php _e('Currencies'); ?></h1>
+  <h1><?php _e('International'); ?></h1>
   <?php
 }
 
@@ -111,13 +111,14 @@ osc_add_filter('admin_title', 'customPageTitle');
 
 $aCurrency = View::newInstance()->_get('aCurrency');
 
-osc_current_admin_theme_path('parts/header.php'); 
+osc_current_admin_theme_path('parts/header.php');
 ?>
 
 <div id="add-currency-settings">
   <h2 class="render-title"><?php echo customText('title'); ?></h2>
   <ul id="error_list"></ul>
   <form name="currency_form" action="<?php echo osc_admin_base_url(true); ?>" method="post">
+    <?php echo osc_csrf_token_form(); ?>
     <input type="hidden" name="page" value="currencies" />
     <input type="hidden" name="action" value="<?php echo $typeForm; ?>" />
     <?php if($typeForm == 'edit_post') { ?>
@@ -145,11 +146,63 @@ osc_current_admin_theme_path('parts/header.php');
             <input type="text" name="s_name" value="<?php echo osc_esc_html($aCurrency['s_name']); ?>" />
           </div>
         </div>
+        <div class="form-row">
+          <div class="form-label"><?php _e('Exchange rate'); ?></div>
+          <div class="form-controls">
+            <?php
+            $erDisplay = '';
+            if(isset($aCurrency['d_exchange_rate']) && $aCurrency['d_exchange_rate'] !== null && $aCurrency['d_exchange_rate'] !== '') {
+              $erRaw = trim((string)$aCurrency['d_exchange_rate']);
+              if(!is_numeric($erRaw)) {
+                $erDisplay = $erRaw;
+              } else {
+                if(stripos($erRaw, 'e') !== false) {
+                  $erRaw = rtrim(rtrim(sprintf('%.20f', (float)$erRaw), '0'), '.');
+                }
+                $neg = (strpos($erRaw, '-') === 0);
+                $num = $neg ? substr($erRaw, 1) : $erRaw;
+                if(strpos($num, '.') !== false) {
+                  $parts = explode('.', $num, 2);
+                  $wi = $parts[0];
+                  $wfSig = rtrim($parts[1], '0');
+                  $lastNz = -1;
+                  for($i = strlen($wfSig) - 1; $i >= 0; $i--) {
+                    if($wfSig[$i] !== '0') {
+                      $lastNz = $i;
+                      break;
+                    }
+                  }
+                  $nzFrac = ($wfSig !== '' ? preg_match_all('/[1-9]/', $wfSig) : 0);
+                  if($wfSig === '' || $lastNz < 0) {
+                    $erDisplay = number_format((float)($neg ? '-' . $num : $num), 4, '.', '');
+                  } elseif($nzFrac > 4 || ($lastNz + 1) > 4) {
+                    $erDisplay = ($neg ? '-' : '') . $wi . '.' . $wfSig;
+                  } else {
+                    $erDisplay = number_format((float)($neg ? '-' . $num : $num), 4, '.', '');
+                  }
+                } else {
+                  $erDisplay = number_format((float)($neg ? '-' . $num : $num), 4, '.', '');
+                }
+              }
+            }
+            ?>
+            <input type="text" class="input-large" name="d_exchange_rate" value="<?php echo osc_esc_html($erDisplay); ?>" />
+            <span class="help-box"><?php _e('Optional. Amount of this currency for 1 US dollar (USD = 1). Examples: euro often near 0.92; Czech koruna often in the 20s. Use public USD rates to fill this easily. Leave empty if unknown.'); ?></span>
+          </div>
+        </div>
+        <?php if($typeForm == 'edit_post') { ?>
+        <div class="form-row">
+          <div class="form-label"><?php _e('Default currency'); ?></div>
+          <div class="form-controls">
+            <label><input type="checkbox" name="b_set_default_currency" value="1" <?php if(osc_currency() == $aCurrency['pk_c_code']) echo 'checked="checked"'; ?> /> <?php _e('Set as default currency (updates General settings)'); ?></label>
+          </div>
+        </div>
+        <?php } ?>
         <div class="form-actions">
           <input type="submit" value="<?php echo osc_esc_html(customText('button')); ?>" class="btn btn-submit" />
 
           <?php if($typeForm == 'edit_post') { ?>
-          <input class="btn btn-red" type="button" value="<?php echo osc_esc_html(__('Cancel')); ?>" onclick="location.href='<?php echo osc_admin_base_url(true); ?>?page=settings&amp;action=currencies'">
+          <input class="btn btn-red" type="button" value="<?php echo osc_esc_html(__('Cancel')); ?>" onclick="location.href='<?php echo osc_admin_base_url(true); ?>?page=currencies'">
           <?php } ?>
         </div>
       </div>
@@ -157,4 +210,4 @@ osc_current_admin_theme_path('parts/header.php');
   </form>
 </div>
 <!-- /settings form -->
-<?php osc_current_admin_theme_path('parts/footer.php'); ?>
+<?php osc_current_admin_theme_path('parts/footer.php');

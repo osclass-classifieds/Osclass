@@ -47,7 +47,7 @@ if(!isset($category['pk_i_id']) ) {
           <input class="input-text" type="text" id="sCity" name="sCity" value="<?php echo osc_esc_html(osc_search_city()); ?>" />
         </div>
       </fieldset>
-      <?php if( osc_images_enabled_at_items() ) { ?>
+      <?php if(osc_images_enabled_at_items() ) { ?>
       <fieldset>
         <h3><?php _e('Show only', 'sigma') ; ?></h3>
         <div class="row picture">
@@ -56,7 +56,7 @@ if(!isset($category['pk_i_id']) ) {
         </div>
       </fieldset>
       <?php } ?>
-      <?php if( osc_price_enabled_at_items() ) { ?>
+      <?php if(osc_price_enabled_at_items() ) { ?>
       <fieldset>
         <div class="row price-slice">
           <h3><?php _e('Price', 'sigma') ; ?></h3>
@@ -81,7 +81,7 @@ if(!isset($category['pk_i_id']) ) {
           osc_run_hook('search_form') ;
         }
         ?></div>
-        
+
       <?php
       $aCategories = osc_search_category();
       foreach($aCategories as $cat_id) { ?>

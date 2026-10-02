@@ -59,14 +59,17 @@ function osc_die($title, $message) {
  */
 function getErrorParam( $param , $htmlencode = false , $quotes_encode = true )
 {
-  if ( $param == '' ) {
+  if($param == '' ) {
     return '';
   }
-  if ( ! isset( $_SERVER[ $param ] ) ) {
+  if(! isset( $_SERVER[ $param ] ) ) {
     return '';
   }
   $value = $_SERVER[$param];
-  if ($htmlencode) {
+  if($htmlencode) {
+    if(!is_string($value)) {
+      $value = is_scalar($value) ? (string)$value : '';
+    }
     if($quotes_encode) {
       return htmlspecialchars(stripslashes($value), ENT_QUOTES);
     } else {
@@ -106,18 +109,18 @@ function strip_slashes_extended_e( $array ) {
 function osc_get_absolute_url() {
   $protocol = ( getErrorParam('HTTPS') === 'on' || getErrorParam( 'HTTPS') == 1 || getErrorParam( 'HTTP_X_FORWARDED_PROTO') === 'https')? 'https' : 'http';
   $replace = '(oc-admin)|(oc-includes)|(oc-content)';
-  
+
   if(defined('OC_ADMIN_FOLDER') && OC_ADMIN_FOLDER != 'oc-admin') {
     $replace .= '|(' . OC_ADMIN_FOLDER . ')';
   }
-  
+
   if(defined('OC_INCLUDES_FOLDER') && OC_INCLUDES_FOLDER != 'oc-includes') {
     $replace .= '|(' . OC_INCLUDES_FOLDER . ')';
   }
-  
+
   if(defined('OC_CONTENT_FOLDER') && OC_CONTENT_FOLDER != 'oc-content') {
     $replace .= '|(' . OC_CONTENT_FOLDER . ')';
   }
-  
+
   return $protocol . '://' . getErrorParam('HTTP_HOST') . preg_replace('/(' . $replace . '|([a-z]+\.php)|(\?.*)).*/i', '', getErrorParam('REQUEST_URI', false, false));
 }

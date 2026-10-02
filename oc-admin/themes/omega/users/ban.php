@@ -18,18 +18,18 @@ if(!defined('ABS_PATH')) exit('ABS_PATH is not loaded. Direct access is not allo
 
 
 function addHelp() {
-  echo '<p>' . __('Add, edit or delete ban rules. Keep in mind that ban rules prevent users to register, publish or comment on listings.') . '</p>';
+  echo '<p>' . __('Add, edit, or delete ban rules by IP or email. Ban rules can prevent registration, publishing, or commenting on listings.') . '</p>';
 }
 
 osc_add_hook('help_box','addHelp');
 
 
-function customPageHeader(){ 
+function customPageHeader(){
   ?>
   <h1><?php _e('Ban rules'); ?>
     <a href="<?php echo osc_admin_base_url(true) . '?page=users&action=settings'; ?>" class="btn ico ico-32 ico-engine float-right"></a>
     <a href="#" class="btn ico ico-32 ico-help float-right"></a>
-    <a href="<?php echo osc_admin_base_url(true) . '?page=users&action=create_ban_rule'; ?>" class="btn btn-green ico ico-add-white float-right"><?php _e('Add new'); ?></a>
+    <a href="<?php echo osc_admin_base_url(true) . '?page=users&action=create_ban_rule'; ?>" class="btn btn-green ico ico-add-white float-right"><?php _e('Add ban rule'); ?></a>
   </h1>
   <?php
 }
@@ -38,14 +38,14 @@ osc_add_hook('admin_page_header','customPageHeader');
 
 
 function customPageTitle($string) {
-  return sprintf(__('Manage ban rules - %s'), $string);
+  return sprintf(__('%s - %s'), __('Manage ban rules'), $string);
 }
 
 osc_add_filter('admin_title', 'customPageTitle');
 
 
 //customize Head
-function customHead() { 
+function customHead() {
   ?>
   <script type="text/javascript">
     $(document).ready(function(){
@@ -53,7 +53,7 @@ function customHead() {
       $("#check_all").change(function(){
         var isChecked = $(this).prop("checked");
         $('.col-bulkactions input').each( function() {
-          if( isChecked == 1 ) {
+          if(isChecked == 1 ) {
             this.checked = true;
           } else {
             this.checked = false;
@@ -81,11 +81,11 @@ function customHead() {
       });
       // dialog bulk actions function
       $("#datatablesForm").submit(function() {
-        if( $("#bulk_actions option:selected").val() == "" ) {
+        if($("#bulk_actions option:selected").val() == "" ) {
           return false;
         }
 
-        if( $("#datatablesForm").attr('data-dialog-open') == "true" ) {
+        if($("#datatablesForm").attr('data-dialog-open') == "true" ) {
           return true;
         }
 
@@ -118,38 +118,71 @@ $sort = Params::getParam('sort');
 $direction = Params::getParam('direction');
 
 $columns = $aData['aColumns'];
+$columnSources = (isset($aData['aColumnSources']) ? $aData['aColumnSources'] : array());
+$sortableColumns = (isset($aData['aSortableColumns']) ? $aData['aSortableColumns'] : array());
 $rows = $aData['aRows'];
+$hasActiveFilters = false;
+$filterExclude = array('page', 'action', 'iDisplayLength', 'sort', 'direction', 'iPage');
 
-osc_current_admin_theme_path('parts/header.php'); 
+foreach(Params::getParamsAsArray('get') as $key => $value) {
+  if(in_array($key, $filterExclude, true)) {
+    continue;
+  }
+
+  if(is_array($value)) {
+    foreach($value as $v) {
+      if(trim((string)$v) != '') {
+        $hasActiveFilters = true;
+        break 2;
+      }
+    }
+  } else if(trim((string)$value) != '') {
+    $hasActiveFilters = true;
+    break;
+  }
+}
+
+osc_current_admin_theme_path('parts/header.php');
 ?>
 
 <h2 class="render-title"><?php _e('Manage ban rules'); ?> <a href="<?php echo osc_admin_base_url(true) . '?page=users&action=create_ban_rule'; ?>" class="btn btn-mini"><?php _e('Add new'); ?></a></h2>
 <div class="relative" id="banrules-list">
   <div id="users-toolbar" class="table-toolbar">
-    <div class="float-right"></div>
-
-    <div class="display-select-top">
+    <div class="float-right">
       <form method="get" action="<?php echo osc_admin_base_url(true); ?>" class="inline nocsrf" id="shortcut-filters">
-        <?php foreach( Params::getParamsAsArray('get') as $key => $value ) { ?>
-          <?php if( $key != 'iDisplayLength' && $key != 'sSearch' ) { ?>
+        <?php foreach(Params::getParamsAsArray('get') as $key => $value ) { ?>
+          <?php if($key != 'sSearch' && $key != 'emailLike' && $key != 'ipLike' ) { ?>
             <input type="hidden" name="<?php echo osc_esc_html(strip_tags($key)); ?>" value="<?php echo osc_esc_html(strip_tags($value)); ?>" />
           <?php } ?>
         <?php } ?>
-        
-        <input type="text" name="sSearch" id="fPattern" class="input-text input-actions" value="<?php echo osc_esc_html(strip_tags(Params::getParam('sSearch'))); ?>" placeholder="<?php echo osc_esc_html(__('Search for a rule')); ?>" />
+        <input type="hidden" name="emailLike" value="<?php echo osc_esc_html(strip_tags(Params::getParam('emailLike'))); ?>" />
+        <input type="hidden" name="ipLike" value="<?php echo osc_esc_html(strip_tags(Params::getParam('ipLike'))); ?>" />
+        <input type="text" name="sSearch" id="fPattern" class="input-text input-actions" value="<?php echo osc_esc_html(strip_tags(Params::getParam('sSearch'))); ?>" placeholder="<?php echo osc_esc_html(__('Search rule')); ?>" />
         <input type="submit" class="btn submit-right" value="<?php echo osc_esc_html(__('Find')); ?>">
-        
-        <select name="iDisplayLength" class="select-box-extra select-box-medium float-left" onchange="this.form.submit();" >
-          <option value="10" <?php if( Params::getParam('iDisplayLength') == 10 ) echo 'selected'; ?> ><?php printf(__('%d rules'), 10); ?></option>
-          <option value="25" <?php if( Params::getParam('iDisplayLength') == 25 ) echo 'selected'; ?> ><?php printf(__('%d rules'), 25); ?></option>
-          <option value="50" <?php if( Params::getParam('iDisplayLength') == 50 ) echo 'selected'; ?> ><?php printf(__('%d rules'), 50); ?></option>
-          <option value="100" <?php if( Params::getParam('iDisplayLength') == 100 ) echo 'selected'; ?> ><?php printf(__('%d rules'), 100); ?></option>
-          <option value="500" <?php if( Params::getParam('iDisplayLength') == 500 ) echo 'selected'; ?> ><?php printf(__('%d rules'), 500); ?></option>
-        </select>
       </form>
     </div>
+
+    <div class="display-select-top">
+      <form method="get" action="<?php echo osc_admin_base_url(true); ?>" class="inline nocsrf">
+        <?php foreach(Params::getParamsAsArray('get') as $key => $value ) { ?>
+          <?php if($key != 'iDisplayLength' ) { ?>
+            <input type="hidden" name="<?php echo osc_esc_html(strip_tags($key)); ?>" value="<?php echo osc_esc_html(strip_tags($value)); ?>" />
+          <?php } ?>
+        <?php } ?>
+        <select name="iDisplayLength" class="select-box-extra select-box-medium float-left" onchange="this.form.submit();" >
+          <option value="10" <?php if(Params::getParam('iDisplayLength') == 10 ) echo 'selected'; ?> ><?php printf(__('%d rules'), 10); ?></option>
+          <option value="25" <?php if(Params::getParam('iDisplayLength') == 25 ) echo 'selected'; ?> ><?php printf(__('%d rules'), 25); ?></option>
+          <option value="50" <?php if(Params::getParam('iDisplayLength') == 50 ) echo 'selected'; ?> ><?php printf(__('%d rules'), 50); ?></option>
+          <option value="100" <?php if(Params::getParam('iDisplayLength') == 100 ) echo 'selected'; ?> ><?php printf(__('%d rules'), 100); ?></option>
+          <option value="500" <?php if(Params::getParam('iDisplayLength') == 500 ) echo 'selected'; ?> ><?php printf(__('%d rules'), 500); ?></option>
+        </select>
+      </form>
+      <?php if($hasActiveFilters) { ?>
+        <a id="btn-hide-filters" href="<?php echo osc_admin_base_url(true); ?>?page=users&action=ban" class="btn"><?php _e('Reset filters'); ?></a>
+      <?php } ?>
+    </div>
   </div>
-  
+
   <form class="" id="datatablesForm" action="<?php echo osc_admin_base_url(true); ?>" method="post">
     <input type="hidden" name="page" value="users" />
 
@@ -164,22 +197,24 @@ osc_current_admin_theme_path('parts/header.php');
         <thead>
           <tr>
             <?php foreach($columns as $k => $v) {
-              echo '<th class="col-'.$k.' '.($sort==$k?($direction=='desc'?'sorting_desc':'sorting_asc'):'').'">'.$v.'</th>';
-            }; ?>
+              $sourceCol = (isset($columnSources[$k]) ? $columnSources[$k] : '');
+              $isSortable = ((in_array($k, $sortableColumns, true) || strpos((string)$v, 'sort=') !== false) ? 'is-sortable' : '');
+              echo '<th class="col-'.$k.' '.$isSortable.' '.($sort==$k?($direction=='desc'?'sort-desc':'sort-asc'):'').'" data-source-col="' . osc_esc_html($sourceCol) . '">' . $v . '</th>';
+            } ?>
           </tr>
         </thead>
         <tbody>
-          <?php if( count($rows) > 0 ) { ?>
+          <?php if(count($rows) > 0 ) { ?>
             <?php foreach($rows as $key => $row) { ?>
               <tr>
                 <?php foreach($row as $k => $v) { ?>
                   <td class="col-<?php echo $k; ?>"><?php echo $v; ?></td>
-                <?php }; ?>
+                <?php } ?>
               </tr>
-            <?php }; ?>
+            <?php } ?>
           <?php } else { ?>
             <tr>
-              <td colspan="5" class="text-center">
+              <td colspan="<?php echo max(1, count($columns)); ?>" class="text-center">
               <p><?php _e('No data available in table'); ?></p>
               </td>
             </tr>
@@ -203,18 +238,18 @@ osc_current_admin_theme_path('parts/header.php');
 
   <div class="display-select-bottom">
     <form method="get" action="<?php echo osc_admin_base_url(true); ?>"  class="inline nocsrf">
-      <?php foreach( Params::getParamsAsArray('get') as $key => $value ) { ?>
-        <?php if( $key != 'iDisplayLength' ) { ?>
+      <?php foreach(Params::getParamsAsArray('get') as $key => $value ) { ?>
+        <?php if($key != 'iDisplayLength' ) { ?>
           <input type="hidden" name="<?php echo osc_esc_html(strip_tags($key)); ?>" value="<?php echo osc_esc_html(strip_tags($value)); ?>" />
         <?php } ?>
       <?php } ?>
-      
+
       <select name="iDisplayLength" class="select-box-extra select-box-medium float-left" onchange="this.form.submit();" >
-        <option value="10" <?php if( Params::getParam('iDisplayLength') == 10 ) echo 'selected'; ?> ><?php printf(__('%d rules'), 10); ?></option>
-        <option value="25" <?php if( Params::getParam('iDisplayLength') == 25 ) echo 'selected'; ?> ><?php printf(__('%d rules'), 25); ?></option>
-        <option value="50" <?php if( Params::getParam('iDisplayLength') == 50 ) echo 'selected'; ?> ><?php printf(__('%d rules'), 50); ?></option>
-        <option value="100" <?php if( Params::getParam('iDisplayLength') == 100 ) echo 'selected'; ?> ><?php printf(__('%d rules'), 100); ?></option>
-        <option value="500" <?php if( Params::getParam('iDisplayLength') == 500 ) echo 'selected'; ?> ><?php printf(__('%d rules'), 500); ?></option>
+        <option value="10" <?php if(Params::getParam('iDisplayLength') == 10 ) echo 'selected'; ?> ><?php printf(__('%d rules'), 10); ?></option>
+        <option value="25" <?php if(Params::getParam('iDisplayLength') == 25 ) echo 'selected'; ?> ><?php printf(__('%d rules'), 25); ?></option>
+        <option value="50" <?php if(Params::getParam('iDisplayLength') == 50 ) echo 'selected'; ?> ><?php printf(__('%d rules'), 50); ?></option>
+        <option value="100" <?php if(Params::getParam('iDisplayLength') == 100 ) echo 'selected'; ?> ><?php printf(__('%d rules'), 100); ?></option>
+        <option value="500" <?php if(Params::getParam('iDisplayLength') == 500 ) echo 'selected'; ?> ><?php printf(__('%d rules'), 500); ?></option>
       </select>
     </form>
   </div>
@@ -250,4 +285,4 @@ osc_current_admin_theme_path('parts/header.php');
   </div>
 </div>
 
-<?php osc_current_admin_theme_path( 'parts/footer.php' ); ?>
+<?php osc_current_admin_theme_path( 'parts/footer.php' );

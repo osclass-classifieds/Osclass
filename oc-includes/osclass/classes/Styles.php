@@ -18,8 +18,8 @@ if(!defined('ABS_PATH')) exit('ABS_PATH is not loaded. Direct access is not allo
  * warranties or conditions of any kind, either express or implied. Do not remove
  * this NOTICE section as it contains license information and copyrights.
  */
- 
- 
+
+
 /**
  * Styles enqueue class.
  *
@@ -29,10 +29,10 @@ class Styles {
   public $styles = array();
   private static $instance;
 
-	/**
-	 * @return \Styles
-	 */
-	public static function newInstance()
+  /**
+   * @return \Styles
+   */
+  public static function newInstance()
   {
     if(!self::$instance instanceof self) {
       self::$instance = new self;
@@ -81,7 +81,7 @@ class Styles {
   {
     $compress = osc_css_minify();
     $minifier = new Minify\CSS('');
-    $banned_pages = array_filter(array_map('strtolower', array_map('trim', explode(',', osc_css_banned_pages())))); 
+    $banned_pages = array_filter(array_map('strtolower', array_map('trim', explode(',', osc_css_banned_pages()))));
     $current_page = strtolower(osc_get_osclass_location() == '' ? 'home' : osc_get_osclass_location());
     $current_page .= (osc_get_osclass_section() <> '' ? '-' . strtolower(osc_get_osclass_section()) : '');
 
@@ -89,32 +89,32 @@ class Styles {
       $name = '';
       $content = '';
       $internal = array();
-      $banned_words = array_filter(array_map('trim', explode(',', osc_css_banned_words()))); 
-      
+      $banned_words = array_filter(array_map('trim', explode(',', osc_css_banned_words())));
+
       // first collect internal names and check if file exists
       foreach($this->styles as $id => $url) {
         if(trim($url) != '') {
-          if (strpos($url, '?v=') !== false) {
+          if(strpos($url, '?v=') !== false) {
             $url = substr($url, 0, strpos($url, '?v='));
           }
 
           $path = str_replace(osc_base_url(), osc_base_path(), $url);
-          
+
           // font and awesome are blocked names, these styles will not be minified
-          if (strpos($url, osc_base_url()) !== false && !osc_string_contains_array($url, $banned_words)) {
+          if(strpos($url, osc_base_url()) !== false && !osc_string_contains_array($url, $banned_words)) {
             $internal[] = $id;
-            
+
             if(is_file($path) && is_readable($path)){
               $modtime = filemtime($path);
             } else {
               $modtime = date('YmdHis');
             }
-            
+
             $name .= $id . '_' . $modtime . ';';
           }
         }
       }
-      
+
       $name = md5($name) . '.css';
       $save_path = osc_uploads_path() . 'minify/';
       $save_url = str_replace(osc_base_path(), osc_base_url(), $save_path);
@@ -133,9 +133,9 @@ class Styles {
                 $url = str_replace('/oc-content/', '/' . osc_content_folder() . '/', $url);
                 $url = str_replace('/oc-includes/', '/' . osc_includes_folder() . '/', $url);
               }
-          
+
               $path = str_replace(osc_base_url(), osc_base_path(), $url);
-              
+
               if(strpos($url, osc_base_url()) !== false && !osc_string_contains_array($url, $banned_words)) {
                 if($compress) {
                   $minifier->add($path);
@@ -154,13 +154,13 @@ class Styles {
           file_put_contents($save_path . $name, $content);
         }
       }
-      
+
       foreach($this->styles as $id => $css) {
         if(!in_array($id, $internal)) {
           echo '<link href="' . osc_apply_filter('style_url', $css) . '" rel="stylesheet" type="text/css" />' . PHP_EOL;
         }
       }
-      
+
       echo '<link href="' . osc_apply_filter('style_url', $save_url . $name) . '" rel="stylesheet" type="text/css" />' . PHP_EOL;
     } else {
       foreach($this->styles as $css) {

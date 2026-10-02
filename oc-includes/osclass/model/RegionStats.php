@@ -47,7 +47,7 @@ class RegionStats extends DAO
   */
   public static function newInstance()
   {
-    if( !self::$instance instanceof self ) {
+    if(!self::$instance instanceof self ) {
       self::$instance = new self;
     }
     return self::$instance;
@@ -102,7 +102,7 @@ class RegionStats extends DAO
     $result     = $this->dao->get();
     $regionStat   = $result->row();
 
-    if( isset( $regionStat['i_num_items'] ) ) {
+    if(isset( $regionStat['i_num_items'] ) ) {
       $this->dao->from( $this->getTableName() );
       $this->dao->set( 'i_num_items', 'i_num_items - 1', false );
       $this->dao->where( 'i_num_items > 0' );
@@ -166,21 +166,21 @@ class RegionStats extends DAO
     $key = md5(osc_base_url().'RegionStats::listRegions'.(string)$country.(string)$zero.(string)$order);
     $found = null;
     $cache = osc_cache_get($key, $found);
-    
+
     if($cache===false) {
       $order_split = explode(' ', $order);
 
       $this->dao->from( DB_TABLE_PREFIX.'t_region , '.$this->getTableName() );
       $this->dao->where( $this->getTableName().'.fk_i_region_id = '.DB_TABLE_PREFIX.'t_region.pk_i_id' );
 
-      if( $order_split[0] === 'region_name' ) {
+      if($order_split[0] === 'region_name' ) {
         $this->dao->select('STRAIGHT_JOIN '.$this->getTableName().'.fk_i_region_id as region_id, '.$this->getTableName().'.i_num_items as items, '.DB_TABLE_PREFIX.'t_region.s_name as region_name, '.DB_TABLE_PREFIX.'t_region.s_name_native as region_name_native, '.DB_TABLE_PREFIX.'t_region.s_slug as region_slug');
-      } else if( $order_split[0] === 'items') {
+      } else if($order_split[0] === 'items') {
         $this->dao->select($this->getTableName().'.fk_i_region_id as region_id, '.$this->getTableName().'.i_num_items as items, '.DB_TABLE_PREFIX.'t_region.s_name as region_name, '.DB_TABLE_PREFIX.'t_region.s_name_native as region_name_native');
       }
 
       $this->dao->where('i_num_items '.$zero.' 0' );
-      if( $country !== '%%%%') {
+      if($country !== '%%%%') {
         $this->dao->where(DB_TABLE_PREFIX.'t_region.fk_c_country_code = \''.$this->dao->connId->real_escape_string($country).'\' ');
       }
       $this->dao->orderBy($order);
@@ -220,7 +220,6 @@ class RegionStats extends DAO
   }
 
 
-
   /**
    * Return a list of regions and count items.
    *
@@ -230,16 +229,16 @@ class RegionStats extends DAO
     $key = md5(osc_base_url().'RegionStats::listRegionsLimit'.(string)$country_code.(string)$order.(string)$limit.(string)$min_items.(string)$custom_condition);
     $found = null;
     $cache = osc_cache_get($key, $found);
-    
+
     if($cache===false) {
       $this->dao->select('r.*, coalesce(s.i_num_items, 0) as i_num_items');
       $this->dao->from(DB_TABLE_PREFIX.'t_region as r');
       $this->dao->join($this->getTableName() . ' as s', 'r.pk_i_id = s.fk_i_region_id', 'LEFT');
-      
+
       if($min_items > 0) {
         $this->dao->where('i_num_items >= ' . $min_items);
       }
-      
+
       if($country_code <> '' && strlen((string)$country_code) == 2) {
         $this->dao->where('r.fk_c_country_code', $country_code);
       }
@@ -247,11 +246,11 @@ class RegionStats extends DAO
       if(is_numeric($limit) && $limit > 0) {
         $this->dao->limit($limit);
       }
-      
+
       if(trim((string)$custom_condition) != '') {
         $this->dao->where($custom_condition);
       }
-      
+
       $this->dao->orderBy($order);
 
       $rs = $this->dao->get();
@@ -262,7 +261,7 @@ class RegionStats extends DAO
 
       $return = $rs->result();
       $output = array();
-      
+
       if(count($return) > 0 && osc_get_current_user_locations_native() == 1) {
         foreach($return as $r) {
           $row = $r;
@@ -279,14 +278,14 @@ class RegionStats extends DAO
       } else {
         $output = $return;
       }
-      
+
       osc_cache_set($key, $output, OSC_CACHE_TTL);
       return $output;
     } else {
       return $cache;
     }
   }
-  
+
   /**
    * Calculate the total items that belong to region
    *

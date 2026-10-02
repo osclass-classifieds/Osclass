@@ -31,55 +31,96 @@ class CAdminMain extends AdminSecBaseModel {
         $this->logout();
         $this->redirectTo(osc_admin_base_url(true));
         break;
-      
-      case('settings'): 
+
+      case('settings'):
         $this->doView('main/settings.php');
         break;
-      
+
       case('settings_post'):  // updating widgets
           osc_csrf_check();
           $iUpdated        = 0;
-          
+
           $params = Params::getParamsAsArray();
-          
+
           $cols_hidden = array();
           foreach($params as $name => $value) {
             $name = explode('_', $name);
-            
+
             if(@$name[0] == 'col' && $value == 1) {
             $cols_hidden[] = $name[1];
             }
           }
-          
+
           $cols_hidden = array_filter(array_unique(array_map('trim', $cols_hidden)));
           $cols_hidden = implode(',', $cols_hidden);
-          
-          
+
+
           $widgets_hidden = array();
           foreach($params as $name => $value) {
             $name = explode('_', $name);
-            
+
             if(@$name[0] == 'widget' && $value == 1) {
             $widgets_hidden[] = $name[1];
             }
           }
-          
+
           $widgets_hidden = array_filter(array_unique(array_map('trim', $widgets_hidden)));
           $widgets_hidden = implode(',', $widgets_hidden);
 
           $iUpdated += osc_set_preference('admindash_columns_hidden', $cols_hidden);
           $iUpdated += osc_set_preference('admindash_widgets_hidden', $widgets_hidden);
-        
+
+          foreach($params as $name => $value) {
+            if(strpos($name, 'widgetcol_') === 0) {
+              $wid = substr($name, 10);
+              $col = (int)$value;
+              if($col >= 1 && $col <= 3 && $wid != '') {
+                osc_set_preference('admindash_widget_column_' . $wid, $col);
+              }
+            }
+          }
+
           if($iUpdated > 0) {
-            osc_add_flash_ok_message(_m("Widget settings have been updated"), 'admin');
+            osc_add_flash_ok_message(_m("Settings have been updated"), 'admin');
           }
           $this->redirectTo(osc_admin_base_url(true) . '?page=main&action=settings');
         break;
-        
-      case('widget'): 
+
+      case('notes_post'):
+        osc_csrf_check();
+
+        $notesType = trim((string)Params::getParam('notes_type'));
+        $notes = (string)Params::getParam('notes');
+        $notes = str_replace("\r\n", "\n", $notes);
+        $notes = str_replace("\r", "\n", $notes);
+
+        $prefName = '';
+
+        if($notesType == 'general') {
+          $prefName = 'notes';
+
+        } else if($notesType == 'my') {
+          $adminId = (int)osc_logged_admin_id();
+
+          if($adminId > 0) {
+            $prefName = 'notes_' . $adminId;
+          }
+        }
+
+        if($prefName == '') {
+          osc_add_flash_error_message(_m('Unable to save notes'), 'admin');
+          $this->redirectTo(osc_admin_base_url(true));
+        }
+
+        osc_set_preference($prefName, $notes);
+        osc_add_flash_ok_message(_m('Notes have been updated'), 'admin');
+        $this->redirectTo(osc_admin_base_url(true));
+        break;
+
+      case('widget'):
         if(Params::getParam('file') <> '') {
           $file = osc_esc_html(Params::getParam('file'));
-          
+
           if(in_array($file, array('api.php','blog.php','product_updates.php','products.php','update.php'))) {
             $this->doView('main/widget/' . $file);
           }
@@ -95,37 +136,12 @@ class CAdminMain extends AdminSecBaseModel {
         if(isset($item_tbl['ENGINE']) && strtoupper($item_tbl['ENGINE']) == 'INNODB' && isset($user_tbl['ENGINE']) && strtoupper($user_tbl['ENGINE']) == 'INNODB') {
           $engine_check = true;
         }
-        
-        // stats
-        $items = array();
-        $stats_items = Stats::newInstance()->new_items_count(date('Y-m-d H:i:s', mktime(0, 0, 0, date("m"), date("d") - 14, date("Y"))),'day');
-        for($k = 14; $k >= 0; $k--) {
-          $items[date('Y-m-d', mktime(0, 0, 0, date("m"), date("d") - $k, date("Y")))] = 0;
-        }
-        
-        foreach($stats_items as $item) {
-          $items[$item['d_date']] = $item['num'];
-        }
-        
-        $comments = array();
-        $stats_comments = Stats::newInstance()->new_comments_count(date('Y-m-d H:i:s', mktime(0, 0, 0, date("m"), date("d") - 14, date("Y"))),'day');
-        for($k = 14; $k >= 0; $k--) {
-          $comments[date('Y-m-d', mktime(0, 0, 0, date("m"), date("d") - $k, date("Y")))] = 0;
-        }
-        
-        foreach($stats_comments as $comment) {
-          $comments[$comment['d_date']] = $comment['num'];
-        }
-       
-        $users = array();
-        $stats_users = Stats::newInstance()->new_users_count(date('Y-m-d H:i:s', mktime(0, 0, 0, date("m"), date("d") - 14, date("Y"))),'day');
-        for($k = 14; $k >= 0; $k--) {
-          $users[date('Y-m-d', mktime(0, 0, 0, date("m"), date("d") - $k, date("Y")))] = 0;
-        }
-        
-        foreach($stats_users as $user) {
-          $users[$user['d_date']] = $user['num'];
-        }
+
+        osc_ensure_reports_tables();
+        $dash_charts = osc_admin_dash_stats_load();
+        $this->_exportVariableToView('dash_chart_series', $dash_charts['series']);
+        $this->_exportVariableToView('dash_chart_mix', $dash_charts['mix']);
+        $this->_exportVariableToView('dash_chart_headings', (isset($dash_charts['headings']) ? $dash_charts['headings'] : array()));
 
         if(function_exists('disk_free_space')) {
           $freedisk = @disk_free_space(osc_uploads_path());
@@ -134,22 +150,26 @@ class CAdminMain extends AdminSecBaseModel {
           }
         }
 
+        if(!osc_alerts_enabled()) {
+          osc_add_flash_info_message(_m('User alerts are currently disabled. You can enable them in Users > Settings.'), 'admin');
+        }
+
         // show messages subscribed
         $status_subscribe = Params::getParam('subscribe_osclass');
         if($status_subscribe != '') {
           switch($status_subscribe) {
             case -1:
-              osc_add_flash_error_message(_m('Entered an invalid email'), 'admin');
+              osc_add_flash_error_message(_m('The email is not valid'), 'admin');
               break;
-              
+
             case 0:
               osc_add_flash_warning_message(_m("You're already subscribed"), 'admin');
               break;
-              
+
             case 1:
-              osc_add_flash_ok_message(_m('Subscribed correctly'), 'admin');
+              osc_add_flash_ok_message(_m('You have been subscribed'), 'admin');
               break;
-              
+
             default:
               osc_add_flash_warning_message(_m("Error subscribing"), 'admin');
               break;
@@ -157,10 +177,7 @@ class CAdminMain extends AdminSecBaseModel {
         }
 
         $this->_exportVariableToView("engine_check", $engine_check);
-        $this->_exportVariableToView("item_stats", $items);
-        $this->_exportVariableToView("user_stats", $users);
-        $this->_exportVariableToView("comment_stats", $comments);
-        
+
         //calling the view...
         $this->doView('main/index.php');
     }

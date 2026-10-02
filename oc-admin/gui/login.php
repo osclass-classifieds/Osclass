@@ -14,16 +14,16 @@
  * warranties or conditions of any kind, either express or implied. Do not remove
  * this NOTICE section as it contains license information and copyrights.
  */
- 
+
 $demo['name'] = '';
-$demo['password'] = '';    
+$demo['password'] = '';
 
 if((defined('DEMO_PLUGINS') && DEMO_PLUGINS === true) || (defined('DEMO_THEMES') && DEMO_THEMES === true) || (defined('DEMO') && DEMO === true)) {
   $demo_admin = Admin::newInstance()->findByUserName('demo');
-  
+
   if($demo_admin !== false) {
     $demo['name'] = 'demo';
-    $demo['password'] = 'demo123';    
+    $demo['password'] = 'demo123';
   }
 }
 ?>
@@ -78,7 +78,7 @@ if((defined('DEMO_PLUGINS') && DEMO_PLUGINS === true) || (defined('DEMO_THEMES')
           </label>
             <a href="<?php echo osc_admin_base_url(true); ?>?page=login&amp;action=recover" title="<?php echo osc_esc_html( __('Forgot your password?')); ?>" class="forgot"><?php _e('Forgot your password?'); ?></a>
         </p>
-        
+
         <?php osc_run_hook('login_admin_form'); ?>
 
         <p class="submit">
@@ -119,7 +119,7 @@ if((defined('DEMO_PLUGINS') && DEMO_PLUGINS === true) || (defined('DEMO_THEMES')
         $("#user_login").focus();
       });
     </script>
-    
+
     <?php osc_run_hook('admin_login_footer'); ?>
   </body>
 </html>

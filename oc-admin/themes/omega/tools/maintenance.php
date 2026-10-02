@@ -37,11 +37,11 @@ function customPageHeader(){ ?>
 }
 
 function customPageTitle($string) {
-  return sprintf(__('Maintenance - %s'), $string);
+  return sprintf(__('%s - %s'), __('Maintenance'), $string);
 }
 osc_add_filter('admin_title', 'customPageTitle');
 
-osc_current_admin_theme_path( 'parts/header.php' ); 
+osc_current_admin_theme_path( 'parts/header.php' );
 ?>
 
 <div id="backup-setting">
@@ -52,9 +52,12 @@ osc_current_admin_theme_path( 'parts/header.php' );
       <fieldset>
         <div class="form-horizontal">
           <div class="form-row">
-            <?php _e("While in maintenance mode, users can't access your website. Useful if you need to make changes on your website. Use the following button to toggle maintenance mode ON/OFF."); ?>
-            <div class="help-box">
-              <?php printf( __('Maintenance mode is: <strong>%s</strong>'), ($maintenance ? __('ON') : __('OFF') ) ); ?>
+            <div class="form-label"><?php _e('Maintenance mode'); ?></div>
+            <div class="form-controls">
+              <strong><?php echo ($maintenance ? osc_esc_html(__('Enabled')) : osc_esc_html(__('Disabled'))); ?></strong>
+              <div class="help-box">
+                <?php _e('While in maintenance mode, users cannot access your website. Useful if you need to make changes on your website.'); ?>
+              </div>
             </div>
           </div>
           <div class="form-actions no-padding">
@@ -66,4 +69,4 @@ osc_current_admin_theme_path( 'parts/header.php' );
   </div>
   <!-- /settings form -->
 </div>
-<?php osc_current_admin_theme_path( 'parts/footer.php' ); ?>
+<?php osc_current_admin_theme_path( 'parts/footer.php' );

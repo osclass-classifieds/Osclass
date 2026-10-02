@@ -31,10 +31,10 @@
  * @return string sanitized
  */
 function osc_sanitize_url($value) {
-  if ($value === '' || $value === null) {
+  if($value === '' || $value === null) {
     return '';
   }
-  
+
   return filter_var($value, FILTER_SANITIZE_URL);
 }
 
@@ -61,10 +61,10 @@ function osc_sanitize_string($value) {
  * @return string sanitized
  */
 function osc_sanitize_name($value) {
-  if ($value === '' || $value === null) {
+  if($value === '' || $value === null) {
     return '';
   }
-  
+
   return ucwords(osc_sanitize_allcaps(trim($value)));
 }
 
@@ -77,11 +77,11 @@ function osc_sanitize_name($value) {
  * @return string sanitized
  */
 function osc_sanitize_allcaps($value) {
-  if ($value === '' || $value === null) {
+  if($value === '' || $value === null) {
     return '';
   }
-  
-  if (preg_match('/^([A-Z][^A-Z]*)+$/', $value) && !preg_match('/[a-z]+/', $value)) {
+
+  if(preg_match('/^([A-Z][^A-Z]*)+$/', $value) && !preg_match('/[a-z]+/', $value)) {
     $value = ucfirst(strtolower($value));
   }
 
@@ -97,10 +97,10 @@ function osc_sanitize_allcaps($value) {
  * @return string sanitized
  */
 function osc_sanitize_username($value) {
-  if ($value === '' || $value === null) {
+  if($value === '' || $value === null) {
     return '';
   }
-  
+
   $value = preg_replace('/(_+)/', '-', preg_replace('/([^0-9A-Za-z_]*)/', '', str_replace(' ', '-', trim((string)$value))));
   $value = preg_replace('/-{2,}/','-', $value);
   return strtolower($value);
@@ -115,7 +115,7 @@ function osc_sanitize_username($value) {
  * @return string sanitized
  */
 function osc_sanitize_int($value) {
-  if (!preg_match('/^[0-9]*$/', $value)) {
+  if(!preg_match('/^[0-9]*$/', $value)) {
     return (int) $value;
   }
 
@@ -132,11 +132,11 @@ function osc_sanitize_int($value) {
  * @return string sanitized
  */
 function osc_sanitize_phone($value) {
-  if ($value === '' || $value === null) {
+  if($value === '' || $value === null) {
     return '';
   }
-  
-  if (empty($value)) {
+
+  if(empty($value)) {
     return '';
   }
 
@@ -144,20 +144,20 @@ function osc_sanitize_phone($value) {
   $value = preg_replace('/[^a-z0-9]/', '', strtolower($value));
 
   // Remove 1 from front of number.
-  if (preg_match('/^([0-9]{11})/', $value) && $value[ 0 ] == 1) {
+  if(preg_match('/^([0-9]{11})/', $value) && $value[ 0 ] == 1) {
     $value = substr($value, 1);
   }
 
   // Check for phone ext.
-  if (! preg_match('/^[0-9]$/', $value)) {
+  if(! preg_match('/^[0-9]$/', $value)) {
     $value = preg_replace('/^([0-9]{10})([a-z]+)([0-9]+)/', '$1ext$3', $value); // Replace 'x|ext|extension' with 'ext'.
     list($value, $ext) = explode('ext', $value); // Split number & ext.
   }
 
   // Add dashes: ___-___-____
-  if (strlen($value) == 7) {
+  if(strlen($value) == 7) {
     $value = preg_replace('/([0-9]{3})([0-9]{4})/', '$1-$2', $value);
-  } else if (strlen($value) == 10) {
+  } elseif(strlen($value) == 10) {
     $value = preg_replace('/([0-9]{3})([0-9]{3})([0-9]{4})/', '$1-$2-$3', $value);
   }
 
@@ -178,7 +178,7 @@ function osc_sanitize_phone($value) {
  * @version 2.4
  */
 function osc_esc_html($str = '') {
-  if ($str === '' || $str === null) {
+  if($str === '' || $str === null) {
     return '';
   }
 
@@ -213,10 +213,10 @@ function osc_esc_html($str = '') {
  * @version 2.4
  */
 function osc_esc_js($str) {
-  if ($str === '' || $str === null) {
+  if($str === '' || $str === null) {
     return '';
   }
-  
+
   static $sNewLines = '<br><br/><br />';
   static $aNewLines = array ('<br>', '<br/>', '<br />');
 
@@ -227,4 +227,26 @@ function osc_esc_js($str) {
   $str = str_replace($aNewLines, '\n', $str);
 
   return $str;
+}
+
+
+// Keep TinyMCE listing HTML and drop scripts, event handlers and unsafe URLs.
+function osc_sanitize_rich_text($html) {
+  if($html === '' || $html === null) {
+    return '';
+  }
+  if(!is_string($html)) {
+    return '';
+  }
+
+  $config = HTMLPurifier_Config::createDefault();
+  $config->set('HTML.Allowed', 'p[style],br,strong,b,em,i,u,s,strike,sub,sup,h1[style],h2[style],h3[style],h4[style],h5[style],h6[style],ul,ol,li,blockquote,pre,code,hr,a[href|title|target|rel],img[src|alt|title|width|height],table[border|cellpadding|cellspacing|width|style],thead,tbody,tfoot,tr[style],th[colspan|rowspan|scope|width|style],td[colspan|rowspan|width|style],span[style],div[style],iframe[src|width|height|frameborder|allow|allowfullscreen|title]');
+  $config->set('HTML.SafeIframe', true);
+  $config->set('URI.SafeIframeRegexp', '%^(https?:)?//(www\.youtube(?:-nocookie)?\.com/embed/|player\.vimeo\.com/video/)%');
+  $config->set('URI.AllowedSchemes', array('http' => true, 'https' => true, 'mailto' => true, 'tel' => true));
+  $config->set('Attr.AllowedFrameTargets', array('_blank'));
+  $config->set('Cache.SerializerPath', osc_uploads_path());
+
+  $purifier = new HTMLPurifier($config);
+  return $purifier->purify($html);
 }

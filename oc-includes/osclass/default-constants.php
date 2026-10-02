@@ -16,8 +16,8 @@
  */
 
 if(!defined('OSCLASS_VERSION')){
-  define('OSCLASS_VERSION', '8.3.1');
-} 
+  define('OSCLASS_VERSION', '8.4.0');
+}
 
 if(!defined('OC_ADMIN')) {
   define('OC_ADMIN', false);
@@ -130,15 +130,15 @@ if(!defined('OSC_CACHE_TTL')) {
 
 if(!defined('OSCLASS_AUTHOR')){
   define('OSCLASS_AUTHOR', 'OSCLASSPOINT');
-} 
+}
 
 if(!defined('UPGRADE_SKIP_DB')){
   define('UPGRADE_SKIP_DB', true);
-} 
+}
 
 if(!defined('PHPMAILER_DEBUG_LEVEL')){
   define('PHPMAILER_DEBUG_LEVEL', 0);
-} 
+}
 
 if(!defined('IP_LOOKUP_SERVICE')){
   define('IP_LOOKUP_SERVICE', 'https://whatismyipaddress.com/ip/{IP_ADDRESS}');
@@ -166,7 +166,7 @@ if(!defined('OPTIMIZE_CITIES_LIMIT')){
 
 if(!defined('OPTIMIZE_CATEGORIES')){
   define('OPTIMIZE_CATEGORIES', true);
-} 
+}
 
 if(!defined('OPTIMIZE_CATEGORIES_LIMIT')){
   define('OPTIMIZE_CATEGORIES_LIMIT', 1000);
@@ -175,7 +175,7 @@ if(!defined('OPTIMIZE_CATEGORIES_LIMIT')){
 // Originally this was underscore _
 // Forbidden characters (will cause issues!!): "+", "-", " ", ",", "+", "/"
 if(!defined('SEARCH_URL_CANONICAL_DELIMITER')){
-  define('SEARCH_URL_CANONICAL_DELIMITER', ':');        
+  define('SEARCH_URL_CANONICAL_DELIMITER', ':');
 }
 
 if(!defined('DISABLE_URL_HISTORY')){
@@ -211,3 +211,6 @@ if(!defined('IMPORTSQL_FORCE_COLLATE')){
   define('IMPORTSQL_FORCE_COLLATE', 'utf8mb4_unicode_ci');
 }
 
+if(!defined('MAX_ITEMS_PER_ALERT')){
+  define('MAX_ITEMS_PER_ALERT', 50);
+}

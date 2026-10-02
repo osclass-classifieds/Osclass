@@ -44,9 +44,9 @@
                     <input type="password" name="new_password2" value="" autocomplete="off" />
                 </div>
             </div>
-            
+
             <?php osc_run_hook('user_forgot_password_form'); ?>
-            
+
             <div class="control-group">
                 <div class="controls">
                     <button type="submit" class="ui-button ui-button-middle ui-button-main"><?php _e("Change password", 'sigma');?></button>
@@ -55,4 +55,4 @@
         </form>
     </div>
 </div>
-<?php osc_current_web_theme_path('footer.php') ; ?>
+<?php osc_current_web_theme_path('footer.php') ;

@@ -16,7 +16,7 @@ class LogOsclassInstaller extends Logger
    */
   public static function instance()
   {
-    if (!isset(self::$_instance)) {
+    if(!isset(self::$_instance)) {
       $c = __CLASS__;
       self::$_instance = new $c;
     }

@@ -35,7 +35,7 @@ class OSCLocale extends DAO {
     if(!self::$instance instanceof self) {
       self::$instance = new self;
     }
-    
+
     return self::$instance;
   }
 
@@ -83,13 +83,13 @@ class OSCLocale extends DAO {
   public function listAllEnabled($isBo = false, $indexedByPk = false) {
     $this->dao->select();
     $this->dao->from($this->getTableName());
-    
+
     if($isBo) {
       $this->dao->where('b_enabled_bo', 1);
     } else {
       $this->dao->where('b_enabled', 1);
     }
-    
+
     $this->dao->orderBy('s_name', 'ASC');
     $result = $this->dao->get();
 
@@ -103,17 +103,16 @@ class OSCLocale extends DAO {
     // Array key is locale code
     if($indexedByPk) {
       $aTmp = array();
-      
+
       for($i = 0, $iMax = count($aResults); $i < $iMax; $i++) {
         $aTmp[(string)$aResults[$i][$this->getPrimaryKey()]] = $aResults[$i];
       }
-      
+
       $aResults = $aTmp;
     }
 
     return $aResults;
   }
-
 
 
   /**
@@ -144,29 +143,29 @@ class OSCLocale extends DAO {
     // Array key is locale code
     if($indexedByPk) {
       $aTmp = array();
-      
+
       for($i = 0, $iMax = count($aResults); $i < $iMax; $i++) {
         $aTmp[(string)$aResults[$i][$this->getPrimaryKey()]] = $aResults[$i];
       }
-      
+
       $aResults = $aTmp;
     }
 
     return $aResults;
   }
-  
-  
+
+
   /**
    *
    * @access public
    * @since 8.3.0+
    * @return array
-   */  
+   */
   public function listAllRaw($cache_enabled = true) {
     $key = md5(osc_base_url().'OSCLocale::listAllRaw');
     $found = null;
     $cache = osc_cache_get($key, $found);
-    
+
     if(OC_ADMIN || $cache_enabled === false || $cache === false) {
       $this->dao->from($this->getTableName());
       $result = $this->dao->get();
@@ -176,14 +175,14 @@ class OSCLocale extends DAO {
       } else {
         $data = $result->result();
       }
-      
+
       osc_cache_set($key, $data, OSC_CACHE_TTL);
       return $data;
     }
-    
+
     return $cache;
   }
-  
+
   /**
    * Return all locales by code
    *
@@ -204,7 +203,7 @@ class OSCLocale extends DAO {
 
     return $result->result();
   }
-  
+
   /**
    * Return first locale found by first 2 letters
    *
@@ -227,6 +226,96 @@ class OSCLocale extends DAO {
     }
 
     return $result->row();
+  }
+
+  /**
+   * Admin languages list: pagination, optional keyword, sort.
+   *
+   * @param int    $start
+   * @param int    $limit
+   * @param string $sortKey   logical key: name, short_name, description, code, enabled_fo, enabled_bo, locations_native, rtl, status
+   * @param string $direction ASC|DESC
+   * @param string $search    quick search
+   *
+   * @return array
+   */
+  public function adminSearch($start, $limit, $sortKey, $direction, $search) {
+    $out = array('total' => 0, 'total_results' => 0, 'locales' => array());
+    $start = (int)$start;
+    $limit = (int)$limit;
+    if($limit <= 0) {
+      $limit = 25;
+    }
+    if($start < 0) {
+      $start = 0;
+    }
+
+    $direction = strtoupper(trim((string)$direction));
+    if($direction != 'ASC' && $direction != 'DESC') {
+      $direction = 'ASC';
+    }
+
+    $sortMap = array(
+      'name' => 's_name',
+      'short_name' => 's_short_name',
+      'description' => 's_description',
+      'code' => 'pk_c_code',
+      'enabled_fo' => 'b_enabled',
+      'enabled_bo' => 'b_enabled_bo',
+      'locations_native' => 'b_locations_native',
+      'rtl' => 'b_rtl',
+      'status' => 'b_enabled',
+    );
+
+    if(!isset($sortMap[$sortKey])) {
+      $sortKey = 'name';
+    }
+    $orderExpr = $sortMap[$sortKey];
+
+    $kw = trim((string)$search);
+    $match = str_replace('*', '%', $kw);
+    if(strpos($match, '%') !== false) {
+      $match = str_replace('%', '', $match);
+    }
+
+    $this->dao->select('COUNT(*) AS num');
+    $this->dao->from($this->getTableName());
+    $rTot = $this->dao->get();
+    if($rTot && $rTot->numRows() >= 1) {
+      $rw = $rTot->row();
+      $out['total'] = (int)$rw['num'];
+    }
+
+    $this->dao->select('COUNT(*) AS num');
+    $this->dao->from($this->getTableName());
+    if($match != '') {
+      $this->dao->like('pk_c_code', $match, 'both');
+      $this->dao->orLike('s_name', $match, 'both');
+      $this->dao->orLike('s_short_name', $match, 'both');
+      $this->dao->orLike('s_description', $match, 'both');
+    }
+    $rF = $this->dao->get();
+    if($rF && $rF->numRows() >= 1) {
+      $rw = $rF->row();
+      $out['total_results'] = (int)$rw['num'];
+    }
+
+    $this->dao->select('*');
+    $this->dao->from($this->getTableName());
+    if($match != '') {
+      $this->dao->like('pk_c_code', $match, 'both');
+      $this->dao->orLike('s_name', $match, 'both');
+      $this->dao->orLike('s_short_name', $match, 'both');
+      $this->dao->orLike('s_description', $match, 'both');
+    }
+    $this->dao->orderBy($orderExpr, $direction);
+    $this->dao->limit($start, $limit);
+    $rList = $this->dao->get();
+    if($rList && $rList->numRows() >= 1) {
+      $out['locales'] = $rList->result();
+    }
+
+    return $out;
   }
 
   /**

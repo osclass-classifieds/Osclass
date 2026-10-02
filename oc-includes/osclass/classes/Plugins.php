@@ -32,7 +32,7 @@ class Plugins {
   public static function runHook($hook) {
     $args = func_get_args();
     array_shift($args);
-    
+
     if(isset(self::$hooks[$hook])) {
       for($priority = 0; $priority<=10; $priority++) {
         if(isset(self::$hooks[$hook][$priority]) && is_array(self::$hooks[$hook][$priority])) {
@@ -55,11 +55,11 @@ class Plugins {
     $args = func_get_args();
     $hook = array_shift($args);
     $content = '';
-    if (isset($args[0])) {
+    if(isset($args[0])) {
       $content = $args[0];
     }
 
-    if (isset(self::$hooks[$hook])) {
+    if(isset(self::$hooks[$hook])) {
       for($priority = 0; $priority<=10; $priority++) {
         if(isset(self::$hooks[$hook][$priority]) && is_array(self::$hooks[$hook][$priority])) {
           foreach(self::$hooks[$hook][$priority] as $fxName) {
@@ -71,7 +71,7 @@ class Plugins {
         }
       }
     }
-    
+
     return $content;
   }
 
@@ -110,34 +110,34 @@ class Plugins {
     $plugins = array();
     $pluginsPath = osc_plugins_path();
     $dir = opendir($pluginsPath);
-    
+
     while($file = readdir($dir)) {
       if(preg_match('/^[a-zA-Z0-9-_]+$/', $file, $matches)) {
         // This has to change in order to catch any .php file
         $pluginPath = $pluginsPath . "$file/index.php";
         if(file_exists($pluginPath)) {
           $plugins[] = $file . '/index.php';
-          
+
         } else {
           trigger_error(sprintf(__('Plugin %s is missing the index.php file %s'), $file, $pluginPath));
         }
       }
     }
-    
+
     closedir($dir);
 
     if($sort) {
       $enabled = self::listEnabled();
       $installed = self::listInstalled();
       $extended_list = array();
-      
+
       foreach($plugins as $p) {
         $extended_list[$p] = self::getInfo($p);
       }
-      
+
       //uasort($extended_list, array('self', 'strnatcmpCustom'));  // not supported from PHP 8.2
       uasort($extended_list, self::class . '::strnatcmpCustom');
-      
+
       $plugins = array();
       // Enabled
       foreach($extended_list as $k => $v) {
@@ -146,7 +146,7 @@ class Plugins {
           unset($extended_list[$k]);
         }
       }
-      
+
       // Installed but disabled
       foreach($extended_list as $k => $v) {
         if(in_array($k, $installed)) {
@@ -154,7 +154,7 @@ class Plugins {
           unset($extended_list[$k]);
         }
       }
-      
+
       // Not installed
       foreach($extended_list as $k => $v) {
         $plugins[] = $k;
@@ -182,7 +182,7 @@ class Plugins {
     if(is_array($plugins_list)) {
       foreach($plugins_list as $plugin_name) {
         $pluginPath = osc_plugins_path() . $plugin_name;
-        
+
         if(file_exists($pluginPath)) {
           // This should include the file and adds the hooks
           include_once $pluginPath;
@@ -226,19 +226,19 @@ class Plugins {
     $arr = array();
     $plugins_path = osc_plugins_path();
     $dir = opendir($plugins_path);
-    
+
     while($plugin_name = readdir($dir)) {
       if(preg_match('/^[a-zA-Z0-9-_]+$/', $plugin_name, $matches)) {
         $plugin_index_path = $plugins_path . $plugin_name . '/index.php';
-        
+
         if(file_exists($plugin_index_path)) {
           $arr[] = $plugin_name . '/index.php';
         }
       }
     }
-    
+
     closedir($dir);
-    
+
     return $arr;
   }
 
@@ -250,14 +250,14 @@ class Plugins {
     $enabled = self::listEnabled();
     $installed = self::listInstalled();
     $existing = self::listExisting();
-    
+
     $enabled_change = false;
     $installed_change = false;
-    
+
     $disabled_delta = array();
     $uninstalled_delta = array();
     $installed_delta = array();
-    
+
 
     // Check #1
     if(is_array($enabled) && count($enabled) > 0) {
@@ -269,7 +269,7 @@ class Plugins {
             $installed_change = true;
             $installed_delta[] = $plugin;
             $installed[] = $plugin;
-            
+
           } else {
             $enabled_change = true;
             $disabled_delta[] = $plugin;
@@ -278,7 +278,7 @@ class Plugins {
         }
       }
     }
-    
+
     // Check #2
     // Disabled - maybe we do not want to drop it, in case user just renamed plugin folder for quick debug.
     if(1==2) {
@@ -292,7 +292,7 @@ class Plugins {
           }
         }
       }
-      
+
       if(is_array($installed) && count($installed) > 0) {
         foreach($installed as $k => $plugin) {
           // Plugin installed, but does not exists
@@ -304,12 +304,12 @@ class Plugins {
         }
       }
     }
-    
+
     // Update database values
     if($enabled_change === true) {
       osc_set_preference('active_plugins', serialize($enabled));
     }
-    
+
     if($installed_change === true) {
       osc_set_preference('installed_plugins', serialize($installed));
     }
@@ -317,15 +317,15 @@ class Plugins {
     // Add flash message in case of change
     if(!empty($disabled_delta) || !empty($uninstalled_delta) || !empty($installed_delta)) {
       $msg_arr = array(__('Integrity check has fixed several issues.'));
-      
+
       if(!empty($disabled_delta)) {
         $msg_arr[] = sprintf(__('Disabled plugins: %s.'), implode(', ', str_replace('/index.php', '', $disabled_delta)));
       }
-      
+
       if(!empty($uninstalled_delta)) {
         $msg_arr[] = sprintf(__('Uninstalled plugins: %s.'), implode(', ', str_replace('/index.php', '', $uninstalled_delta)));
       }
-      
+
       if(!empty($installed_delta)) {
         $msg_arr[] = sprintf(__('Installed plugins: %s.'), implode(', ', str_replace('/index.php', '', $installed_delta)));
       }
@@ -337,7 +337,7 @@ class Plugins {
     self::reload();
     return false;
   }
-  
+
 
   /**
    * @param $uri
@@ -346,14 +346,14 @@ class Plugins {
    */
   public static function findByUpdateURI($uri) {
     $plugins = self::listAll();
-    
+
     foreach($plugins as $p) {
       $info = self::getInfo($p);
       if($info['plugin_update_uri'] == $uri) {
         return $p;
       }
     }
-    
+
     return false;
   }
 
@@ -374,7 +374,7 @@ class Plugins {
   public static function register($path, $function) {
     $path = str_replace(osc_plugins_path(), '', $path);
     $tmp = explode(OC_CONTENT_FOLDER . '/plugins/', $path);
-    
+
     if(count($tmp)==2) {
       $path = $tmp[1];
     }
@@ -401,7 +401,7 @@ class Plugins {
 
     try {
       include_once osc_plugins_path() . $path;
-      
+
       self::runHook('install_' . $path);
     } catch(Exception $e) {
       return array('error_code' => 'custom_error','msg' => $e->getMessage());
@@ -410,7 +410,7 @@ class Plugins {
     if(!self::activate($path)) {
       return array('error_code' => '');
     }
-    
+
     if(!is_array($plugins_list)) {
       $plugins_list = array();
     }
@@ -419,7 +419,7 @@ class Plugins {
     osc_set_preference('installed_plugins', serialize($plugins_list));
 
     // Check if something failed
-    if (ob_get_length() > 0) {
+    if(ob_get_length() > 0) {
       return array('error_code' => 'error_output', 'output' => ob_get_clean());
     }
 
@@ -439,7 +439,7 @@ class Plugins {
     $plugins_list = unserialize(osc_installed_plugins());
 
     $path = str_replace(osc_plugins_path(), '', $path);
-    
+
     if(!is_array($plugins_list)) {
       return false;
     }
@@ -482,7 +482,7 @@ class Plugins {
 
     if(is_array($plugins_list) && in_array($path, $plugins_list)) {
       return false;
-      
+
     } else if(!is_array($plugins_list)) {
       $plugins_list = array();
     }
@@ -565,10 +565,10 @@ class Plugins {
         'short_name' => ''
       );
     }
-    
+
     $s_info = file_get_contents(osc_plugins_path() . $plugin);
     $info = array();
-    
+
     if(preg_match('|Plugin Name:([^\\r\\t\\n]*)|i', $s_info, $match)) {
       $info['plugin_name'] = trim($match[1]);
     } else {
@@ -650,14 +650,14 @@ class Plugins {
    */
   public static function configureView($path) {
     $plugin = str_replace(osc_plugins_path(), '', $path);
-    
+
     if(stripos($plugin, '.php') === FALSE) {
       $plugins_list = unserialize(osc_active_plugins());
-      
+
       if(is_array($plugins_list)) {
         foreach($plugins_list as $p){
           $data = self::getInfo($p);
-          
+
           if($plugin == $data['plugin_name']) {
             $plugin = $p;
             break;
@@ -665,7 +665,7 @@ class Plugins {
         }
       }
     }
-    
+
     osc_redirect_to(osc_plugin_configure_url($plugin));
   }
 
@@ -685,11 +685,11 @@ class Plugins {
   public static function addToCategoryPlugin($categories, $plugin) {
     $dao_pluginCategory = new PluginCategory();
     $dao_category = new Category();
-    
+
     if(!empty($categories)) {
       foreach($categories as $catId) {
         $result = $dao_pluginCategory->isThisCategory($plugin, $catId);
-        
+
         if($result==0) {
           $fields = array();
           $fields['s_plugin_name'] = $plugin;
@@ -697,7 +697,7 @@ class Plugins {
           $dao_pluginCategory->insert($fields);
 
           $subs = $dao_category->findSubcategories($catId);
-          
+
           if(is_array($subs) && count($subs)>0) {
             $cats = array();
             foreach($subs as $sub) {
@@ -708,7 +708,7 @@ class Plugins {
         }
       }
     }
-    
+
     unset($dao_pluginCategory, $dao_category);
   }
 
@@ -724,7 +724,7 @@ class Plugins {
     $plugin_path = str_replace('\\', '/', osc_plugins_path());
     $hook = str_replace($plugin_path, '', $hook);
     $found_plugin = false;
-    
+
     if(isset(self::$hooks[$hook])) {
       for($_priority = 0;$_priority<=10;$_priority++) {
         if(isset(self::$hooks[$hook][$_priority])) {
@@ -737,8 +737,8 @@ class Plugins {
         }
       }
     }
-    
-    if(!$found_plugin) { 
+
+    if(!$found_plugin) {
       self::$hooks[$hook][$priority][] = $function;
     }
   }
