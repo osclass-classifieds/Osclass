@@ -100,6 +100,7 @@ function osc_runAlert($type = '', $last_exec = null){
 
       $mSearch = Search::newInstance();
       $mSearch->setJsonAlert($conditions, $user_email, $user_id);
+      osc_alert_apply_location_normalize($mSearch, $conditions_param);
       $mSearch->addConditions(sprintf('%st_item.dt_pub_date > "%s"', DB_TABLE_PREFIX, $last_exec));
       $mSearch->limit(0, $items_limit_per_alert);   // Avoid excessive email with hundreds of listings
 

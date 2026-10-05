@@ -459,6 +459,33 @@ function osc_search_show_all_url($params = array()) {
 function osc_search_url($params = null, $lang_code = '') {
   if(is_array($params)) {
     osc_prune_array($params);
+
+    foreach(array('sCountry', 'sRegion', 'sCity', 'sCityArea') as $loc_key) {
+      if(isset($params[$loc_key]) && is_array($params[$loc_key])) {
+        $loc_first = '';
+        foreach($params[$loc_key] as $loc_val) {
+          if($loc_val === null || $loc_val === '') {
+            continue;
+          }
+          if(is_numeric($loc_val) && (int)$loc_val === 0) {
+            continue;
+          }
+          $loc_first = $loc_val;
+          break;
+        }
+        $params[$loc_key] = $loc_first;
+      }
+    }
+
+    $has_city = isset($params['sCity']) && $params['sCity'] !== null && $params['sCity'] !== '' && !(is_numeric($params['sCity']) && (int)$params['sCity'] === 0);
+    $has_region = isset($params['sRegion']) && $params['sRegion'] !== null && $params['sRegion'] !== '' && !(is_numeric($params['sRegion']) && (int)$params['sRegion'] === 0);
+
+    if($has_city) {
+      unset($params['sRegion']);
+      unset($params['sCountry']);
+    } else if($has_region) {
+      unset($params['sCountry']);
+    }
   }
 
   $countP = 0;
@@ -1516,6 +1543,481 @@ function osc_search_param_value_to_slug($param, $value, $slug_strict = false, $w
 }
 
 
+// Restore location display names from custom-rule URL slugs
+function osc_search_param_value_from_slug($param, $value) {
+  $value_original = $value;
+  $value = trim((string)$value);
+
+  if($value === '') {
+    return $value;
+  }
+
+  // Keep country codes and numeric location IDs as-is; only rewrite slug-like values
+  if($param === 'sCountry' && strlen($value) == 2) {
+    return osc_apply_filter('search_param_value_from_slug', $value, $param, $value_original);
+  }
+  if(($param === 'sRegion' || $param === 'sCity') && is_numeric($value)) {
+    return osc_apply_filter('search_param_value_from_slug', $value, $param, $value_original);
+  }
+
+  $row = osc_search_location_row_from_value($param, $value);
+  if(is_array($row) && isset($row['s_name']) && $row['s_name'] != '') {
+    $value = $row['s_name'];
+  }
+
+  return osc_apply_filter('search_param_value_from_slug', $value, $param, $value_original);
+}
+
+// Compare a URL slug to a stored slug or sanitized location name
+function osc_search_location_slug_matches($row, $value_cmp) {
+  if(!is_array($row) || $value_cmp === '') {
+    return false;
+  }
+
+  $candidates = array();
+  if(isset($row['s_slug']) && $row['s_slug'] != '') {
+    $candidates[] = strtolower(rawurldecode((string)$row['s_slug']));
+  }
+  if(isset($row['s_name']) && $row['s_name'] != '') {
+    $candidates[] = strtolower(rawurldecode((string)osc_sanitizeString($row['s_name'])));
+  }
+  if(isset($row['s_name_native']) && $row['s_name_native'] != '') {
+    $candidates[] = strtolower(rawurldecode((string)osc_sanitizeString($row['s_name_native'])));
+  }
+
+  return in_array($value_cmp, $candidates, true);
+}
+
+// Resolve country/region/city row from id, slug, name, or sanitized URL slug
+function osc_search_location_row_from_value($param, $value, $parent = null) {
+  $value = trim((string)$value);
+  if($value === '') {
+    return false;
+  }
+
+  if($parent !== null && $parent !== false) {
+    $parent = trim((string)$parent);
+    if($parent === '') {
+      $parent = null;
+    }
+  } else {
+    $parent = null;
+  }
+
+  $value_cmp = strtolower(rawurldecode($value));
+  $row = false;
+
+  switch($param) {
+    case 'sCountry':
+      if(strlen($value) == 2) {
+        $row = osc_get_country_row($value);
+        break;
+      }
+
+      $row = osc_get_country_row_by_slug($value);
+      if(isset($row['pk_c_code'])) {
+        break;
+      }
+
+      $row = Country::newInstance()->findByNameOrSlug($value);
+      if(isset($row['pk_c_code'])) {
+        break;
+      }
+
+      foreach(osc_get_countries() as $c) {
+        if(osc_search_location_slug_matches($c, $value_cmp)) {
+          $row = $c;
+          break;
+        }
+      }
+      break;
+
+    case 'sRegion':
+      if(is_numeric($value)) {
+        $row = osc_get_region_row($value);
+        break;
+      }
+
+      $row = osc_get_region_row_by_slug($value);
+      if(isset($row['pk_i_id'])) {
+        if($parent === null || !isset($row['fk_c_country_code']) || strcasecmp((string)$row['fk_c_country_code'], (string)$parent) == 0) {
+          break;
+        }
+      }
+
+      $row = Region::newInstance()->findByNameOrSlug($value, $parent);
+      if(isset($row['pk_i_id'])) {
+        break;
+      }
+
+      foreach(osc_get_regions($parent === null ? '' : $parent) as $r) {
+        if(osc_search_location_slug_matches($r, $value_cmp)) {
+          $row = $r;
+          break;
+        }
+      }
+      break;
+
+    case 'sCity':
+      if(is_numeric($value)) {
+        $row = osc_get_city_row($value);
+        break;
+      }
+
+      $row = osc_get_city_row_by_slug($value);
+      if(isset($row['pk_i_id'])) {
+        if($parent === null || !isset($row['fk_i_region_id']) || (string)$row['fk_i_region_id'] === (string)$parent) {
+          break;
+        }
+      }
+
+      $row = City::newInstance()->findByNameOrSlug($value, $parent);
+      if(isset($row['pk_i_id'])) {
+        break;
+      }
+
+      foreach(osc_get_cities($parent === null ? '' : $parent) as $c) {
+        if(osc_search_location_slug_matches($c, $value_cmp)) {
+          $row = $c;
+          break;
+        }
+      }
+      break;
+
+    default:
+      $row = false;
+      break;
+  }
+
+  if(!is_array($row) || (!isset($row['pk_i_id']) && !isset($row['pk_c_code']))) {
+    $row = false;
+  }
+
+  return $row;
+}
+
+// Split a location param into a list of non-empty string tokens
+function osc_alert_location_param_values($value) {
+  if(is_array($value)) {
+    $out = array();
+    foreach($value as $v) {
+      $v = trim((string)$v);
+      if($v !== '') {
+        $out[] = $v;
+      }
+    }
+    return $out;
+  }
+
+  $value = trim((string)$value);
+  if($value === '') {
+    return array();
+  }
+
+  if(strpos($value, ',') !== false) {
+    $out = array();
+    $parts = explode(',', $value);
+    foreach($parts as $p) {
+      $p = trim((string)$p);
+      if($p !== '') {
+        $out[] = $p;
+      }
+    }
+    return $out;
+  }
+
+  return array($value);
+}
+
+// Rejoin canonical location values in the same shape as the original param
+function osc_alert_location_param_join($original, $values) {
+  if(!is_array($values)) {
+    $values = array();
+  }
+  if(is_array($original)) {
+    return $values;
+  }
+  return implode(',', $values);
+}
+
+// True when every location value is a positive numeric id
+function osc_alert_location_values_are_ids($value) {
+  $vals = osc_alert_location_param_values($value);
+  if(count($vals) == 0) {
+    return false;
+  }
+
+  foreach($vals as $v) {
+    if(!is_numeric($v) || (int)$v <= 0) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+// Store country code and region/city ids in alert params when they can be resolved
+function osc_alert_canonicalize_location_params($params) {
+  if(!is_array($params)) {
+    return array();
+  }
+
+  $out = $params;
+  $country_code = null;
+  $region_id = null;
+
+  if(isset($out['sCountry'])) {
+    $vals = osc_alert_location_param_values($out['sCountry']);
+    $canon = array();
+    foreach($vals as $v) {
+      $row = osc_search_location_row_from_value('sCountry', $v);
+      if(is_array($row) && isset($row['pk_c_code']) && $row['pk_c_code'] != '') {
+        $code = (string)$row['pk_c_code'];
+        $canon[] = $code;
+        if($country_code === null) {
+          $country_code = $code;
+        }
+      } else {
+        $canon[] = $v;
+      }
+    }
+    $out['sCountry'] = osc_alert_location_param_join($params['sCountry'], $canon);
+  }
+
+  if(isset($out['sRegion'])) {
+    $vals = osc_alert_location_param_values($out['sRegion']);
+    $canon = array();
+    foreach($vals as $v) {
+      $row = osc_search_location_row_from_value('sRegion', $v, $country_code);
+      if(is_array($row) && isset($row['pk_i_id']) && (int)$row['pk_i_id'] > 0) {
+        $rid = (string)$row['pk_i_id'];
+        $canon[] = $rid;
+        if($region_id === null) {
+          $region_id = $rid;
+        }
+        if($country_code === null && isset($row['fk_c_country_code']) && $row['fk_c_country_code'] != '') {
+          $country_code = (string)$row['fk_c_country_code'];
+        }
+      } else {
+        $canon[] = $v;
+      }
+    }
+    $out['sRegion'] = osc_alert_location_param_join($params['sRegion'], $canon);
+  }
+
+  if(isset($out['sCity'])) {
+    $vals = osc_alert_location_param_values($out['sCity']);
+    $canon = array();
+    foreach($vals as $v) {
+      $row = osc_search_location_row_from_value('sCity', $v, $region_id);
+      if(is_array($row) && isset($row['pk_i_id']) && (int)$row['pk_i_id'] > 0) {
+        $canon[] = (string)$row['pk_i_id'];
+      } else {
+        $canon[] = $v;
+      }
+    }
+    $out['sCity'] = osc_alert_location_param_join($params['sCity'], $canon);
+  }
+
+  if(osc_alert_location_values_are_ids(isset($out['sCity']) ? $out['sCity'] : null)) {
+    unset($out['sRegion']);
+    unset($out['sCountry']);
+  } else if(osc_alert_location_values_are_ids(isset($out['sRegion']) ? $out['sRegion'] : null)) {
+    unset($out['sCountry']);
+  }
+
+  return $out;
+}
+
+// Convert stored location ids/codes/slugs to display names for search form Params
+function osc_alert_location_params_to_display($params) {
+  if(!is_array($params)) {
+    return array();
+  }
+
+  $out = $params;
+  $country_code = null;
+  $region_id = null;
+
+  if(isset($out['sCountry'])) {
+    $vals = osc_alert_location_param_values($out['sCountry']);
+    $names = array();
+    foreach($vals as $v) {
+      $row = osc_search_location_row_from_value('sCountry', $v);
+      if(is_array($row) && isset($row['s_name']) && $row['s_name'] != '') {
+        $names[] = $row['s_name'];
+        if($country_code === null && isset($row['pk_c_code'])) {
+          $country_code = (string)$row['pk_c_code'];
+        }
+      } else {
+        $names[] = $v;
+      }
+    }
+    $out['sCountry'] = osc_alert_location_param_join($params['sCountry'], $names);
+  }
+
+  if(isset($out['sRegion'])) {
+    $vals = osc_alert_location_param_values($out['sRegion']);
+    $names = array();
+    foreach($vals as $v) {
+      $row = osc_search_location_row_from_value('sRegion', $v, $country_code);
+      if(is_array($row) && isset($row['s_name']) && $row['s_name'] != '') {
+        $names[] = $row['s_name'];
+        if($region_id === null && isset($row['pk_i_id'])) {
+          $region_id = (string)$row['pk_i_id'];
+        }
+      } else {
+        $names[] = $v;
+      }
+    }
+    $out['sRegion'] = osc_alert_location_param_join($params['sRegion'], $names);
+  }
+
+  if(isset($out['sCity'])) {
+    $vals = osc_alert_location_param_values($out['sCity']);
+    $names = array();
+    foreach($vals as $v) {
+      $row = osc_search_location_row_from_value('sCity', $v, $region_id);
+      if(is_array($row) && isset($row['s_name']) && $row['s_name'] != '') {
+        $names[] = $row['s_name'];
+      } else {
+        $names[] = $v;
+      }
+    }
+    $out['sCity'] = osc_alert_location_param_join($params['sCity'], $names);
+  }
+
+  return $out;
+}
+
+// Rebuild cities/regions/countries SQL fragments in alert s_search JSON from canonical params
+function osc_alert_apply_location_to_search_json($aData, $params) {
+  if(!is_array($aData)) {
+    $aData = array();
+  }
+  if(!is_array($params)) {
+    return $aData;
+  }
+
+  $params = osc_alert_canonicalize_location_params($params);
+  $has_country = isset($params['sCountry']);
+  $has_region = isset($params['sRegion']);
+  $has_city = isset($params['sCity']);
+  if(!$has_country && !$has_region && !$has_city) {
+    return $aData;
+  }
+
+  if(osc_alert_location_values_are_ids(isset($params['sCity']) ? $params['sCity'] : null)) {
+    unset($aData['countries']);
+    unset($aData['regions']);
+  } else if(osc_alert_location_values_are_ids(isset($params['sRegion']) ? $params['sRegion'] : null)) {
+    unset($aData['countries']);
+  }
+
+  $tmp = new Search(false, false, false);
+  if($has_country) {
+    foreach(osc_alert_location_param_values($params['sCountry']) as $v) {
+      $tmp->addCountry($v);
+    }
+  }
+  if($has_region) {
+    foreach(osc_alert_location_param_values($params['sRegion']) as $v) {
+      $tmp->addRegion($v);
+    }
+  }
+  if($has_city) {
+    foreach(osc_alert_location_param_values($params['sCity']) as $v) {
+      $tmp->addCity($v);
+    }
+  }
+
+  $tmp_json = json_decode($tmp->toJson(), true);
+  if(!is_array($tmp_json)) {
+    return $aData;
+  }
+
+  if($has_country && isset($tmp_json['countries']) && is_array($tmp_json['countries'])) {
+    $aData['countries'] = $tmp_json['countries'];
+  }
+  if($has_region && isset($tmp_json['regions']) && is_array($tmp_json['regions'])) {
+    $aData['regions'] = $tmp_json['regions'];
+  }
+  if($has_city && isset($tmp_json['cities']) && is_array($tmp_json['cities'])) {
+    $aData['cities'] = $tmp_json['cities'];
+  }
+
+  return $aData;
+}
+
+// Rebuild Search location filters from alert s_param (name, slug, or id)
+function osc_alert_apply_location_normalize($search, $s_param) {
+  if(!is_object($search) || !method_exists($search, 'addCity')) {
+    return;
+  }
+
+  if(is_string($s_param)) {
+    $s_param = json_decode($s_param, true) ?: array();
+  }
+  if(!is_array($s_param)) {
+    $s_param = array();
+  }
+
+  $has_loc = false;
+  foreach(array('sCountry', 'sRegion', 'sCity') as $k) {
+    if(isset($s_param[$k]) && count(osc_alert_location_param_values($s_param[$k])) > 0) {
+      $has_loc = true;
+      break;
+    }
+  }
+
+  if(!$has_loc) {
+    $aData = json_decode($search->toJson(), true) ?: array();
+    $raw = osc_get_raw_search($aData);
+    $s_param = array();
+    if(isset($raw['countries']) && is_array($raw['countries']) && count($raw['countries']) > 0) {
+      $s_param['sCountry'] = implode(',', $raw['countries']);
+    }
+    if(isset($raw['regions']) && is_array($raw['regions']) && count($raw['regions']) > 0) {
+      $s_param['sRegion'] = implode(',', $raw['regions']);
+    }
+    if(isset($raw['cities']) && is_array($raw['cities']) && count($raw['cities']) > 0) {
+      $s_param['sCity'] = implode(',', $raw['cities']);
+    }
+    if(count($s_param) == 0) {
+      return;
+    }
+  }
+
+  $canon = osc_alert_canonicalize_location_params($s_param);
+
+  if(osc_alert_location_values_are_ids(isset($canon['sCity']) ? $canon['sCity'] : null)) {
+    $search->removeCountryAll();
+    $search->removeRegionAll();
+  } else if(osc_alert_location_values_are_ids(isset($canon['sRegion']) ? $canon['sRegion'] : null)) {
+    $search->removeCountryAll();
+  }
+
+  if(isset($canon['sCountry'])) {
+    $search->removeCountryAll();
+    foreach(osc_alert_location_param_values($canon['sCountry']) as $v) {
+      $search->addCountry($v);
+    }
+  }
+  if(isset($canon['sRegion'])) {
+    $search->removeRegionAll();
+    foreach(osc_alert_location_param_values($canon['sRegion']) as $v) {
+      $search->addRegion($v);
+    }
+  }
+  if(isset($canon['sCity'])) {
+    $search->removeCityAll();
+    foreach(osc_alert_location_param_values($canon['sCity']) as $v) {
+      $search->addCity($v);
+    }
+  }
+}
+
+
 // Clean search URL for compare action
 function osc_clear_compare_url($url) {
   $url = urldecode($url);
@@ -1979,12 +2481,22 @@ function osc_get_raw_search($conditions) {
         // Extract string from condition... ie: oc_t_item_location.s_city LIKE 'Detroit' OR oc_t_it... ---> Detroit
         // } elseif(preg_match("|'([^']*)'|", $v, $match)) {
         } elseif(preg_match($pattern_string, $v, $match)) {
-          $conditions[$key][$k] = stripslashes(substr($match[0], 1, -1));
-
-          if($key == 'countries' && strlen($conditions[$key][$k]) == 2) {
-            $name = Country::newInstance()->findNameByPrimaryKey($conditions[$key][$k]);
-            $conditions[$key][$k] = ($name === false ? $conditions[$key][$k] : $name);
+          $token = stripslashes(substr($match[0], 1, -1));
+          $loc_param = '';
+          if($key == 'countries') {
+            $loc_param = 'sCountry';
+          } elseif($key == 'regions') {
+            $loc_param = 'sRegion';
+          } elseif($key == 'cities') {
+            $loc_param = 'sCity';
           }
+          if($loc_param != '') {
+            $row = osc_search_location_row_from_value($loc_param, $token);
+            if(is_array($row) && isset($row['s_name']) && $row['s_name'] != '') {
+              $token = $row['s_name'];
+            }
+          }
+          $conditions[$key][$k] = $token;
         }
       }
     } else {

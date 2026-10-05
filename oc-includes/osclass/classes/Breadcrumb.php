@@ -237,14 +237,21 @@ class Breadcrumb {
 
           // Get city row
           if($b_city && ($city_row === false || !isset($city_row['pk_i_id']))) {
-            if($b_region) {
-              $_region = Region::newInstance()->findByName($region);
+            $city_row = City::newInstance()->findBySlug($city);
 
-              if(isset($_region['pk_i_id'])) {
-                $city_row = City::newInstance()->findByName($city, $_region['pk_i_id']);
+            if($city_row === false || !isset($city_row['pk_i_id'])) {
+              if($b_region) {
+                $_region = Region::newInstance()->findByName($region);
+                if(!isset($_region['pk_i_id'])) {
+                  $_region = Region::newInstance()->findBySlug($region);
+                }
+
+                if(isset($_region['pk_i_id'])) {
+                  $city_row = City::newInstance()->findByName($city, $_region['pk_i_id']);
+                }
+              } else {
+                $city_row = City::newInstance()->findByName($city);
               }
-            } else {
-              $city_row = City::newInstance()->findByName($city);
             }
           }
 
@@ -257,14 +264,21 @@ class Breadcrumb {
 
           // Get region row
           if($b_region && ($region_row === false || !isset($region_row['pk_i_id']))) {
-            if($b_country) {
-              $_country = Country::newInstance()->findByName($country);
+            $region_row = Region::newInstance()->findBySlug($region);
 
-              if(isset($_country['pk_c_code'])) {
-                $region_row = Region::newInstance()->findByName($region, $_country['pk_c_code']);
+            if($region_row === false || !isset($region_row['pk_i_id'])) {
+              if($b_country) {
+                $_country = Country::newInstance()->findByName($country);
+                if(!isset($_country['pk_c_code'])) {
+                  $_country = Country::newInstance()->findBySlug($country);
+                }
+
+                if(isset($_country['pk_c_code'])) {
+                  $region_row = Region::newInstance()->findByName($region, $_country['pk_c_code']);
+                }
+              } else {
+                $region_row = Region::newInstance()->findByName($region);
               }
-            } else {
-              $region_row = Region::newInstance()->findByName($region);
             }
           }
 

@@ -321,6 +321,11 @@ class CWebAjax extends BaseModel {
           return false;
         }
 
+        $alert_params = osc_alert_canonicalize_location_params($alert_params);
+        $alert_arr = osc_alert_apply_location_to_search_json($alert_arr, $alert_params);
+        $alert_json = json_encode($alert_arr);
+        $alert_json_params = json_encode($alert_params);
+
         $email = osc_esc_html(Params::getParam('email'));
         $user_id = osc_esc_html(Params::getParam('userid'));
 

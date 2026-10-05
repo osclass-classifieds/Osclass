@@ -1,3 +1,11 @@
+Osclass 8.4.1
+------------------------
+- Custom search URLs no longer redirect in a loop or repeat the min-price part when you add a price filter.
+- City, region and country names with accents stay as written in custom search URLs, breadcrumbs and alerts (for example Kosice).
+- Search alerts remember the place you searched. A city is enough on its own, so region and country are not stored with it. A region is enough on its own, so country is not stored with it. Older alerts that used a name or slug still match listings.
+- Open in search from My Alerts keeps that place in the results URL.
+
+
 Osclass 8.4.0
 ------------------------
 - IMPORTANT: Minimum PHP version to run Osclass has changed from 7.2 to 7.4 (based on library dependencies).

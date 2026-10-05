@@ -101,6 +101,31 @@ class Country extends DAO
     return $result->row();
   }
 
+  /**
+   * Find a country by name, native name, or slug
+   *
+   * @access public
+   * @param $value
+   * @return array
+   */
+  public function findByNameOrSlug($value) {
+    $value = trim((string)$value);
+    if($value == '') {
+      return array();
+    }
+
+    $this->dao->select();
+    $this->dao->from($this->getTableName());
+    $this->dao->where(sprintf('(s_name="%s" OR s_name_native="%s" OR s_slug="%s")', $value, $value, $value));
+    $this->dao->limit(1);
+
+    $result = $this->dao->get();
+    if($result == false) {
+      return array();
+    }
+    return $result->row();
+  }
+
 
   /**
    * Get all the rows from the table t_country

@@ -211,6 +211,7 @@ class CWebSearch extends BaseModel {
                   $param_name = $rule_params[$j];
                   $param_value = urldecode($matched_values[$j+2]);
                   //$param_value = osc_search_param_value_to_slug($param_name, $param_value);
+                  $param_value = osc_search_param_value_from_slug($param_name, $param_value);
 
                   // Custom rule meta param used, so take "meta14", "meta15" back to "meta"
                   if(substr($param_name, 0, 4) == 'meta' && strlen($param_name) > 4) {
@@ -234,8 +235,20 @@ class CWebSearch extends BaseModel {
               }
             }
             
-            $p_sParams_arr = array_filter($p_sParams_arr);
-            $p_sParams = '/' . implode('/', $p_sParams_arr);
+            // Leftover is the unmatched suffix. Index unsets miss static rule segments (min-{sPriceMin}-eur).
+            $matched_path = isset($matched_values[0]) ? $matched_values[0] : '';
+            if($matched_path != '' && strpos($p_sParams, $matched_path) === 0) {
+              $p_sParams = substr($p_sParams, strlen($matched_path));
+            }
+            $p_sParams_arr = array_filter(explode('/', trim((string)$p_sParams, '/')));
+            $p_sParams_keep = array();
+            foreach($p_sParams_arr as $p_sParams_seg) {
+              if(strpos($p_sParams_seg, ',') !== false) {
+                $p_sParams_keep[] = $p_sParams_seg;
+              }
+            }
+            $p_sParams_arr = $p_sParams_keep;
+            $p_sParams = (count($p_sParams_arr) > 0 ? '/' . implode('/', $p_sParams_arr) : '');
             
             // echo 'Custom rule: ' . $custom_rule_id . ' ... '; EXIT;
             // We have now extracted Rule ID and it's params from sParams
@@ -305,6 +318,7 @@ class CWebSearch extends BaseModel {
     $alert_id = (int)Params::getParam('iAlertId');
     $alert_secret = Params::getParam('sAlertSecret');
     $alert_ok = false;
+    $array_params = array();
     
     if($alert_id > 0 && $alert_secret != '') {
       $alert = Alerts::newInstance()->findByPrimaryKey($alert_id);
@@ -312,6 +326,9 @@ class CWebSearch extends BaseModel {
       if(isset($alert['s_secret']) && $alert['s_secret'] == $alert_secret) {
         $array_conditions = @json_decode($alert['s_search'], true);
         $array_params = @json_decode($alert['s_param'], true);
+        if(!is_array($array_params)) {
+          $array_params = array();
+        }
 
         // Check if alert structure is OK
         if(isset($array_conditions['price_min']) && $alert['b_active'] == 1) {
@@ -320,8 +337,8 @@ class CWebSearch extends BaseModel {
           $this->mSearch = Search::newInstance();
           $this->mSearch->setJsonAlert($array_conditions);
           
-          if(is_array($array_params) && count($array_params) > 0) {
-            $alert_params = $array_params;
+          if(count($array_params) > 0) {
+            $alert_params = osc_alert_location_params_to_display($array_params);
             $skip_arr = osc_alert_skip_params();
             
             foreach($alert_params as $pname => $pval) {
@@ -360,6 +377,26 @@ class CWebSearch extends BaseModel {
 
     $p_sCountry = osc_esc_html(Params::getParam('sCountry'));
     $p_sCountry = is_array($p_sCountry) ? $p_sCountry : ($p_sCountry == '' ? array() : explode(',', $p_sCountry));
+
+    // Custom-rule URLs use location slugs; restore names for filters, pickers, breadcrumbs, alerts
+    foreach($p_sCountry as $k => $v) {
+      $p_sCountry[$k] = osc_esc_html(osc_search_param_value_from_slug('sCountry', $v));
+    }
+    foreach($p_sRegion as $k => $v) {
+      $p_sRegion[$k] = osc_esc_html(osc_search_param_value_from_slug('sRegion', $v));
+    }
+    foreach($p_sCity as $k => $v) {
+      $p_sCity[$k] = osc_esc_html(osc_search_param_value_from_slug('sCity', $v));
+    }
+    if(count($p_sCountry) > 0) {
+      Params::setParam('sCountry', implode(',', $p_sCountry));
+    }
+    if(count($p_sRegion) > 0) {
+      Params::setParam('sRegion', implode(',', $p_sRegion));
+    }
+    if(count($p_sCity) > 0) {
+      Params::setParam('sCity', implode(',', $p_sCity));
+    }
 
     $p_sUser = osc_esc_html(Params::getParam('sUser'));
     $p_sUser = is_array($p_sUser) ? $p_sUser : ($p_sUser == '' ? '' : explode(',', $p_sUser));
@@ -498,6 +535,10 @@ class CWebSearch extends BaseModel {
     }
     
     $p_sCountry = implode(', ' , $p_sCountry);
+
+    if($alert_ok) {
+      osc_alert_apply_location_normalize($this->mSearch, $array_params);
+    }
 
     // FILTERING PATTERN
     if($p_sPattern != '') {
@@ -704,42 +745,45 @@ class CWebSearch extends BaseModel {
     $country_code = null;
     $country_name = $p_sCountry;
     $country_row = array();
-    
-    if(strlen($p_sCountry) == 2) {
-      $c = osc_get_country_row($p_sCountry);
-      
-      if($c) {
+
+    if($p_sCountry != '') {
+      $c = osc_search_location_row_from_value('sCountry', $p_sCountry);
+
+      if($c && isset($c['pk_c_code'])) {
         $country_code = $c['pk_c_code'];
         $country_name = (($use_native && $c['s_name_native'] <> '') ? $c['s_name_native'] : $c['s_name']);
         $country_row = $c;
+        Params::setParam('sCountry', $c['s_name']);
       }
     }
     
     $region_id = null;
     $region_name = $p_sRegion;
     $region_row = array();
-    
-    if(is_numeric($p_sRegion)) {
-      $r = osc_get_region_row($p_sRegion);
-      
-      if($r) {
+
+    if($p_sRegion != '') {
+      $r = osc_search_location_row_from_value('sRegion', $p_sRegion);
+
+      if($r && isset($r['pk_i_id'])) {
         $region_id = $r['pk_i_id'];
         $region_name = (($use_native && $r['s_name_native'] <> '') ? $r['s_name_native'] : $r['s_name']);
         $region_row = $r;
+        Params::setParam('sRegion', $r['s_name']);
       }
     }
     
     $city_id = null;
     $city_name = $p_sCity;
     $city_row = array();
-    
-    if(is_numeric($p_sCity)) {
-      $c = osc_get_city_row($p_sCity);
-      
-      if($c) {
+
+    if($p_sCity != '') {
+      $c = osc_search_location_row_from_value('sCity', $p_sCity);
+
+      if($c && isset($c['pk_i_id'])) {
         $city_id = $c['pk_i_id'];
         $city_name = (($use_native && $c['s_name_native'] <> '') ? $c['s_name_native'] : $c['s_name']);
         $city_row = $c;
+        Params::setParam('sCity', $c['s_name']);
       }
     }
 
@@ -781,6 +825,9 @@ class CWebSearch extends BaseModel {
     // Get current search params into Json for Alert subscription
     $json = $this->mSearch->toJson();
     $json_arr = @json_decode($json, true);
+    if(!is_array($json_arr)) {
+      $json_arr = array();
+    }
     
     $json_params = Params::getParamsAsArray();
     $skip_arr = osc_alert_skip_params();
@@ -790,6 +837,10 @@ class CWebSearch extends BaseModel {
     }
     
     ksort($json_params);
+
+    $json_params = osc_alert_canonicalize_location_params(is_array($json_params) ? $json_params : array());
+    $json_arr = osc_alert_apply_location_to_search_json($json_arr, $json_params);
+    $json = json_encode($json_arr);
     
     $json_arr['params'] = (is_array($json_params) ? $json_params : array());
     $json_arr['sql'] = $this->mSearch->exportSQL();

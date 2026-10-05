@@ -125,6 +125,37 @@ class Region extends DAO
   }
 
   /**
+   * Find a region by name, native name, or slug
+   *
+   * @access public
+   * @param $value
+   * @param $country
+   * @return array
+   */
+  public function findByNameOrSlug($value, $country = null) {
+    $value = trim((string)$value);
+    if($value == '') {
+      return array();
+    }
+
+    $this->dao->select();
+    $this->dao->from($this->getTableName());
+    $this->dao->where(sprintf('(s_name="%s" OR s_name_native="%s" OR s_slug="%s")', $value, $value, $value));
+    if($country != null) {
+      $this->dao->where('fk_c_country_code', $country);
+    }
+
+    $this->dao->limit(1);
+    $result = $this->dao->get();
+
+    if($result == false) {
+      return array();
+    }
+
+    return $result->row();
+  }
+
+  /**
    * Function to deal with ajax queries
    *
    * @access public

@@ -142,6 +142,7 @@ class CWebUser extends WebSecBaseModel {
           if(isset($array_conditions['price_min'])) {
             $search = new Search();
             $search->setJsonAlert($array_conditions, $a['s_email'], $a['fk_i_user_id']);
+            osc_alert_apply_location_normalize($search, isset($a['s_param']) ? $a['s_param'] : null);
             //$search->notFromUser(Session::newInstance()->_get('userId'));
             $search->limit(0, osc_apply_filter('limit_alert_items', 12));
 

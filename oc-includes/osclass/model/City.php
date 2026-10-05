@@ -195,6 +195,37 @@ class City extends DAO
   }
 
   /**
+   * Find a city by name, native name, or slug
+   *
+   * @access public
+   * @param $value
+   * @param $regionId
+   * @return array
+   */
+  public function findByNameOrSlug($value, $regionId = null) {
+    $value = trim((string)$value);
+    if($value == '') {
+      return array();
+    }
+
+    $this->dao->select($this->getFields());
+    $this->dao->from($this->getTableName());
+    $this->dao->where(sprintf('(s_name="%s" OR s_name_native="%s" OR s_slug="%s")', $value, $value, $value));
+    $this->dao->limit(1);
+    if($regionId != null) {
+      $this->dao->where('fk_i_region_id', $regionId);
+    }
+
+    $result = $this->dao->get();
+
+    if($result == false) {
+      return array();
+    }
+
+    return $result->row();
+  }
+
+  /**
    * Get all the rows from the table t_city
    *
    * @access public
