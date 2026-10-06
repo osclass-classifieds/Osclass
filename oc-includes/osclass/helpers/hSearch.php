@@ -1866,6 +1866,9 @@ function osc_alert_location_params_to_display($params) {
         if($region_id === null && isset($row['pk_i_id'])) {
           $region_id = (string)$row['pk_i_id'];
         }
+        if($country_code === null && isset($row['fk_c_country_code']) && $row['fk_c_country_code'] != '') {
+          $country_code = (string)$row['fk_c_country_code'];
+        }
       } else {
         $names[] = $v;
       }
@@ -1873,6 +1876,7 @@ function osc_alert_location_params_to_display($params) {
     $out['sRegion'] = osc_alert_location_param_join($params['sRegion'], $names);
   }
 
+  $city_row = null;
   if(isset($out['sCity'])) {
     $vals = osc_alert_location_param_values($out['sCity']);
     $names = array();
@@ -1880,11 +1884,38 @@ function osc_alert_location_params_to_display($params) {
       $row = osc_search_location_row_from_value('sCity', $v, $region_id);
       if(is_array($row) && isset($row['s_name']) && $row['s_name'] != '') {
         $names[] = $row['s_name'];
+        if($city_row === null) {
+          $city_row = $row;
+        }
       } else {
         $names[] = $v;
       }
     }
     $out['sCity'] = osc_alert_location_param_join($params['sCity'], $names);
+  }
+
+  if($city_row !== null && count(osc_alert_location_param_values(isset($out['sRegion']) ? $out['sRegion'] : null)) == 0) {
+    if(isset($city_row['fk_i_region_id']) && (int)$city_row['fk_i_region_id'] > 0) {
+      $region = osc_get_region_row($city_row['fk_i_region_id']);
+      if(is_array($region) && isset($region['s_name']) && $region['s_name'] != '') {
+        $out['sRegion'] = $region['s_name'];
+        if($country_code === null && isset($region['fk_c_country_code']) && $region['fk_c_country_code'] != '') {
+          $country_code = (string)$region['fk_c_country_code'];
+        }
+      }
+    }
+  }
+
+  if(count(osc_alert_location_param_values(isset($out['sCountry']) ? $out['sCountry'] : null)) == 0) {
+    if($country_code === null && $city_row !== null && isset($city_row['fk_c_country_code']) && $city_row['fk_c_country_code'] != '') {
+      $country_code = (string)$city_row['fk_c_country_code'];
+    }
+    if($country_code !== null) {
+      $country = osc_get_country_row($country_code);
+      if(is_array($country) && isset($country['s_name']) && $country['s_name'] != '') {
+        $out['sCountry'] = $country['s_name'];
+      }
+    }
   }
 
   return $out;
@@ -1908,10 +1939,10 @@ function osc_alert_apply_location_to_search_json($aData, $params) {
   }
 
   if(osc_alert_location_values_are_ids(isset($params['sCity']) ? $params['sCity'] : null)) {
-    unset($aData['countries']);
-    unset($aData['regions']);
+    $aData['countries'] = array();
+    $aData['regions'] = array();
   } else if(osc_alert_location_values_are_ids(isset($params['sRegion']) ? $params['sRegion'] : null)) {
-    unset($aData['countries']);
+    $aData['countries'] = array();
   }
 
   $tmp = new Search(false, false, false);

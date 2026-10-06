@@ -787,6 +787,37 @@ class CWebSearch extends BaseModel {
       }
     }
 
+    if($city_id > 0 && $p_sRegion == '') {
+      if(isset($city_row['fk_i_region_id']) && (int)$city_row['fk_i_region_id'] > 0) {
+        $r = osc_get_region_row($city_row['fk_i_region_id']);
+        if($r && isset($r['pk_i_id'])) {
+          $region_id = $r['pk_i_id'];
+          $region_name = (($use_native && $r['s_name_native'] <> '') ? $r['s_name_native'] : $r['s_name']);
+          $region_row = $r;
+          Params::setParam('sRegion', $r['s_name']);
+        }
+      }
+    }
+
+    if(($city_id > 0 || $region_id > 0) && $p_sCountry == '') {
+      $cc = '';
+      if(isset($city_row['fk_c_country_code']) && $city_row['fk_c_country_code'] != '') {
+        $cc = $city_row['fk_c_country_code'];
+      } else if(isset($region_row['fk_c_country_code']) && $region_row['fk_c_country_code'] != '') {
+        $cc = $region_row['fk_c_country_code'];
+      }
+
+      if($cc != '') {
+        $co = osc_get_country_row($cc);
+        if($co && isset($co['pk_c_code'])) {
+          $country_code = $co['pk_c_code'];
+          $country_name = (($use_native && $co['s_name_native'] <> '') ? $co['s_name_native'] : $co['s_name']);
+          $country_row = $co;
+          Params::setParam('sCountry', $co['s_name']);
+        }
+      }
+    }
+
     $this->_exportVariableToView('search_start', $iStart);
     $this->_exportVariableToView('search_end', $iEnd);
     $this->_exportVariableToView('search_category', $p_sCategory);

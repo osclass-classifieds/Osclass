@@ -2190,9 +2190,9 @@ class Search extends DAO {
     // locations
     $this->zips = isset($aData['zips']) ? $aData['zips'] : array();
     $this->city_areas = isset($aData['city_areas']) ? $aData['city_areas'] : array();
-    $this->cities = $aData['cities'];
-    $this->regions = $aData['regions'];
-    $this->countries = $aData['countries'];
+    $this->cities = isset($aData['cities']) ? $aData['cities'] : array();
+    $this->regions = isset($aData['regions']) ? $aData['regions'] : array();
+    $this->countries = isset($aData['countries']) ? $aData['countries'] : array();
 
     $this->user_ids = $aData['user_ids'];
 
