@@ -486,10 +486,31 @@ class CAdminItemComments extends AdminSecBaseModel {
 
   function sendCommentActivated($commentId) {
     $aComment = $this->itemCommentManager->findByPrimaryKey($commentId);
+    if($aComment === false || !isset($aComment['pk_i_id'])) {
+      return;
+    }
+
     $aItem = Item::newInstance()->findByPrimaryKey($aComment['fk_i_item_id']);
     View::newInstance()->_exportVariableToView('item', $aItem);
 
     osc_run_hook('hook_email_comment_validated', $aComment);
+
+    // Notify listing owner (or reply author) when a moderated comment becomes active
+    $replyId = (isset($aComment['fk_i_reply_id']) ? (int)$aComment['fk_i_reply_id'] : 0);
+    $mailItem = array(
+      'id' => $aComment['fk_i_item_id'],
+      'authorName' => $aComment['s_author_name'],
+      'authorEmail' => $aComment['s_author_email'],
+      'body' => $aComment['s_body'],
+      'title' => $aComment['s_title'],
+      'reply' => ($replyId > 0 ? $this->itemCommentManager->findByPrimaryKey($replyId) : array())
+    );
+
+    if(osc_notify_new_comment_user() && (!osc_enable_comment_reply() || $replyId <= 0)) {
+      osc_run_hook('hook_email_new_comment_user', $mailItem);
+    } else if(osc_notify_new_comment_reply_user() && osc_enable_comment_reply() && $replyId > 0) {
+      osc_run_hook('hook_email_new_comment_reply_user', $mailItem);
+    }
   }
 }
 

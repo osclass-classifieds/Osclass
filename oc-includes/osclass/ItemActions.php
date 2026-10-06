@@ -1732,22 +1732,22 @@ class ItemActions {
         if($user) {
           User::newInstance()->update(array('i_comments' => $user['i_comments'] + 1), array('pk_i_id' => $user['pk_i_id']));
         }
+      }
 
-        // Notify user - owner of listing (only if comment is active)
+      // Notify user - owner of listing (only if comment is active)
+      if($status_num == 2) {
         if(osc_notify_new_comment_user() && (!osc_enable_comment_reply() || $replyId <= 0)) {
           osc_run_hook('hook_email_new_comment_user', $aItem);
-
         } else if(osc_notify_new_comment_reply_user() && osc_enable_comment_reply() && $replyId > 0) {
           osc_run_hook('hook_email_new_comment_reply_user', $aItem);
         }
       }
 
       // Notify admin
-      if(osc_notify_new_comment_user() && (!osc_enable_comment_reply() || $replyId <= 0)) {
+      if(osc_notify_new_comment() && (!osc_enable_comment_reply() || $replyId <= 0)) {
         osc_run_hook('hook_email_new_comment_admin', $aItem);
       } else if(osc_notify_new_comment_reply() && osc_enable_comment_reply() && $replyId > 0) {
         osc_run_hook('hook_email_new_comment_reply_admin', $aItem);
-
       }
 
       osc_run_hook('add_comment', $commentID);

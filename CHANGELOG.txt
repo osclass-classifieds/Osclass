@@ -4,6 +4,7 @@ Osclass 8.4.1
 - City, region and country names with accents stay as written in custom search URLs, breadcrumbs and alerts (for example Kosice).
 - Search alerts remember the place you searched. A city is enough on its own, so region and country are not stored with it. A region is enough on its own, so country is not stored with it. Older alerts that used a name or slug still match listings.
 - Open in search from My Alerts keeps that place in the results URL.
+- Listing owners now receive the new-comment email after a moderated comment is approved (and for active guest comments).
 
 
 Osclass 8.4.0
