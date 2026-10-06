@@ -514,7 +514,7 @@ function customPageHeader(){
 }
 
 function customPageTitle($string) {
-  return sprintf(__('%s - %s'), __('Permalinks'), $string);
+  return __('Permalinks') . ' - ' . $string;
 }
 
 osc_add_filter('admin_title', 'customPageTitle');

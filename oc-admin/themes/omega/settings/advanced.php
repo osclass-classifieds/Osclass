@@ -52,7 +52,7 @@ function customPageHeader() {
 $ip_service = osc_ipdata_service_map('ALL', osc_get_ip());
 
 function customPageTitle($string) {
-  return sprintf(__('%s - %s'), __('Advanced settings'), $string);
+  return __('Advanced settings') . ' - ' . $string;
 }
 
 osc_add_filter('admin_title', 'customPageTitle');

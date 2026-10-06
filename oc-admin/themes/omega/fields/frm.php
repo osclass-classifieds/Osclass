@@ -36,9 +36,9 @@ osc_add_hook('admin_page_header','customPageHeader');
 function customPageTitle($string) {
   global $is_add;
   if($is_add) {
-    return sprintf(__('%s - %s'), __('Add custom field'), $string);
+    return __('Add custom field') . ' - ' . $string;
   }
-  return sprintf(__('%s - %s'), __('Edit custom field'), $string);
+  return __('Edit custom field') . ' - ' . $string;
 }
 osc_add_filter('admin_title', 'customPageTitle');
 

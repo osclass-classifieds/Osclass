@@ -44,7 +44,7 @@ function customPageTitle($string) {
   if(isset($comment['pk_i_id'])) {
     return sprintf(__('Edit comment #%s - %s'), $comment['pk_i_id'], $string);
   }
-  return sprintf(__('%s - %s'), __('Add comment'), $string);
+  return __('Add comment') . ' - ' . $string;
 }
 
 osc_add_filter('admin_title', 'customPageTitle');

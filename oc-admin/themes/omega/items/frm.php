@@ -60,7 +60,7 @@ osc_add_hook('admin_page_header', 'customPageHeader');
 
 
 function customPageTitle($string) {
-  return sprintf('%s - %s', customText('subtitle'), $string);
+  return customText('subtitle') . ' - ' . $string;
 }
 
 osc_add_filter('admin_title', 'customPageTitle');

@@ -36,7 +36,7 @@ osc_add_hook('admin_page_header','customPageHeader');
 
 
 function customPageTitle($string) {
-  return sprintf(__('%s - %s'), __('Add theme'), $string);
+  return __('Add theme') . ' - ' . $string;
 }
 
 osc_add_filter('admin_title', 'customPageTitle');

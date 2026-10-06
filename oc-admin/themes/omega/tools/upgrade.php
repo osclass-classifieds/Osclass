@@ -124,7 +124,7 @@ function customPageHeader() {
 }
 
 function customPageTitle($string) {
-  return sprintf(__('%s - %s'), __('Upgrade'), $string);
+  return __('Upgrade') . ' - ' . $string;
 }
 
 osc_add_filter('admin_title', 'customPageTitle');

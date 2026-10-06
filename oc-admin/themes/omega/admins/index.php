@@ -25,7 +25,7 @@ osc_add_hook('help_box','addHelp');
 
 
 function customPageTitle($string) {
-  return sprintf(__('%s - %s'), __('Manage admins'), $string);
+  return __('Manage admins') . ' - ' . $string;
 }
 
 osc_add_filter('admin_title', 'customPageTitle');

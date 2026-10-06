@@ -52,7 +52,7 @@ $aux = customFrmText();
 
 function customPageTitle($string) {
   $aux = customFrmText();
-  return sprintf('%s - %s', $aux['title'], $string);
+  return $aux['title'] . ' - ' . $string;
 }
 
 osc_add_filter('admin_title', 'customPageTitle');

@@ -83,7 +83,7 @@ osc_add_hook('admin_page_header','customPageHeader');
 
 
 function customPageTitle($string) {
-  return sprintf(__('%s - %s'), __('Listing settings'), $string);
+  return __('Listing settings') . ' - ' . $string;
 }
 
 osc_add_filter('admin_title', 'customPageTitle');
@@ -291,7 +291,7 @@ osc_current_admin_theme_path( 'parts/header.php');
               <div class="form-label"> <?php _e('Title length'); ?></div>
               <div class="form-controls">
                 <div class="">
-                  <?php printf(__('%s'), '<input type="text" class="input-medium" name="max_chars_per_title" value="' . osc_max_characters_per_title() . '" />'); ?>
+                  <?php echo '<input type="text" class="input-medium" name="max_chars_per_title" value="' . osc_max_characters_per_title() . '" />'; ?>
                   <div class="inpt-desc"><?php _e('characters'); ?></div>
                 </div>
               </div>
@@ -301,7 +301,7 @@ osc_current_admin_theme_path( 'parts/header.php');
               <div class="form-label"> <?php _e('Description length'); ?></div>
                 <div class="form-controls">
                   <div class="">
-                    <?php printf(__('%s'), '<input type="text" class="input-medium" name="max_chars_per_description" value="' . osc_max_characters_per_description() . '" />'); ?>
+                    <?php echo '<input type="text" class="input-medium" name="max_chars_per_description" value="' . osc_max_characters_per_description() . '" />'; ?>
                     <div class="inpt-desc"><?php _e('characters'); ?></div>
                   </div>
                 <div class="help-box"><?php _e('Note that if TinyMCE is enabled, real limit will be lower, as HTML symbols are counted towards limit as well. In this case you should set limit higher by 30%.'); ?></div>

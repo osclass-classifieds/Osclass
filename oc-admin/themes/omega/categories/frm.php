@@ -31,7 +31,7 @@ function customPageHeader() {
 osc_add_hook('admin_page_header','customPageHeader');
 
 function customPageTitle($string) {
-  return sprintf('%s - %s', customFrmText('title'), $string);
+  return customFrmText('title') . ' - ' . $string;
 }
 osc_add_filter('admin_title', 'customPageTitle');
 

@@ -54,7 +54,7 @@ function customPageHeader() {
 osc_add_hook('admin_page_header','customPageHeader');
 
 function customPageTitle($string) {
-  return sprintf(__('%s - %s'), __('Plugins'), $string);
+  return __('Plugins') . ' - ' . $string;
 }
 osc_add_filter('admin_title', 'customPageTitle');
 

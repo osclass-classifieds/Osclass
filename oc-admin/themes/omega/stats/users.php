@@ -56,7 +56,7 @@ function customPageHeader(){ ?>
 }
 
 function customPageTitle($string) {
-  return sprintf(__('%s - %s'), __('User statistics'), $string);
+  return __('User statistics') . ' - ' . $string;
 }
 osc_add_filter('admin_title', 'customPageTitle');
 

@@ -51,7 +51,7 @@ osc_add_hook('admin_page_header','customPageHeader');
 
 function customPageTitle($string) {
   $aux = customFrmText();
-  return sprintf('%s - %s', $aux['title'], $string);
+  return $aux['title'] . ' - ' . $string;
 }
 
 osc_add_filter('admin_title', 'customPageTitle');

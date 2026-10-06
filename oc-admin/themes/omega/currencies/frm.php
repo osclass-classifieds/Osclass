@@ -103,7 +103,7 @@ function customText($return = 'title') {
 
 
 function customPageTitle($string) {
-  return sprintf('%s - %s', customText('title'), $string);
+  return customText('title') . ' - ' . $string;
 }
 
 osc_add_filter('admin_title', 'customPageTitle');

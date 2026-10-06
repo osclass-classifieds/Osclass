@@ -35,7 +35,7 @@ function customPageHeader(){
 }
 
 function customPageTitle($string) {
-  return sprintf(__('%s - %s'), __('Backoffice widget settings'), $string);
+  return __('Backoffice widget settings') . ' - ' . $string;
 }
 osc_add_filter('admin_title', 'customPageTitle');
 

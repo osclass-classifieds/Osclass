@@ -27,7 +27,7 @@ osc_add_hook('admin_page_header','customPageHeader');
 
 
 function customPageTitle($string) {
-  return sprintf(__('%s - %s'), __('Add language'), $string);
+  return __('Add language') . ' - ' . $string;
 }
 
 osc_add_filter('admin_title', 'customPageTitle');

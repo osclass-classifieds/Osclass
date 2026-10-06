@@ -58,7 +58,7 @@ osc_add_hook('admin_page_header','customPageHeader');
 
 
 function customPageTitle($string) {
-  return sprintf(__('%s - %s'), __('Report statistics'), $string);
+  return __('Report statistics') . ' - ' . $string;
 }
 
 osc_add_filter('admin_title', 'customPageTitle');
