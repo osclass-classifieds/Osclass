@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-06 14:40+0200\n"
+"POT-Creation-Date: 2026-10-13 09:16+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -58,9 +58,9 @@ msgstr ""
 #: oc-admin/themes/omega/users/frm.php:268
 #: oc-admin/themes/omega/users/frm.php:425
 #: oc-admin/themes/omega/users/index.php:197
-#: oc-includes/osclass/classes/EmailVariables.php:111
 #: oc-includes/osclass/classes/datatables/AdminsDataTable.php:78
 #: oc-includes/osclass/classes/datatables/UsersDataTable.php:101
+#: oc-includes/osclass/classes/EmailVariables.php:111
 #: oc-includes/osclass/frm/Admin.form.class.php:134
 #: oc-includes/osclass/install-functions.php:927
 #: oc-includes/osclass/install-functions.php:1104
@@ -71,7 +71,8 @@ msgstr ""
 #: oc-admin/themes/omega/admins/frm.php:79
 #: oc-admin/themes/omega/admins/index.php:154
 #: oc-admin/themes/omega/appearance/add.php:93
-#: oc-admin/themes/omega/appearance/add_widget.php:253
+#: oc-admin/themes/omega/appearance/add_widget.php:218
+#: oc-admin/themes/omega/appearance/add_widget.php:296
 #: oc-admin/themes/omega/appearance/index.php:252
 #: oc-admin/themes/omega/categories/frm.php:140
 #: oc-admin/themes/omega/currencies/frm.php:55
@@ -341,7 +342,6 @@ msgid "Email field is empty"
 msgstr ""
 
 #: oc-admin/ajax/ajax.php:493 oc-admin/themes/omega/settings/index.php:97
-#: oc-includes/osclass/ItemActions.php:1542
 #: oc-includes/osclass/frm/Admin.form.class.php:140
 #: oc-includes/osclass/frm/Comment.form.class.php:156
 #: oc-includes/osclass/frm/Contact.form.class.php:138
@@ -350,6 +350,7 @@ msgstr ""
 #: oc-includes/osclass/frm/SendFriend.form.class.php:124
 #: oc-includes/osclass/frm/User.form.class.php:213
 #: oc-includes/osclass/frm/User.form.class.php:331
+#: oc-includes/osclass/ItemActions.php:1542
 msgid "The email is not valid"
 msgstr ""
 
@@ -387,7 +388,7 @@ msgid "Plugin"
 msgstr ""
 
 #: oc-admin/ajax/ajax.php:641
-#: oc-admin/themes/omega/appearance/add_widget.php:225
+#: oc-admin/themes/omega/appearance/add_widget.php:267
 #: oc-admin/themes/omega/translations/edit.php:322
 #: oc-admin/themes/omega/translations/edit.php:352
 #: oc-admin/themes/omega/translations/edit.php:357
@@ -478,9 +479,10 @@ msgid ""
 "%s"
 msgstr ""
 
-#: oc-admin/appearance.php:440
-#: oc-admin/themes/omega/appearance/add_widget.php:185
-#: oc-admin/themes/omega/appearance/add_widget.php:220
+#: oc-admin/appearance.php:442
+#: oc-admin/themes/omega/appearance/add_widget.php:221
+#: oc-admin/themes/omega/appearance/add_widget.php:224
+#: oc-admin/themes/omega/appearance/add_widget.php:262
 #: oc-admin/themes/omega/translations/edit.php:333
 #: oc-admin/themes/omega/translations/index.php:235
 #: oc-admin/themes/omega/translations/index.php:317
@@ -489,9 +491,7 @@ msgstr ""
 msgid "Section"
 msgstr ""
 
-#: oc-admin/appearance.php:445
-#: oc-admin/themes/omega/appearance/add_widget.php:182
-#: oc-admin/themes/omega/categories/frm.php:146
+#: oc-admin/appearance.php:447 oc-admin/themes/omega/categories/frm.php:146
 #: oc-admin/themes/omega/functions.php:309
 #: oc-admin/themes/omega/functions.php:342
 #: oc-admin/themes/omega/languages/frm.php:83
@@ -1077,7 +1077,7 @@ msgstr ""
 #: oc-admin/themes/omega/admins/index.php:299
 #: oc-admin/themes/omega/admins/index.php:310
 #: oc-admin/themes/omega/appearance/add.php:114
-#: oc-admin/themes/omega/appearance/add_widget.php:306
+#: oc-admin/themes/omega/appearance/add_widget.php:352
 #: oc-admin/themes/omega/appearance/index.php:279
 #: oc-admin/themes/omega/appearance/index.php:300
 #: oc-admin/themes/omega/appearance/widgets.php:305
@@ -1444,7 +1444,7 @@ msgid ""
 msgstr ""
 
 #: oc-admin/themes/omega/appearance/add.php:29
-#: oc-admin/themes/omega/appearance/add_widget.php:70
+#: oc-admin/themes/omega/appearance/add_widget.php:71
 #: oc-admin/themes/omega/appearance/customization.php:28
 #: oc-admin/themes/omega/appearance/index.php:58
 #: oc-admin/themes/omega/appearance/index.php:66
@@ -1615,7 +1615,7 @@ msgid "Continue install"
 msgstr ""
 
 #: oc-admin/themes/omega/appearance/add_widget.php:30
-#: oc-admin/themes/omega/appearance/add_widget.php:57
+#: oc-admin/themes/omega/appearance/add_widget.php:58
 msgid "Edit widget"
 msgstr ""
 
@@ -1653,34 +1653,36 @@ msgstr ""
 
 #: oc-admin/themes/omega/appearance/add_widget.php:34
 #: oc-admin/themes/omega/appearance/add_widget.php:36
-#: oc-admin/themes/omega/appearance/add_widget.php:59
+#: oc-admin/themes/omega/appearance/add_widget.php:60
 #: oc-admin/themes/omega/appearance/widgets.php:38
 msgid "Add widget"
 msgstr ""
 
-#: oc-admin/themes/omega/appearance/add_widget.php:49
-msgid ""
-"Section is required. Pick a theme or custom section, or type a new slug. "
-"Name is the admin label only and is not printed on the site. Internal name "
-"is unique and becomes the CSS class wdg-{name}."
-msgstr ""
-
 #: oc-admin/themes/omega/appearance/add_widget.php:50
 msgid ""
-"HTML content can differ per locale unless Single locale is checked. Code is "
-"optional HTML or JavaScript printed after the content (not localized). CSS "
-"is printed only when the widget has content or code."
+"Section is required. Pick a theme or custom section, or choose Create a new "
+"section and enter a slug. Name is the admin label only and is not printed on "
+"the site. Internal name is unique and becomes the CSS class wdg-{name}."
 msgstr ""
 
 #: oc-admin/themes/omega/appearance/add_widget.php:51
+msgid ""
+"HTML content can differ per locale unless Restrict locale is set to same "
+"content for all locales. Code is optional HTML or JavaScript printed after "
+"the content (not localized). CSS is printed only when the widget has content "
+"or code."
+msgstr ""
+
+#: oc-admin/themes/omega/appearance/add_widget.php:52
 msgid ""
 "Device visibility uses CSS: All devices, Mobile only (0-767px), or Desktop "
 "only (768px and up). A widget with empty content and empty code is not "
 "printed."
 msgstr ""
 
-#: oc-admin/themes/omega/appearance/add_widget.php:182
-#: oc-admin/themes/omega/appearance/add_widget.php:185
+#: oc-admin/themes/omega/appearance/add_widget.php:218
+#: oc-admin/themes/omega/appearance/add_widget.php:221
+#: oc-admin/themes/omega/appearance/add_widget.php:224
 #: oc-admin/themes/omega/currencies/frm.php:46
 #: oc-admin/themes/omega/currencies/frm.php:51
 #: oc-admin/themes/omega/currencies/frm.php:55
@@ -1810,8 +1812,6 @@ msgstr ""
 #: oc-admin/themes/omega/settings/permalinks.php:465
 #: oc-admin/themes/omega/settings/permalinks.php:466
 #: oc-admin/themes/omega/users/frm.php:268
-#: oc-includes/osclass/ItemActions.php:1539
-#: oc-includes/osclass/ItemActions.php:1545
 #: oc-includes/osclass/frm/Admin.form.class.php:129
 #: oc-includes/osclass/frm/Admin.form.class.php:134
 #: oc-includes/osclass/frm/Admin.form.class.php:139
@@ -1856,43 +1856,49 @@ msgstr ""
 #: oc-includes/osclass/frm/User.form.class.php:220
 #: oc-includes/osclass/frm/User.form.class.php:327
 #: oc-includes/osclass/frm/User.form.class.php:330
+#: oc-includes/osclass/ItemActions.php:1539
+#: oc-includes/osclass/ItemActions.php:1545
 #, php-format
 msgid "%s is required"
 msgstr ""
 
-#: oc-admin/themes/omega/appearance/add_widget.php:223
+#: oc-admin/themes/omega/appearance/add_widget.php:265
 msgid "Select a section"
 msgstr ""
 
-#: oc-admin/themes/omega/appearance/add_widget.php:232
+#: oc-admin/themes/omega/appearance/add_widget.php:274
 #: oc-admin/themes/omega/appearance/widget_settings.php:25
 #: oc-admin/themes/omega/appearance/widget_settings.php:73
 msgid "Custom sections"
 msgstr ""
 
-#: oc-admin/themes/omega/appearance/add_widget.php:240
-msgid "Or add a new custom section:"
+#: oc-admin/themes/omega/appearance/add_widget.php:281
+msgid "Create a new section"
 msgstr ""
 
-#: oc-admin/themes/omega/appearance/add_widget.php:241
-msgid "xyz"
+#: oc-admin/themes/omega/appearance/add_widget.php:283
+msgid "your_custom_section"
 msgstr ""
 
-#: oc-admin/themes/omega/appearance/add_widget.php:247
+#: oc-admin/themes/omega/appearance/add_widget.php:284
+msgid "Letters, numbers, hyphen and underscore."
+msgstr ""
+
+#: oc-admin/themes/omega/appearance/add_widget.php:290
 #, php-format
 msgid ""
 "This section is not listed in the theme. Add this to your theme file: %s"
 msgstr ""
 
-#: oc-admin/themes/omega/appearance/add_widget.php:248
+#: oc-admin/themes/omega/appearance/add_widget.php:291
 msgid "If the section is empty, that call prints nothing."
 msgstr ""
 
-#: oc-admin/themes/omega/appearance/add_widget.php:256
+#: oc-admin/themes/omega/appearance/add_widget.php:299
 msgid "Admin label only. It is not printed on the site."
 msgstr ""
 
-#: oc-admin/themes/omega/appearance/add_widget.php:261
+#: oc-admin/themes/omega/appearance/add_widget.php:304
 #: oc-admin/themes/omega/emails/frm.php:147
 #: oc-admin/themes/omega/pages/frm.php:157
 #: oc-includes/osclass/classes/datatables/EmailTemplatesDataTable.php:72
@@ -1901,56 +1907,70 @@ msgstr ""
 msgid "Internal name"
 msgstr ""
 
-#: oc-admin/themes/omega/appearance/add_widget.php:264
+#: oc-admin/themes/omega/appearance/add_widget.php:307
 msgid ""
 "Unique slug used in CSS as wdg-{name}. Letters, numbers, hyphen and "
 "underscore."
 msgstr ""
 
-#: oc-admin/themes/omega/appearance/add_widget.php:269
+#: oc-admin/themes/omega/appearance/add_widget.php:312
 msgid "Device visibility"
 msgstr ""
 
-#: oc-admin/themes/omega/appearance/add_widget.php:273
+#: oc-admin/themes/omega/appearance/add_widget.php:316
 #: oc-includes/osclass/classes/datatables/WidgetsDataTable.php:305
 msgid "All devices"
 msgstr ""
 
-#: oc-admin/themes/omega/appearance/add_widget.php:274
+#: oc-admin/themes/omega/appearance/add_widget.php:317
 #: oc-includes/osclass/classes/datatables/WidgetsDataTable.php:300
 msgid "Mobile only"
 msgstr ""
 
-#: oc-admin/themes/omega/appearance/add_widget.php:275
+#: oc-admin/themes/omega/appearance/add_widget.php:318
 #: oc-includes/osclass/classes/datatables/WidgetsDataTable.php:303
 msgid "Desktop only"
 msgstr ""
 
-#: oc-admin/themes/omega/appearance/add_widget.php:281
-msgid "Single locale"
+#: oc-admin/themes/omega/appearance/add_widget.php:320
+msgid "All devices, Mobile only (0-767px), or Desktop only (768px and up)."
 msgstr ""
 
-#: oc-admin/themes/omega/appearance/add_widget.php:285
-msgid "Use one content field for all locales."
+#: oc-admin/themes/omega/appearance/add_widget.php:325
+msgid "Restrict locale"
 msgstr ""
 
-#: oc-admin/themes/omega/appearance/add_widget.php:294
+#: oc-admin/themes/omega/appearance/add_widget.php:328
+msgid "Same content for all locales"
+msgstr ""
+
+#: oc-admin/themes/omega/appearance/add_widget.php:329
+msgid "Different content per locale"
+msgstr ""
+
+#: oc-admin/themes/omega/appearance/add_widget.php:331
+msgid ""
+"Same content uses one editor for every language. Different content shows one "
+"editor per language tab."
+msgstr ""
+
+#: oc-admin/themes/omega/appearance/add_widget.php:340
 #: oc-includes/osclass/classes/datatables/CurrenciesDataTable.php:109
 #: oc-includes/osclass/classes/datatables/LanguagesDataTable.php:120
 msgid "Code"
 msgstr ""
 
-#: oc-admin/themes/omega/appearance/add_widget.php:296
+#: oc-admin/themes/omega/appearance/add_widget.php:342
 msgid ""
 "Optional HTML or JavaScript printed after the content. Not localized. Can be "
 "used without content (for example AdSense)."
 msgstr ""
 
-#: oc-admin/themes/omega/appearance/add_widget.php:300
+#: oc-admin/themes/omega/appearance/add_widget.php:346
 msgid "CSS"
 msgstr ""
 
-#: oc-admin/themes/omega/appearance/add_widget.php:302
+#: oc-admin/themes/omega/appearance/add_widget.php:348
 msgid "Optional CSS printed only when the widget has content or code."
 msgstr ""
 
@@ -3311,8 +3331,6 @@ msgstr ""
 #: oc-admin/themes/omega/items/index.php:209
 #: oc-admin/themes/omega/items/index.php:349
 #: oc-admin/themes/omega/items/settings.php:283 oc-admin/tools.php:469
-#: oc-includes/osclass/ItemActions.php:148
-#: oc-includes/osclass/ItemActions.php:762
 #: oc-includes/osclass/classes/datatables/ItemsDataTable.php:84
 #: oc-includes/osclass/helpers/hDefines.php:2260
 #: oc-includes/osclass/helpers/hItemStats.php:2552
@@ -3320,6 +3338,8 @@ msgstr ""
 #: oc-includes/osclass/helpers/hItemStats.php:3153
 #: oc-includes/osclass/helpers/hItemStats.php:3184
 #: oc-includes/osclass/helpers/hItemStats.php:3192
+#: oc-includes/osclass/ItemActions.php:148
+#: oc-includes/osclass/ItemActions.php:762
 msgid "Category"
 msgstr ""
 
@@ -5195,8 +5215,8 @@ msgstr ""
 #: oc-admin/themes/omega/market/themes.php:86
 #: oc-admin/themes/omega/market/themes.php:180
 #: oc-admin/themes/omega/stats/items.php:73
-#: oc-includes/osclass/helpers/hItemStats.php:2388
 #: oc-includes/osclass/helpers/hItems.php:1456
+#: oc-includes/osclass/helpers/hItemStats.php:2388
 msgid "Free"
 msgstr ""
 
@@ -12042,26 +12062,34 @@ msgstr ""
 msgid "Resend activation"
 msgstr ""
 
-#: oc-includes/osclass/ItemActions.php:108
-#: oc-includes/osclass/structured-data.php:151
-msgid "Anonymous"
+#: oc-includes/AjaxUploader.php:57
+msgid "Server error. Upload directory isn't writable."
 msgstr ""
 
-#: oc-includes/osclass/ItemActions.php:1539
-#: oc-includes/osclass/frm/SendFriend.form.class.php:121
-msgid "Your name"
+#: oc-includes/AjaxUploader.php:61
+msgid "No files were uploaded"
 msgstr ""
 
-#: oc-includes/osclass/ItemActions.php:1545
-#: oc-includes/osclass/frm/Contact.form.class.php:141
-#: oc-includes/osclass/frm/Contact.form.class.php:142
-#: oc-includes/osclass/frm/SendFriend.form.class.php:134
-msgid "Message"
+#: oc-includes/AjaxUploader.php:66 oc-includes/osclass/controller/ajax.php:632
+msgid "File is empty"
 msgstr ""
 
-#: oc-includes/osclass/Themes.php:220
+#: oc-includes/AjaxUploader.php:70 oc-includes/osclass/controller/ajax.php:638
+msgid "File is too large"
+msgstr ""
+
+#: oc-includes/AjaxUploader.php:82
 #, php-format
-msgid "ERROR: Some scripts could not be loaded (%s)"
+msgid "File has an invalid extension (%s), it should be one of %s."
+msgstr ""
+
+#: oc-includes/AjaxUploader.php:96
+#, php-format
+msgid "File has an invalid extension, it should be one of %s."
+msgstr ""
+
+#: oc-includes/AjaxUploader.php:228
+msgid "Getting content length is not supported."
 msgstr ""
 
 #: oc-includes/osclass/alerts.php:40
@@ -12234,6 +12262,297 @@ msgstr ""
 #: oc-includes/osclass/classes/Breadcrumb.php:554
 #: oc-includes/osclass/functions.php:2806
 msgid "Create a new account"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/AdminsDataTable.php:99
+msgid "View action logs"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/AlertsDataTable.php:92
+#: oc-includes/osclass/classes/datatables/AlertsDataTable.php:162
+msgid "Details"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/AlertsDataTable.php:93
+msgid "Triggered"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/AlertsDataTable.php:94
+msgid "Subscribe date"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/AlertsDataTable.php:96
+msgid "Unsubscribe date"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/AlertsDataTable.php:134
+#: oc-includes/osclass/helpers/hUsers.php:1034
+msgid "Unsubscribed"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/AlertsDataTable.php:163
+#: oc-includes/osclass/classes/datatables/CategoriesDataTable.php:262
+msgid "View in search"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/AlertsDataTable.php:184
+#, php-format
+msgid "<b>Pattern:</b> %s"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/AlertsDataTable.php:194
+#: oc-includes/osclass/classes/datatables/AlertsDataTable.php:204
+msgid "...More"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/AlertsDataTable.php:197
+#, php-format
+msgid "<b>Categories:</b> %s"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/AlertsDataTable.php:212
+msgid "1 email alert sent"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/AlertsDataTable.php:214
+#, php-format
+msgid "%d email alerts sent"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/BanRulesDataTable.php:91
+msgid "Hits"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/BanRulesDataTable.php:92
+msgid "Expire Date"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/BanRulesDataTable.php:93
+msgid "Create Date"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/CategoriesDataTable.php:127
+msgid "Subcategories"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/CategoriesDataTable.php:202
+#: oc-includes/osclass/classes/datatables/FieldsDataTable.php:176
+#: oc-includes/osclass/classes/datatables/PagesDataTable.php:222
+#: oc-includes/osclass/classes/datatables/WidgetsDataTable.php:194
+msgid "Up"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/CategoriesDataTable.php:203
+#: oc-includes/osclass/classes/datatables/FieldsDataTable.php:177
+#: oc-includes/osclass/classes/datatables/PagesDataTable.php:223
+#: oc-includes/osclass/classes/datatables/WidgetsDataTable.php:195
+msgid "Down"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/CategoriesDataTable.php:287
+msgid "Non-Expiring"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/CommentsDataTable.php:116
+msgid "Is reply to comment"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/CommentsDataTable.php:117
+msgid "Has replies"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/CommentsDataTable.php:149
+msgid "View parent comment"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/CommentsDataTable.php:154
+msgid "View replies"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/CommentsDataTable.php:167
+#: oc-includes/osclass/classes/datatables/MediaDataTable.php:139
+msgid "View listing"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/CommentsDataTable.php:202
+msgid "1 reply"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/CommentsDataTable.php:202
+#, php-format
+msgid "%d replies"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/CurrenciesDataTable.php:110
+msgid "Symbol"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/DataTable.php:567
+#: oc-includes/osclass/helpers/hAdminMenu.php:197
+msgid "Show more"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/EmailTemplatesDataTable.php:73
+msgid "Create date"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/EmailTemplatesDataTable.php:74
+msgid "Update date"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/ItemsDataTable.php:159
+msgid "View comments"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/ItemsDataTable.php:160
+msgid "View media"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/LanguagesDataTable.php:121
+msgid "Front-office"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/LanguagesDataTable.php:123
+msgid "Native loc."
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/LanguagesDataTable.php:124
+msgid "Direction"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/LanguagesDataTable.php:208
+msgid "Right to left"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/LanguagesDataTable.php:210
+msgid "Left to right"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/LogsDataTable.php:112
+msgid "Data"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/LogsDataTable.php:114
+msgid "IP"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/LogsDataTable.php:115
+msgid "Who"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/LogsDataTable.php:164
+msgid "Show details"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/LogsDataTable.php:164
+msgid "Hide details"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/LogsDataTable.php:166
+msgid "View logs with same ID"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/LogsDataTable.php:172
+msgid "No details found"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/MediaDataTable.php:83
+msgid "File"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/MediaDataTable.php:84
+msgid "Extension"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/MediaDataTable.php:85
+msgid "Order"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/MediaDataTable.php:86
+msgid "Variants"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/MediaDataTable.php:87
+msgid "Upload date"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/MediaDataTable.php:137
+#: oc-includes/osclass/helpers/hCustomDataTable.php:864
+msgid "View"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/MediaDataTable.php:140
+msgid "View all item media"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/MediaDataTable.php:141
+msgid "Are you sure you want to delete all media of this listing?"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/MediaDataTable.php:141
+msgid "Delete all listing media"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/MediaDataTable.php:234
+msgid "Normal"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/MediaDataTable.php:235
+msgid "Thumbnail"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/MediaDataTable.php:237
+msgid "Original"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/MediaDataTable.php:256
+msgid "File does not exist or is not stored in local storage"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/PagesDataTable.php:92
+msgid "Indexable"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/ReportsDataTable.php:117
+msgid "Reported"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/ReportsDataTable.php:119
+msgid "Reporter"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/ReportsDataTable.php:120
+msgid "Conversation"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/ReportsDataTable.php:142
+#: oc-includes/osclass/frm/Report.form.class.php:79
+msgid "Reply"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/ReportsDataTable.php:228
+#, php-format
+msgid "%d new"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/UsersDataTable.php:105
+msgid "Last access date"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/UsersDataTable.php:135
+msgid "Block all listings"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/UsersDataTable.php:138
+msgid "Unblock all listings"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/UsersDataTable.php:141
+msgid "Re-send activation email"
+msgstr ""
+
+#: oc-includes/osclass/classes/datatables/WidgetsDataTable.php:81
+msgid "Device"
 msgstr ""
 
 #: oc-includes/osclass/classes/Dependencies.php:88
@@ -12552,307 +12871,8 @@ msgstr ""
 msgid "Installed plugins: %s."
 msgstr ""
 
-#: oc-includes/osclass/classes/datatables/AdminsDataTable.php:99
-msgid "View action logs"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/AlertsDataTable.php:92
-#: oc-includes/osclass/classes/datatables/AlertsDataTable.php:162
-msgid "Details"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/AlertsDataTable.php:93
-msgid "Triggered"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/AlertsDataTable.php:94
-msgid "Subscribe date"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/AlertsDataTable.php:96
-msgid "Unsubscribe date"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/AlertsDataTable.php:134
-#: oc-includes/osclass/helpers/hUsers.php:1034
-msgid "Unsubscribed"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/AlertsDataTable.php:163
-#: oc-includes/osclass/classes/datatables/CategoriesDataTable.php:262
-msgid "View in search"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/AlertsDataTable.php:184
-#, php-format
-msgid "<b>Pattern:</b> %s"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/AlertsDataTable.php:194
-#: oc-includes/osclass/classes/datatables/AlertsDataTable.php:204
-msgid "...More"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/AlertsDataTable.php:197
-#, php-format
-msgid "<b>Categories:</b> %s"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/AlertsDataTable.php:212
-msgid "1 email alert sent"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/AlertsDataTable.php:214
-#, php-format
-msgid "%d email alerts sent"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/BanRulesDataTable.php:91
-msgid "Hits"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/BanRulesDataTable.php:92
-msgid "Expire Date"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/BanRulesDataTable.php:93
-msgid "Create Date"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/CategoriesDataTable.php:127
-msgid "Subcategories"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/CategoriesDataTable.php:202
-#: oc-includes/osclass/classes/datatables/FieldsDataTable.php:176
-#: oc-includes/osclass/classes/datatables/PagesDataTable.php:222
-#: oc-includes/osclass/classes/datatables/WidgetsDataTable.php:194
-msgid "Up"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/CategoriesDataTable.php:203
-#: oc-includes/osclass/classes/datatables/FieldsDataTable.php:177
-#: oc-includes/osclass/classes/datatables/PagesDataTable.php:223
-#: oc-includes/osclass/classes/datatables/WidgetsDataTable.php:195
-msgid "Down"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/CategoriesDataTable.php:287
-msgid "Non-Expiring"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/CommentsDataTable.php:116
-msgid "Is reply to comment"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/CommentsDataTable.php:117
-msgid "Has replies"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/CommentsDataTable.php:149
-msgid "View parent comment"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/CommentsDataTable.php:154
-msgid "View replies"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/CommentsDataTable.php:167
-#: oc-includes/osclass/classes/datatables/MediaDataTable.php:139
-msgid "View listing"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/CommentsDataTable.php:202
-msgid "1 reply"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/CommentsDataTable.php:202
-#, php-format
-msgid "%d replies"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/CurrenciesDataTable.php:110
-msgid "Symbol"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/DataTable.php:567
-#: oc-includes/osclass/helpers/hAdminMenu.php:197
-msgid "Show more"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/EmailTemplatesDataTable.php:73
-msgid "Create date"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/EmailTemplatesDataTable.php:74
-msgid "Update date"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/ItemsDataTable.php:159
-msgid "View comments"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/ItemsDataTable.php:160
-msgid "View media"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/LanguagesDataTable.php:121
-msgid "Front-office"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/LanguagesDataTable.php:123
-msgid "Native loc."
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/LanguagesDataTable.php:124
-msgid "Direction"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/LanguagesDataTable.php:208
-msgid "Right to left"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/LanguagesDataTable.php:210
-msgid "Left to right"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/LogsDataTable.php:112
-msgid "Data"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/LogsDataTable.php:114
-msgid "IP"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/LogsDataTable.php:115
-msgid "Who"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/LogsDataTable.php:164
-msgid "Show details"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/LogsDataTable.php:164
-msgid "Hide details"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/LogsDataTable.php:166
-msgid "View logs with same ID"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/LogsDataTable.php:172
-msgid "No details found"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/MediaDataTable.php:83
-msgid "File"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/MediaDataTable.php:84
-msgid "Extension"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/MediaDataTable.php:85
-msgid "Order"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/MediaDataTable.php:86
-msgid "Variants"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/MediaDataTable.php:87
-msgid "Upload date"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/MediaDataTable.php:137
-#: oc-includes/osclass/helpers/hCustomDataTable.php:864
-msgid "View"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/MediaDataTable.php:140
-msgid "View all item media"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/MediaDataTable.php:141
-msgid "Are you sure you want to delete all media of this listing?"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/MediaDataTable.php:141
-msgid "Delete all listing media"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/MediaDataTable.php:234
-msgid "Normal"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/MediaDataTable.php:235
-msgid "Thumbnail"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/MediaDataTable.php:237
-msgid "Original"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/MediaDataTable.php:256
-msgid "File does not exist or is not stored in local storage"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/PagesDataTable.php:92
-msgid "Indexable"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/ReportsDataTable.php:117
-msgid "Reported"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/ReportsDataTable.php:119
-msgid "Reporter"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/ReportsDataTable.php:120
-msgid "Conversation"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/ReportsDataTable.php:142
-#: oc-includes/osclass/frm/Report.form.class.php:79
-msgid "Reply"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/ReportsDataTable.php:228
-#, php-format
-msgid "%d new"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/UsersDataTable.php:105
-msgid "Last access date"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/UsersDataTable.php:135
-msgid "Block all listings"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/UsersDataTable.php:138
-msgid "Unblock all listings"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/UsersDataTable.php:141
-msgid "Re-send activation email"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/WidgetsDataTable.php:81
-msgid "Device"
-msgstr ""
-
 #: oc-includes/osclass/controller/ajax.php:626
 msgid "File name is empty"
-msgstr ""
-
-#: oc-includes/osclass/controller/ajax.php:632
-msgid "File is empty"
-msgstr ""
-
-#: oc-includes/osclass/controller/ajax.php:638
-msgid "File is too large"
 msgstr ""
 
 #: oc-includes/osclass/controller/ajax.php:644
@@ -13178,6 +13198,13 @@ msgstr ""
 
 #: oc-includes/osclass/frm/Alert.form.class.php:45
 msgid "Enter your email"
+msgstr ""
+
+#: oc-includes/osclass/frm/Contact.form.class.php:141
+#: oc-includes/osclass/frm/Contact.form.class.php:142
+#: oc-includes/osclass/frm/SendFriend.form.class.php:134
+#: oc-includes/osclass/ItemActions.php:1545
+msgid "Message"
 msgstr ""
 
 #: oc-includes/osclass/frm/Field.form.class.php:29
@@ -13684,6 +13711,11 @@ msgstr ""
 
 #: oc-includes/osclass/frm/Report.form.class.php:80
 msgid "Reply: enter at least 3 characters"
+msgstr ""
+
+#: oc-includes/osclass/frm/SendFriend.form.class.php:121
+#: oc-includes/osclass/ItemActions.php:1539
+msgid "Your name"
 msgstr ""
 
 #: oc-includes/osclass/frm/SendFriend.form.class.php:128
@@ -14411,6 +14443,18 @@ msgstr ""
 msgid "Refund"
 msgstr ""
 
+#: oc-includes/osclass/helpers/hItems.php:447
+msgid "You must login to see phone number"
+msgstr ""
+
+#: oc-includes/osclass/helpers/hItems.php:1455
+msgid "Check with seller"
+msgstr ""
+
+#: oc-includes/osclass/helpers/hItems.php:1552
+msgid "From"
+msgstr ""
+
 #: oc-includes/osclass/helpers/hItemStats.php:109
 msgid "Standard views"
 msgstr ""
@@ -14858,18 +14902,6 @@ msgstr ""
 msgid "Rating: %d of 5"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hItems.php:447
-msgid "You must login to see phone number"
-msgstr ""
-
-#: oc-includes/osclass/helpers/hItems.php:1455
-msgid "Check with seller"
-msgstr ""
-
-#: oc-includes/osclass/helpers/hItems.php:1552
-msgid "From"
-msgstr ""
-
 #: oc-includes/osclass/helpers/hPage.php:226
 msgid "Anyone"
 msgstr ""
@@ -14909,27 +14941,27 @@ msgstr ""
 msgid "Custom %d"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hPreference.php:1810
+#: oc-includes/osclass/helpers/hPreference.php:1930
 msgid ""
 "ImageMagick is active in Media Settings, but this format is not supported by "
 "your ImageMagick build."
 msgstr ""
 
-#: oc-includes/osclass/helpers/hPreference.php:1814
+#: oc-includes/osclass/helpers/hPreference.php:1934
 msgid ""
 "HEIF/HEIC requires ImageMagick with HEIC/HEIF support enabled in Media "
 "Settings."
 msgstr ""
 
-#: oc-includes/osclass/helpers/hPreference.php:1818
+#: oc-includes/osclass/helpers/hPreference.php:1938
 msgid "AVIF requires PHP 8.1+ GD (imageavif) or ImageMagick with AVIF support."
 msgstr ""
 
-#: oc-includes/osclass/helpers/hPreference.php:1822
+#: oc-includes/osclass/helpers/hPreference.php:1942
 msgid "WebP requires GD (imagewebp) or ImageMagick with WebP support."
 msgstr ""
 
-#: oc-includes/osclass/helpers/hPreference.php:1825
+#: oc-includes/osclass/helpers/hPreference.php:1945
 msgid ""
 "This image format is not supported by the active image library on this "
 "server."
@@ -15206,424 +15238,6 @@ msgstr ""
 
 #: oc-includes/osclass/helpers/hUtils.php:296
 msgid "My profile"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:139
-#, php-format
-msgid "PHP version %s or higher"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:141
-#, php-format
-msgid ""
-"At least PHP %s is recommended to run Osclass. You may talk with your "
-"hosting to upgrade your PHP version (optional)."
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:148
-#, php-format
-msgid "PHP version %s or lower"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:150
-#, php-format
-msgid ""
-"PHP %s is latest version supported by Osclass. You may talk with your "
-"hosting to downgrade your PHP version (optional)."
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:156
-msgid "CURL extension for PHP"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:158
-msgid ""
-"CURL extension is required. How to <a target=\"_blank\" href=\"https://"
-"www.php.net/manual/en/curl.setup.php\">install/configure</a>."
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:162
-msgid "MySQLi extension for PHP"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:164
-msgid ""
-"MySQLi extension is required. How to <a target=\"_blank\" href=\"https://"
-"www.php.net/manual/en/mysqli.setup.php\">install/configure</a>."
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:168
-msgid "GD extension for PHP"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:170
-msgid ""
-"GD extension is required. How to <a target=\"_blank\" href=\"https://"
-"www.php.net/manual/en/image.setup.php\">install/configure</a>."
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:174
-msgid "Folder <code>oc-content/uploads</code> exists"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:176
-#, php-format
-msgid ""
-"You have to create <code>uploads</code> folder, i.e.: <code>mkdir %soc-"
-"content/uploads/</code>"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:180
-msgid "<code>oc-content/uploads</code> folder is writable"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:182
-#, php-format
-msgid ""
-"<code>uploads</code> folder has to be writable, i.e.: <code>chmod 0755 %soc-"
-"content/uploads/</code>"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:186
-msgid "Folder <code>oc-content/downloads</code> exists"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:188
-#, php-format
-msgid ""
-"You have to create <code>downloads</code> folder, i.e.: <code>mkdir %soc-"
-"content/downloads/</code>"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:192
-msgid "<code>oc-content/downloads</code> folder is writable"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:194
-#, php-format
-msgid ""
-"<code>downloads</code> folder has to be writable, i.e.: <code>chmod 0755 "
-"%soc-content/downloads/</code>"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:198
-msgid "Folder <code>oc-content/languages</code> folder exists"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:200
-#, php-format
-msgid ""
-"You have to create the <code>languages</code> folder, i.e.: <code>mkdir %soc-"
-"content/languages/</code>"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:204
-msgid "<code>oc-content/languages</code> folder is writable"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:206
-#, php-format
-msgid ""
-"<code>languages</code> folder has to be writable, i.e.: <code>chmod 0755 "
-"%soc-content/languages/</code>"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:219
-msgid "<code>config.php</code> file is writable"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:221
-#, php-format
-msgid ""
-"<code>config.php</code> file has to be writable, i.e.: <code>chmod 0755 "
-"%sconfig.php</code>"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:229
-msgid "Root directory is writable"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:231
-#, php-format
-msgid "Root folder has to be writable, i.e.: <code>chmod 0755 %s</code>"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:239
-msgid "<code>config-sample.php</code> file exists"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:241
-msgid ""
-"<code>config-sample.php</code> file is required, you should re-download "
-"Osclass."
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:336
-#: oc-includes/osclass/install-functions.php:353
-#: oc-includes/osclass/install-functions.php:394
-#: oc-includes/osclass/install-functions.php:411
-#, php-format
-msgid "Cannot connect to the database. [%s] %s"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:341
-#: oc-includes/osclass/install-functions.php:399
-#, php-format
-msgid ""
-"The database doesn't exist. You should check the \"Create DB\" checkbox and "
-"fill in a username and password with the right privileges. <br/>[%s: %s]"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:344
-#: oc-includes/osclass/install-functions.php:402
-#, php-format
-msgid ""
-"Cannot connect to the database. Check if the DB user is correct and has "
-"required privileges. <br/>[%s: %s]"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:347
-#: oc-includes/osclass/install-functions.php:405
-#, php-format
-msgid ""
-"Cannot connect to the database. Check if the username and password are "
-"correct. <br/>[%s: %s]"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:350
-#: oc-includes/osclass/install-functions.php:408
-#, php-format
-msgid "Cannot resolve the MySQL host. Check if the host is correct. [%s] %s"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:368
-#: oc-includes/osclass/install-functions.php:375
-#, php-format
-msgid "Cannot create the database. [%s] %s"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:372
-#, php-format
-msgid ""
-"Cannot create the database. Check if the admin username and password are "
-"correct. [%s] %s"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:419
-#: oc-includes/osclass/install-functions.php:422
-msgid "Cannot write config.php. Check if the file is writable."
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:430
-#: oc-includes/osclass/install-functions.php:433
-msgid ""
-"config-sample.php doesn't exist. Check if everything is decompressed "
-"correctly."
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:438
-#: oc-includes/osclass/install-functions.php:441
-msgid "Cannot copy config-sample.php. Check if the root directory is writable."
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:460
-#: oc-includes/osclass/install-functions.php:468
-#, php-format
-msgid "Cannot create tables (struct.sql). [%s] %s"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:465
-msgid ""
-"There are tables with the same name in the database. Change the table prefix "
-"or the database and try again."
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:507
-#: oc-includes/osclass/install-functions.php:510
-#, php-format
-msgid "The file %s doesn't exist"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:522
-#: oc-includes/osclass/install-functions.php:530
-#, php-format
-msgid "Cannot insert basic configuration. Error number: %s"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:527
-msgid "Cannot insert basic configuration. This user has no INSERT privilege."
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:811
-msgid "Host"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:813
-msgid "Server name or IP where the database engine resides"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:816
-msgid "Database name"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:818
-msgid "The name of the database you want to run Osclass in"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:821
-msgid "User Name"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:823
-msgid "Your MySQL username"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:829
-msgid "Your MySQL password"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:832
-msgid "Table prefix"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:834
-msgid ""
-"If you want to run multiple Osclass installations in a single database, "
-"change this"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:879
-msgid "Create DB"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:880
-msgid "Check here if the database is not created and you want to create it now"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:883
-msgid "DB admin username"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:888
-msgid "DB admin password"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:890
-msgid "Password copied from above"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:923
-msgid "Admin user"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:932
-msgid "Admin user is required"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:945
-msgid ""
-"A password will be automatically generated for you if you leave this blank."
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:946
-msgid ""
-"You can modify username and password if you like, just change the input "
-"value."
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:948
-msgid "Contact information"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:952
-msgid "Web title"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:959
-msgid "Put your email here"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:964
-msgid "Choose a country where your target users are located"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:971
-msgid "Skip location"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:983
-msgid ""
-"No internet connection. You can continue the installation and insert "
-"countries later."
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:1008
-msgid "Go back"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:1094
-msgid "The selected location could not be installed"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:1097
-msgid "Congratulations!"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:1098
-msgid ""
-"Osclass has been installed. Were you expecting more steps? Sorry to "
-"disappoint you!"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:1098
-#, php-format
-msgid "An email with the oc-admin password has been sent to %s"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:1125
-#, php-format
-msgid "Don't forget to setup %s and %s after installation."
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:1128
-msgid "Go to backoffice"
-msgstr ""
-
-#: oc-includes/osclass/install-functions.php:1129
-msgid "Explore frontoffice"
-msgstr ""
-
-#: oc-includes/osclass/install-location.php:121
-#, php-format
-msgid "Hi %s,"
-msgstr ""
-
-#: oc-includes/osclass/install-location.php:122
-#, php-format
-msgid ""
-"Your Osclass installation at %s is up and running. You can access the "
-"administration panel with these details:"
-msgstr ""
-
-#: oc-includes/osclass/install-location.php:124
-#, php-format
-msgid "username: %s"
-msgstr ""
-
-#: oc-includes/osclass/install-location.php:125
-#, php-format
-msgid "password: %s"
-msgstr ""
-
-#: oc-includes/osclass/install-location.php:127
-#, php-format
-msgid ""
-"Remember that for any doubts you might have you can consult our <a "
-"href=\"%1$s\">documentation</a>"
-msgstr ""
-
-#: oc-includes/osclass/install-location.php:129
-msgid "The <a href=\"https://osclass-classifieds.com\">OsclassPoint</a> team"
 msgstr ""
 
 #: oc-includes/osclass/install.php:105
@@ -16123,6 +15737,429 @@ msgid ""
 "of Service or any other help information."
 msgstr ""
 
+#: oc-includes/osclass/install-functions.php:139
+#, php-format
+msgid "PHP version %s or higher"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:141
+#, php-format
+msgid ""
+"At least PHP %s is recommended to run Osclass. You may talk with your "
+"hosting to upgrade your PHP version (optional)."
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:148
+#, php-format
+msgid "PHP version %s or lower"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:150
+#, php-format
+msgid ""
+"PHP %s is latest version supported by Osclass. You may talk with your "
+"hosting to downgrade your PHP version (optional)."
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:156
+msgid "CURL extension for PHP"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:158
+msgid ""
+"CURL extension is required. How to <a target=\"_blank\" href=\"https://"
+"www.php.net/manual/en/curl.setup.php\">install/configure</a>."
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:162
+msgid "MySQLi extension for PHP"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:164
+msgid ""
+"MySQLi extension is required. How to <a target=\"_blank\" href=\"https://"
+"www.php.net/manual/en/mysqli.setup.php\">install/configure</a>."
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:168
+msgid "GD extension for PHP"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:170
+msgid ""
+"GD extension is required. How to <a target=\"_blank\" href=\"https://"
+"www.php.net/manual/en/image.setup.php\">install/configure</a>."
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:174
+msgid "Folder <code>oc-content/uploads</code> exists"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:176
+#, php-format
+msgid ""
+"You have to create <code>uploads</code> folder, i.e.: <code>mkdir %soc-"
+"content/uploads/</code>"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:180
+msgid "<code>oc-content/uploads</code> folder is writable"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:182
+#, php-format
+msgid ""
+"<code>uploads</code> folder has to be writable, i.e.: <code>chmod 0755 %soc-"
+"content/uploads/</code>"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:186
+msgid "Folder <code>oc-content/downloads</code> exists"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:188
+#, php-format
+msgid ""
+"You have to create <code>downloads</code> folder, i.e.: <code>mkdir %soc-"
+"content/downloads/</code>"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:192
+msgid "<code>oc-content/downloads</code> folder is writable"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:194
+#, php-format
+msgid ""
+"<code>downloads</code> folder has to be writable, i.e.: <code>chmod 0755 "
+"%soc-content/downloads/</code>"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:198
+msgid "Folder <code>oc-content/languages</code> folder exists"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:200
+#, php-format
+msgid ""
+"You have to create the <code>languages</code> folder, i.e.: <code>mkdir %soc-"
+"content/languages/</code>"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:204
+msgid "<code>oc-content/languages</code> folder is writable"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:206
+#, php-format
+msgid ""
+"<code>languages</code> folder has to be writable, i.e.: <code>chmod 0755 "
+"%soc-content/languages/</code>"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:219
+msgid "<code>config.php</code> file is writable"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:221
+#, php-format
+msgid ""
+"<code>config.php</code> file has to be writable, i.e.: <code>chmod 0755 "
+"%sconfig.php</code>"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:229
+msgid "Root directory is writable"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:231
+#, php-format
+msgid "Root folder has to be writable, i.e.: <code>chmod 0755 %s</code>"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:239
+msgid "<code>config-sample.php</code> file exists"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:241
+msgid ""
+"<code>config-sample.php</code> file is required, you should re-download "
+"Osclass."
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:336
+#: oc-includes/osclass/install-functions.php:353
+#: oc-includes/osclass/install-functions.php:394
+#: oc-includes/osclass/install-functions.php:411
+#, php-format
+msgid "Cannot connect to the database. [%s] %s"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:341
+#: oc-includes/osclass/install-functions.php:399
+#, php-format
+msgid ""
+"The database doesn't exist. You should check the \"Create DB\" checkbox and "
+"fill in a username and password with the right privileges. <br/>[%s: %s]"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:344
+#: oc-includes/osclass/install-functions.php:402
+#, php-format
+msgid ""
+"Cannot connect to the database. Check if the DB user is correct and has "
+"required privileges. <br/>[%s: %s]"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:347
+#: oc-includes/osclass/install-functions.php:405
+#, php-format
+msgid ""
+"Cannot connect to the database. Check if the username and password are "
+"correct. <br/>[%s: %s]"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:350
+#: oc-includes/osclass/install-functions.php:408
+#, php-format
+msgid "Cannot resolve the MySQL host. Check if the host is correct. [%s] %s"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:368
+#: oc-includes/osclass/install-functions.php:375
+#, php-format
+msgid "Cannot create the database. [%s] %s"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:372
+#, php-format
+msgid ""
+"Cannot create the database. Check if the admin username and password are "
+"correct. [%s] %s"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:419
+#: oc-includes/osclass/install-functions.php:422
+msgid "Cannot write config.php. Check if the file is writable."
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:430
+#: oc-includes/osclass/install-functions.php:433
+msgid ""
+"config-sample.php doesn't exist. Check if everything is decompressed "
+"correctly."
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:438
+#: oc-includes/osclass/install-functions.php:441
+msgid "Cannot copy config-sample.php. Check if the root directory is writable."
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:460
+#: oc-includes/osclass/install-functions.php:468
+#, php-format
+msgid "Cannot create tables (struct.sql). [%s] %s"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:465
+msgid ""
+"There are tables with the same name in the database. Change the table prefix "
+"or the database and try again."
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:507
+#: oc-includes/osclass/install-functions.php:510
+#, php-format
+msgid "The file %s doesn't exist"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:522
+#: oc-includes/osclass/install-functions.php:530
+#, php-format
+msgid "Cannot insert basic configuration. Error number: %s"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:527
+msgid "Cannot insert basic configuration. This user has no INSERT privilege."
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:811
+msgid "Host"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:813
+msgid "Server name or IP where the database engine resides"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:816
+msgid "Database name"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:818
+msgid "The name of the database you want to run Osclass in"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:821
+msgid "User Name"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:823
+msgid "Your MySQL username"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:829
+msgid "Your MySQL password"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:832
+msgid "Table prefix"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:834
+msgid ""
+"If you want to run multiple Osclass installations in a single database, "
+"change this"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:879
+msgid "Create DB"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:880
+msgid "Check here if the database is not created and you want to create it now"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:883
+msgid "DB admin username"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:888
+msgid "DB admin password"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:890
+msgid "Password copied from above"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:923
+msgid "Admin user"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:932
+msgid "Admin user is required"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:945
+msgid ""
+"A password will be automatically generated for you if you leave this blank."
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:946
+msgid ""
+"You can modify username and password if you like, just change the input "
+"value."
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:948
+msgid "Contact information"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:952
+msgid "Web title"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:959
+msgid "Put your email here"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:964
+msgid "Choose a country where your target users are located"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:971
+msgid "Skip location"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:983
+msgid ""
+"No internet connection. You can continue the installation and insert "
+"countries later."
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:1008
+msgid "Go back"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:1094
+msgid "The selected location could not be installed"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:1097
+msgid "Congratulations!"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:1098
+msgid ""
+"Osclass has been installed. Were you expecting more steps? Sorry to "
+"disappoint you!"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:1098
+#, php-format
+msgid "An email with the oc-admin password has been sent to %s"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:1125
+#, php-format
+msgid "Don't forget to setup %s and %s after installation."
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:1128
+msgid "Go to backoffice"
+msgstr ""
+
+#: oc-includes/osclass/install-functions.php:1129
+msgid "Explore frontoffice"
+msgstr ""
+
+#: oc-includes/osclass/install-location.php:121
+#, php-format
+msgid "Hi %s,"
+msgstr ""
+
+#: oc-includes/osclass/install-location.php:122
+#, php-format
+msgid ""
+"Your Osclass installation at %s is up and running. You can access the "
+"administration panel with these details:"
+msgstr ""
+
+#: oc-includes/osclass/install-location.php:124
+#, php-format
+msgid "username: %s"
+msgstr ""
+
+#: oc-includes/osclass/install-location.php:125
+#, php-format
+msgid "password: %s"
+msgstr ""
+
+#: oc-includes/osclass/install-location.php:127
+#, php-format
+msgid ""
+"Remember that for any doubts you might have you can consult our <a "
+"href=\"%1$s\">documentation</a>"
+msgstr ""
+
+#: oc-includes/osclass/install-location.php:129
+msgid "The <a href=\"https://osclass-classifieds.com\">OsclassPoint</a> team"
+msgstr ""
+
+#: oc-includes/osclass/ItemActions.php:108
+#: oc-includes/osclass/structured-data.php:151
+msgid "Anonymous"
+msgstr ""
+
 #: oc-includes/osclass/model/Category.php:814
 msgid "Non-Existent Category"
 msgstr ""
@@ -16163,6 +16200,11 @@ msgstr ""
 msgid "Available"
 msgstr ""
 
+#: oc-includes/osclass/Themes.php:220
+#, php-format
+msgid "ERROR: Some scripts could not be loaded (%s)"
+msgstr ""
+
 #: oc-includes/osclass/upgrade-funcs.php:38
 msgid "Osclass has some errors"
 msgstr ""
@@ -16180,12 +16222,11 @@ msgid ""
 "forums.osclasspoint.com\">ask in our forums</a>."
 msgstr ""
 
-#: oc-includes/osclass/upgrade-funcs.php:1012
-#: oc-includes/osclass/utils.php:3149
+#: oc-includes/osclass/upgrade-funcs.php:993 oc-includes/osclass/utils.php:3149
 msgid "Osclass has been updated"
 msgstr ""
 
-#: oc-includes/osclass/upgrade-funcs.php:1013
+#: oc-includes/osclass/upgrade-funcs.php:994
 msgid ""
 "Osclass has been updated successfully. <a href=\"https://"
 "forums.osclasspoint.com\">Need more help?</a>"
@@ -16286,4 +16327,12 @@ msgstr ""
 
 #: oc-includes/osclass/utils.php:3461
 msgid "Missing product key"
+msgstr ""
+
+#: oc-load.php:244
+msgid "The website is currently undergoing maintenance"
+msgstr ""
+
+#: oc-load.php:274
+msgid "This subdomain is restricted based on user IP"
 msgstr ""

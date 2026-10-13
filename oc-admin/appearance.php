@@ -402,10 +402,12 @@ class CAdminAppearance extends AdminSecBaseModel {
       $description = substr($description, 0, 40);
     }
 
-    $location = osc_widget_sanitize_slug(Params::getParam('location'));
+    $locationRaw = Params::getParam('location');
     $newSection = osc_widget_sanitize_slug(Params::getParam('new_section'));
-    if($newSection != '') {
+    if($locationRaw === '__new__' || $newSection != '') {
       $location = $newSection;
+    } else {
+      $location = osc_widget_sanitize_slug($locationRaw);
     }
 
     $internal = osc_widget_sanitize_slug(Params::getParam('s_internal_name'));
@@ -418,7 +420,7 @@ class CAdminAppearance extends AdminSecBaseModel {
       $device = 'all';
     }
 
-    $single = (Params::getParam('b_single_locale') != '' ? 1 : 0);
+    $single = (Params::getParam('b_single_locale') == '1' ? 1 : 0);
     $code = Params::getParam('s_code', false, false);
     $css = Params::getParam('s_css', false, false);
 
@@ -485,7 +487,7 @@ class CAdminAppearance extends AdminSecBaseModel {
       } else {
         osc_add_flash_error_message(_m('The widget could not be updated'), 'admin');
       }
-      $this->redirectTo(osc_admin_base_url(true) . '?page=appearance&action=widgets');
+      $this->redirectTo($backEdit);
     }
 
     if($internal != '' && $manager->internalNameExists(0, $internal)) {

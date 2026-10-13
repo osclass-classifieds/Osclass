@@ -44,10 +44,11 @@ if($edit && isset($widget['s_location'])) {
 }
 
 $is_theme_section = (is_array($theme_sections) && in_array($selected_location, $theme_sections, true));
+$single_locale = ($edit && isset($widget['b_single_locale']) && (int)$widget['b_single_locale'] === 1);
 
 function addHelp() {
-  echo '<p>' . __('Section is required. Pick a theme or custom section, or type a new slug. Name is the admin label only and is not printed on the site. Internal name is unique and becomes the CSS class wdg-{name}.') . '</p>';
-  echo '<p>' . __('HTML content can differ per locale unless Single locale is checked. Code is optional HTML or JavaScript printed after the content (not localized). CSS is printed only when the widget has content or code.') . '</p>';
+  echo '<p>' . __('Section is required. Pick a theme or custom section, or choose Create a new section and enter a slug. Name is the admin label only and is not printed on the site. Internal name is unique and becomes the CSS class wdg-{name}.') . '</p>';
+  echo '<p>' . __('HTML content can differ per locale unless Restrict locale is set to same content for all locales. Code is optional HTML or JavaScript printed after the content (not localized). CSS is printed only when the widget has content or code.') . '</p>';
   echo '<p>' . __('Device visibility uses CSS: All devices, Mobile only (0-767px), or Desktop only (768px and up). A widget with empty content and empty code is not printed.') . '</p>';
 }
 osc_add_hook('help_box','addHelp');
@@ -79,19 +80,19 @@ function customHead2() {
       width: "100%",
       height: "560px",
       language: 'en',
-      theme_advanced_toolbar_align : "left",
-      theme_advanced_toolbar_location : "top",
 
       content_style: "body {font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen-Sans,Ubuntu,Cantarell,'Helvetica Neue',sans-serif;}",
       contextmenu: 'link linkchecker image editimage table spellchecker configurepermanentpen',
-      plugins: 'paste print preview importcss searchreplace autolink autosave save directionality visualblocks visualchars fullscreen image link media code codesample table charmap hr pagebreak nonbreaking toc insertdatetime advlist lists wordcount imagetools textpattern noneditable help charmap quickbars',
+      plugins: 'paste print preview importcss searchreplace autolink autosave save directionality visualblocks visualchars fullscreen image link media code codesample table charmap emoticons hr pagebreak nonbreaking toc insertdatetime advlist lists wordcount imagetools textpattern noneditable help charmap quickbars',
       menubar: 'file edit view insert format tools table tc help',
       toolbar1: 'undo redo | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | fontselect fontsizeselect formatselect',
-      toolbar2: 'outdent indent | numlist bullist checklist | forecolor backcolor removeformat | link image media blockquote | ltr rtl | pagebreak codesample charmap | print code fullscreen',
+      toolbar2: 'outdent indent | numlist bullist checklist | forecolor backcolor removeformat | link image media blockquote | ltr rtl | pagebreak codesample charmap emoticons | print code fullscreen',
       image_caption: true,
       quickbars_selection_toolbar: 'bold italic underline strikethrough | quicklink h2 h3 h4 | blockquote quickimage quicktable',
       toolbar_mode: 'wrap',
 
+      theme_advanced_toolbar_align : "left",
+      theme_advanced_toolbar_location : "top",
       entity_encoding : "raw",
       theme_advanced_buttons1_add : "forecolorpicker,fontsizeselect",
       theme_advanced_buttons2_add: "media",
@@ -148,8 +149,21 @@ function customHead2() {
   </script>
 
   <script type="text/javascript">
+    function toggleWidgetNewSection() {
+      var isNew = ($('#location').val() === '__new__');
+      var $input = $('input[name=new_section]');
+      var $help = $('#widget-new-section-help');
+      if(isNew) {
+        $input.show();
+        $help.show();
+      } else {
+        $input.hide().val('');
+        $help.hide();
+      }
+    }
+
     function toggleWidgetSingleLocale() {
-      var single = $('#b_single_locale').is(':checked');
+      var single = ($('#b_single_locale').val() === '1');
       if(single) {
         $('#language-tab').hide();
         $('.widget-locale-content').hide();
@@ -158,12 +172,29 @@ function customHead2() {
         if($('#language-tab li').length > 1) {
           $('#language-tab').show();
         }
-        $('.widget-locale-content').show();
+        var $active = $('#language-tab li.ui-tabs-selected a');
+        if($active.length) {
+          $active.triggerHandler('click');
+        } else if(typeof osc !== 'undefined' && osc.locales) {
+          var locale = osc.locales.current || osc.locales._default;
+          var $tab = $('#language-tab li a[href="#' + locale + '"]');
+          if($tab.length) {
+            $tab.triggerHandler('click');
+          } else {
+            $(osc.locales.string).parent().hide();
+            $('[name*="' + locale + '"],.' + locale).parent().show();
+          }
+        }
       }
     }
 
     $(document).ready(function(){
-      toggleWidgetSingleLocale();
+      toggleWidgetNewSection();
+      $('#location').on('change', toggleWidgetNewSection);
+
+      setTimeout(function(){
+        toggleWidgetSingleLocale();
+      }, 0);
       $('#b_single_locale').on('change', toggleWidgetSingleLocale);
 
       $("form[name=widget_form]").validate({
@@ -173,15 +204,23 @@ function customHead2() {
           },
           location: {
             required: function() {
-              return $.trim($('input[name=new_section]').val()) == '';
+              return $('#location').val() !== '__new__';
+            }
+          },
+          new_section: {
+            required: function() {
+              return $('#location').val() === '__new__';
             }
           }
         },
         messages: {
           description: {
-            required: '<?php echo osc_esc_js(sprintf(__('%s is required'), __('Description'))); ?>.'
+            required: '<?php echo osc_esc_js(sprintf(__('%s is required'), __('Name'))); ?>.'
           },
           location: {
+            required: '<?php echo osc_esc_js(sprintf(__('%s is required'), __('Section'))); ?>.'
+          },
+          new_section: {
             required: '<?php echo osc_esc_js(sprintf(__('%s is required'), __('Section'))); ?>.'
           }
         },
@@ -221,7 +260,7 @@ osc_current_admin_theme_path('parts/header.php');
         <fieldset>
           <div class="input-line">
             <label><?php _e('Section'); ?> *</label>
-            <div class="input">
+            <div class="input widget-section-row">
               <select name="location" id="location">
                 <option value=""><?php _e('Select a section'); ?></option>
                 <?php if(is_array($theme_sections) && count($theme_sections) > 0) { ?>
@@ -239,9 +278,10 @@ osc_current_admin_theme_path('parts/header.php');
                     <?php } ?>
                   </optgroup>
                 <?php } ?>
+                <option value="__new__"><?php _e('Create a new section'); ?></option>
               </select>
-              <span class="help-box"><?php _e('Or add a new custom section:'); ?></span>
-              <input type="text" class="medium" name="new_section" value="" placeholder="<?php echo osc_esc_html(__('xyz')); ?>" />
+              <input type="text" class="medium" name="new_section" value="" placeholder="<?php echo osc_esc_html(__('your_custom_section')); ?>" style="display:none;" />
+              <span id="widget-new-section-help" class="help-box" style="display:none;"><?php _e('Letters, numbers, hyphen and underscore.'); ?></span>
             </div>
           </div>
 
@@ -277,18 +317,21 @@ osc_current_admin_theme_path('parts/header.php');
                 <option value="mobile" <?php if($device === 'mobile') { echo 'selected="selected"'; } ?>><?php _e('Mobile only'); ?></option>
                 <option value="desktop" <?php if($device === 'desktop') { echo 'selected="selected"'; } ?>><?php _e('Desktop only'); ?></option>
               </select>
+              <span class="help-box"><?php _e('All devices, Mobile only (0-767px), or Desktop only (768px and up).'); ?></span>
             </div>
           </div>
 
           <div class="input-line">
-            <label><?php _e('Single locale'); ?></label>
+            <label><?php _e('Restrict locale'); ?></label>
             <div class="input">
-              <label>
-                <input type="checkbox" id="b_single_locale" name="b_single_locale" value="1" <?php if($edit && isset($widget['b_single_locale']) && (int)$widget['b_single_locale'] === 1) { echo 'checked="checked"'; } ?> />
-                <?php _e('Use one content field for all locales.'); ?>
-              </label>
+              <select name="b_single_locale" id="b_single_locale">
+                <option value="1" <?php if($single_locale) { echo 'selected="selected"'; } ?>><?php _e('Same content for all locales'); ?></option>
+                <option value="0" <?php if(!$single_locale) { echo 'selected="selected"'; } ?>><?php _e('Different content per locale'); ?></option>
+              </select>
+              <span class="help-box"><?php _e('Same content uses one editor for every language. Different content shows one editor per language tab.'); ?></span>
             </div>
           </div>
+          <hr/>
 
           <?php printLocaleTabs($locales); ?>
           <?php printLocaleContentWidget($locales, ($edit ? $widget : array())); ?>
