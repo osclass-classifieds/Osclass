@@ -339,7 +339,7 @@ osc_current_admin_theme_path('parts/header.php');
 
 <!-- add user form -->
 <div class="settings-user">
-  <?php if($aux['edit'] && osc_user_public_profile_is_enabled($user) === false) { ?>
+  <?php if($aux['edit'] && $user['b_enabled'] != 0 && $user['b_active'] != 0 && osc_user_public_profile_is_enabled($user) === false) { ?>
     <div class="flashmessage flashmessage-warning">
       <p class="info"><?php _e('Public profile for this user is not enabled and return 404 page - based on User > Settings configuration.'); ?></p>
     </div>

@@ -191,6 +191,9 @@ function customHead2() {
           $('html,body').animate({ scrollTop: $('h1').offset().top }, { duration: 250, easing: 'swing'});
         },
         submitHandler: function(form){
+          if(typeof tinyMCE !== 'undefined') {
+            tinyMCE.triggerSave();
+          }
           $('button[type=submit], input[type=submit]').attr('disabled', 'disabled');
           form.submit();
         }

@@ -5,6 +5,8 @@ Osclass 8.4.1
 - Search alerts remember the place you searched. A city is enough on its own, so region and country are not stored with it. A region is enough on its own, so country is not stored with it. Older alerts that used a name or slug still match listings.
 - Open in search from My Alerts keeps that place in the results URL.
 - Listing owners now receive the new-comment email after a moderated comment is approved (and for active guest comments).
+- Widget Content from the visual editor is saved when you add or edit a widget. The Code field already saved; Content does now too.
+- Report friendly URLs (report/item, report/user, report/view) work right after upgrade. No need to re-save Permalinks.
 
 
 Osclass 8.4.0

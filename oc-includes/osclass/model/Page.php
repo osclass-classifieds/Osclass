@@ -353,10 +353,19 @@ class Page extends DAO {
    * @return mixed @return mixed It return the number of affected rows if the delete has been  correct or false if nothing has been modified
    */
   public function deleteByPrimaryKey($id) {
-    $row = $this->findByPrimaryKey($id);
-    $order = $row['i_order'];
+    // Read raw row (do not use findByPrimaryKey: extendDescription returns [] when locale text is missing)
+    $this->dao->select('i_order, b_indelible');
+    $this->dao->from($this->getTableName());
+    $this->dao->where('pk_i_id', $id);
+    $result = $this->dao->get();
 
-    $this->reOrderPages($order);
+    if($result && $result->numRows() > 0) {
+      $row = $result->row();
+      // Only reorder static pages; email templates (b_indelible = 1) are not positionable
+      if(isset($row['b_indelible']) && (int)$row['b_indelible'] === 0 && isset($row['i_order'])) {
+        $this->reOrderPages((int)$row['i_order']);
+      }
+    }
 
     $this->dao->delete($this->getDescriptionTableName(), array('fk_i_pages_id' => $id));
     return $this->dao->delete($this->tableName, array('pk_i_id' => $id));
@@ -371,7 +380,21 @@ class Page extends DAO {
    * @return bool True on successful removal, false on failure
    */
   public function deleteByInternalName($intName) {
-    $row = $this->findByInternalName($intName);
+    // Raw lookup: findByInternalName can return [] when the page has no description rows
+    $this->dao->select('pk_i_id');
+    $this->dao->from($this->getTableName());
+    $this->dao->where('s_internal_name', $intName);
+    $result = $this->dao->get();
+
+    if($result == false || $result->numRows() == 0) {
+      return false;
+    }
+
+    $row = $result->row();
+    if(!isset($row['pk_i_id'])) {
+      return false;
+    }
+
     return $this->deleteByPrimaryKey($row['pk_i_id']);
   }
 

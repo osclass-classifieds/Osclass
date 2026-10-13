@@ -1617,6 +1617,126 @@ function osc_rewrite_rules() {
   return getPreference('rewrite_rules');
 }
 
+// True when key is a late catch-all search rule (must stay after specific routes)
+function osc_rewrite_rule_is_fallback($key) {
+  return ($key === '^(.+)$' || $key === '^(.+)/?$' || $key === '^(.+)/([0-9]+)$');
+}
+
+// Insert rules before catch-all search routes (append would never match)
+function osc_rewrite_rules_insert_before_fallback($rules, $new_rules) {
+  if(!is_array($rules)) {
+    $rules = array();
+  }
+  if(!is_array($new_rules) || count($new_rules) <= 0) {
+    return $rules;
+  }
+
+  foreach(array_keys($new_rules) as $nk) {
+    unset($rules[$nk]);
+  }
+
+  $out = array();
+  $inserted = false;
+  foreach($rules as $k => $v) {
+    if(!$inserted && osc_rewrite_rule_is_fallback($k)) {
+      foreach($new_rules as $nk => $nv) {
+        $out[$nk] = $nv;
+      }
+      $inserted = true;
+    }
+    $out[$k] = $v;
+  }
+
+  if(!$inserted) {
+    foreach($new_rules as $nk => $nv) {
+      $out[$nk] = $nv;
+    }
+  }
+
+  return $out;
+}
+
+// Report/mark rewrite rules that must exist when friendly URLs are on
+function osc_rewrite_report_rules_map() {
+  $map = array();
+  $report_item = osc_get_preference('rewrite_report_item');
+  $report_user = osc_get_preference('rewrite_report_user');
+  $report_view = osc_get_preference('rewrite_report_view');
+
+  if($report_item != '') {
+    $map['^' . $report_item . '/([0-9]+)/?$'] = 'index.php?page=report&action=item&id=$1';
+  }
+  if($report_user != '') {
+    $map['^' . $report_user . '/([0-9]+)/?$'] = 'index.php?page=report&action=user&id=$1';
+  }
+  if($report_view != '') {
+    $map['^' . $report_view . '/([0-9]+)/?$'] = 'index.php?page=report&action=view&id=$1';
+  }
+
+  $map['^item/mark/(.*?)/([0-9]+)/?$'] = 'index.php?page=item&action=mark&as=$1&id=$2';
+
+  $mark = osc_get_preference('rewrite_item_mark');
+  if($mark != '') {
+    $map['^' . $mark . '/(.*?)/([0-9]+)/?$'] = 'index.php?page=item&action=mark&as=$1&id=$2';
+  }
+
+  return $map;
+}
+
+// Add missing report permalink rules before catch-all (upgrade and runtime heal)
+function osc_ensure_report_rewrite_rules() {
+  if(!osc_rewrite_enabled()) {
+    return false;
+  }
+
+  if(osc_get_preference('rewrite_report_item') == '' && osc_get_preference('rewrite_report_user') == '' && osc_get_preference('rewrite_report_view') == '') {
+    return false;
+  }
+
+  $rules = osc_unserialize(osc_get_preference('rewrite_rules'));
+  if(!is_array($rules) || empty($rules)) {
+    return false;
+  }
+
+  $need = osc_rewrite_report_rules_map();
+  if(count($need) <= 0) {
+    return false;
+  }
+
+  $need_sync = false;
+  foreach($need as $key => $uri) {
+    if(!isset($rules[$key]) || $rules[$key] != $uri) {
+      $need_sync = true;
+      break;
+    }
+  }
+
+  if(!$need_sync) {
+    $seen_fallback = false;
+    foreach($rules as $k => $v) {
+      if(osc_rewrite_rule_is_fallback($k)) {
+        $seen_fallback = true;
+        continue;
+      }
+      if($seen_fallback && isset($need[$k])) {
+        $need_sync = true;
+        break;
+      }
+    }
+  }
+
+  if(!$need_sync) {
+    return false;
+  }
+
+  $rules = osc_rewrite_rules_insert_before_fallback($rules, $need);
+  $serialized = osc_serialize($rules);
+  osc_set_preference('rewrite_rules', $serialized);
+  Preference::newInstance()->set('rewrite_rules', $serialized);
+
+  return true;
+}
+
 /**
  * Gets max kb of uploads
  *

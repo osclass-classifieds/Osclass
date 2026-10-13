@@ -208,7 +208,11 @@ class Preference extends DAO
       's_section' => $section,
       'e_type'  => in_array($type, $aValidEnumTypes) ? $type : 'STRING'
     );
-    return $this->dao->replace($this->getTableName(), $array_replace);
+    $result = $this->dao->replace($this->getTableName(), $array_replace);
+    if($result !== false) {
+      $this->pref[$section][$key] = $value;
+    }
+    return $result;
   }
 }
 

@@ -899,30 +899,8 @@ if($current_version < 840) {
   $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'rewrite_report_view', 'report/view', 'STRING')", DB_TABLE_PREFIX));
   osc_reset_preferences();
 
-  // Update permalink rules to accept new report urls; old mark urls keep routing so they can redirect
-  $rules = osc_unserialize(osc_get_preference('rewrite_rules'));
-  if(osc_rewrite_enabled() && is_array($rules) && !empty($rules)) {
-    $mark = osc_get_preference('rewrite_item_mark');
-    if($mark != '') {
-      $rules['^' . $mark . '/(.*?)/([0-9]+)/?$'] = 'index.php?page=item&action=mark&as=$1&id=$2';
-    }
-    $rules['^item/mark/(.*?)/([0-9]+)/?$'] = 'index.php?page=item&action=mark&as=$1&id=$2';
-
-    $report_item = osc_get_preference('rewrite_report_item');
-    $report_user = osc_get_preference('rewrite_report_user');
-    $report_view = osc_get_preference('rewrite_report_view');
-    if($report_item != '') {
-      $rules['^' . $report_item . '/([0-9]+)/?$'] = 'index.php?page=report&action=item&id=$1';
-    }
-    if($report_user != '') {
-      $rules['^' . $report_user . '/([0-9]+)/?$'] = 'index.php?page=report&action=user&id=$1';
-    }
-    if($report_view != '') {
-      $rules['^' . $report_view . '/([0-9]+)/?$'] = 'index.php?page=report&action=view&id=$1';
-    }
-
-    osc_set_preference('rewrite_rules', osc_serialize($rules));
-  }
+  // Insert report/mark rules before catch-all search routes (append would never match)
+  osc_ensure_report_rewrite_rules();
 
   // Remove legacy "Mark as" preferences and obsolete reported listings views
   $comm->query(sprintf("DELETE FROM %st_preference WHERE s_section = 'osclass' AND s_name IN ('item_mark_disable', 'rewrite_item_mark')", DB_TABLE_PREFIX));
@@ -995,6 +973,9 @@ if(isset($updated_version) && $updated_version >= $known_version) {
 }
 
 osc_changeVersionTo($current_version);
+
+// Heal report permalink rules for installs already past 8.4.0 (append-after-catch-all bug)
+osc_ensure_report_rewrite_rules();
 
 // Make sure Omega is selected as admin theme
 osc_set_preference('admin_theme', 'omega');
