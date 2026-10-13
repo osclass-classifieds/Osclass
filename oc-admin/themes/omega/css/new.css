@@ -173,6 +173,7 @@ ul.tabbernav li.tabberactive a:hover {}
 !.mb-box .mb-head select.mb-select-locale {margin:-10px 0;}
 .mb-box input {max-width:75%;}
 .log-details code {padding:4px 6px;width:100%;font-size:13px;line-height:16px;display:inline-block;margin:10px 0 4px 0;box-sizing: border-box;background:#f4f4f4;}
+.page-tools.action-logs .table td.col-comment {word-wrap:break-word;word-break:break-all;}
 #bulk-actions a.btn.plugin-btn {margin-left:5px;}
 #settings_form + #settings_form {margin-top:25px;}
 #settings_form fieldset {border:none!important;}

@@ -16,7 +16,7 @@
  */
 
 if(!defined('OSCLASS_VERSION')){
-  define('OSCLASS_VERSION', '8.4.0');
+  define('OSCLASS_VERSION', '8.4.1');
 }
 
 if(!defined('OC_ADMIN')) {

@@ -96,24 +96,29 @@ class CWebUserNonSecure extends BaseModel {
       case 'activate_alert':
         $email = Params::getParam('email');
         $secret = Params::getParam('secret');
-        $id = Params::getParam('id');
+        $id = (int)Params::getParam('id');
 
         $alert = Alerts::newInstance()->findByPrimaryKey($id);
         $result = 0;
-        
-        if (!empty($alert) && $email == $alert['s_email'] && $secret == $alert['s_secret']) {
+
+        if(!empty($alert) && strcasecmp((string)$email, (string)$alert['s_email']) === 0 && $secret == $alert['s_secret']) {
           $user = User::newInstance()->findByEmail($alert['s_email']);
-          
-          if (isset($user['pk_i_id'])) {
-            Alerts::newInstance()->update(array ('fk_i_user_id' => $user['pk_i_id']) , array ('pk_i_id' => $id));
+
+          if(isset($user['pk_i_id'])) {
+            Alerts::newInstance()->update(array('fk_i_user_id' => $user['pk_i_id']), array('pk_i_id' => $id));
           }
-          
+
           $result = Alerts::newInstance()->activate($id);
         }
 
         if($result == 1) {
+          $who_id = (isset($alert['fk_i_user_id']) ? (int)$alert['fk_i_user_id'] : 0);
+          if(isset($user) && is_array($user) && isset($user['pk_i_id'])) {
+            $who_id = (int)$user['pk_i_id'];
+          }
+          Log::newInstance()->insertLog('alerts', 'activate', $id, sprintf(__('Alert #%d activated by %s'), $id, $email), 'user', $who_id);
           osc_add_flash_ok_message(_m('Alert activated'));
-        }else{
+        } else {
           osc_add_flash_error_message(_m('Oops! There was a problem trying to activate your alert. Please contact an administrator'));
         }
 

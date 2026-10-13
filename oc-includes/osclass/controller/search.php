@@ -330,8 +330,8 @@ class CWebSearch extends BaseModel {
           $array_params = array();
         }
 
-        // Check if alert structure is OK
-        if(isset($array_conditions['price_min']) && $alert['b_active'] == 1) {
+        // Check if alert structure is OK (secret already matched; inactive alerts may still be viewed)
+        if(isset($array_conditions['price_min'])) {
           $alert_ok = true;
 
           $this->mSearch = Search::newInstance();

@@ -80,14 +80,14 @@ function osc_runAlert($type = '', $last_exec = null){
 
       // User that subscribed to alert does not exists, is removed, blocked or inactive
       if($user_invalid) {
-        Alert::newInstance()->deactivate($alert_id);
+        Alerts::newInstance()->deactivate($alert_id);
         Log::newInstance()->insertLog('alerts', 'userInvalid', $user_id, sprintf(__('Alert ID %d (%s) for user %s (ID %d) triggered, but was not sent because the user\'s user state is invalid (removed, inactive or blocked). This alert has been deactivated.'), $alert_id, strtolower($type), $user_email, $user_id), 'cron', 0, $last_exec_comment);
         continue;
       }
 
       // Check if user is not banned
       if(osc_is_email_banned($user_email) !== false) {
-        Alert::newInstance()->deactivate($alert_id);
+        Alerts::newInstance()->deactivate($alert_id);
         Log::newInstance()->insertLog('alerts', 'userBanned', $user_id, sprintf(__('Alert ID %d (%s) for user %s (ID %d) triggered, but was not sent because the user\'s email is banned. This alert has been deactivated.'), $alert_id, strtolower($type), $user_email, $user_id), 'cron', 0, $last_exec_comment);
         continue;
       }

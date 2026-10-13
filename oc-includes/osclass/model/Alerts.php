@@ -356,6 +356,45 @@ class Alerts extends DAO {
   }
 
   /**
+   * Find alert by search JSON and user/email (non-unsubscribed by default)
+   *
+   * @access public
+   * @param string $search
+   * @param string $email
+   * @param int $userid
+   * @param bool $unsub
+   * @return array|false
+   */
+  public function findBySearchAndEmail($search, $email, $userid = 0, $unsub = false) {
+    $userid = (int)$userid;
+    $email = strtolower(trim((string)$email));
+
+    $this->dao->select();
+    $this->dao->from($this->getTableName());
+    $this->dao->where('s_search', $search);
+
+    if(!$unsub) {
+      $this->dao->where('dt_unsub_date IS NULL');
+    }
+
+    if($userid <= 0) {
+      $this->dao->where('(fk_i_user_id = 0 OR fk_i_user_id IS NULL)');
+      $this->dao->where('s_email', $email);
+    } else {
+      $this->dao->where('fk_i_user_id', $userid);
+    }
+
+    $result = $this->dao->get();
+
+    if($result == false) {
+      return false;
+    }
+
+    $row = $result->row();
+    return (isset($row['pk_i_id']) ? $row : false);
+  }
+
+  /**
    * Create a new alert
    *
    * @access public
@@ -372,56 +411,47 @@ class Alerts extends DAO {
       return false;
     }
 
-    $results = 0;
-    $this->dao->select();
-    $this->dao->from($this->getTableName());
-    $this->dao->where('s_search', $alert);
+    $userid = (int)$userid;
+    $email = strtolower(trim((string)$email));
 
-    $this->dao->where('dt_unsub_date IS NULL');
-
-    if($userid == 0 || $userid == null){
-      $this->dao->where('fk_i_user_id', 0);
-      $this->dao->where('s_email', $email);
-
-    } else {
-      $this->dao->where('fk_i_user_id', $userid);
+    $existing = $this->findBySearchAndEmail($alert, $email, $userid, false);
+    if($existing !== false) {
+      return false;
     }
 
-    $results = $this->dao->get();
-
-
-    if($results->numRows() == 0) {
+    $expire_date = null;
+    if(function_exists('osc_alerts_default_non_expiring') && osc_alerts_default_non_expiring() === true) {
       $expire_date = null;
-      if(function_exists('osc_alerts_default_non_expiring') && osc_alerts_default_non_expiring() === true) {
-        $expire_date = null;
-      } else {
-        $months = 3;
-        if(function_exists('osc_alerts_expiration_months_user') && function_exists('osc_alerts_expiration_months_guest')) {
-          $months = ((int)$userid > 0 ? osc_alerts_expiration_months_user() : osc_alerts_expiration_months_guest());
-        }
-        if((int)$months > 0) {
-          $expire_date = date('Y-m-d H:i:s', strtotime('+' . (int)$months . ' month'));
-        }
+    } else {
+      $months = 3;
+      if(function_exists('osc_alerts_expiration_months_user') && function_exists('osc_alerts_expiration_months_guest')) {
+        $months = ($userid > 0 ? osc_alerts_expiration_months_user() : osc_alerts_expiration_months_guest());
       }
-
-      $this->dao->insert($this->getTableName(), array(
-        'fk_i_user_id' => $userid,
-        's_name' => $name,
-        's_email' => $email,
-        's_search' => $alert,
-        's_param' => $params,
-        's_sql' => $sql,
-        'e_type' => $type,
-        's_secret' => $secret,
-        'i_num_trigger' => 0,
-        'dt_date' => date('Y-m-d H:i:s'),
-        'dt_expire_date' => $expire_date
-      ));
-
-      return $this->dao->insertedId();
+      if((int)$months > 0) {
+        $expire_date = date('Y-m-d H:i:s', strtotime('+' . (int)$months . ' month'));
+      }
     }
 
-    return false;
+    $inserted = $this->dao->insert($this->getTableName(), array(
+      'fk_i_user_id' => $userid,
+      's_name' => $name,
+      's_email' => $email,
+      's_search' => $alert,
+      's_param' => $params,
+      's_sql' => $sql,
+      'e_type' => $type,
+      's_secret' => $secret,
+      'b_active' => 0,
+      'i_num_trigger' => 0,
+      'dt_date' => date('Y-m-d H:i:s'),
+      'dt_expire_date' => $expire_date
+    ));
+
+    if($inserted === false) {
+      return false;
+    }
+
+    return $this->dao->insertedId();
   }
 
   /**

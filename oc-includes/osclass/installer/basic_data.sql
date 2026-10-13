@@ -59,6 +59,7 @@ INSERT INTO /*TABLE_PREFIX*/t_preference VALUES
 ,('osclass', 'alerts_allow_user_expiration_change', '1', 'BOOLEAN')
 ,('osclass', 'alerts_default_non_expiring', '0', 'BOOLEAN')
 ,('osclass', 'alerts_unsub_inactive_months', 3, 'INTEGER')
+,('osclass', 'alerts_guest_validation', '1', 'BOOLEAN')
 ,('osclass', 'breadcrumbs_item_page_title', '1', 'BOOLEAN')
 ,('osclass', 'breadcrumbs_item_country', '0', 'BOOLEAN')
 ,('osclass', 'breadcrumbs_item_region', '0', 'BOOLEAN')

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-01 14:15+0200\n"
+"POT-Creation-Date: 2026-10-13 10:01+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -227,31 +227,42 @@ msgstr ""
 msgid "Save changes"
 msgstr ""
 
-#: alert-form.php:29
+#: alert-form.php:31
+#, php-format
+msgid ""
+"Alert has been successfully created. A validation email has been sent to %s. "
+"Please activate your alert using the link in that email."
+msgstr ""
+
+#: alert-form.php:33
 msgid "You have sucessfully subscribed to the alert"
 msgstr ""
 
-#: alert-form.php:30 user-change_email.php:74
+#: alert-form.php:36
+msgid "You already subscribed to this search for this email"
+msgstr ""
+
+#: alert-form.php:37 user-change_email.php:74
 msgid "The email is not valid"
 msgstr ""
 
-#: alert-form.php:31
+#: alert-form.php:38
 msgid "There was a problem with the alert"
 msgstr ""
 
-#: alert-form.php:63
+#: alert-form.php:69
 msgid "Already subscribed to this search"
 msgstr ""
 
-#: alert-form.php:63
+#: alert-form.php:69
 msgid "Manage"
 msgstr ""
 
-#: alert-form.php:67
+#: alert-form.php:73
 msgid "Subscribe to this search"
 msgstr ""
 
-#: alert-form.php:82
+#: alert-form.php:88
 msgid "Subscribe now"
 msgstr ""
 

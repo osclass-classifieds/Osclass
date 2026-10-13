@@ -326,17 +326,18 @@ class CWebAjax extends BaseModel {
         $alert_json = json_encode($alert_arr);
         $alert_json_params = json_encode($alert_params);
 
-        $email = osc_esc_html(Params::getParam('email'));
-        $user_id = osc_esc_html(Params::getParam('userid'));
+        $email = strtolower(trim((string)osc_esc_html(Params::getParam('email'))));
+        $user_id = (int)osc_esc_html(Params::getParam('userid'));
+        $user = false;
 
         if(osc_is_web_user_logged_in()) {
-          $user_id = osc_logged_user_id();
+          $user_id = (int)osc_logged_user_id();
           $user = osc_logged_user();
-          $email = $user['s_email'];
+          $email = strtolower(trim((string)osc_esc_html($user['s_email'])));
 
         } else {
           $user = User::newInstance()->findByEmail($email);
-          $user_id = ((isset($user['pk_i_id']) && (int)$user['pk_i_id'] > 0) ? $user['pk_i_id'] : $user_id);
+          $user_id = ((isset($user['pk_i_id']) && (int)$user['pk_i_id'] > 0) ? (int)$user['pk_i_id'] : 0);
         }
 
         if($alert_json == '' || $email == '') {
@@ -370,7 +371,48 @@ class CWebAjax extends BaseModel {
         $name = osc_generate_alert_name($alert_json, 3, false);
         $name = osc_apply_filter('alert_pre_save_name', $name, $alert_json, $user_id, $email, $type);
 
-        $alert_id = Alerts::newInstance()->createAlert($user_id, $email, $name, $alert, $secret, $type, $alert_params_save, $alert_sql_save);
+        $alerts_manager = Alerts::newInstance();
+        $existing = $alerts_manager->findBySearchAndEmail($alert, $email, $user_id, false);
+        $log_who_id = ($user_id > 0 ? $user_id : 0);
+        $log_params = (is_string($alert_params_save) ? trim($alert_params_save) : '');
+        if($log_params === '' || $log_params === 'null' || $log_params === '[]' || $log_params === '{}') {
+          $log_params = null;
+        }
+
+        // Existing inactive guest alert: refresh secret and resend validation (or auto-activate if validation disabled)
+        if($existing !== false && (int)$existing['b_active'] != 1 && $user_id <= 0) {
+          $alert_id = (int)$existing['pk_i_id'];
+          $alerts_manager->update(array('s_secret' => $secret, 's_email' => $email), array('pk_i_id' => $alert_id));
+
+          if(!osc_alerts_guest_validation()) {
+            $alerts_manager->activate($alert_id);
+            Log::newInstance()->insertLog('alerts', 'activate', $alert_id, sprintf(__('Alert #%d activated by %s'), $alert_id, $email), 'user', $log_who_id);
+
+            if($json_reply) {
+              echo json_encode(array('status' => 'OK', 'code' => 'SUCCESS', 'message' => _m('Alert created'), 'data' => array('alert_id' => $alert_id)));
+              exit;
+            }
+
+            echo '1';
+            return true;
+          }
+
+          $alert_row = $alerts_manager->findByPrimaryKey($alert_id);
+          osc_run_hook('hook_email_alert_validation', $alert_row, $email, $secret);
+          $activation_url = osc_user_activate_alert_url($alert_id, $secret, $email);
+          $activation_comment = '<a href="' . osc_esc_html($activation_url) . '" target="_blank" rel="noopener">' . osc_esc_html($activation_url) . '</a>';
+          Log::newInstance()->insertLog('alerts', 'validation_email', $alert_id, sprintf(__('Alert activation link sent to %s (alert #%d)'), $email, $alert_id), 'user', $log_who_id, $activation_comment, $activation_url);
+
+          if($json_reply) {
+            echo json_encode(array('status' => 'OK', 'code' => 'SUCCESS_VALIDATION_REQUIRED', 'message' => sprintf(_m('Alert has been successfully created. A validation email has been sent to %s. Please activate your alert using the link in that email.'), $email), 'data' => array('alert_id' => $alert_id)));
+            exit;
+          }
+
+          echo '1';
+          return true;
+        }
+
+        $alert_id = $alerts_manager->createAlert($user_id, $email, $name, $alert, $secret, $type, $alert_params_save, $alert_sql_save);
         osc_run_hook('alert_created', $alert_id, $alert, $user_id, $email, $secret);
 
         if($alert_id === false) {
@@ -383,12 +425,16 @@ class CWebAjax extends BaseModel {
           return true;
         }
 
-        if((int)$user_id > 0 && isset($user['pk_i_id'])) {
+        $alert_id = (int)$alert_id;
+        Log::newInstance()->insertLog('alerts', 'create', $alert_id, sprintf(__('New alert #%d has been created for %s'), $alert_id, $email), 'user', $log_who_id, $log_params, $log_params);
+
+        if($user_id > 0 && isset($user['pk_i_id'])) {
           if($user['b_active'] == 1 && $user['b_enabled'] == 1) {
-            Alerts::newInstance()->activate($alert_id);
+            $alerts_manager->activate($alert_id);
+            Log::newInstance()->insertLog('alerts', 'activate', $alert_id, sprintf(__('Alert #%d activated by %s'), $alert_id, $email), 'user', $log_who_id);
 
             if($json_reply) {
-              echo json_encode(array('status' => 'OK', 'code' => 'SUCCESS', 'message' => _m('Alert created'), 'data' => array('alert_id' => (int)$alert_id)));
+              echo json_encode(array('status' => 'OK', 'code' => 'SUCCESS', 'message' => _m('Alert created'), 'data' => array('alert_id' => $alert_id)));
               exit;
             }
 
@@ -397,7 +443,7 @@ class CWebAjax extends BaseModel {
           }
 
           if($json_reply) {
-            echo json_encode(array('status' => 'ERROR', 'code' => 'USER_BLOCKED', 'message' => _m('Alert was created but cannot be activated for this user'), 'data' => array('alert_id' => (int)$alert_id)));
+            echo json_encode(array('status' => 'ERROR', 'code' => 'USER_BLOCKED', 'message' => _m('Alert was created but cannot be activated for this user'), 'data' => array('alert_id' => $alert_id)));
             exit;
           }
 
@@ -405,11 +451,28 @@ class CWebAjax extends BaseModel {
           return false;
         }
 
-        $alert_row = Alerts::newInstance()->findByPrimaryKey($alert_id);
-        osc_run_hook('hook_email_alert_validation', $alert_row, $email, $secret);      // user not found (not registered)
+        // True guest (no registered user)
+        if(!osc_alerts_guest_validation()) {
+          $alerts_manager->activate($alert_id);
+          Log::newInstance()->insertLog('alerts', 'activate', $alert_id, sprintf(__('Alert #%d activated by %s'), $alert_id, $email), 'user', $log_who_id);
+
+          if($json_reply) {
+            echo json_encode(array('status' => 'OK', 'code' => 'SUCCESS', 'message' => _m('Alert created'), 'data' => array('alert_id' => $alert_id)));
+            exit;
+          }
+
+          echo '1';
+          return true;
+        }
+
+        $alert_row = $alerts_manager->findByPrimaryKey($alert_id);
+        osc_run_hook('hook_email_alert_validation', $alert_row, $email, $secret);
+        $activation_url = osc_user_activate_alert_url($alert_id, $secret, $email);
+        $activation_comment = '<a href="' . osc_esc_html($activation_url) . '" target="_blank" rel="noopener">' . osc_esc_html($activation_url) . '</a>';
+        Log::newInstance()->insertLog('alerts', 'validation_email', $alert_id, sprintf(__('Alert activation link sent to %s (alert #%d)'), $email, $alert_id), 'user', $log_who_id, $activation_comment, $activation_url);
 
         if($json_reply) {
-          echo json_encode(array('status' => 'OK', 'code' => 'SUCCESS_VALIDATION_REQUIRED', 'message' => _m('Alert created. Please confirm it via email'), 'data' => array('alert_id' => (int)$alert_id)));
+          echo json_encode(array('status' => 'OK', 'code' => 'SUCCESS_VALIDATION_REQUIRED', 'message' => sprintf(_m('Alert has been successfully created. A validation email has been sent to %s. Please activate your alert using the link in that email.'), $email), 'data' => array('alert_id' => $alert_id)));
           exit;
         }
 

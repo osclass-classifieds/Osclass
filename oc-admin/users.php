@@ -583,11 +583,19 @@ class CAdminUsers extends AdminSecBaseModel {
         foreach($alertId as $id) {
           if($alert_action == 'activate') {
             $alert_action_text = __('activated');
-            $iUpdated += $mAlerts->activate($id);
+            $updated = $mAlerts->activate($id);
+            $iUpdated += $updated;
+            if($updated) {
+              Log::newInstance()->insertLog('alerts', 'activate', $id, sprintf(__('Alert #%d activated by admin'), $id), 'admin', osc_logged_admin_id());
+            }
 
           } else if($alert_action == 'deactivate') {
             $alert_action_text = __('deactivated');
-            $iUpdated += $mAlerts->deactivate($id);
+            $updated = $mAlerts->deactivate($id);
+            $iUpdated += $updated;
+            if($updated) {
+              Log::newInstance()->insertLog('alerts', 'deactivate', $id, sprintf(__('Alert #%d deactivated by admin'), $id), 'admin', osc_logged_admin_id());
+            }
 
           } else if($alert_action == 'delete') {
             $alert_action_text = __('deleted');
@@ -661,6 +669,8 @@ class CAdminUsers extends AdminSecBaseModel {
         $usernameBlacklistTmp = explode(",", Params::getParam('username_blacklist'));
         $alertsEnabled = Params::getParam('alerts_enabled');
         $alertsEnabled = (($alertsEnabled != '') ? true : false);
+        $alertsGuestValidation = Params::getParam('alerts_guest_validation');
+        $alertsGuestValidation = (($alertsGuestValidation != '') ? true : false);
         $alertsExpireMonthsUser = max(0, (int)Params::getParam('alerts_expiration_months_user'));
         $alertsExpireMonthsGuest = max(0, (int)Params::getParam('alerts_expiration_months_guest'));
         $alertsAllowNonExpiring = Params::getParam('alerts_allow_non_expiring');
@@ -685,6 +695,7 @@ class CAdminUsers extends AdminSecBaseModel {
         $iUpdated += osc_set_preference('username_generator', $usernameGenerator);
         $iUpdated += osc_set_preference('username_blacklist', $usernameBlacklist);
         $iUpdated += osc_set_preference('alerts_enabled', $alertsEnabled, 'osclass', 'BOOLEAN');
+        $iUpdated += osc_set_preference('alerts_guest_validation', $alertsGuestValidation, 'osclass', 'BOOLEAN');
         $iUpdated += osc_set_preference('alerts_expiration_months_user', $alertsExpireMonthsUser, 'osclass', 'INTEGER');
         $iUpdated += osc_set_preference('alerts_expiration_months_guest', $alertsExpireMonthsGuest, 'osclass', 'INTEGER');
         $iUpdated += osc_set_preference('alerts_allow_non_expiring', $alertsAllowNonExpiring, 'osclass', 'BOOLEAN');

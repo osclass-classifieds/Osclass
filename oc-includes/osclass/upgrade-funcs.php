@@ -962,6 +962,12 @@ if($current_version < 840) {
   $updated_version = 840;       // Version 8.4.0
 }
 
+if($current_version < 841) {
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'alerts_guest_validation', '1', 'BOOLEAN')", DB_TABLE_PREFIX));
+
+  $updated_version = 841;       // Version 8.4.1
+}
+
 // Resolve current version
 // Critical for auto-upgrade, where constant OSCLASS_VERSION keeps current installation version, as new file is being downloaded
 $known_version = (int)str_replace('.', '', OSCLASS_VERSION);

@@ -173,6 +173,17 @@ osc_current_admin_theme_path('parts/header.php');
       </div>
 
       <div class="form-row">
+        <div class="form-label"><?php _e('Guest alert validation'); ?></div>
+        <div class="form-controls">
+          <label id="alerts_guest_validation" class="form-label-checkbox">
+            <input type="checkbox" id="alerts_guest_validation" name="alerts_guest_validation" <?php echo (osc_alerts_guest_validation() ? 'checked="checked"' : ''); ?> value="1" />
+            <?php _e('Require email confirmation before activating alerts for non-registered users'); ?>
+          </label>
+          <span class="help-box"><?php _e('If disabled, guest alerts are activated immediately without a validation email.'); ?></span>
+        </div>
+      </div>
+
+      <div class="form-row">
         <div class="form-label"><?php _e('Default expiration'); ?></div>
         <div class="form-controls has-intext-input">
           <?php _e('Logged user alerts expire after'); ?>

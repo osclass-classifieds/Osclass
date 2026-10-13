@@ -149,6 +149,19 @@ function osc_alerts_enabled() {
 }
 
 /**
+ * True when guest alerts require email validation before activation
+ *
+ * @return boolean
+ */
+function osc_alerts_guest_validation() {
+  $raw = getPreference('alerts_guest_validation');
+  if($raw === '' || $raw === null) {
+    return true;
+  }
+  return getBoolPreference('alerts_guest_validation');
+}
+
+/**
  * Get default expiration in months for logged user alerts
  *
  * @return int

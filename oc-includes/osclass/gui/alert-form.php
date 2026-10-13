@@ -21,10 +21,16 @@ $(document).ready(function(){
     $(".sub_button").click(function(){
         $.post('<?php echo osc_base_url(true); ?>', {email:$("#alert_email").val(), userid:$("#alert_userId").val(), alert:$("#alert").val(), page:"ajax", action:"alerts"},
             function(data){
-                if(data==1) { alert('<?php echo osc_esc_js(__('You have sucessfully subscribed to the alert', 'sigma')); ?>'); }
+                if(data==1) {
+                    <?php if(!osc_is_web_user_logged_in() && function_exists('osc_alerts_guest_validation') && osc_alerts_guest_validation()) { ?>
+                    alert('<?php echo osc_esc_js(__('Alert has been successfully created. A validation email has been sent to %s. Please activate your alert using the link in that email.', 'sigma')); ?>'.replace('%s', $("#alert_email").val()));
+                    <?php } else { ?>
+                    alert('<?php echo osc_esc_js(__('You have sucessfully subscribed to the alert', 'sigma')); ?>');
+                    <?php } ?>
+                }
+                else if(data==0) { alert('<?php echo osc_esc_js(__('You already subscribed to this search for this email', 'sigma')); ?>'); }
                 else if(data==-1) { alert('<?php echo osc_esc_js(__('The email is not valid', 'sigma')); ?>'); }
-                else { alert('<?php echo osc_esc_js(__('There was a problem with the alert', 'sigma')); ?>');
-                };
+                else { alert('<?php echo osc_esc_js(__('There was a problem with the alert', 'sigma')); ?>'); }
         });
         return false;
     });

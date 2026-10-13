@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-01 14:15+0200\n"
+"POT-Creation-Date: 2026-10-13 10:00+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -50,7 +50,7 @@ msgstr ""
 #: oc-includes/osclass/controller/contact.php:76
 #: oc-includes/osclass/controller/item.php:667
 #: oc-includes/osclass/controller/login.php:275
-#: oc-includes/osclass/controller/user.php:167
+#: oc-includes/osclass/controller/user.php:168
 #: oc-includes/osclass/ItemActions.php:155
 #: oc-includes/osclass/UserActions.php:70
 msgid "The email is not valid"
@@ -191,11 +191,11 @@ msgstr ""
 #: oc-admin/controller/settings/optimization.php:112
 #: oc-admin/controller/settings/spamnbots.php:81 oc-admin/items.php:677
 #: oc-admin/main.php:84 oc-admin/plugins.php:486 oc-admin/reports.php:413
-#: oc-admin/stats.php:181 oc-admin/users.php:702
+#: oc-admin/stats.php:181 oc-admin/users.php:713
 msgid "Settings have been updated"
 msgstr ""
 
-#: oc-admin/appearance.php:210 oc-admin/appearance.php:465
+#: oc-admin/appearance.php:210 oc-admin/appearance.php:467
 msgid "Widget cannot be found"
 msgstr ""
 
@@ -216,7 +216,7 @@ msgstr ""
 msgid "The theme has been activated"
 msgstr ""
 
-#: oc-admin/appearance.php:440 oc-admin/appearance.php:445
+#: oc-admin/appearance.php:442 oc-admin/appearance.php:447
 #: oc-admin/controller/settings/main.php:206
 #: oc-admin/controller/settings/main.php:209 oc-admin/languages.php:157
 #: oc-admin/languages.php:160 oc-admin/languages.php:163
@@ -226,23 +226,23 @@ msgstr ""
 msgid "%s is required"
 msgstr ""
 
-#: oc-admin/appearance.php:470 oc-admin/appearance.php:492
+#: oc-admin/appearance.php:472 oc-admin/appearance.php:494
 msgid "Internal name is already in use"
 msgstr ""
 
-#: oc-admin/appearance.php:484
+#: oc-admin/appearance.php:486
 msgid "The widget has been updated"
 msgstr ""
 
-#: oc-admin/appearance.php:486
+#: oc-admin/appearance.php:488
 msgid "The widget could not be updated"
 msgstr ""
 
-#: oc-admin/appearance.php:505
+#: oc-admin/appearance.php:507
 msgid "Widget cannot be added"
 msgstr ""
 
-#: oc-admin/appearance.php:515
+#: oc-admin/appearance.php:517
 msgid "The widget has been added"
 msgstr ""
 
@@ -972,7 +972,7 @@ msgstr ""
 #: oc-includes/osclass/controller/item.php:598
 #: oc-includes/osclass/controller/login.php:294
 #: oc-includes/osclass/controller/report.php:88
-#: oc-includes/osclass/controller/user-non-secure.php:439
+#: oc-includes/osclass/controller/user-non-secure.php:444
 msgid "Recaptcha validation has failed"
 msgstr ""
 
@@ -989,12 +989,12 @@ msgid "Sorry, the link is not valid"
 msgstr ""
 
 #: oc-admin/login.php:217 oc-includes/osclass/controller/login.php:332
-#: oc-includes/osclass/controller/user.php:262
+#: oc-includes/osclass/controller/user.php:263
 msgid "The password has been changed"
 msgstr ""
 
 #: oc-admin/login.php:221 oc-includes/osclass/controller/login.php:335
-#: oc-includes/osclass/controller/user.php:256
+#: oc-includes/osclass/controller/user.php:257
 #: oc-includes/osclass/UserActions.php:58
 #: oc-includes/osclass/UserActions.php:207
 msgid "The passwords do not match"
@@ -1552,7 +1552,7 @@ msgstr ""
 
 #: oc-admin/users.php:313 oc-admin/users.php:337 oc-admin/users.php:363
 #: oc-admin/users.php:388 oc-admin/users.php:413 oc-admin/users.php:441
-#: oc-admin/users.php:477 oc-admin/users.php:510 oc-admin/users.php:900
+#: oc-admin/users.php:477 oc-admin/users.php:510 oc-admin/users.php:911
 msgid "User id isn't in the correct format"
 msgstr ""
 
@@ -1659,63 +1659,63 @@ msgid_plural "%s alerts have been deleted"
 msgstr[0] ""
 msgstr[1] ""
 
-#: oc-admin/users.php:618
+#: oc-admin/users.php:626
 #, php-format
 msgid "No alerts have been %s"
 msgstr ""
 
-#: oc-admin/users.php:620
+#: oc-admin/users.php:628
 #, php-format
 msgid "One alert has been %s"
 msgstr ""
 
-#: oc-admin/users.php:622
+#: oc-admin/users.php:630
 #, php-format
 msgid "%d alerts have been %s"
 msgstr ""
 
-#: oc-admin/users.php:710 oc-includes/osclass/controller/ajax.php:284
+#: oc-admin/users.php:721 oc-includes/osclass/controller/ajax.php:284
 #: oc-includes/osclass/controller/user.php:131
-#: oc-includes/osclass/controller/user.php:490
-#: oc-includes/osclass/controller/user.php:513
-#: oc-includes/osclass/controller/user.php:551
-#: oc-includes/osclass/controller/user.php:583
+#: oc-includes/osclass/controller/user.php:491
+#: oc-includes/osclass/controller/user.php:528
+#: oc-includes/osclass/controller/user.php:566
+#: oc-includes/osclass/controller/user.php:598
 msgid "Alerts are disabled"
 msgstr ""
 
-#: oc-admin/users.php:854 oc-admin/users.php:878
+#: oc-admin/users.php:865 oc-admin/users.php:889
 msgid "Both rules cannot be empty"
 msgstr ""
 
-#: oc-admin/users.php:866
+#: oc-admin/users.php:877
 msgid "The rule has been updated"
 msgstr ""
 
-#: oc-admin/users.php:890
+#: oc-admin/users.php:901
 msgid "The rule has been saved"
 msgstr ""
 
-#: oc-admin/users.php:912
+#: oc-admin/users.php:923
 msgid "No rules have been deleted"
 msgstr ""
 
-#: oc-admin/users.php:914
+#: oc-admin/users.php:925
 #, php-format
 msgid "One ban rule has been deleted"
 msgid_plural "%s ban rules have been deleted"
 msgstr[0] ""
 msgstr[1] ""
 
-#: oc-admin/users.php:927 oc-includes/osclass/controller/login.php:86
+#: oc-admin/users.php:938 oc-includes/osclass/controller/login.php:86
 #: oc-includes/osclass/controller/login.php:169
 msgid "The user doesn't exist"
 msgstr ""
 
-#: oc-admin/users.php:930
+#: oc-admin/users.php:941
 msgid "The user is blocked or not activated"
 msgstr ""
 
-#: oc-admin/users.php:939
+#: oc-admin/users.php:950
 #, php-format
 msgid "You have logged in as %s"
 msgstr ""
@@ -1761,28 +1761,34 @@ msgstr ""
 msgid "Alert integrity check failed"
 msgstr ""
 
-#: oc-includes/osclass/controller/ajax.php:339
+#: oc-includes/osclass/controller/ajax.php:345
 msgid "Missing email or alert"
 msgstr ""
 
-#: oc-includes/osclass/controller/ajax.php:349
+#: oc-includes/osclass/controller/ajax.php:355
 msgid "Email is invalid"
 msgstr ""
 
-#: oc-includes/osclass/controller/ajax.php:373
-msgid "Alert already exists"
-msgstr ""
-
-#: oc-includes/osclass/controller/ajax.php:386
+#: oc-includes/osclass/controller/ajax.php:388
+#: oc-includes/osclass/controller/ajax.php:431
+#: oc-includes/osclass/controller/ajax.php:454
 msgid "Alert created"
 msgstr ""
 
-#: oc-includes/osclass/controller/ajax.php:395
-msgid "Alert was created but cannot be activated for this user"
+#: oc-includes/osclass/controller/ajax.php:401
+#: oc-includes/osclass/controller/ajax.php:467
+#, php-format
+msgid ""
+"Alert has been successfully created. A validation email has been sent to %s. "
+"Please activate your alert using the link in that email."
 msgstr ""
 
-#: oc-includes/osclass/controller/ajax.php:407
-msgid "Alert created. Please confirm it via email"
+#: oc-includes/osclass/controller/ajax.php:414
+msgid "Alert already exists"
+msgstr ""
+
+#: oc-includes/osclass/controller/ajax.php:440
+msgid "Alert was created but cannot be activated for this user"
 msgstr ""
 
 #: oc-includes/osclass/controller/contact.php:35
@@ -1798,7 +1804,7 @@ msgstr ""
 #: oc-includes/osclass/controller/item.php:610
 #: oc-includes/osclass/controller/login.php:151
 #: oc-includes/osclass/controller/register.php:64
-#: oc-includes/osclass/controller/user-non-secure.php:452
+#: oc-includes/osclass/controller/user-non-secure.php:457
 msgid "Your current email is not allowed"
 msgstr ""
 
@@ -1807,7 +1813,7 @@ msgstr ""
 #: oc-includes/osclass/controller/item.php:613
 #: oc-includes/osclass/controller/login.php:155
 #: oc-includes/osclass/controller/register.php:67
-#: oc-includes/osclass/controller/user-non-secure.php:456
+#: oc-includes/osclass/controller/user-non-secure.php:461
 msgid "Your current IP is not allowed"
 msgstr ""
 
@@ -2071,7 +2077,7 @@ msgid "We were not able to identify you given the information provided"
 msgstr ""
 
 #: oc-includes/osclass/controller/login.php:315
-#: oc-includes/osclass/controller/user.php:241
+#: oc-includes/osclass/controller/user.php:242
 msgid "Password cannot be blank"
 msgstr ""
 
@@ -2215,114 +2221,114 @@ msgstr ""
 msgid "Your profile has been updated"
 msgstr ""
 
-#: oc-includes/osclass/controller/user.php:192
+#: oc-includes/osclass/controller/user.php:193
 #: oc-includes/osclass/UserActions.php:77
 msgid "This email is already in use"
 msgstr ""
 
-#: oc-includes/osclass/controller/user.php:211
+#: oc-includes/osclass/controller/user.php:212
 msgid "The specified username is already in use"
 msgstr ""
 
-#: oc-includes/osclass/controller/user.php:215
+#: oc-includes/osclass/controller/user.php:216
 msgid "The username was updated"
 msgstr ""
 
-#: oc-includes/osclass/controller/user.php:221
+#: oc-includes/osclass/controller/user.php:222
 #: oc-includes/osclass/UserActions.php:88
 msgid "The specified username is not valid, it contains some invalid words"
 msgstr ""
 
-#: oc-includes/osclass/controller/user.php:225
+#: oc-includes/osclass/controller/user.php:226
 msgid "The specified username could not be empty"
 msgstr ""
 
-#: oc-includes/osclass/controller/user.php:246
+#: oc-includes/osclass/controller/user.php:247
 msgid "Current password doesn't match"
 msgstr ""
 
-#: oc-includes/osclass/controller/user.php:251
+#: oc-includes/osclass/controller/user.php:252
 msgid "Passwords cannot be empty"
 msgstr ""
 
-#: oc-includes/osclass/controller/user.php:503
-#: oc-includes/osclass/controller/user-non-secure.php:115
+#: oc-includes/osclass/controller/user.php:518
+#: oc-includes/osclass/controller/user-non-secure.php:120
 msgid "Alert activated"
 msgstr ""
 
-#: oc-includes/osclass/controller/user.php:505
-#: oc-includes/osclass/controller/user-non-secure.php:117
+#: oc-includes/osclass/controller/user.php:520
+#: oc-includes/osclass/controller/user-non-secure.php:122
 msgid ""
 "Oops! There was a problem trying to activate your alert. Please contact an "
 "administrator"
 msgstr ""
 
-#: oc-includes/osclass/controller/user.php:534
-#: oc-includes/osclass/controller/user-non-secure.php:141
+#: oc-includes/osclass/controller/user.php:549
+#: oc-includes/osclass/controller/user-non-secure.php:146
 #, php-format
 msgid "This alert was tied to account %s."
 msgstr ""
 
-#: oc-includes/osclass/controller/user.php:539
-#: oc-includes/osclass/controller/user-non-secure.php:146
+#: oc-includes/osclass/controller/user.php:554
+#: oc-includes/osclass/controller/user-non-secure.php:151
 msgid "You have successfully unsubscribed from this alert."
 msgstr ""
 
-#: oc-includes/osclass/controller/user.php:541
-#: oc-includes/osclass/controller/user-non-secure.php:148
+#: oc-includes/osclass/controller/user.php:556
+#: oc-includes/osclass/controller/user-non-secure.php:153
 msgid "You have been unsubscribed from this alert"
 msgstr ""
 
-#: oc-includes/osclass/controller/user.php:543
-#: oc-includes/osclass/controller/user-non-secure.php:150
+#: oc-includes/osclass/controller/user.php:558
+#: oc-includes/osclass/controller/user-non-secure.php:155
 msgid ""
 "Oops! There was a problem trying to unsubscribe you. Please contact an "
 "administrator"
 msgstr ""
 
-#: oc-includes/osclass/controller/user.php:564
+#: oc-includes/osclass/controller/user.php:579
 msgid ""
 "Oops! There was a problem trying to change alert frequency - invalid type. "
 "Please contact an administrator"
 msgstr ""
 
-#: oc-includes/osclass/controller/user.php:573
+#: oc-includes/osclass/controller/user.php:588
 msgid "Alert frequency has been changed"
 msgstr ""
 
-#: oc-includes/osclass/controller/user.php:575
+#: oc-includes/osclass/controller/user.php:590
 msgid ""
 "Oops! There was a problem trying to change alert frequency. Please contact "
 "an administrator"
 msgstr ""
 
-#: oc-includes/osclass/controller/user.php:588
+#: oc-includes/osclass/controller/user.php:603
 msgid "Changing alert expiration is not allowed"
 msgstr ""
 
-#: oc-includes/osclass/controller/user.php:599
+#: oc-includes/osclass/controller/user.php:614
 msgid ""
 "Oops! There was a problem trying to change alert expiration. Please contact "
 "an administrator"
 msgstr ""
 
-#: oc-includes/osclass/controller/user.php:601
-#: oc-includes/osclass/controller/user.php:643
-#: oc-includes/osclass/controller/user.php:647
+#: oc-includes/osclass/controller/user.php:616
+#: oc-includes/osclass/controller/user.php:658
+#: oc-includes/osclass/controller/user.php:662
 msgid "Oops! You cannot do that"
 msgstr ""
 
-#: oc-includes/osclass/controller/user.php:607
+#: oc-includes/osclass/controller/user.php:622
 msgid "Alert expiration has been changed"
 msgstr ""
 
-#: oc-includes/osclass/controller/user.php:609
+#: oc-includes/osclass/controller/user.php:624
 msgid ""
 "Oops! There was a problem trying to change alert expiration - invalid "
 "operation. Please contact an administrator"
 msgstr ""
 
-#: oc-includes/osclass/controller/user.php:640
+#: oc-includes/osclass/controller/user.php:655
 msgid "Your account has been deleted"
 msgstr ""
 
@@ -2330,7 +2336,7 @@ msgstr ""
 msgid "Your email has been changed"
 msgstr ""
 
-#: oc-includes/osclass/controller/user-non-secure.php:461
+#: oc-includes/osclass/controller/user-non-secure.php:466
 msgid "Your email has been sent"
 msgstr ""
 
@@ -2534,7 +2540,7 @@ msgid ""
 "Your rating has been removed as you already rated this listing %d time(s)"
 msgstr ""
 
-#: oc-includes/osclass/upgrade-funcs.php:1008
+#: oc-includes/osclass/upgrade-funcs.php:995
 msgid ""
 "Osclass has been updated successfully. <a href=\"https://"
 "forums.osclasspoint.com\">Need more help?</a>"
