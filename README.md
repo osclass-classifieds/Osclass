@@ -29,7 +29,7 @@ Osclass is actively maintained and developed.
 
 This repository contains the official Osclass source code and release history maintained by the OsclassPoint team.
 
-Current stable release: **8.3.1** (PHP 7.2 or higher; PHP 8.x recommended, including PHP 8.5).
+Current stable release: **8.4.0** (PHP 7.4 or higher; PHP 8.x recommended, including PHP 8.5).
 
 For current releases, installation instructions, documentation and project news:
 
