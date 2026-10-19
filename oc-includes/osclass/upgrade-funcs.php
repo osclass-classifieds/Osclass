@@ -968,7 +968,11 @@ if($current_version < 841) {
   $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'password_min_length', '1', 'INTEGER')", DB_TABLE_PREFIX));
   $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'rewrite_user_public_profile', '', 'STRING')", DB_TABLE_PREFIX));
 
-  $comm->query(sprintf('ALTER TABLE %st_log ADD INDEX idx_section_id_date (s_section, fk_i_id, dt_date);', DB_TABLE_PREFIX));
+  // Index for the history of one object (section + id, ordered by date)
+  $log_index = $comm->query(sprintf("SHOW INDEX FROM %st_log WHERE Key_name = 'idx_section_id_date'", DB_TABLE_PREFIX))->result();
+  if(empty($log_index)) {
+    $comm->query(sprintf('ALTER TABLE %st_log ADD INDEX idx_section_id_date (s_section, fk_i_id, dt_date);', DB_TABLE_PREFIX));
+  }
 
   $updated_version = 841;       // Version 8.4.1
 }
