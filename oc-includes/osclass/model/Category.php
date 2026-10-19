@@ -1363,6 +1363,12 @@ class Category extends DAO
       return false;
     }
 
+    // Parent unchanged: always valid (existing tree may exceed the depth limit)
+    $current = $this->findByPrimaryKey($categoryId);
+    if($current && (int)$current['fk_i_parent_id'] === $newParentId) {
+      return true;
+    }
+
     if($newParentId <= 0) {
       return ($subtreeHeight <= $maxLevels);
     }
