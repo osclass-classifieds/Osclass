@@ -167,6 +167,7 @@ INSERT INTO /*TABLE_PREFIX*/t_preference VALUES
 ,('osclass', 'profile_picture_library', 'UPPY', 'STRING')
 ,('osclass', 'logged_user_item_validation', '1', 'BOOLEAN')
 ,('osclass', 'items_wait_time', '0', 'INTEGER')
+,('osclass', 'item_phone_required', '0', 'BOOLEAN')
 ,('osclass', 'enabled_user_validation', '1', 'BOOLEAN')
 ,('osclass', 'enabled_user_registration', '1', 'BOOLEAN')
 ,('osclass', 'enabled_users','1', 'BOOLEAN')

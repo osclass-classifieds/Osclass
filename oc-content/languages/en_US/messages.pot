@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-13 10:00+0200\n"
+"POT-Creation-Date: 2026-10-19 15:47+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -39,8 +39,8 @@ msgstr ""
 #: oc-admin/tools.php:498 oc-admin/tools.php:517 oc-admin/tools.php:595
 #: oc-admin/tools.php:636 oc-admin/tools.php:689 oc-admin/tools.php:722
 #: oc-admin/tools.php:749 oc-admin/tools.php:786 oc-admin/translations.php:39
-#: oc-admin/translations.php:82 oc-admin/translations.php:278
-#: oc-admin/translations.php:525 oc-admin/translations.php:549
+#: oc-admin/translations.php:82 oc-admin/translations.php:228
+#: oc-admin/translations.php:479 oc-admin/translations.php:503
 #: oc-admin/upgrade.php:34
 msgid "This action cannot be done because it is a demo site"
 msgstr ""
@@ -51,7 +51,7 @@ msgstr ""
 #: oc-includes/osclass/controller/item.php:667
 #: oc-includes/osclass/controller/login.php:275
 #: oc-includes/osclass/controller/user.php:168
-#: oc-includes/osclass/ItemActions.php:155
+#: oc-includes/osclass/ItemActions.php:156
 #: oc-includes/osclass/UserActions.php:70
 msgid "The email is not valid"
 msgstr ""
@@ -59,7 +59,7 @@ msgstr ""
 #: oc-admin/admins.php:90 oc-admin/admins.php:94 oc-admin/admins.php:98
 #: oc-admin/admins.php:220 oc-admin/admins.php:224
 #: oc-includes/osclass/ItemActions.php:148
-#: oc-includes/osclass/ItemActions.php:762
+#: oc-includes/osclass/ItemActions.php:763
 #, php-format
 msgid "%s is not valid"
 msgstr ""
@@ -189,7 +189,7 @@ msgstr ""
 #: oc-admin/controller/settings/media.php:235
 #: oc-admin/controller/settings/optimization.php:75
 #: oc-admin/controller/settings/optimization.php:112
-#: oc-admin/controller/settings/spamnbots.php:81 oc-admin/items.php:677
+#: oc-admin/controller/settings/spamnbots.php:81 oc-admin/items.php:679
 #: oc-admin/main.php:84 oc-admin/plugins.php:486 oc-admin/reports.php:413
 #: oc-admin/stats.php:181 oc-admin/users.php:713
 msgid "Settings have been updated"
@@ -220,8 +220,8 @@ msgstr ""
 #: oc-admin/controller/settings/main.php:206
 #: oc-admin/controller/settings/main.php:209 oc-admin/languages.php:157
 #: oc-admin/languages.php:160 oc-admin/languages.php:163
-#: oc-admin/languages.php:166 oc-includes/osclass/ItemActions.php:186
-#: oc-includes/osclass/ItemActions.php:793
+#: oc-admin/languages.php:166 oc-includes/osclass/ItemActions.php:187
+#: oc-includes/osclass/ItemActions.php:795
 #, php-format
 msgid "%s is required"
 msgstr ""
@@ -754,27 +754,27 @@ msgstr ""
 msgid "A new listing has been added"
 msgstr ""
 
-#: oc-admin/items.php:615
+#: oc-admin/items.php:616
 msgid "Wait time must only contain numeric characters"
 msgstr ""
 
-#: oc-admin/items.php:618
+#: oc-admin/items.php:619
 msgid "Number of moderated listings must only contain numeric characters"
 msgstr ""
 
-#: oc-admin/items.php:621
+#: oc-admin/items.php:622
 msgid "Images per listing must only contain numeric characters"
 msgstr ""
 
-#: oc-admin/items.php:624
+#: oc-admin/items.php:625
 msgid "Number of expiration days has to be a numeric value"
 msgstr ""
 
-#: oc-admin/items.php:627
+#: oc-admin/items.php:628
 msgid "Title Length has to be a numeric value"
 msgstr ""
 
-#: oc-admin/items.php:630
+#: oc-admin/items.php:631
 msgid "Description Length has to be a numeric value"
 msgstr ""
 
@@ -1418,84 +1418,84 @@ msgstr ""
 msgid "There was problem cleaning data (no data has been found)"
 msgstr ""
 
-#: oc-admin/translations.php:201 oc-admin/translations.php:332
-#: oc-admin/translations.php:589
+#: oc-admin/translations.php:201 oc-admin/translations.php:282
+#: oc-admin/translations.php:543
 #, php-format
 msgid ""
 "Required and missing folder %s could not be created. Create it manually in "
 "your file system."
 msgstr ""
 
-#: oc-admin/translations.php:271
+#: oc-admin/translations.php:221
 msgid "Translations have been updated"
 msgstr ""
 
-#: oc-admin/translations.php:311
+#: oc-admin/translations.php:261
 msgid ""
 "Translation catalog could not be created, invalid language code for Gettext. "
 "Create catalog manually."
 msgstr ""
 
-#: oc-admin/translations.php:374
+#: oc-admin/translations.php:324
 msgid "Translations have been created from source code."
 msgstr ""
 
-#: oc-admin/translations.php:376
+#: oc-admin/translations.php:326
 msgid "Translations have been updated from source code."
 msgstr ""
 
-#: oc-admin/translations.php:388 oc-admin/translations.php:425
-#: oc-admin/translations.php:534
+#: oc-admin/translations.php:338 oc-admin/translations.php:375
+#: oc-admin/translations.php:488
 msgid "Translations does not exists."
 msgstr ""
 
-#: oc-admin/translations.php:399 oc-admin/translations.php:457
+#: oc-admin/translations.php:349 oc-admin/translations.php:411
 msgid "ZIP archive could not be created."
 msgstr ""
 
-#: oc-admin/translations.php:451
+#: oc-admin/translations.php:405
 #, php-format
 msgid ""
 "Translation does not contain all required files (Required: %s, Found: %s)."
 msgstr ""
 
-#: oc-admin/translations.php:501
+#: oc-admin/translations.php:455
 #, php-format
 msgid "There was problem sending translation (cURL issue): [%s] %s"
 msgstr ""
 
-#: oc-admin/translations.php:508
+#: oc-admin/translations.php:462
 #, php-format
 msgid "Translation was not accepted with following error: %s"
 msgstr ""
 
-#: oc-admin/translations.php:514
+#: oc-admin/translations.php:468
 msgid "Your server does not have cURL extension activated."
 msgstr ""
 
-#: oc-admin/translations.php:518
+#: oc-admin/translations.php:472
 msgid ""
 "Translation successfully sent to Osclass Team and is pending validation. "
 "Thanks for sharing and helping community!"
 msgstr ""
 
-#: oc-admin/translations.php:543
+#: oc-admin/translations.php:497
 msgid "The translation has been removed"
 msgstr ""
 
-#: oc-admin/translations.php:561
+#: oc-admin/translations.php:515
 msgid "Source translations catalog is same as target translations catalog."
 msgstr ""
 
-#: oc-admin/translations.php:568
+#: oc-admin/translations.php:522
 msgid "Source translations catalog does not exists."
 msgstr ""
 
-#: oc-admin/translations.php:575
+#: oc-admin/translations.php:529
 msgid "Target translations catalog does not exists."
 msgstr ""
 
-#: oc-admin/translations.php:601
+#: oc-admin/translations.php:555
 msgid ""
 "Target translations catalog has been merged with translations from source "
 "catalog"
@@ -1769,25 +1769,25 @@ msgstr ""
 msgid "Email is invalid"
 msgstr ""
 
-#: oc-includes/osclass/controller/ajax.php:388
-#: oc-includes/osclass/controller/ajax.php:431
-#: oc-includes/osclass/controller/ajax.php:454
+#: oc-includes/osclass/controller/ajax.php:392
+#: oc-includes/osclass/controller/ajax.php:437
+#: oc-includes/osclass/controller/ajax.php:460
 msgid "Alert created"
 msgstr ""
 
-#: oc-includes/osclass/controller/ajax.php:401
-#: oc-includes/osclass/controller/ajax.php:467
+#: oc-includes/osclass/controller/ajax.php:407
+#: oc-includes/osclass/controller/ajax.php:475
 #, php-format
 msgid ""
 "Alert has been successfully created. A validation email has been sent to %s. "
 "Please activate your alert using the link in that email."
 msgstr ""
 
-#: oc-includes/osclass/controller/ajax.php:414
+#: oc-includes/osclass/controller/ajax.php:420
 msgid "Alert already exists"
 msgstr ""
 
-#: oc-includes/osclass/controller/ajax.php:440
+#: oc-includes/osclass/controller/ajax.php:446
 msgid "Alert was created but cannot be activated for this user"
 msgstr ""
 
@@ -1977,23 +1977,23 @@ msgstr ""
 msgid "The comment was not added by you, you cannot delete it"
 msgstr ""
 
-#: oc-includes/osclass/controller/item.php:803
+#: oc-includes/osclass/controller/item.php:810
 msgid "The listing has expired. Please renew it in order to make it public"
 msgstr ""
 
-#: oc-includes/osclass/controller/item.php:810
+#: oc-includes/osclass/controller/item.php:816
 msgid "The listing has not been validated. Validate it to make it public"
 msgstr ""
 
-#: oc-includes/osclass/controller/item.php:813
+#: oc-includes/osclass/controller/item.php:819
 msgid "The listing is deactivated"
 msgstr ""
 
-#: oc-includes/osclass/controller/item.php:823
+#: oc-includes/osclass/controller/item.php:830
 msgid "The listing has not been enabled. Enable it to make it public"
 msgstr ""
 
-#: oc-includes/osclass/controller/item.php:826
+#: oc-includes/osclass/controller/item.php:833
 msgid "The listing has been blocked or is awaiting moderation from the admin"
 msgstr ""
 
@@ -2391,12 +2391,12 @@ msgid "Invalid CSRF/Security token."
 msgstr ""
 
 #: oc-includes/osclass/ItemActions.php:112
-#: oc-includes/osclass/ItemActions.php:725
+#: oc-includes/osclass/ItemActions.php:726
 msgid "Image with an incorrect extension."
 msgstr ""
 
 #: oc-includes/osclass/ItemActions.php:115
-#: oc-includes/osclass/ItemActions.php:729
+#: oc-includes/osclass/ItemActions.php:730
 msgid "Image is too big. Max. size"
 msgstr ""
 
@@ -2421,17 +2421,17 @@ msgid "Description too long (%s)."
 msgstr ""
 
 #: oc-includes/osclass/ItemActions.php:149
-#: oc-includes/osclass/ItemActions.php:763
+#: oc-includes/osclass/ItemActions.php:764
 msgid "Price must be a number."
 msgstr ""
 
 #: oc-includes/osclass/ItemActions.php:150
-#: oc-includes/osclass/ItemActions.php:764
+#: oc-includes/osclass/ItemActions.php:765
 msgid "Price too long."
 msgstr ""
 
 #: oc-includes/osclass/ItemActions.php:151
-#: oc-includes/osclass/ItemActions.php:765
+#: oc-includes/osclass/ItemActions.php:766
 msgid "Price must be positive number."
 msgstr ""
 
@@ -2444,103 +2444,108 @@ msgid "Phone too long."
 msgstr ""
 
 #: oc-includes/osclass/ItemActions.php:154
-msgid "Other contact information too long."
+#: oc-includes/osclass/ItemActions.php:777
+msgid "Phone is required."
 msgstr ""
 
-#: oc-includes/osclass/ItemActions.php:156
-#: oc-includes/osclass/ItemActions.php:766
-msgid "Country too short."
+#: oc-includes/osclass/ItemActions.php:155
+msgid "Other contact information too long."
 msgstr ""
 
 #: oc-includes/osclass/ItemActions.php:157
 #: oc-includes/osclass/ItemActions.php:767
-msgid "Country too long."
+msgid "Country too short."
 msgstr ""
 
 #: oc-includes/osclass/ItemActions.php:158
 #: oc-includes/osclass/ItemActions.php:768
-msgid "Region too short."
+msgid "Country too long."
 msgstr ""
 
 #: oc-includes/osclass/ItemActions.php:159
 #: oc-includes/osclass/ItemActions.php:769
-msgid "Region too long."
+msgid "Region too short."
 msgstr ""
 
 #: oc-includes/osclass/ItemActions.php:160
 #: oc-includes/osclass/ItemActions.php:770
-msgid "City too short."
+msgid "Region too long."
 msgstr ""
 
 #: oc-includes/osclass/ItemActions.php:161
 #: oc-includes/osclass/ItemActions.php:771
-msgid "City too long."
+msgid "City too short."
 msgstr ""
 
 #: oc-includes/osclass/ItemActions.php:162
 #: oc-includes/osclass/ItemActions.php:772
-msgid "Municipality too short."
+msgid "City too long."
 msgstr ""
 
 #: oc-includes/osclass/ItemActions.php:163
 #: oc-includes/osclass/ItemActions.php:773
-msgid "Municipality too long."
+msgid "Municipality too short."
 msgstr ""
 
 #: oc-includes/osclass/ItemActions.php:164
 #: oc-includes/osclass/ItemActions.php:774
-msgid "Address too short."
+msgid "Municipality too long."
 msgstr ""
 
 #: oc-includes/osclass/ItemActions.php:165
 #: oc-includes/osclass/ItemActions.php:775
-msgid "Address too long."
+msgid "Address too short."
 msgstr ""
 
 #: oc-includes/osclass/ItemActions.php:166
+#: oc-includes/osclass/ItemActions.php:776
+msgid "Address too long."
+msgstr ""
+
+#: oc-includes/osclass/ItemActions.php:167
 msgid "Too fast. You should wait a little to publish your ad."
 msgstr ""
 
-#: oc-includes/osclass/ItemActions.php:402
+#: oc-includes/osclass/ItemActions.php:403
 msgid "The file you tried to upload does not have a valid extension"
 msgstr ""
 
-#: oc-includes/osclass/ItemActions.php:429
+#: oc-includes/osclass/ItemActions.php:430
 msgid "One of the files you tried to upload exceeds the maximum size"
 msgstr ""
 
-#: oc-includes/osclass/ItemActions.php:613
+#: oc-includes/osclass/ItemActions.php:614
 msgid "You cannot upload more images. Image limit reached."
 msgstr ""
 
-#: oc-includes/osclass/ItemActions.php:741
+#: oc-includes/osclass/ItemActions.php:742
 msgid "Title too short."
 msgstr ""
 
-#: oc-includes/osclass/ItemActions.php:741
+#: oc-includes/osclass/ItemActions.php:742
 msgid "Title too long."
 msgstr ""
 
-#: oc-includes/osclass/ItemActions.php:756
+#: oc-includes/osclass/ItemActions.php:757
 msgid "Description too short."
 msgstr ""
 
-#: oc-includes/osclass/ItemActions.php:756
+#: oc-includes/osclass/ItemActions.php:757
 msgid "Description too long."
 msgstr ""
 
-#: oc-includes/osclass/ItemActions.php:1438
+#: oc-includes/osclass/ItemActions.php:1440
 #, php-format
 msgid "We just sent your message to %s"
 msgstr ""
 
-#: oc-includes/osclass/ItemActions.php:1594
+#: oc-includes/osclass/ItemActions.php:1596
 #, php-format
 msgid ""
 "Your rating has been removed as you already rated this listing %d time(s)"
 msgstr ""
 
-#: oc-includes/osclass/upgrade-funcs.php:995
+#: oc-includes/osclass/upgrade-funcs.php:996
 msgid ""
 "Osclass has been updated successfully. <a href=\"https://"
 "forums.osclasspoint.com\">Need more help?</a>"

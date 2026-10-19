@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Osclass by OsclassPoint.com\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-13 09:45+0200\n"
+"POT-Creation-Date: 2026-10-19 15:47+0200\n"
 "PO-Revision-Date: 2026-10-01 14:14+0200\n"
 "Last-Translator: Translations <translations@osclass>\n"
 "Language-Team: OsclassPoint\n"
@@ -133,7 +133,7 @@ msgstr ""
 #: oc-admin/admins.php:392 oc-admin/appearance.php:169
 #: oc-admin/categories.php:475 oc-admin/comments.php:462
 #: oc-admin/currencies.php:346 oc-admin/custom_fields.php:222
-#: oc-admin/items.php:745 oc-admin/languages.php:432 oc-admin/media.php:175
+#: oc-admin/items.php:747 oc-admin/languages.php:432 oc-admin/media.php:175
 #: oc-admin/pages.php:339 oc-admin/plugins.php:752 oc-admin/reports.php:474
 #: oc-admin/themes/omega/admins/index.php:304
 #: oc-admin/themes/omega/appearance/widgets.php:310
@@ -165,7 +165,7 @@ msgstr ""
 #: oc-admin/admins.php:393 oc-admin/appearance.php:170
 #: oc-admin/categories.php:478 oc-admin/comments.php:463
 #: oc-admin/currencies.php:349 oc-admin/custom_fields.php:223
-#: oc-admin/items.php:746 oc-admin/languages.php:455 oc-admin/languages.php:456
+#: oc-admin/items.php:748 oc-admin/languages.php:455 oc-admin/languages.php:456
 #: oc-admin/media.php:176 oc-admin/pages.php:344 oc-admin/plugins.php:688
 #: oc-admin/plugins.php:757 oc-admin/reports.php:475
 #: oc-admin/themes/omega/admins/index.php:298
@@ -357,7 +357,7 @@ msgstr ""
 #: oc-includes/osclass/frm/SendFriend.form.class.php:124
 #: oc-includes/osclass/frm/User.form.class.php:213
 #: oc-includes/osclass/frm/User.form.class.php:331
-#: oc-includes/osclass/ItemActions.php:1542
+#: oc-includes/osclass/ItemActions.php:1544
 msgid "The email is not valid"
 msgstr ""
 
@@ -465,7 +465,7 @@ msgstr ""
 msgid "You don't have the necessary permissions"
 msgstr ""
 
-#: oc-admin/ajax/ajax.php:1232 oc-includes/osclass/controller/ajax.php:830
+#: oc-admin/ajax/ajax.php:1232 oc-includes/osclass/controller/ajax.php:838
 msgid "no action defined"
 msgstr ""
 
@@ -616,7 +616,7 @@ msgid "Expiration disabled"
 msgstr ""
 
 #: oc-admin/comments.php:276 oc-admin/comments.php:465 oc-admin/items.php:364
-#: oc-admin/items.php:748 oc-admin/themes/omega/users/alerts.php:240
+#: oc-admin/items.php:750 oc-admin/themes/omega/users/alerts.php:240
 #: oc-admin/users.php:120 oc-admin/users.php:1017
 #: oc-includes/osclass/classes/datatables/AlertsDataTable.php:145
 #: oc-includes/osclass/classes/datatables/CommentsDataTable.php:161
@@ -626,7 +626,7 @@ msgid "Deactivate"
 msgstr ""
 
 #: oc-admin/comments.php:278 oc-admin/comments.php:464 oc-admin/items.php:366
-#: oc-admin/items.php:747 oc-admin/themes/omega/appearance/index.php:214
+#: oc-admin/items.php:749 oc-admin/themes/omega/appearance/index.php:214
 #: oc-admin/themes/omega/market/languages.php:164
 #: oc-admin/themes/omega/market/themes.php:216
 #: oc-admin/themes/omega/users/alerts.php:239 oc-admin/users.php:122
@@ -639,7 +639,7 @@ msgid "Activate"
 msgstr ""
 
 #: oc-admin/comments.php:282 oc-admin/comments.php:466 oc-admin/items.php:369
-#: oc-admin/items.php:749 oc-admin/themes/omega/items/index.php:278
+#: oc-admin/items.php:751 oc-admin/themes/omega/items/index.php:278
 #: oc-admin/themes/omega/users/index.php:271 oc-admin/users.php:126
 #: oc-admin/users.php:1019
 #: oc-includes/osclass/classes/datatables/CommentsDataTable.php:143
@@ -649,7 +649,7 @@ msgid "Block"
 msgstr ""
 
 #: oc-admin/comments.php:284 oc-admin/comments.php:467 oc-admin/items.php:371
-#: oc-admin/items.php:750 oc-admin/users.php:128 oc-admin/users.php:1018
+#: oc-admin/items.php:752 oc-admin/users.php:128 oc-admin/users.php:1018
 #: oc-includes/osclass/classes/datatables/CommentsDataTable.php:145
 #: oc-includes/osclass/classes/datatables/ItemsDataTable.php:128
 #: oc-includes/osclass/classes/datatables/UsersDataTable.php:137
@@ -876,29 +876,29 @@ msgid ""
 "access only oc-admin > Appearance section. Action buttons may be restricted."
 msgstr ""
 
-#: oc-admin/items.php:374 oc-admin/items.php:752
+#: oc-admin/items.php:374 oc-admin/items.php:754
 #: oc-includes/osclass/classes/datatables/ItemsDataTable.php:131
 msgid "Unmark as premium"
 msgstr ""
 
-#: oc-admin/items.php:376 oc-admin/items.php:751
+#: oc-admin/items.php:376 oc-admin/items.php:753
 #: oc-includes/osclass/classes/datatables/ItemsDataTable.php:133
 msgid "Mark as premium"
 msgstr ""
 
-#: oc-admin/items.php:379 oc-admin/items.php:754
+#: oc-admin/items.php:379 oc-admin/items.php:756
 #: oc-includes/osclass/classes/datatables/ItemsDataTable.php:136
 msgid "Unmark as spam"
 msgstr ""
 
-#: oc-admin/items.php:381 oc-admin/items.php:753
+#: oc-admin/items.php:381 oc-admin/items.php:755
 #: oc-includes/osclass/classes/datatables/ItemsDataTable.php:138
 msgid "Mark as spam"
 msgstr ""
 
-#: oc-admin/items.php:746 oc-admin/items.php:747 oc-admin/items.php:748
-#: oc-admin/items.php:749 oc-admin/items.php:750 oc-admin/items.php:751
-#: oc-admin/items.php:752 oc-admin/items.php:753 oc-admin/items.php:754
+#: oc-admin/items.php:748 oc-admin/items.php:749 oc-admin/items.php:750
+#: oc-admin/items.php:751 oc-admin/items.php:752 oc-admin/items.php:753
+#: oc-admin/items.php:754 oc-admin/items.php:755 oc-admin/items.php:756
 #, php-format
 msgid "Are you sure you want to %s the selected listings?"
 msgstr ""
@@ -1634,7 +1634,7 @@ msgstr ""
 #: oc-admin/themes/omega/emails/frm.php:169
 #: oc-admin/themes/omega/fields/frm.php:186
 #: oc-admin/themes/omega/fields/iframe.php:95
-#: oc-admin/themes/omega/items/settings.php:391
+#: oc-admin/themes/omega/items/settings.php:398
 #: oc-admin/themes/omega/languages/frm.php:180
 #: oc-admin/themes/omega/main/settings.php:269
 #: oc-admin/themes/omega/pages/frm.php:37
@@ -1863,8 +1863,8 @@ msgstr ""
 #: oc-includes/osclass/frm/User.form.class.php:220
 #: oc-includes/osclass/frm/User.form.class.php:327
 #: oc-includes/osclass/frm/User.form.class.php:330
-#: oc-includes/osclass/ItemActions.php:1539
-#: oc-includes/osclass/ItemActions.php:1545
+#: oc-includes/osclass/ItemActions.php:1541
+#: oc-includes/osclass/ItemActions.php:1547
 #, php-format
 msgid "%s is required"
 msgstr ""
@@ -2473,7 +2473,7 @@ msgstr ""
 
 #: oc-admin/themes/omega/categories/frm.php:171
 #: oc-admin/themes/omega/categories/iframe.php:62
-#: oc-admin/themes/omega/items/settings.php:268
+#: oc-admin/themes/omega/items/settings.php:275
 #: oc-admin/themes/omega/settings/index.php:833
 #: oc-includes/osclass/helpers/hUsers.php:1071
 msgid "days"
@@ -3337,7 +3337,7 @@ msgstr ""
 #: oc-admin/themes/omega/items/frm.php:290
 #: oc-admin/themes/omega/items/index.php:209
 #: oc-admin/themes/omega/items/index.php:349
-#: oc-admin/themes/omega/items/settings.php:283 oc-admin/tools.php:469
+#: oc-admin/themes/omega/items/settings.php:290 oc-admin/tools.php:469
 #: oc-includes/osclass/classes/datatables/ItemsDataTable.php:84
 #: oc-includes/osclass/helpers/hDefines.php:2260
 #: oc-includes/osclass/helpers/hItemStats.php:2552
@@ -3346,7 +3346,7 @@ msgstr ""
 #: oc-includes/osclass/helpers/hItemStats.php:3184
 #: oc-includes/osclass/helpers/hItemStats.php:3192
 #: oc-includes/osclass/ItemActions.php:148
-#: oc-includes/osclass/ItemActions.php:762
+#: oc-includes/osclass/ItemActions.php:763
 msgid "Category"
 msgstr ""
 
@@ -3389,7 +3389,7 @@ msgid ""
 msgstr ""
 
 #: oc-admin/themes/omega/items/frm.php:335
-#: oc-admin/themes/omega/items/settings.php:317
+#: oc-admin/themes/omega/items/settings.php:324
 #: oc-admin/themes/omega/stats/items.php:93
 #: oc-includes/osclass/helpers/hItemStats.php:2389
 msgid "Price"
@@ -3662,150 +3662,154 @@ msgstr ""
 msgid "Only logged in users can post listings"
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:114
+#: oc-admin/themes/omega/items/settings.php:116
+msgid "Phone number is required to publish a listing"
+msgstr ""
+
+#: oc-admin/themes/omega/items/settings.php:121
 #, php-format
 msgid "An user has to wait %s seconds between each listing added"
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:116
+#: oc-admin/themes/omega/items/settings.php:123
 msgid "If the value is set to zero, there is no wait period"
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:123
+#: oc-admin/themes/omega/items/settings.php:130
 msgid "Users have to validate their listings"
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:130
+#: oc-admin/themes/omega/items/settings.php:137
 msgid "Users can disable / de-activate listing"
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:136
+#: oc-admin/themes/omega/items/settings.php:143
 #, php-format
 msgid ""
 "After %s validated listings the user doesn't need to validate the listings "
 "any more"
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:138
+#: oc-admin/themes/omega/items/settings.php:145
 msgid "If the value is zero, it means that each listing must be validated"
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:144
+#: oc-admin/themes/omega/items/settings.php:151
 msgid "Logged in users don't need to validate their listings"
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:152
+#: oc-admin/themes/omega/items/settings.php:159
 msgid "Show reCAPTCHA in add/edit listing form"
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:154
+#: oc-admin/themes/omega/items/settings.php:161
 msgid "<strong>Remember</strong> that you must configure reCAPTCHA first"
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:160
+#: oc-admin/themes/omega/items/settings.php:167
 msgid "Enable TinyMCE on add/edit listing form in front/back office"
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:162
+#: oc-admin/themes/omega/items/settings.php:169
 msgid "TinyMCE enable to format description of listings"
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:169
+#: oc-admin/themes/omega/items/settings.php:176
 msgid "Renewal"
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:174
+#: oc-admin/themes/omega/items/settings.php:181
 msgid ""
 "User can renew its listings once expired. This feature is available only to "
 "registered users."
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:181
+#: oc-admin/themes/omega/items/settings.php:188
 msgid "Publish date of renewed listing is updated to current date"
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:186
+#: oc-admin/themes/omega/items/settings.php:193
 #, php-format
 msgid "Listing can be republished %s times at maximum"
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:188
+#: oc-admin/themes/omega/items/settings.php:195
 msgid "If the value is set to zero, there is no renewal limit"
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:196
+#: oc-admin/themes/omega/items/settings.php:203
 #: oc-includes/osclass/classes/Breadcrumb.php:539
 msgid "Contact publisher"
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:201
+#: oc-admin/themes/omega/items/settings.php:208
 msgid "Disable contact publisher form"
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:208
+#: oc-admin/themes/omega/items/settings.php:215
 msgid "Only allow registered users to contact publisher"
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:215
+#: oc-admin/themes/omega/items/settings.php:222
 msgid "Only allow registered users to see contact phone number"
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:222
+#: oc-admin/themes/omega/items/settings.php:229
 msgid "Allow attached files in contact publisher form"
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:229
+#: oc-admin/themes/omega/items/settings.php:236
 msgid "Send to friend"
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:234
+#: oc-admin/themes/omega/items/settings.php:241
 msgid "Disable send to friend form"
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:241
+#: oc-admin/themes/omega/items/settings.php:248
 #: oc-admin/themes/omega/settings/comments.php:196
 msgid "Notifications"
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:246
+#: oc-admin/themes/omega/items/settings.php:253
 msgid "Notify admin when a new listing is added"
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:252
+#: oc-admin/themes/omega/items/settings.php:259
 msgid "Send admin a copy of the \"contact publisher\" email"
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:258
+#: oc-admin/themes/omega/items/settings.php:265
 msgid "Send admin a copy to \"share listing\" email"
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:265
+#: oc-admin/themes/omega/items/settings.php:272
 msgid "Warn about expiration"
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:270
+#: oc-admin/themes/omega/items/settings.php:277
 msgid ""
 "This option will send an email X days before an ad expires to the author. 0 "
 "for email at day of expiration. -1 for no email."
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:271
+#: oc-admin/themes/omega/items/settings.php:278
 msgid "Require hourly cron to be configured."
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:277
+#: oc-admin/themes/omega/items/settings.php:284
 msgid "Redirect priority after publish"
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:281
+#: oc-admin/themes/omega/items/settings.php:288
 msgid "Dashboard > Listing > Category"
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:282
+#: oc-admin/themes/omega/items/settings.php:289
 msgid "Listing > Category"
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:285
+#: oc-admin/themes/omega/items/settings.php:292
 msgid ""
 "Redirect priority once item is published. I.e. Dashboard > Listing > Search "
 "means, that if user is logged in, will be redirected to user listings page "
@@ -3813,45 +3817,45 @@ msgid ""
 "listing page. Otherwise will go to category page."
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:291
+#: oc-admin/themes/omega/items/settings.php:298
 msgid "Title length"
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:295
-#: oc-admin/themes/omega/items/settings.php:305
+#: oc-admin/themes/omega/items/settings.php:302
+#: oc-admin/themes/omega/items/settings.php:312
 msgid "characters"
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:301
+#: oc-admin/themes/omega/items/settings.php:308
 msgid "Description length"
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:307
+#: oc-admin/themes/omega/items/settings.php:314
 msgid ""
 "Note that if TinyMCE is enabled, real limit will be lower, as HTML symbols "
 "are counted towards limit as well. In this case you should set limit higher "
 "by 30%."
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:312
+#: oc-admin/themes/omega/items/settings.php:319
 msgid "Optional fields"
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:323
+#: oc-admin/themes/omega/items/settings.php:330
 #: oc-includes/osclass/frm/Item.form.class.php:1835
 msgid "Upload images"
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:328
+#: oc-admin/themes/omega/items/settings.php:335
 #, php-format
 msgid "Upload max. %s images per listing"
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:329
+#: oc-admin/themes/omega/items/settings.php:336
 msgid "If the value is zero, it means an unlimited number of images is allowed"
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:336
+#: oc-admin/themes/omega/items/settings.php:343
 #: oc-admin/themes/omega/stats/alerts.php:56
 #: oc-admin/themes/omega/stats/comments.php:51
 #: oc-admin/themes/omega/stats/details.php:52
@@ -3868,64 +3872,64 @@ msgstr ""
 msgid "Statistics"
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:340
+#: oc-admin/themes/omega/items/settings.php:347
 #: oc-admin/themes/omega/stats/settings.php:109
 msgid "One view per session"
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:341
+#: oc-admin/themes/omega/items/settings.php:348
 #: oc-admin/themes/omega/stats/settings.php:110
 msgid "One view per page load"
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:343
+#: oc-admin/themes/omega/items/settings.php:350
 #: oc-admin/themes/omega/stats/settings.php:112
 msgid ""
 "Applies to page views and premium views. Other impression measures always "
 "count once per session."
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:348
+#: oc-admin/themes/omega/items/settings.php:355
 #: oc-admin/themes/omega/stats/settings.php:116
 msgid "Collect from logged-in visitors only"
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:350
+#: oc-admin/themes/omega/items/settings.php:357
 #: oc-admin/themes/omega/stats/settings.php:119
 msgid "Does not apply to renewals, promotions or alert emails."
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:353
+#: oc-admin/themes/omega/items/settings.php:360
 msgid "Open Statistics settings"
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:353
+#: oc-admin/themes/omega/items/settings.php:360
 msgid "for click selectors, engaged-view time and user charts."
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:354
+#: oc-admin/themes/omega/items/settings.php:361
 #: oc-admin/themes/omega/stats/settings.php:124
 msgid "Presets"
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:355
+#: oc-admin/themes/omega/items/settings.php:362
 #: oc-admin/themes/omega/stats/settings.php:127
 msgid "Essential"
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:356
+#: oc-admin/themes/omega/items/settings.php:363
 #: oc-admin/themes/omega/stats/settings.php:128
 #: oc-includes/osclass/helpers/hItemStats.php:542
 msgid "Engagement"
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:357
+#: oc-admin/themes/omega/items/settings.php:364
 #: oc-admin/themes/omega/stats/settings.php:129
 #: oc-includes/osclass/helpers/hItemStats.php:544
 msgid "Commerce"
 msgstr ""
 
-#: oc-admin/themes/omega/items/settings.php:358
+#: oc-admin/themes/omega/items/settings.php:365
 #: oc-admin/themes/omega/stats/settings.php:130
 msgid "Full"
 msgstr ""
@@ -12102,11 +12106,11 @@ msgstr ""
 msgid "No files were uploaded"
 msgstr ""
 
-#: oc-includes/AjaxUploader.php:66 oc-includes/osclass/controller/ajax.php:687
+#: oc-includes/AjaxUploader.php:66 oc-includes/osclass/controller/ajax.php:695
 msgid "File is empty"
 msgstr ""
 
-#: oc-includes/AjaxUploader.php:70 oc-includes/osclass/controller/ajax.php:693
+#: oc-includes/AjaxUploader.php:70 oc-includes/osclass/controller/ajax.php:701
 msgid "File is too large"
 msgstr ""
 
@@ -12903,59 +12907,59 @@ msgstr ""
 msgid "Installed plugins: %s."
 msgstr ""
 
-#: oc-includes/osclass/controller/ajax.php:385
-#: oc-includes/osclass/controller/ajax.php:428
-#: oc-includes/osclass/controller/ajax.php:451
+#: oc-includes/osclass/controller/ajax.php:389
+#: oc-includes/osclass/controller/ajax.php:434
+#: oc-includes/osclass/controller/ajax.php:457
 #: oc-includes/osclass/controller/user.php:517
 #: oc-includes/osclass/controller/user-non-secure.php:119
 #, php-format
 msgid "Alert #%d activated by %s"
 msgstr ""
 
-#: oc-includes/osclass/controller/ajax.php:398
-#: oc-includes/osclass/controller/ajax.php:464
+#: oc-includes/osclass/controller/ajax.php:404
+#: oc-includes/osclass/controller/ajax.php:472
 #, php-format
 msgid "Alert activation link sent to %s (alert #%d)"
 msgstr ""
 
-#: oc-includes/osclass/controller/ajax.php:423
+#: oc-includes/osclass/controller/ajax.php:429
 #, php-format
 msgid "New alert #%d has been created for %s"
 msgstr ""
 
-#: oc-includes/osclass/controller/ajax.php:681
+#: oc-includes/osclass/controller/ajax.php:689
 msgid "File name is empty"
 msgstr ""
 
-#: oc-includes/osclass/controller/ajax.php:699
+#: oc-includes/osclass/controller/ajax.php:707
 msgid "File extension not allowed"
 msgstr ""
 
-#: oc-includes/osclass/controller/ajax.php:705
+#: oc-includes/osclass/controller/ajax.php:713
 msgid "File upload error"
 msgstr ""
 
-#: oc-includes/osclass/controller/ajax.php:721
+#: oc-includes/osclass/controller/ajax.php:729
 #, php-format
 msgid ""
 "Image dimension does not match. Refine/crop your image before uploading. "
 "Expected image dimension is %spx."
 msgstr ""
 
-#: oc-includes/osclass/controller/ajax.php:734
+#: oc-includes/osclass/controller/ajax.php:742
 msgid "File could not be processed"
 msgstr ""
 
-#: oc-includes/osclass/controller/ajax.php:745
-#: oc-includes/osclass/controller/ajax.php:759
+#: oc-includes/osclass/controller/ajax.php:753
+#: oc-includes/osclass/controller/ajax.php:767
 msgid "You must be logged in"
 msgstr ""
 
-#: oc-includes/osclass/controller/ajax.php:777
+#: oc-includes/osclass/controller/ajax.php:785
 msgid "Invalid request"
 msgstr ""
 
-#: oc-includes/osclass/controller/ajax.php:824
+#: oc-includes/osclass/controller/ajax.php:832
 msgid "Could not update statistics"
 msgstr ""
 
@@ -13255,7 +13259,7 @@ msgstr ""
 #: oc-includes/osclass/frm/Contact.form.class.php:141
 #: oc-includes/osclass/frm/Contact.form.class.php:142
 #: oc-includes/osclass/frm/SendFriend.form.class.php:134
-#: oc-includes/osclass/ItemActions.php:1545
+#: oc-includes/osclass/ItemActions.php:1547
 msgid "Message"
 msgstr ""
 
@@ -13766,7 +13770,7 @@ msgid "Reply: enter at least 3 characters"
 msgstr ""
 
 #: oc-includes/osclass/frm/SendFriend.form.class.php:121
-#: oc-includes/osclass/ItemActions.php:1539
+#: oc-includes/osclass/ItemActions.php:1541
 msgid "Your name"
 msgstr ""
 
@@ -14993,27 +14997,27 @@ msgstr ""
 msgid "Custom %d"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hPreference.php:1943
+#: oc-includes/osclass/helpers/hPreference.php:1952
 msgid ""
 "ImageMagick is active in Media Settings, but this format is not supported by "
 "your ImageMagick build."
 msgstr ""
 
-#: oc-includes/osclass/helpers/hPreference.php:1947
+#: oc-includes/osclass/helpers/hPreference.php:1956
 msgid ""
 "HEIF/HEIC requires ImageMagick with HEIC/HEIF support enabled in Media "
 "Settings."
 msgstr ""
 
-#: oc-includes/osclass/helpers/hPreference.php:1951
+#: oc-includes/osclass/helpers/hPreference.php:1960
 msgid "AVIF requires PHP 8.1+ GD (imageavif) or ImageMagick with AVIF support."
 msgstr ""
 
-#: oc-includes/osclass/helpers/hPreference.php:1955
+#: oc-includes/osclass/helpers/hPreference.php:1964
 msgid "WebP requires GD (imagewebp) or ImageMagick with WebP support."
 msgstr ""
 
-#: oc-includes/osclass/helpers/hPreference.php:1958
+#: oc-includes/osclass/helpers/hPreference.php:1967
 msgid ""
 "This image format is not supported by the active image library on this "
 "server."
@@ -16274,11 +16278,12 @@ msgid ""
 "forums.osclasspoint.com\">ask in our forums</a>."
 msgstr ""
 
-#: oc-includes/osclass/upgrade-funcs.php:994 oc-includes/osclass/utils.php:3149
+#: oc-includes/osclass/upgrade-funcs.php:1000
+#: oc-includes/osclass/utils.php:3149
 msgid "Osclass has been updated"
 msgstr ""
 
-#: oc-includes/osclass/upgrade-funcs.php:995
+#: oc-includes/osclass/upgrade-funcs.php:1001
 msgid ""
 "Osclass has been updated successfully. <a href=\"https://"
 "forums.osclasspoint.com\">Need more help?</a>"
