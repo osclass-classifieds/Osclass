@@ -595,7 +595,8 @@ CREATE TABLE /*TABLE_PREFIX*/t_log (
   fk_i_who_id INT(10) UNSIGNED NOT NULL,
   
   INDEX idx_s_section (s_section),
-  INDEX idx_s_action (s_action)
+  INDEX idx_s_action (s_action),
+  INDEX idx_section_id_date (s_section, fk_i_id, dt_date)
 ) ENGINE=InnoDB DEFAULT CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_unicode_ci';
 
 CREATE TABLE /*TABLE_PREFIX*/t_city_stats (

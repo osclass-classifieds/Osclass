@@ -247,50 +247,33 @@ class CWebReport extends BaseModel {
 
         $data = osc_apply_filter('report_data', $data);
 
-        $reportId = Report::newInstance()->createReport($data);
+        $attachment_dir = osc_uploads_path() . 'report/';
+        $reportId = osc_report_create($data, true, function($reportId) use ($data, $attachment_ext, $attachment_tmp, $attachment_dir) {
+          if(isset($data['fk_i_item_id']) && (int)$data['fk_i_item_id'] > 0) {
+            osc_increase_item_stat('reports', (int)$data['fk_i_item_id']);
+          }
+
+          // Store attachment renamed to {report_id}_{random 8 chars}.{ext}
+          if($attachment_ext !== false && $attachment_tmp !== false) {
+            if(!file_exists($attachment_dir)) {
+              @mkdir($attachment_dir, 0755, true);
+              @file_put_contents($attachment_dir . 'index.php', '<?php // Silence is golden');
+            }
+
+            $file_name = $reportId . '_' . strtolower(osc_genRandomPassword(8)) . '.' . $attachment_ext;
+
+            if(@move_uploaded_file($attachment_tmp, $attachment_dir . $file_name)) {
+              Report::newInstance()->update(array('s_file' => $file_name), array('pk_i_id' => $reportId));
+            }
+          }
+        });
 
         if(!$reportId) {
           osc_add_flash_error_message(_m('There was a problem submitting your report, please try again later.'));
           $this->redirectTo($redirect_url);
         }
 
-        if(isset($data['fk_i_item_id']) && (int)$data['fk_i_item_id'] > 0) {
-          osc_increase_item_stat('reports', (int)$data['fk_i_item_id']);
-        }
-
-        // Store attachment renamed to {report_id}_{random 8 chars}.{ext}
-        if($attachment_ext !== false && $attachment_tmp !== false) {
-          $upload_dir = osc_uploads_path() . 'report/';
-
-          if(!file_exists($upload_dir)) {
-            @mkdir($upload_dir, 0755, true);
-            @file_put_contents($upload_dir . 'index.php', '<?php // Silence is golden');
-          }
-
-          $file_name = $reportId . '_' . strtolower(osc_genRandomPassword(8)) . '.' . $attachment_ext;
-
-          if(@move_uploaded_file($attachment_tmp, $upload_dir . $file_name)) {
-            Report::newInstance()->update(array('s_file' => $file_name), array('pk_i_id' => $reportId));
-          }
-        }
-
         $report = Report::newInstance()->findByPrimaryKey($reportId);
-
-        osc_run_hook('after_report_add', $report);
-        osc_run_hook('posted_report', $report);
-
-        // Notifications
-        if(osc_reports_notify_admin()) {
-          osc_run_hook('hook_email_report_admin', $report);
-        }
-
-        if(osc_reports_notify_reporter_created()) {
-          osc_run_hook('hook_email_report_reporter_created', $report);
-        }
-
-        if(osc_reports_notify_owner_created()) {
-          osc_run_hook('hook_email_report_owner_created', $report);
-        }
 
         if(osc_is_admin_user_logged_in() && is_array($report) && (int)$report['pk_i_id'] > 0) {
           osc_add_flash_ok_message(sprintf(_m('Report #%d has been submitted.'), (int)$report['pk_i_id']));

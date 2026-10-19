@@ -275,6 +275,7 @@ class LogsDataTable extends DataTable {
           $row['date'] = '-';
         }
 
+        $row = osc_apply_filter('logs_processing_row', $row, $aRow);
         $row = osc_apply_filter('rules_processing_row', $row, $aRow);
 
         $this->addRow($row);

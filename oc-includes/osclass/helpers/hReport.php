@@ -939,6 +939,42 @@ function osc_report_web_contact_created($set = null) {
 }
 
 
+// Create a report, run the report hooks and send the notification emails
+// $after_create(int $reportId) runs right after the insert, before the hooks (attachments)
+function osc_report_create($data, $notify = true, $after_create = null) {
+  $reportId = Report::newInstance()->createReport($data);
+  if(!$reportId) {
+    return false;
+  }
+
+  if(is_callable($after_create)) {
+    call_user_func($after_create, $reportId);
+  }
+
+  $report = Report::newInstance()->findByPrimaryKey($reportId);
+  osc_run_hook('after_report_add', $report);
+  osc_run_hook('posted_report', $report);
+
+  if($notify) {
+    if(osc_reports_notify_admin()) {
+      osc_run_hook('hook_email_report_admin', $report);
+    }
+    if(@$data['s_type'] != 'webcontact') {
+      if(osc_reports_notify_reporter_created()) {
+        osc_run_hook('hook_email_report_reporter_created', $report);
+      }
+      if(osc_reports_notify_owner_created()) {
+        osc_run_hook('hook_email_report_owner_created', $report);
+      }
+    }
+  }
+
+  osc_run_hook('report_created', $report);
+
+  return $reportId;
+}
+
+
 // Create a webcontact report from website contact form data (no target id)
 function osc_report_create_from_web_contact($params) {
   $name = trim(strip_tags((string)(isset($params['yourName']) ? $params['yourName'] : Params::getParam('yourName'))));
@@ -988,38 +1024,30 @@ function osc_report_create_from_web_contact($params) {
 
   osc_run_hook('pre_report_add', $data);
 
-  $reportId = Report::newInstance()->createReport($data);
-  if(!$reportId) {
-    return false;
-  }
+  $reportId = osc_report_create($data, true, function($reportId) use ($params) {
+    $attachment = (isset($params['attachment']) ? $params['attachment'] : null);
+    if(is_array($attachment) && isset($attachment['path']) && $attachment['path'] != '' && file_exists($attachment['path'])) {
+      $ext = strtolower(pathinfo((string)$attachment['name'], PATHINFO_EXTENSION));
+      $ext = preg_replace('/[^a-z0-9]/', '', $ext);
+      $blocked = array('php', 'phtml', 'phar', 'exe', 'js', 'cgi', 'pl');
+      $size_ok = ((int)@filesize($attachment['path']) <= osc_reports_attachment_max_size_mb() * 1024 * 1024);
 
-  $attachment = (isset($params['attachment']) ? $params['attachment'] : null);
-  if(is_array($attachment) && isset($attachment['path']) && $attachment['path'] != '' && file_exists($attachment['path'])) {
-    $ext = strtolower(pathinfo((string)$attachment['name'], PATHINFO_EXTENSION));
-    $ext = preg_replace('/[^a-z0-9]/', '', $ext);
-    $blocked = array('php', 'phtml', 'phar', 'exe', 'js', 'cgi', 'pl');
-    $size_ok = ((int)@filesize($attachment['path']) <= osc_reports_attachment_max_size_mb() * 1024 * 1024);
+      if($ext != '' && $size_ok && !in_array($ext, $blocked, true)) {
+        $upload_dir = osc_uploads_path() . 'report/';
+        if(!file_exists($upload_dir)) {
+          @mkdir($upload_dir, 0755, true);
+          @file_put_contents($upload_dir . 'index.php', '<?php // Silence is golden');
+        }
 
-    if($ext != '' && $size_ok && !in_array($ext, $blocked, true)) {
-      $upload_dir = osc_uploads_path() . 'report/';
-      if(!file_exists($upload_dir)) {
-        @mkdir($upload_dir, 0755, true);
-        @file_put_contents($upload_dir . 'index.php', '<?php // Silence is golden');
-      }
-
-      $file_name = $reportId . '_' . strtolower(osc_genRandomPassword(8)) . '.' . $ext;
-      if(@copy($attachment['path'], $upload_dir . $file_name)) {
-        Report::newInstance()->update(array('s_file' => $file_name), array('pk_i_id' => $reportId));
+        $file_name = $reportId . '_' . strtolower(osc_genRandomPassword(8)) . '.' . $ext;
+        if(@copy($attachment['path'], $upload_dir . $file_name)) {
+          Report::newInstance()->update(array('s_file' => $file_name), array('pk_i_id' => $reportId));
+        }
       }
     }
-  }
-
-  $report = Report::newInstance()->findByPrimaryKey($reportId);
-  osc_run_hook('after_report_add', $report);
-  osc_run_hook('posted_report', $report);
-
-  if(osc_reports_notify_admin()) {
-    osc_run_hook('hook_email_report_admin', $report);
+  });
+  if(!$reportId) {
+    return false;
   }
 
   osc_report_web_contact_created(true);
