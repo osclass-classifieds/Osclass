@@ -68,6 +68,11 @@ abstract class BaseModel {
     $this->ajax = false;
     $this->time = microtime(true);
 
+    // validate front user session early, so code that reads user id from session never sees an ended session
+    if(!OC_ADMIN) {
+      osc_is_web_user_logged_in();
+    }
+
     osc_run_hook('before_init');
 
     WebThemes::newInstance();

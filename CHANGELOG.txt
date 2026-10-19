@@ -18,6 +18,8 @@ Osclass 8.4.1
 - Plugins can now change listing URLs, like they already can for user URLs.
 - Listing view statistics work on themes without jQuery.
 - "Login as user" in the back office now sends users to the same page a plugin chooses for a normal login.
+- Security: signing in (front and back office) and changing a password now start a new session, so a session id planted before login cannot be used.
+- Security: secret codes (password reset links, "Remember me" logins, listing edit links, alert links) now come from a secure random source, and new "Remember me" secrets are longer.
 
 
 Osclass 8.4.0

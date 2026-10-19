@@ -37,11 +37,11 @@ if(!defined('BCRYPT_COST')) {
  */
 function osc_genRandomPassword($length = 8) {
   $dict = array_merge(range('a', 'z'), range('0', '9'), range('A', 'Z'));
-  shuffle($dict);
 
+  // cryptographically secure, values are used as secrets and tokens
   $pass = '';
   for($i = 0; $i < $length; $i ++) {
-    $pass .= $dict[mt_rand(0 , count( $dict ) - 1 )];
+    $pass .= $dict[random_int(0, count($dict) - 1)];
   }
 
   return $pass;
@@ -341,13 +341,18 @@ function osc_validate_password($password, $user = null, $context = '') {
 
 
 /**
- * Remember user secret of current login in session, so a password change on another device ends this session.
+ * Called on user login and password change: new session id (prevents session fixation) and user secret stored in session,
+ * so a password change on another device ends this session.
  *
  * @param array $user user row
  *
  * @since 8.4.1
  */
 function osc_set_user_session_secret($user) {
+  if(session_status() === PHP_SESSION_ACTIVE && !headers_sent()) {
+    session_regenerate_id(true);
+  }
+
   Session::newInstance()->_set('userSecret', hash('sha256', (string)(isset($user['s_secret']) ? $user['s_secret'] : '')));
 }
 
@@ -362,7 +367,7 @@ function osc_set_user_session_secret($user) {
  * @since 8.4.1
  */
 function osc_rotate_user_secret($user_id, $context = '') {
-  $secret = osc_genRandomPassword();
+  $secret = osc_genRandomPassword(32);
   User::newInstance()->update(array('s_secret' => $secret), array('pk_i_id' => (int)$user_id));
 
   // keep current device logged in

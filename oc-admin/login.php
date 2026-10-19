@@ -120,7 +120,7 @@ class CAdminLogin extends AdminBaseModel
           // currently it only updates secret if it is blank
           if($admin['s_secret'] == '') {
             require_once osc_lib_path() . 'osclass/helpers/hSecurity.php';
-            $secret = osc_genRandomPassword();
+            $secret = osc_genRandomPassword(32);
             Admin::newInstance()->update(array('s_secret' => $secret), array('pk_i_id' => $admin['pk_i_id']));
             $admin['s_secret'] = $secret;
           }
@@ -135,6 +135,11 @@ class CAdminLogin extends AdminBaseModel
         // we are logged in... let's go!
         if(isset($admin['i_login_fails'])) {                               // just to make sure after upgrade, admin can login
           Admin::newInstance()->updateLoginFailed($admin['pk_i_id'], 0);   // reset fail login counter
+        }
+
+        // new session id on login (prevents session fixation)
+        if(session_status() === PHP_SESSION_ACTIVE && !headers_sent()) {
+          session_regenerate_id(true);
         }
 
         Session::newInstance()->_set('adminId', $admin['pk_i_id']);
@@ -210,7 +215,7 @@ class CAdminLogin extends AdminBaseModel
 
         if(Params::getParam('new_password', false, false) == Params::getParam('new_password2', false, false) ) {
           Admin::newInstance()->update(
-            array('s_secret' => osc_genRandomPassword()
+            array('s_secret' => osc_genRandomPassword(32)
               , 's_password' => osc_hash_password(Params::getParam('new_password', false, false))
             ), array('pk_i_id' => $admin['pk_i_id'])
           );

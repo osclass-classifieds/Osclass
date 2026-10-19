@@ -331,7 +331,7 @@ class UserActions {
       $input['dt_reg_date'] = $date;
       $input['dt_mod_date'] = $date;
       $input['dt_access_date'] = $date;
-      $input['s_secret'] = osc_genRandomPassword();
+      $input['s_secret'] = osc_genRandomPassword(32);
       $input['s_access_ip'] = osc_get_ip(); //Params::getServerParam('REMOTE_ADDR');
     } else {
       $input['dt_mod_date'] = date('Y-m-d H:i:s');
@@ -611,7 +611,7 @@ class UserActions {
 
     // secret is needed to end sessions on other devices after password change
     if($user['s_secret'] == '') {
-      $user['s_secret'] = osc_genRandomPassword();
+      $user['s_secret'] = osc_genRandomPassword(32);
       User::newInstance()->update(array('s_secret' => $user['s_secret']), array('pk_i_id' => $user['pk_i_id']));
     }
 

@@ -140,9 +140,13 @@ function osc_is_web_user_logged_in() {
   if(Session::newInstance()->_get("userId") > 0) {
     $user = osc_get_user_row(Session::newInstance()->_get("userId"));
 
-    // password was changed on another device: end this session (sessions started before 8.4.1 have no secret stored)
+    // password was changed on another device: end this session
     $session_secret = (string)Session::newInstance()->_get('userSecret');
-    if($session_secret != '' && isset($user['pk_i_id']) && !hash_equals($session_secret, hash('sha256', (string)$user['s_secret']))) {
+    if($session_secret == '' && isset($user['pk_i_id'])) {
+      // session started before 8.4.1, bind it to current secret
+      Session::newInstance()->_set('userSecret', hash('sha256', (string)$user['s_secret']));
+
+    } else if($session_secret != '' && isset($user['pk_i_id']) && !hash_equals($session_secret, hash('sha256', (string)$user['s_secret']))) {
       Session::newInstance()->_drop('userId');
       Session::newInstance()->_drop('userName');
       Session::newInstance()->_drop('userEmail');

@@ -697,6 +697,11 @@ class CAdminTranslations extends AdminSecBaseModel {
 
   // Rewrite index.php of core translation with correct author and current Osclass version
   function update_index($language) {
+    // locale code is used in function name of generated file
+    if(!preg_match('/^[a-zA-Z0-9_]+$/', (string)$language)) {
+      return;
+    }
+
     $path_index = $this->get_path_index($language);
     $db_data = OSCLocale::newInstance()->findByPrimaryKey($language);
 

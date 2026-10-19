@@ -415,7 +415,7 @@ HTACCESS;
 
           // optional, empty = same as user profile
           $rewrite_user_public_profile = trim(substr(str_replace('//', '/', Params::getParam('rewrite_user_public_profile').'/'), 0, -1), '/');
-          if($rewrite_user_public_profile != '' && !osc_validate_text($rewrite_user_public_profile)) {
+          if($rewrite_user_public_profile != '' && !preg_match('#^[a-zA-Z0-9_-]+(/[a-zA-Z0-9_-]+)*$#', $rewrite_user_public_profile)) {
             $errors += 1;
           } else {
             osc_set_preference('rewrite_user_public_profile', ($rewrite_user_public_profile == osc_get_preference('rewrite_user_profile') ? '' : $rewrite_user_public_profile));
