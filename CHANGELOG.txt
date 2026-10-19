@@ -8,6 +8,7 @@ Osclass 8.4.1
 - Widget Content from the visual editor is saved when you add or edit a widget. The Code field already saved; Content does now too.
 - Report friendly URLs (report/item, report/user, report/view) work right after upgrade. No need to re-save Permalinks.
 - New Listing setting: require a phone number to publish a listing. Off by default; admins are not affected. Registration never requires a phone.
+- Expired listings now return 410 Gone to visitors and search engines, so they drop out of search results. Owners and admins still see them. Inactive, unvalidated and blocked listings now return 404 instead of 400.
 
 
 Osclass 8.4.0

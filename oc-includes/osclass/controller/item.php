@@ -798,14 +798,20 @@ class CWebItem extends BaseModel {
           return;
         }
 
+        $isOwnerOrAdmin = (($this->userId == $item['fk_i_user_id']) && ($this->userId > 0)) || osc_is_admin_user_logged_in();
+
         if(osc_isExpired($item['dt_expiration'])) {
-          if(($this->userId == $item['fk_i_user_id']) && ($this->userId > 0) || osc_is_admin_user_logged_in()) {
-            osc_add_flash_warning_message(_m("The listing has expired. Please renew it in order to make it public"));
+          // expired listing is gone for visitors and bots, owner and admin can still see it
+          if(!$isOwnerOrAdmin) {
+            $this->do410();
+            return;
           }
+
+          osc_add_flash_warning_message(_m("The listing has expired. Please renew it in order to make it public"));
         }
 
         if($item['b_active'] != 1) {
-          if(($this->userId == $item['fk_i_user_id']) && ($this->userId > 0) || osc_is_admin_user_logged_in()) {
+          if($isOwnerOrAdmin) {
             if(!osc_isExpired($item['dt_expiration'])) {
               osc_add_flash_warning_message(_m("The listing has not been validated. Validate it to make it public"));
 
@@ -814,7 +820,8 @@ class CWebItem extends BaseModel {
             }
 
           } else {
-            $this->do400();
+            // may be validated later, so 404 instead of 410
+            $this->do404();
             return;
           }
 
@@ -826,7 +833,7 @@ class CWebItem extends BaseModel {
             osc_add_flash_warning_message(_m("The listing has been blocked or is awaiting moderation from the admin"));
 
           } else {
-            $this->do400();
+            $this->do404();
             return;
           }
         }
