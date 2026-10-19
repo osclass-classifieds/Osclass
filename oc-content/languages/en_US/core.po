@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Osclass by OsclassPoint.com\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-19 16:06+0200\n"
+"POT-Creation-Date: 2026-10-19 17:23+0200\n"
 "PO-Revision-Date: 2026-10-01 14:14+0200\n"
 "Last-Translator: Translations <translations@osclass>\n"
 "Language-Team: OsclassPoint\n"
@@ -410,7 +410,7 @@ msgstr ""
 #: oc-admin/ajax/ajax.php:645 oc-admin/themes/omega/gui/login.php:61
 #: oc-admin/themes/omega/market/languages_plugins.php:200
 #: oc-admin/themes/omega/market/languages_themes.php:193
-#: oc-admin/themes/omega/settings/permalinks.php:1046
+#: oc-admin/themes/omega/settings/permalinks.php:1058
 #: oc-admin/themes/omega/translations/edit.php:313
 #: oc-admin/themes/omega/translations/index.php:206
 #: oc-admin/themes/omega/translations/index.php:288
@@ -1648,7 +1648,7 @@ msgstr ""
 #: oc-admin/themes/omega/settings/media.php:636
 #: oc-admin/themes/omega/settings/optimization.php:155
 #: oc-admin/themes/omega/settings/optimization.php:200
-#: oc-admin/themes/omega/settings/permalinks.php:1056
+#: oc-admin/themes/omega/settings/permalinks.php:1068
 #: oc-admin/themes/omega/settings/searches.php:207
 #: oc-admin/themes/omega/settings/spamNbots.php:91
 #: oc-admin/themes/omega/settings/spamNbots.php:145
@@ -2475,7 +2475,7 @@ msgstr ""
 #: oc-admin/themes/omega/categories/iframe.php:62
 #: oc-admin/themes/omega/items/settings.php:275
 #: oc-admin/themes/omega/settings/index.php:833
-#: oc-includes/osclass/helpers/hUsers.php:1089
+#: oc-includes/osclass/helpers/hUsers.php:1093
 msgid "days"
 msgstr ""
 
@@ -3339,7 +3339,7 @@ msgstr ""
 #: oc-admin/themes/omega/items/index.php:349
 #: oc-admin/themes/omega/items/settings.php:290 oc-admin/tools.php:469
 #: oc-includes/osclass/classes/datatables/ItemsDataTable.php:84
-#: oc-includes/osclass/helpers/hDefines.php:2260
+#: oc-includes/osclass/helpers/hDefines.php:2307
 #: oc-includes/osclass/helpers/hItemStats.php:2552
 #: oc-includes/osclass/helpers/hItemStats.php:2553
 #: oc-includes/osclass/helpers/hItemStats.php:3153
@@ -3366,13 +3366,13 @@ msgid "Expiration date"
 msgstr ""
 
 #: oc-admin/themes/omega/items/frm.php:311
-#: oc-includes/osclass/helpers/hUsers.php:1143
+#: oc-includes/osclass/helpers/hUsers.php:1147
 #, php-format
 msgid "Expired on %s"
 msgstr ""
 
 #: oc-admin/themes/omega/items/frm.php:314
-#: oc-includes/osclass/helpers/hUsers.php:1149
+#: oc-includes/osclass/helpers/hUsers.php:1153
 #, php-format
 msgid "Expire on %s"
 msgstr ""
@@ -3461,7 +3461,7 @@ msgstr ""
 #: oc-admin/themes/omega/stats/users.php:126
 #: oc-admin/themes/omega/users/frm.php:483
 #: oc-admin/themes/omega/users/index.php:232
-#: oc-includes/osclass/helpers/hDefines.php:2257
+#: oc-includes/osclass/helpers/hDefines.php:2304
 #: oc-includes/osclass/helpers/hItemStats.php:2354
 #: oc-includes/osclass/helpers/hItemStats.php:2379
 #: oc-includes/osclass/helpers/hItemStats.php:2438
@@ -3476,7 +3476,7 @@ msgstr ""
 #: oc-admin/themes/omega/stats/users.php:127
 #: oc-admin/themes/omega/users/frm.php:490
 #: oc-admin/themes/omega/users/index.php:242
-#: oc-includes/osclass/helpers/hDefines.php:2258
+#: oc-includes/osclass/helpers/hDefines.php:2305
 #: oc-includes/osclass/helpers/hItemStats.php:2359
 #: oc-includes/osclass/helpers/hItemStats.php:2384
 msgid "Region"
@@ -3488,7 +3488,7 @@ msgstr ""
 #: oc-admin/themes/omega/locations/index.php:360
 #: oc-admin/themes/omega/users/frm.php:497
 #: oc-admin/themes/omega/users/index.php:252
-#: oc-includes/osclass/helpers/hDefines.php:2259
+#: oc-includes/osclass/helpers/hDefines.php:2306
 msgid "City"
 msgstr ""
 
@@ -3585,7 +3585,7 @@ msgstr ""
 #: oc-includes/osclass/helpers/hItemStats.php:2368
 #: oc-includes/osclass/helpers/hItemStats.php:2373
 #: oc-includes/osclass/helpers/hItemStats.php:2432
-#: oc-includes/osclass/helpers/hUsers.php:1048
+#: oc-includes/osclass/helpers/hUsers.php:1052
 msgid "Active"
 msgstr ""
 
@@ -5346,7 +5346,7 @@ msgstr ""
 #: oc-includes/osclass/frm/User.form.class.php:933
 #: oc-includes/osclass/helpers/hItemStats.php:2303
 #: oc-includes/osclass/helpers/hItemStats.php:2432
-#: oc-includes/osclass/helpers/hUsers.php:1050
+#: oc-includes/osclass/helpers/hUsers.php:1054
 msgid "Expired"
 msgstr ""
 
@@ -5683,14 +5683,14 @@ msgstr ""
 #: oc-admin/themes/omega/parts/header.php:16
 #: oc-includes/osclass/frm/Item.form.class.php:480
 #: oc-includes/osclass/frm/Item.form.class.php:492
-#: oc-includes/osclass/helpers/hUsers.php:1107
+#: oc-includes/osclass/helpers/hUsers.php:1111
 msgid "1 day"
 msgstr ""
 
 #: oc-admin/themes/omega/parts/header.php:17
 #: oc-includes/osclass/frm/Item.form.class.php:481
 #: oc-includes/osclass/frm/Item.form.class.php:495
-#: oc-includes/osclass/helpers/hUsers.php:1107
+#: oc-includes/osclass/helpers/hUsers.php:1111
 #, php-format
 msgid "%d days"
 msgstr ""
@@ -6078,7 +6078,7 @@ msgstr ""
 #: oc-includes/osclass/functions.php:115
 #: oc-includes/osclass/helpers/hCustomDataTable.php:839
 #: oc-includes/osclass/helpers/hCustomDataTable.php:890
-#: oc-includes/osclass/helpers/hDefines.php:2261
+#: oc-includes/osclass/helpers/hDefines.php:2308
 #: oc-includes/osclass/helpers/hReport.php:33
 msgid "User"
 msgstr ""
@@ -6730,32 +6730,32 @@ msgid "Item edit"
 msgstr ""
 
 #: oc-admin/themes/omega/settings/breadcrumbs.php:179
-#: oc-admin/themes/omega/settings/permalinks.php:973
+#: oc-admin/themes/omega/settings/permalinks.php:985
 msgid "User listings"
 msgstr ""
 
 #: oc-admin/themes/omega/settings/breadcrumbs.php:184
-#: oc-admin/themes/omega/settings/permalinks.php:980
+#: oc-admin/themes/omega/settings/permalinks.php:992
 msgid "User alerts"
 msgstr ""
 
 #: oc-admin/themes/omega/settings/breadcrumbs.php:189
-#: oc-admin/themes/omega/settings/permalinks.php:958
+#: oc-admin/themes/omega/settings/permalinks.php:970
 msgid "User profile"
 msgstr ""
 
 #: oc-admin/themes/omega/settings/breadcrumbs.php:194
-#: oc-admin/themes/omega/settings/permalinks.php:1008
+#: oc-admin/themes/omega/settings/permalinks.php:1020
 msgid "User change email"
 msgstr ""
 
 #: oc-admin/themes/omega/settings/breadcrumbs.php:199
-#: oc-admin/themes/omega/settings/permalinks.php:1001
+#: oc-admin/themes/omega/settings/permalinks.php:1013
 msgid "User change password"
 msgstr ""
 
 #: oc-admin/themes/omega/settings/breadcrumbs.php:204
-#: oc-admin/themes/omega/settings/permalinks.php:1022
+#: oc-admin/themes/omega/settings/permalinks.php:1034
 msgid "User change username"
 msgstr ""
 
@@ -6782,7 +6782,7 @@ msgid "Static page"
 msgstr ""
 
 #: oc-admin/themes/omega/settings/breadcrumbs.php:234
-#: oc-admin/themes/omega/settings/permalinks.php:1032
+#: oc-admin/themes/omega/settings/permalinks.php:1044
 #: oc-includes/osclass/classes/Breadcrumb.php:555
 #: oc-includes/osclass/controller/contact.php:104
 #: oc-includes/osclass/functions.php:2838
@@ -7343,20 +7343,20 @@ msgid "Never"
 msgstr ""
 
 #: oc-admin/themes/omega/settings/index.php:648
-#: oc-includes/osclass/helpers/hUsers.php:937
+#: oc-includes/osclass/helpers/hUsers.php:941
 msgid "Hourly"
 msgstr ""
 
 #: oc-admin/themes/omega/settings/index.php:654
 #: oc-admin/themes/omega/settings/optimization.php:177
-#: oc-includes/osclass/helpers/hUsers.php:940
+#: oc-includes/osclass/helpers/hUsers.php:944
 msgid "Daily"
 msgstr ""
 
 #: oc-admin/themes/omega/settings/index.php:660
 #: oc-admin/themes/omega/settings/optimization.php:73
 #: oc-admin/themes/omega/settings/optimization.php:178
-#: oc-includes/osclass/helpers/hUsers.php:943
+#: oc-includes/osclass/helpers/hUsers.php:947
 msgid "Weekly"
 msgstr ""
 
@@ -8004,7 +8004,7 @@ msgstr ""
 #: oc-admin/themes/omega/settings/searches.php:188
 #: oc-admin/themes/omega/users/frm.php:385
 #: oc-includes/osclass/frm/Category.form.class.php:215
-#: oc-includes/osclass/helpers/hDefines.php:2264
+#: oc-includes/osclass/helpers/hDefines.php:2311
 msgid "None"
 msgstr ""
 
@@ -8344,7 +8344,7 @@ msgstr ""
 
 #: oc-admin/themes/omega/settings/permalinks.php:253
 #: oc-admin/themes/omega/settings/permalinks.php:254
-#: oc-admin/themes/omega/settings/permalinks.php:577
+#: oc-admin/themes/omega/settings/permalinks.php:589
 msgid "Static page URL"
 msgstr ""
 
@@ -8355,7 +8355,7 @@ msgstr ""
 
 #: oc-admin/themes/omega/settings/permalinks.php:261
 #: oc-admin/themes/omega/settings/permalinks.php:262
-#: oc-admin/themes/omega/settings/permalinks.php:611
+#: oc-admin/themes/omega/settings/permalinks.php:623
 msgid "Search URL"
 msgstr ""
 
@@ -8397,85 +8397,85 @@ msgstr ""
 
 #: oc-admin/themes/omega/settings/permalinks.php:293
 #: oc-admin/themes/omega/settings/permalinks.php:294
-#: oc-admin/themes/omega/settings/permalinks.php:667
+#: oc-admin/themes/omega/settings/permalinks.php:679
 msgid "Search order"
 msgstr ""
 
 #: oc-admin/themes/omega/settings/permalinks.php:297
 #: oc-admin/themes/omega/settings/permalinks.php:298
-#: oc-admin/themes/omega/settings/permalinks.php:674
+#: oc-admin/themes/omega/settings/permalinks.php:686
 msgid "Search order type"
 msgstr ""
 
 #: oc-admin/themes/omega/settings/permalinks.php:301
 #: oc-admin/themes/omega/settings/permalinks.php:302
-#: oc-admin/themes/omega/settings/permalinks.php:681
+#: oc-admin/themes/omega/settings/permalinks.php:693
 msgid "Search order by price"
 msgstr ""
 
 #: oc-admin/themes/omega/settings/permalinks.php:305
 #: oc-admin/themes/omega/settings/permalinks.php:306
-#: oc-admin/themes/omega/settings/permalinks.php:688
+#: oc-admin/themes/omega/settings/permalinks.php:700
 msgid "Search order by publish date"
 msgstr ""
 
 #: oc-admin/themes/omega/settings/permalinks.php:309
 #: oc-admin/themes/omega/settings/permalinks.php:310
-#: oc-admin/themes/omega/settings/permalinks.php:695
+#: oc-admin/themes/omega/settings/permalinks.php:707
 msgid "Search order by relevance"
 msgstr ""
 
 #: oc-admin/themes/omega/settings/permalinks.php:313
 #: oc-admin/themes/omega/settings/permalinks.php:314
-#: oc-admin/themes/omega/settings/permalinks.php:702
+#: oc-admin/themes/omega/settings/permalinks.php:714
 msgid "Search order by expiration date"
 msgstr ""
 
 #: oc-admin/themes/omega/settings/permalinks.php:317
 #: oc-admin/themes/omega/settings/permalinks.php:318
-#: oc-admin/themes/omega/settings/permalinks.php:709
+#: oc-admin/themes/omega/settings/permalinks.php:721
 msgid "Search order by rating"
 msgstr ""
 
 #: oc-admin/themes/omega/settings/permalinks.php:321
 #: oc-admin/themes/omega/settings/permalinks.php:322
-#: oc-admin/themes/omega/settings/permalinks.php:716
+#: oc-admin/themes/omega/settings/permalinks.php:728
 msgid "Search minimum price"
 msgstr ""
 
 #: oc-admin/themes/omega/settings/permalinks.php:325
 #: oc-admin/themes/omega/settings/permalinks.php:326
-#: oc-admin/themes/omega/settings/permalinks.php:723
+#: oc-admin/themes/omega/settings/permalinks.php:735
 msgid "Search maximum price"
 msgstr ""
 
 #: oc-admin/themes/omega/settings/permalinks.php:329
 #: oc-admin/themes/omega/settings/permalinks.php:330
-#: oc-admin/themes/omega/settings/permalinks.php:730
+#: oc-admin/themes/omega/settings/permalinks.php:742
 msgid "Search with picture"
 msgstr ""
 
 #: oc-admin/themes/omega/settings/permalinks.php:333
 #: oc-admin/themes/omega/settings/permalinks.php:334
-#: oc-admin/themes/omega/settings/permalinks.php:737
+#: oc-admin/themes/omega/settings/permalinks.php:749
 msgid "Search premium only"
 msgstr ""
 
 #: oc-admin/themes/omega/settings/permalinks.php:337
 #: oc-admin/themes/omega/settings/permalinks.php:338
-#: oc-admin/themes/omega/settings/permalinks.php:744
+#: oc-admin/themes/omega/settings/permalinks.php:756
 msgid "Search with phone"
 msgstr ""
 
 #: oc-admin/themes/omega/settings/permalinks.php:341
 #: oc-admin/themes/omega/settings/permalinks.php:342
-#: oc-admin/themes/omega/settings/permalinks.php:751
+#: oc-admin/themes/omega/settings/permalinks.php:763
 msgid "Search show as"
 msgstr ""
 
 #: oc-admin/themes/omega/settings/permalinks.php:345
 #: oc-admin/themes/omega/settings/permalinks.php:346
-#: oc-admin/themes/omega/settings/permalinks.php:758
+#: oc-admin/themes/omega/settings/permalinks.php:770
 msgid "Search page number"
 msgstr ""
 
@@ -8688,86 +8688,98 @@ msgid "Required keywords: %s"
 msgstr ""
 
 #: oc-admin/themes/omega/settings/permalinks.php:571
-#: oc-admin/themes/omega/settings/permalinks.php:581
-#: oc-admin/themes/omega/settings/permalinks.php:592
+#: oc-admin/themes/omega/settings/permalinks.php:593
+#: oc-admin/themes/omega/settings/permalinks.php:604
 #, php-format
 msgid "Accepted keywords: %s"
 msgstr ""
 
+#: oc-admin/themes/omega/settings/permalinks.php:578
+#, php-format
+msgid "Keywords from plugins: %s"
+msgstr ""
+
 #: oc-admin/themes/omega/settings/permalinks.php:582
+#, php-format
+msgid ""
+"%s can be left out when the URL has %s after a fixed first part, for example "
+"%s."
+msgstr ""
+
+#: oc-admin/themes/omega/settings/permalinks.php:594
 #, php-format
 msgid ""
 "When not using %s, add prefix before page slug to keep static page URLs "
 "unique, example: %s."
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:588
+#: oc-admin/themes/omega/settings/permalinks.php:600
 msgid "Category page URL:"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:598
+#: oc-admin/themes/omega/settings/permalinks.php:610
 msgid "Search page structure"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:601
+#: oc-admin/themes/omega/settings/permalinks.php:613
 msgid "Search prefix URL:"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:605
+#: oc-admin/themes/omega/settings/permalinks.php:617
 msgid "It always appear before the category, region or city url."
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:618
+#: oc-admin/themes/omega/settings/permalinks.php:630
 msgid "Search keyword country"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:625
+#: oc-admin/themes/omega/settings/permalinks.php:637
 msgid "Search keyword region"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:632
+#: oc-admin/themes/omega/settings/permalinks.php:644
 msgid "Search keyword city"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:639
+#: oc-admin/themes/omega/settings/permalinks.php:651
 msgid "Search keyword city area"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:646
+#: oc-admin/themes/omega/settings/permalinks.php:658
 msgid "Search keyword category"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:653
+#: oc-admin/themes/omega/settings/permalinks.php:665
 msgid "Search keyword user"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:660
+#: oc-admin/themes/omega/settings/permalinks.php:672
 msgid "Search keyword pattern"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:764
+#: oc-admin/themes/omega/settings/permalinks.php:776
 msgid "Custom search page structure (optional)"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:768
+#: oc-admin/themes/omega/settings/permalinks.php:780
 msgid ""
 "You can customize search page URLs based on active parameters in search "
 "engine."
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:769
+#: oc-admin/themes/omega/settings/permalinks.php:781
 #, php-format
 msgid ""
 "Following parameters are ignored in custom rules (no matter if strict is "
 "enabled) and will be added at the end of rule: %s. Do not use these!"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:772
+#: oc-admin/themes/omega/settings/permalinks.php:784
 #, php-format
 msgid "Subdomain params are forbidden in custom rules and will be removed: %s."
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:775
+#: oc-admin/themes/omega/settings/permalinks.php:787
 msgid ""
 "Custom rule is activated and applied only if all required parameters exists "
 "(not empty). Priority is reversed - A is lowest, Z is highest. Place very "
@@ -8775,178 +8787,178 @@ msgid ""
 "at the end."
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:776
+#: oc-admin/themes/omega/settings/permalinks.php:788
 msgid ""
 "Custom rules has higher priority then canonical urls (category, category + "
 "city, ...)"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:777
+#: oc-admin/themes/omega/settings/permalinks.php:789
 #, php-format
 msgid ""
 "All other search parameters are accepted. Use technical name. Examples: %s"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:782
+#: oc-admin/themes/omega/settings/permalinks.php:794
 msgid "Custom rules"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:787
+#: oc-admin/themes/omega/settings/permalinks.php:799
 msgid "Enable custom search rules"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:794
+#: oc-admin/themes/omega/settings/permalinks.php:806
 msgid "Strict form"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:799
+#: oc-admin/themes/omega/settings/permalinks.php:811
 msgid "Custom rules must strictly match to pattern"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:804
+#: oc-admin/themes/omega/settings/permalinks.php:816
 msgid ""
 "If strict is enabled, your search page params must strictly match params "
 "from custom rule. If there are any extra params, rule will not match. "
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:811
+#: oc-admin/themes/omega/settings/permalinks.php:823
 #, php-format
 msgid "Search url rule \"%s\""
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:816
+#: oc-admin/themes/omega/settings/permalinks.php:828
 msgid "Rule \"A\" - lowest priority"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:819
+#: oc-admin/themes/omega/settings/permalinks.php:831
 msgid "Rule \"Z\" - highest priority"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:826
+#: oc-admin/themes/omega/settings/permalinks.php:838
 msgid "Listing pages structure"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:829
+#: oc-admin/themes/omega/settings/permalinks.php:841
 msgid "Listing send friend"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:836
+#: oc-admin/themes/omega/settings/permalinks.php:848
 msgid "Listing contact"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:843
+#: oc-admin/themes/omega/settings/permalinks.php:855
 msgid "Report listing"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:850
+#: oc-admin/themes/omega/settings/permalinks.php:862
 msgid "Report user"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:857
+#: oc-admin/themes/omega/settings/permalinks.php:869
 msgid "Report view"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:864
+#: oc-admin/themes/omega/settings/permalinks.php:876
 msgid "Listing new"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:871
+#: oc-admin/themes/omega/settings/permalinks.php:883
 msgid "Listing activate"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:878
+#: oc-admin/themes/omega/settings/permalinks.php:890
 msgid "Listing deactivate"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:885
+#: oc-admin/themes/omega/settings/permalinks.php:897
 msgid "Listing renew"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:892
+#: oc-admin/themes/omega/settings/permalinks.php:904
 msgid "Listing edit"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:899
+#: oc-admin/themes/omega/settings/permalinks.php:911
 msgid "Listing delete"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:906
+#: oc-admin/themes/omega/settings/permalinks.php:918
 msgid "Listing resource delete"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:913
+#: oc-admin/themes/omega/settings/permalinks.php:925
 msgid "User pages structure"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:916
+#: oc-admin/themes/omega/settings/permalinks.php:928
 msgid "User login"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:923
+#: oc-admin/themes/omega/settings/permalinks.php:935
 msgid "User dashboard"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:930
+#: oc-admin/themes/omega/settings/permalinks.php:942
 msgid "User logout"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:937
+#: oc-admin/themes/omega/settings/permalinks.php:949
 msgid "User register"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:944
+#: oc-admin/themes/omega/settings/permalinks.php:956
 msgid "User activate"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:951
+#: oc-admin/themes/omega/settings/permalinks.php:963
 msgid "User activate alert"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:965
+#: oc-admin/themes/omega/settings/permalinks.php:977
 msgid "User public profile"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:968
+#: oc-admin/themes/omega/settings/permalinks.php:980
 msgid ""
 "Optional. Own address for public profiles, for example \"u\" gives /u/"
 "username. Leave empty to use the user profile prefix."
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:987
+#: oc-admin/themes/omega/settings/permalinks.php:999
 msgid "User recover"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:994
+#: oc-admin/themes/omega/settings/permalinks.php:1006
 msgid "User forgot"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:1015
+#: oc-admin/themes/omega/settings/permalinks.php:1027
 msgid "User change email confirm"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:1029
+#: oc-admin/themes/omega/settings/permalinks.php:1041
 msgid "Other pages structure"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:1039
+#: oc-admin/themes/omega/settings/permalinks.php:1051
 msgid "Feed"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:1061
+#: oc-admin/themes/omega/settings/permalinks.php:1073
 msgid "Configuration of .htaccess file"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:1066
+#: oc-admin/themes/omega/settings/permalinks.php:1078
 msgid ""
 "Permalinks will be functional just thanks to .htaccess file. Your .htaccess "
 "file could not be found! Ask your hosting provider for help."
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:1073
+#: oc-admin/themes/omega/settings/permalinks.php:1085
 msgid "Your .htaccess file"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:1082
+#: oc-admin/themes/omega/settings/permalinks.php:1094
 msgid "What your .htaccess file should contain:"
 msgstr ""
 
@@ -9228,7 +9240,7 @@ msgstr ""
 #: oc-includes/osclass/classes/datatables/LanguagesDataTable.php:198
 #: oc-includes/osclass/classes/datatables/UsersDataTable.php:427
 #: oc-includes/osclass/helpers/hItemStats.php:2432
-#: oc-includes/osclass/helpers/hUsers.php:1054
+#: oc-includes/osclass/helpers/hUsers.php:1058
 msgid "Inactive"
 msgstr ""
 
@@ -11512,7 +11524,7 @@ msgstr ""
 
 #: oc-admin/themes/omega/users/alerts.php:242
 #: oc-includes/osclass/classes/datatables/AlertsDataTable.php:159
-#: oc-includes/osclass/helpers/hUsers.php:1155
+#: oc-includes/osclass/helpers/hUsers.php:1159
 msgid "Expire"
 msgstr ""
 
@@ -12343,7 +12355,7 @@ msgid "Unsubscribe date"
 msgstr ""
 
 #: oc-includes/osclass/classes/datatables/AlertsDataTable.php:134
-#: oc-includes/osclass/helpers/hUsers.php:1052
+#: oc-includes/osclass/helpers/hUsers.php:1056
 msgid "Unsubscribed"
 msgstr ""
 
@@ -14735,7 +14747,7 @@ msgid "Listing life"
 msgstr ""
 
 #: oc-includes/osclass/helpers/hItemStats.php:546
-#: oc-includes/osclass/helpers/hUsers.php:946
+#: oc-includes/osclass/helpers/hUsers.php:950
 msgid "Custom"
 msgstr ""
 
@@ -15174,114 +15186,114 @@ msgstr ""
 msgid "Higher price first"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hUsers.php:934
+#: oc-includes/osclass/helpers/hUsers.php:938
 msgid "Instant"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hUsers.php:1000
+#: oc-includes/osclass/helpers/hUsers.php:1004
 msgid "1 email notification sent"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hUsers.php:1003
+#: oc-includes/osclass/helpers/hUsers.php:1007
 #, php-format
 msgid "%d email notifications sent"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hUsers.php:1071
+#: oc-includes/osclass/helpers/hUsers.php:1075
 msgid "Alert is active and notifications can be sent"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hUsers.php:1073
+#: oc-includes/osclass/helpers/hUsers.php:1077
 msgid "Alert has expired and notifications are no longer sent"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hUsers.php:1075
+#: oc-includes/osclass/helpers/hUsers.php:1079
 msgid "Alert was unsubscribed and notifications are stopped"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hUsers.php:1077
+#: oc-includes/osclass/helpers/hUsers.php:1081
 msgid "Alert is inactive and notifications are not sent"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hUsers.php:1094
-#: oc-includes/osclass/helpers/hUsers.php:1140
+#: oc-includes/osclass/helpers/hUsers.php:1098
+#: oc-includes/osclass/helpers/hUsers.php:1144
 msgid "1 year"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hUsers.php:1094
+#: oc-includes/osclass/helpers/hUsers.php:1098
 #, php-format
 msgid "%d years"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hUsers.php:1099
+#: oc-includes/osclass/helpers/hUsers.php:1103
 msgid "1 month"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hUsers.php:1099
-#: oc-includes/osclass/helpers/hUsers.php:1139
+#: oc-includes/osclass/helpers/hUsers.php:1103
+#: oc-includes/osclass/helpers/hUsers.php:1143
 #, php-format
 msgid "%d months"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hUsers.php:1104
+#: oc-includes/osclass/helpers/hUsers.php:1108
 msgid "1 week"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hUsers.php:1104
+#: oc-includes/osclass/helpers/hUsers.php:1108
 #, php-format
 msgid "%d weeks"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hUsers.php:1136
+#: oc-includes/osclass/helpers/hUsers.php:1140
 msgid "Non-expiring"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hUsers.php:1146
+#: oc-includes/osclass/helpers/hUsers.php:1150
 msgid "Renew alert"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hUsers.php:1152
+#: oc-includes/osclass/helpers/hUsers.php:1156
 #, php-format
 msgid "+%d months"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hUsers.php:1157
+#: oc-includes/osclass/helpers/hUsers.php:1161
 #, php-format
 msgid "-%d months"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hUsers.php:1177
+#: oc-includes/osclass/helpers/hUsers.php:1181
 msgid "Change alert expiration date"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hUsers.php:1184
+#: oc-includes/osclass/helpers/hUsers.php:1188
 #, php-format
 msgid "Change alert expiration date - will expire in %d months"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hUsers.php:1186
+#: oc-includes/osclass/helpers/hUsers.php:1190
 #, php-format
 msgid "Change alert expiration date - shorten by %d months"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hUsers.php:1188
+#: oc-includes/osclass/helpers/hUsers.php:1192
 msgid "Set alert as expired immediately"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hUsers.php:1190
+#: oc-includes/osclass/helpers/hUsers.php:1194
 msgid "Change alert expiration date - will expire in 3 months"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hUsers.php:1192
+#: oc-includes/osclass/helpers/hUsers.php:1196
 msgid "Change alert expiration date - will expire in 1 year"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hUsers.php:1198
+#: oc-includes/osclass/helpers/hUsers.php:1202
 #, php-format
 msgid "Renew alert from today (+%d months)"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hUsers.php:1200
+#: oc-includes/osclass/helpers/hUsers.php:1204
 msgid "Change alert expiration date - alert will never expire"
 msgstr ""
 

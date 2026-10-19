@@ -778,6 +778,24 @@ class CWebItem extends BaseModel {
         break;
 
       default:
+        // URL without id (pattern with a plugin keyword): filter item_resolve_id($id, array(param => value)) returns the listing id.
+        // An old value may return its listing too, the redirect below sends it to the current URL. Deleted listing id = 410.
+        if(Params::getParam('id') == '') {
+          $resolve_params = array();
+
+          foreach(osc_item_permalink_keywords() as $keyword_data) {
+            if(Params::getParam($keyword_data['param']) != '') {
+              $resolve_params[$keyword_data['param']] = Params::getParam($keyword_data['param']);
+            }
+          }
+
+          $resolve_id = (!empty($resolve_params) ? (int)osc_apply_filter('item_resolve_id', 0, $resolve_params) : 0);
+
+          if($resolve_id > 0) {
+            Params::setParam('id', $resolve_id);
+          }
+        }
+
         // if there isn't ID, show an error 404
         if(Params::getParam('id') == '') {
           $this->do404();

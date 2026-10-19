@@ -900,6 +900,42 @@ function osc_item_url($locale = '') {
 
 
 /**
+ * Listing URL keywords added by plugins, checked. Filter item_permalink_keywords returns for example
+ * array('{ITEM_SLUG}' => array('regex' => '([a-z0-9-]+)', 'param' => 'slug', 'unique' => true)):
+ * regex = one capture group for the rewrite rule (must not match & or =), param = request param it fills,
+ * unique = the value identifies one listing, so the pattern may leave out {ITEM_ID} (filter item_resolve_id finds the listing).
+ * Values per listing come from filter item_url_keyword_values.
+ *
+ * @since 8.4.1
+ *
+ * @return array
+ */
+function osc_item_permalink_keywords() {
+  $core = array('{ITEM_ID}','{CATEGORY}','{CATEGORIES}','{ITEM_TITLE}','{ITEM_COUNTRY}','{ITEM_COUNTRY_CODE}','{ITEM_REGION}','{ITEM_CITY}','{ITEM_CITY_AREA}','{ITEM_ZIP}','{ITEM_CONTACT_NAME}','{ITEM_CONTACT_EMAIL}','{ITEM_CURRENCY_CODE}','{ITEM_PUB_DATE}');
+  $reserved = array('page', 'action', 'id', 'lang', 'route', 'file', 'sParams', 'comments-page');
+  $keywords = array();
+
+  foreach((array)osc_apply_filter('item_permalink_keywords', array()) as $keyword => $data) {
+    $data = (is_array($data) ? $data : array());
+    $regex = (isset($data['regex']) ? (string)$data['regex'] : '([a-zA-Z0-9_%-]+)');
+    $param = (isset($data['param']) ? (string)$data['param'] : '');
+    $regex_bad = @preg_grep('#^' . $regex . '$#', array('&', '=', 'a&b', 'a=b'));
+
+    // {UPPER_CASE} name, one valid plain capture group without # (rule delimiter) that cannot add query params, simple param name
+    if(in_array($keyword, $core) || !preg_match('/^\{[A-Z0-9_]+\}$/', $keyword)
+      || !preg_match('/^\((?!\?)[^()#]+\)$/', $regex) || $regex_bad === false || !empty($regex_bad)
+      || !preg_match('/^[a-zA-Z][a-zA-Z0-9_]*$/', $param) || in_array($param, $reserved)) {
+      continue;
+    }
+
+    $keywords[$keyword] = array('regex' => $regex, 'param' => $param, 'unique' => !empty($data['unique']));
+  }
+
+  return $keywords;
+}
+
+
+/**
  * Create item url from item data without exported to view.
  *
  * @since 3.3
@@ -1008,6 +1044,17 @@ function osc_item_url_from_item($item, $locale = '') {
     $uri = str_replace('{ITEM_CURRENCY_CODE}', osc_sanitizeString(isset($item['fk_c_currency_code']) ? $item['fk_c_currency_code'] : ''), $uri);
     $uri = str_replace('{ITEM_PUB_DATE}', osc_sanitizeString(isset($item['dt_pub_date']) ? date('Y-m-d', strtotime($item['dt_pub_date'])) : ''), $uri);
     $uri = str_replace('{ITEM_TITLE}', osc_sanitizeString(str_replace(',' , '-' , $item_title)), $uri);
+
+    // Plugin keywords, values for this listing from filter item_url_keyword_values: array('{ITEM_SLUG}' => 'legacy-barber')
+    if(strpos($uri, '{') !== false) {
+      $plugin_keywords = array_keys(osc_item_permalink_keywords());
+      $plugin_values = (!empty($plugin_keywords) ? (array)osc_apply_filter('item_url_keyword_values', array(), $item, $locale) : array());
+
+      foreach($plugin_keywords as $keyword) {
+        $uri = str_replace($keyword, osc_sanitizeString(isset($plugin_values[$keyword]) ? (string)$plugin_values[$keyword] : ''), $uri);
+      }
+    }
+
     $uri = str_replace('?', '', $uri);
     $uri = str_replace(array('//','///','////','/////','//////'), '/', $uri);
     $uri = ltrim($uri, '/');

@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-19 16:06+0200\n"
+"POT-Creation-Date: 2026-10-19 17:24+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -32,7 +32,7 @@ msgstr ""
 #: oc-admin/locations.php:163 oc-admin/locations.php:199
 #: oc-admin/locations.php:244 oc-admin/locations.php:315
 #: oc-admin/locations.php:358 oc-admin/locations.php:407
-#: oc-admin/locations.php:489 oc-admin/locations.php:529 oc-admin/login.php:157
+#: oc-admin/locations.php:489 oc-admin/locations.php:529 oc-admin/login.php:162
 #: oc-admin/plugins.php:40 oc-admin/plugins.php:271 oc-admin/plugins.php:322
 #: oc-admin/plugins.php:368 oc-admin/plugins.php:386 oc-admin/plugins.php:404
 #: oc-admin/tools.php:408 oc-admin/tools.php:460 oc-admin/tools.php:479
@@ -471,70 +471,78 @@ msgstr ""
 msgid "Optimized CSS and JS files have been removed"
 msgstr ""
 
-#: oc-admin/controller/settings/permalinks.php:640
+#: oc-admin/controller/settings/permalinks.php:99
+#, php-format
+msgid ""
+"Listing URL was not saved. It needs %s, or a plugin keyword that identifies "
+"the listing after a fixed first part (for example %s). Unknown keywords are "
+"not allowed."
+msgstr ""
+
+#: oc-admin/controller/settings/permalinks.php:680
 msgid "All fields are required"
 msgstr ""
 
-#: oc-admin/controller/settings/permalinks.php:640
+#: oc-admin/controller/settings/permalinks.php:680
 #, php-format
 msgid "One field was not updated"
 msgid_plural "%s fields were not updated"
 msgstr[0] ""
 msgstr[1] ""
 
-#: oc-admin/controller/settings/permalinks.php:644
-#: oc-admin/controller/settings/permalinks.php:654
-#: oc-admin/controller/settings/permalinks.php:696
+#: oc-admin/controller/settings/permalinks.php:684
+#: oc-admin/controller/settings/permalinks.php:694
+#: oc-admin/controller/settings/permalinks.php:736
 msgid "Permalinks structure updated"
 msgstr ""
 
-#: oc-admin/controller/settings/permalinks.php:656
+#: oc-admin/controller/settings/permalinks.php:696
 msgid ""
 "However, we cannot check if Apache module <b>mod_rewrite</b> is loaded. If "
 "you experience some problems with the URLs, you should deactivate "
 "<em>Friendly URLs</em>"
 msgstr ""
 
-#: oc-admin/controller/settings/permalinks.php:664
-#: oc-admin/controller/settings/permalinks.php:675
+#: oc-admin/controller/settings/permalinks.php:704
+#: oc-admin/controller/settings/permalinks.php:715
 msgid "File <b>.htaccess</b> couldn't be filled out with the right content."
 msgstr ""
 
-#: oc-admin/controller/settings/permalinks.php:666
+#: oc-admin/controller/settings/permalinks.php:706
 msgid ""
 "Here's the content you have to add to the <b>.htaccess</b> file. If you "
 "cannot create the file, please deactivate the <em>Friendly URLs</em> option."
 msgstr ""
 
-#: oc-admin/controller/settings/permalinks.php:677
+#: oc-admin/controller/settings/permalinks.php:717
 msgid ""
 "Here's the content you have to add to the <b>.htaccess</b> file. If you "
 "cannot create the file or experience some problems with the URLs, please "
 "deactivate the <em>Friendly URLs</em> option."
 msgstr ""
 
-#: oc-admin/controller/settings/permalinks.php:690
+#: oc-admin/controller/settings/permalinks.php:730
 msgid "File <b>.htaccess</b> already exists and was not modified."
 msgstr ""
 
-#: oc-admin/controller/settings/permalinks.php:692
+#: oc-admin/controller/settings/permalinks.php:732
 msgid ""
 "Here's the content you have to add to the <b>.htaccess</b> file. If you "
 "cannot modify the file or experience some problems with the URLs, please "
 "deactivate the <em>Friendly URLs</em> option."
 msgstr ""
 
-#: oc-admin/controller/settings/permalinks.php:730
+#: oc-admin/controller/settings/permalinks.php:770
 msgid "Friendly URLs have been deactivated"
 msgstr ""
 
-#: oc-admin/controller/settings/permalinks.php:733
+#: oc-admin/controller/settings/permalinks.php:773
 msgid ""
 "Friendly URLs deactivated, but .htaccess file could not be deleted. Please, "
 "remove it manually"
 msgstr ""
 
-#: oc-admin/controller/settings/permalinks.php:735
+#: oc-admin/controller/settings/permalinks.php:775
 msgid ""
 "Friendly URLs deactivated, but .htaccess file was modified outside Osclass "
 "and was not deleted"
@@ -965,7 +973,7 @@ msgid ""
 "Sorry, incorrect password. <a href=\"%s\">Have you lost your password?</a>"
 msgstr ""
 
-#: oc-admin/login.php:171 oc-includes/osclass/controller/contact.php:47
+#: oc-admin/login.php:176 oc-includes/osclass/controller/contact.php:47
 #: oc-includes/osclass/controller/item.php:128
 #: oc-includes/osclass/controller/item.php:279
 #: oc-includes/osclass/controller/item.php:528
@@ -976,11 +984,11 @@ msgstr ""
 msgid "Recaptcha validation has failed"
 msgstr ""
 
-#: oc-admin/login.php:189
+#: oc-admin/login.php:194
 msgid "A new password has been sent to your email"
 msgstr ""
 
-#: oc-admin/login.php:196 oc-admin/login.php:207
+#: oc-admin/login.php:201 oc-admin/login.php:212
 #: oc-includes/osclass/controller/login.php:300
 #: oc-includes/osclass/controller/login.php:340
 #: oc-includes/osclass/controller/user-non-secure.php:86
@@ -988,12 +996,12 @@ msgstr ""
 msgid "Sorry, the link is not valid"
 msgstr ""
 
-#: oc-admin/login.php:217 oc-includes/osclass/controller/login.php:333
+#: oc-admin/login.php:222 oc-includes/osclass/controller/login.php:333
 #: oc-includes/osclass/controller/user.php:270
 msgid "The password has been changed"
 msgstr ""
 
-#: oc-admin/login.php:221 oc-includes/osclass/controller/login.php:336
+#: oc-admin/login.php:226 oc-includes/osclass/controller/login.php:336
 #: oc-includes/osclass/controller/user.php:257
 #: oc-includes/osclass/UserActions.php:64
 #: oc-includes/osclass/UserActions.php:213
@@ -1977,23 +1985,23 @@ msgstr ""
 msgid "The comment was not added by you, you cannot delete it"
 msgstr ""
 
-#: oc-includes/osclass/controller/item.php:810
+#: oc-includes/osclass/controller/item.php:828
 msgid "The listing has expired. Please renew it in order to make it public"
 msgstr ""
 
-#: oc-includes/osclass/controller/item.php:816
+#: oc-includes/osclass/controller/item.php:834
 msgid "The listing has not been validated. Validate it to make it public"
 msgstr ""
 
-#: oc-includes/osclass/controller/item.php:819
+#: oc-includes/osclass/controller/item.php:837
 msgid "The listing is deactivated"
 msgstr ""
 
-#: oc-includes/osclass/controller/item.php:830
+#: oc-includes/osclass/controller/item.php:848
 msgid "The listing has not been enabled. Enable it to make it public"
 msgstr ""
 
-#: oc-includes/osclass/controller/item.php:833
+#: oc-includes/osclass/controller/item.php:851
 msgid "The listing has been blocked or is awaiting moderation from the admin"
 msgstr ""
 

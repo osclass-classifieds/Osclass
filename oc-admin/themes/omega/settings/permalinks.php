@@ -569,6 +569,18 @@ osc_current_admin_theme_path('parts/header.php');
                 <?php echo sprintf(__('Required keywords: %s'), '{ITEM_ID}'); ?>
                 <br/>
                 <?php echo sprintf(__('Accepted keywords: %s'), '<b>{ITEM_ID}</b>,{CATEGORIES},{CATEGORY},{ITEM_TITLE},{ITEM_COUNTRY},{ITEM_COUNTRY_CODE},{ITEM_REGION},{ITEM_CITY},{ITEM_CITY_AREA},{ITEM_ZIP},{ITEM_CONTACT_NAME},{ITEM_CONTACT_EMAIL},{ITEM_CURRENCY_CODE},{ITEM_PUB_DATE}'); ?>
+                <?php
+                  $item_url_keywords = osc_item_permalink_keywords();
+                  $item_url_unique = array_keys(array_filter($item_url_keywords, function($k) { return $k['unique']; }));
+                ?>
+                <?php if(!empty($item_url_keywords)) { ?>
+                  <br/>
+                  <?php echo sprintf(__('Keywords from plugins: %s'), implode(',', array_keys($item_url_keywords))); ?>
+                <?php } ?>
+                <?php if(!empty($item_url_unique)) { ?>
+                  <br/>
+                  <?php echo sprintf(__('%s can be left out when the URL has %s after a fixed first part, for example %s.'), '{ITEM_ID}', implode(' / ', $item_url_unique), 'listing/' . $item_url_unique[0]); ?>
+                <?php } ?>
               </div>
             </div>
           </div>

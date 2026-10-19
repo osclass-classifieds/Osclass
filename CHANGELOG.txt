@@ -16,6 +16,8 @@ Osclass 8.4.1
 - New Users setting: minimum password length. It is checked on registration, password change, password reset and when an admin sets a password. Existing sites keep 1 (any password that is not empty); new installs start at 8. Plugins can add own rules.
 - New permalink setting for the public user profile, so it can live on its own address (for example /u/name). Empty keeps today's behaviour.
 - Plugins can now change listing URLs, like they already can for user URLs.
+- Plugins can add own keywords to the listing URL pattern (for example a stored slug) and resolve the listing from them.
+- Permalinks no longer save a listing URL with unknown keywords, or without {ITEM_ID} unless a plugin keyword identifies the listing. Such a URL used to break all listing pages.
 - Listing view statistics work on themes without jQuery.
 - "Login as user" in the back office now sends users to the same page a plugin chooses for a normal login.
 - Security: signing in (front and back office) and changing a password now start a new session, so a session id planted before login cannot be used.

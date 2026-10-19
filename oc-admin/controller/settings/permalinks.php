@@ -78,8 +78,25 @@ HTACCESS;
 
           $errors = 0;
           $item_url = substr(str_replace('//', '/', Params::getParam('rewrite_item_url').'/'), 0, -1);
-          if(!osc_validate_text($item_url)) {
+
+          // only core keywords and keywords from plugins (item_permalink_keywords); without {ITEM_ID} a unique plugin keyword
+          // after a fixed first part (listing/{ITEM_SLUG}), so the rule does not catch category and other pages
+          $item_keywords = array('{ITEM_ID}','{CATEGORY}','{CATEGORIES}','{ITEM_TITLE}','{ITEM_COUNTRY}','{ITEM_COUNTRY_CODE}','{ITEM_REGION}','{ITEM_CITY}','{ITEM_CITY_AREA}','{ITEM_ZIP}','{ITEM_CONTACT_NAME}','{ITEM_CONTACT_EMAIL}','{ITEM_CURRENCY_CODE}','{ITEM_PUB_DATE}');
+          $item_url_keywords = osc_item_permalink_keywords();
+          $item_url_unique = false;
+
+          foreach($item_url_keywords as $keyword => $keyword_data) {
+            if($keyword_data['unique'] && strpos($item_url, $keyword) !== false) {
+              $item_url_unique = true;
+            }
+          }
+
+          preg_match_all('/\{[^}]*\}/', $item_url, $item_url_tokens);
+          $item_url_unknown = array_diff($item_url_tokens[0], $item_keywords, array_keys($item_url_keywords));
+
+          if(!osc_validate_text($item_url) || !empty($item_url_unknown) || (strpos($item_url, '{ITEM_ID}') === false && (!$item_url_unique || !preg_match('#^[a-zA-Z0-9_-]+/#', $item_url)))) {
             $errors += 1;
+            osc_add_flash_error_message(sprintf(_m('Listing URL was not saved. It needs %s, or a plugin keyword that identifies the listing after a fixed first part (for example %s). Unknown keywords are not allowed.'), '{ITEM_ID}', 'listing/{ITEM_SLUG}'), 'admin');
           } else {
             osc_set_preference('rewrite_item_url', $item_url);
           }
@@ -519,7 +536,8 @@ HTACCESS;
           $rewrite->addRule('^'.osc_get_preference('rewrite_item_delete').'/([0-9]+)/(.*?)/?$', 'index.php?page=item&action=item_delete&id=$1&secret=$2');
           $rewrite->addRule('^'.osc_get_preference('rewrite_item_resource_delete').'/([0-9]+)/([0-9]+)/([0-9A-Za-z]+)/?(.*?)/?$', 'index.php?page=item&action=deleteResource&id=$1&item=$2&code=$3&secret=$4');
 
-          // Item rules
+          // Item rules (from the saved pattern, a rejected one keeps the old rules)
+          $item_url = osc_get_preference('rewrite_item_url');
           $id_pos = stripos($item_url, '{ITEM_ID}');
           $title_pos = stripos($item_url, '{ITEM_TITLE}');
           $cat_pos = stripos($item_url, '{CATEGORIES');
@@ -542,16 +560,16 @@ HTACCESS;
           // $rewrite->addRule('^'. str_replace('{ITEM_CITY}', '.*', str_replace('{CATEGORIES}', '.*', str_replace('{ITEM_TITLE}', '.*', str_replace('{ITEM_ID}', '([0-9]+)', $item_url)))).'$', 'index.php?page=item&id=$1');
 
           //$item_rule = str_replace('{ITEM_CITY}', '.*', str_replace('{CATEGORIES}', '.*', str_replace('{ITEM_TITLE}', '.*', str_replace('{ITEM_ID}', '([0-9]+)', $item_url.'\?comments-page=([0-9al]*)'))));
-          $item_rule = str_replace(
-            array('{ITEM_ID}','{CATEGORY}','{CATEGORIES}','{ITEM_TITLE}','{ITEM_COUNTRY}','{ITEM_COUNTRY_CODE}','{ITEM_REGION}','{ITEM_CITY}','{ITEM_CITY_AREA}','{ITEM_ZIP}','{ITEM_CONTACT_NAME}','{ITEM_CONTACT_EMAIL}','{ITEM_CURRENCY_CODE}','{ITEM_PUB_DATE}'),
-            array('([0-9]+)','.*','.*','.*','.*','.*','.*','.*','.*','.*','.*','.*','.*','.*'),
-            $item_url
-          );
+          // plugin keywords are only decoration when the pattern has {ITEM_ID}
+          $item_keywords_regex = array('([0-9]+)','.*','.*','.*','.*','.*','.*','.*','.*','.*','.*','.*','.*','.*');
+          $item_rule = str_replace($item_keywords, $item_keywords_regex, str_replace(array_keys($item_url_keywords), '.*', $item_url));
 
-          $rewrite->addRule('^([a-z]{2})_([A-Z]{2})/'. $item_rule .'\?comments-page=([0-9al]*)$', 'index.php?page=item&id=$3&lang=$1_$2&comments-page=$4');
-          $rewrite->addRule('^'. $item_rule .'\?comments-page=([0-9al]*)$', 'index.php?page=item&id=$2&comments-page=$3');
-          $rewrite->addRule('^([a-z]{2})_([A-Z]{2})/'. $item_rule.'$', 'index.php?page=item&id=$3&lang=$1_$2');
-          $rewrite->addRule('^'. $item_rule.'$', 'index.php?page=item&id=$1');
+          if($id_pos !== false) {
+            $rewrite->addRule('^([a-z]{2})_([A-Z]{2})/'. $item_rule .'\?comments-page=([0-9al]*)$', 'index.php?page=item&id=$3&lang=$1_$2&comments-page=$4');
+            $rewrite->addRule('^'. $item_rule .'\?comments-page=([0-9al]*)$', 'index.php?page=item&id=$2&comments-page=$3');
+            $rewrite->addRule('^([a-z]{2})_([A-Z]{2})/'. $item_rule.'$', 'index.php?page=item&id=$3&lang=$1_$2');
+            $rewrite->addRule('^'. $item_rule.'$', 'index.php?page=item&id=$1');
+          }
 
           // User rules
           $rewrite->addRule('^'.osc_get_preference('rewrite_user_login').'/?$', 'index.php?page=login');
@@ -605,6 +623,28 @@ HTACCESS;
             $rewrite->addRule('^([a-z]{2})_([A-Z]{2})/' . str_replace('{PAGE_SLUG}', '([\p{L}\p{N}_\-,]+)', $page_url) . '/?$', 'index.php?page=page&lang=$1_$2&slug=$3' );
             $rewrite->addRule('^([a-z]{2})-([A-Z]{2})/' . str_replace('{PAGE_SLUG}', '([\p{L}\p{N}_\-,]+)', $page_url) . '/?$', 'index.php?page=page&lang=$1_$2&slug=$3' );
             $rewrite->addRule('^([a-z]{2})/' . str_replace('{PAGE_SLUG}', '([\p{L}\p{N}_\-,]+)', $page_url) . '/?$', 'index.php?page=page&lang=$1&slug=$2' );
+          }
+
+          // Item rules without {ITEM_ID}, after user and page rules: plugin keywords become captures passed as request params (item_resolve_id finds the listing)
+          if($id_pos === false) {
+            $item_rule = '';
+            $item_rule_query = '';
+            $item_rule_query_lang = '';
+            $item_rule_pos = 0;
+
+            foreach(preg_split('/(\{[A-Z0-9_]+\})/', $item_url, -1, PREG_SPLIT_DELIM_CAPTURE) as $item_url_part) {
+              if(isset($item_url_keywords[$item_url_part])) {
+                $item_rule_pos++;
+                $item_rule .= $item_url_keywords[$item_url_part]['regex'];
+                $item_rule_query .= '&' . $item_url_keywords[$item_url_part]['param'] . '=$' . $item_rule_pos;
+                $item_rule_query_lang .= '&' . $item_url_keywords[$item_url_part]['param'] . '=$' . ($item_rule_pos + 2);
+              } else {
+                $item_rule .= str_replace($item_keywords, $item_keywords_regex, $item_url_part);
+              }
+            }
+
+            $rewrite->addRule('^([a-z]{2})_([A-Z]{2})/' . $item_rule . '$', 'index.php?page=item' . $item_rule_query_lang . '&lang=$1_$2');
+            $rewrite->addRule('^' . $item_rule . '$', 'index.php?page=item' . $item_rule_query);
           }
 
           // Clean archive files
