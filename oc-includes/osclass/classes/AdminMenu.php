@@ -123,6 +123,7 @@ class AdminMenu {
     // $this->add_submenu('settings', __('User'), osc_admin_base_url(true) .'?page=users&action=settings', 'settings_users', 'administrator');
     $this->add_submenu('settings', __('Email templates'), osc_admin_base_url(true) .'?page=emails', 'settings_emails_manage', 'administrator');
     $this->add_submenu('settings', __('Mail server'), osc_admin_base_url(true) .'?page=settings&action=mailserver', 'settings_mailserver', 'administrator');
+    $this->add_submenu('settings', __('Mail queue'), osc_admin_base_url(true) .'?page=settings&action=mailqueue', 'settings_mailqueue', 'administrator');
     $this->add_submenu('settings', __('Comments'), osc_admin_base_url(true) .'?page=settings&action=comments', 'settings_comments', 'administrator');
     $this->add_submenu('settings', __('Media'), osc_admin_base_url(true) .'?page=settings&action=media', 'settings_media', 'administrator');
     $this->add_submenu('settings', __('Spam and bots'), osc_admin_base_url(true) .'?page=settings&action=spamNbots', 'settings_spambots', 'administrator');

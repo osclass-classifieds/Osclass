@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Osclass by OsclassPoint.com\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-19 17:24+0200\n"
+"POT-Creation-Date: 2026-10-19 21:48+0200\n"
 "PO-Revision-Date: 2026-09-01 12:54+0200\n"
 "Last-Translator: Translations <translations@osclass>\n"
 "Language-Team: OsclassPoint\n"
@@ -30,6 +30,8 @@ msgstr ""
 #: oc-admin/admins.php:51 oc-admin/admins.php:177 oc-admin/admins.php:303
 #: oc-admin/ajax/ajax.php:726 oc-admin/appearance.php:37
 #: oc-admin/appearance.php:89 oc-admin/controller/settings/advanced.php:33
+#: oc-admin/controller/settings/mailqueue.php:34
+#: oc-admin/controller/settings/mailqueue.php:62
 #: oc-admin/controller/settings/mailserver.php:33
 #: oc-admin/controller/settings/media.php:256 oc-admin/languages.php:47
 #: oc-admin/locations.php:31 oc-admin/locations.php:79
@@ -188,8 +190,8 @@ msgstr ""
 #: oc-admin/controller/settings/breadcrumbs.php:83
 #: oc-admin/controller/settings/comments.php:99
 #: oc-admin/controller/settings/latestsearches.php:71
-#: oc-admin/controller/settings/main.php:293
-#: oc-admin/controller/settings/main.php:295
+#: oc-admin/controller/settings/main.php:296
+#: oc-admin/controller/settings/main.php:298
 #: oc-admin/controller/settings/media.php:235
 #: oc-admin/controller/settings/optimization.php:75
 #: oc-admin/controller/settings/optimization.php:112
@@ -221,8 +223,8 @@ msgid "The theme has been activated"
 msgstr ""
 
 #: oc-admin/appearance.php:442 oc-admin/appearance.php:447
-#: oc-admin/controller/settings/main.php:206
-#: oc-admin/controller/settings/main.php:209 oc-admin/languages.php:157
+#: oc-admin/controller/settings/main.php:207
+#: oc-admin/controller/settings/main.php:210 oc-admin/languages.php:157
 #: oc-admin/languages.php:160 oc-admin/languages.php:163
 #: oc-admin/languages.php:166 oc-includes/osclass/ItemActions.php:187
 #: oc-includes/osclass/ItemActions.php:795
@@ -381,6 +383,33 @@ msgid ""
 "invalid"
 msgstr ""
 
+#: oc-admin/controller/settings/mailqueue.php:52
+msgid "Mail queue settings have been updated"
+msgstr ""
+
+#: oc-admin/controller/settings/mailqueue.php:74
+msgid "Sending is paused. New emails still wait in the queue."
+msgstr ""
+
+#: oc-admin/controller/settings/mailqueue.php:74
+msgid "Sending is resumed"
+msgstr ""
+
+#: oc-admin/controller/settings/mailqueue.php:98
+msgid "The email was not sent. See the error in the list."
+msgstr ""
+
+#: oc-admin/controller/settings/mailqueue.php:103
+#, php-format
+msgid "One email has been updated"
+msgid_plural "%s emails have been updated"
+msgstr[0] ""
+msgstr[1] ""
+
+#: oc-admin/controller/settings/mailqueue.php:111
+msgid "Email not found in the mail queue"
+msgstr ""
+
 #: oc-admin/controller/settings/mailserver.php:54
 msgid "Mail server type is incorrect"
 msgstr ""
@@ -404,33 +433,33 @@ msgstr ""
 msgid "API key \"%s\" validation failed, invalid response from server"
 msgstr ""
 
-#: oc-admin/controller/settings/main.php:123
+#: oc-admin/controller/settings/main.php:124
 msgid ""
 "Option \"Add language code into base URL\" is not supported when subdomain "
 "type \"Language\" is enabled!"
 msgstr ""
 
-#: oc-admin/controller/settings/main.php:212
+#: oc-admin/controller/settings/main.php:213
 msgid "Number of listings in the RSS has to be a numeric value"
 msgstr ""
 
-#: oc-admin/controller/settings/main.php:215
+#: oc-admin/controller/settings/main.php:216
 msgid "Number of category levels has to be a numeric value"
 msgstr ""
 
-#: oc-admin/controller/settings/main.php:218
+#: oc-admin/controller/settings/main.php:219
 msgid "Max latest listings has to be a numeric value"
 msgstr ""
 
-#: oc-admin/controller/settings/main.php:221
+#: oc-admin/controller/settings/main.php:222
 msgid "Number of listings on search has to be a numeric value"
 msgstr ""
 
-#: oc-admin/controller/settings/main.php:252
+#: oc-admin/controller/settings/main.php:253
 msgid "Number of listings in the RSS must be an integer"
 msgstr ""
 
-#: oc-admin/controller/settings/main.php:259
+#: oc-admin/controller/settings/main.php:260
 msgid "Number of recent listings displayed at home must be an integer"
 msgstr ""
 
@@ -1248,7 +1277,7 @@ msgstr ""
 msgid "Your reply has been added"
 msgstr ""
 
-#: oc-admin/reports.php:267 oc-includes/osclass/controller/report.php:366
+#: oc-admin/reports.php:267 oc-includes/osclass/controller/report.php:349
 msgid "There was a problem submitting your reply, please try again later."
 msgstr ""
 
@@ -2155,17 +2184,17 @@ msgid "Please describe reason of your report."
 msgstr ""
 
 #: oc-includes/osclass/controller/report.php:151
-#: oc-includes/osclass/controller/report.php:425
+#: oc-includes/osclass/controller/report.php:408
 msgid "You cannot report your own listing."
 msgstr ""
 
 #: oc-includes/osclass/controller/report.php:162
-#: oc-includes/osclass/controller/report.php:392
+#: oc-includes/osclass/controller/report.php:375
 msgid "User you are trying to report does not exist."
 msgstr ""
 
 #: oc-includes/osclass/controller/report.php:169
-#: oc-includes/osclass/controller/report.php:397
+#: oc-includes/osclass/controller/report.php:380
 msgid "You cannot report yourself."
 msgstr ""
 
@@ -2179,53 +2208,53 @@ msgstr ""
 msgid "Attached file is not allowed, check its type and size."
 msgstr ""
 
-#: oc-includes/osclass/controller/report.php:253
+#: oc-includes/osclass/controller/report.php:272
 msgid "There was a problem submitting your report, please try again later."
 msgstr ""
 
-#: oc-includes/osclass/controller/report.php:296
+#: oc-includes/osclass/controller/report.php:279
 #, php-format
 msgid "Report #%d has been submitted."
 msgstr ""
 
-#: oc-includes/osclass/controller/report.php:299
+#: oc-includes/osclass/controller/report.php:282
 msgid "Thank you, your report has been submitted and our team will review it."
 msgstr ""
 
-#: oc-includes/osclass/controller/report.php:310
-#: oc-includes/osclass/controller/report.php:334
+#: oc-includes/osclass/controller/report.php:293
+#: oc-includes/osclass/controller/report.php:317
 msgid "You can only view reports related to you."
 msgstr ""
 
-#: oc-includes/osclass/controller/report.php:326
+#: oc-includes/osclass/controller/report.php:309
 msgid "Sorry, replies to reports are disabled."
 msgstr ""
 
-#: oc-includes/osclass/controller/report.php:342
+#: oc-includes/osclass/controller/report.php:325
 msgid "This report has been closed, replies are not possible anymore."
 msgstr ""
 
-#: oc-includes/osclass/controller/report.php:344
+#: oc-includes/osclass/controller/report.php:327
 msgid "You can reply only when feedback was requested on this report."
 msgstr ""
 
-#: oc-includes/osclass/controller/report.php:352
+#: oc-includes/osclass/controller/report.php:335
 msgid "Please enter your reply."
 msgstr ""
 
-#: oc-includes/osclass/controller/report.php:383
+#: oc-includes/osclass/controller/report.php:366
 msgid "Your reply has been added."
 msgstr ""
 
-#: oc-includes/osclass/controller/report.php:451
+#: oc-includes/osclass/controller/report.php:434
 msgid "Listing you are trying to report does not exist."
 msgstr ""
 
-#: oc-includes/osclass/controller/report.php:457
+#: oc-includes/osclass/controller/report.php:440
 msgid "This listing is not enabled and cannot be reported."
 msgstr ""
 
-#: oc-includes/osclass/controller/report.php:459
+#: oc-includes/osclass/controller/report.php:442
 msgid "This listing is not active and cannot be reported."
 msgstr ""
 
@@ -2389,8 +2418,8 @@ msgstr ""
 msgid "A report already exists (report #%d)."
 msgstr ""
 
-#: oc-includes/osclass/helpers/hReport.php:1037
-#: oc-includes/osclass/helpers/hReport.php:1041
+#: oc-includes/osclass/helpers/hReport.php:1065
+#: oc-includes/osclass/helpers/hReport.php:1069
 msgid "Your message could not be stored. Please try again later."
 msgstr ""
 
@@ -2562,7 +2591,7 @@ msgid ""
 "Your rating has been removed as you already rated this listing %d time(s)"
 msgstr ""
 
-#: oc-includes/osclass/upgrade-funcs.php:998
+#: oc-includes/osclass/upgrade-funcs.php:1043
 msgid ""
 "Osclass has been updated successfully. <a href=\"https://"
 "forums.osclasspoint.com\">Need more help?</a>"
@@ -2586,6 +2615,6 @@ msgstr ""
 msgid "This email is already used by %s"
 msgstr ""
 
-#: oc-includes/osclass/utils.php:1576
+#: oc-includes/osclass/utils.php:1677
 msgid "Empty server response"
 msgstr ""

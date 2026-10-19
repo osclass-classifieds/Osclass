@@ -32,10 +32,15 @@ class EmailTemplatesDataTable extends DataTable {
     $this->getDBParams($params);
 
     $emails = Page::newInstance()->listAll(1, null, null, null, null);
+
+    // Plugins can hide or add templates before search and pagination
+    $emails = osc_apply_filter('admin_emails_list', $emails, $params);
+    $emails = (is_array($emails) ? array_values($emails) : array());
+    $this->total = count($emails);
+
     $emails = $this->filterEmails($emails);
     $emails = $this->sortEmails($emails);
 
-    $this->total = Page::newInstance()->count(1);
     $this->totalFiltered = count($emails);
     $this->processData(array_slice($emails, $this->start, $this->limit));
 
@@ -72,6 +77,9 @@ class EmailTemplatesDataTable extends DataTable {
     $this->addColumn('internal_name', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('internal_name', $sort, $direction)) . '">' . __('Internal name') . '</a>');
     $this->addColumn('pub_date', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('pub_date', $sort, $direction)) . '">' . __('Create date') . '</a>');
     $this->addColumn('mod_date', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('mod_date', $sort, $direction)) . '">' . __('Update date') . '</a>');
+
+    $dummy = &$this;
+    osc_run_hook('admin_emails_table', $dummy);
   }
 
   private function getDBParams($params) {
@@ -100,7 +108,9 @@ class EmailTemplatesDataTable extends DataTable {
       $options = array();
       $options[] = '<a href="' . osc_admin_base_url(true) . '?page=emails&amp;action=edit&amp;id=' . $email['pk_i_id'] . '">' . __('Edit') . '</a>';
       $options[] = '<a href="#" class="email-test-popup" data-id="' . (int)$email['pk_i_id'] . '">' . __('Test - Send email') . '</a>';
-      $actions = $this->buildRowActions($options, array(), 8);
+      $options_more = osc_apply_filter('more_actions_manage_emails', array(), $email);
+      $options = osc_apply_filter('actions_manage_emails', $options, $email);
+      $actions = $this->buildRowActions($options, $options_more, 8);
 
       $row = array();
       $row['id'] = $email['pk_i_id'];
@@ -108,6 +118,7 @@ class EmailTemplatesDataTable extends DataTable {
       $row['internal_name'] = $email['s_internal_name'];
       $row['pub_date'] = osc_format_date_only($email['dt_pub_date']);
       $row['mod_date'] = osc_format_date_only($email['dt_mod_date']);
+      $row = osc_apply_filter('emails_processing_row', $row, $email);
       $this->addRow($row);
       $this->rawRows[] = $email;
     }

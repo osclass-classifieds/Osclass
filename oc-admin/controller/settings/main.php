@@ -96,6 +96,7 @@ class CAdminSettingsMain extends AdminSecBaseModel {
         $adminColorScheme = Params::getParam('admin_color_scheme');
         $jqueryVersion = Params::getParam('jquery_version');
         $bAutoCron = Params::getParam('auto_cron');
+        $iCronMinutelyInterval = (int)Params::getParam('cron_minutely_interval');
         $hideGenerator = Params::getParam('hide_generator');
         $opApiKey = Params::getParam('osclasspoint_api_key');
         $structuredData = Params::getParam('structured_data');
@@ -269,6 +270,8 @@ class CAdminSettingsMain extends AdminSecBaseModel {
         $iUpdated += osc_set_preference('contact_attachment', $contactAttachment);
         $iUpdated += osc_set_preference('search_pattern_method', $searchPatternMethod);
         $iUpdated += osc_set_preference('auto_cron', $bAutoCron);
+        $iCronMinutelyInterval = ($iCronMinutelyInterval >= 1 ? min(60, $iCronMinutelyInterval) : osc_cron_minutely_interval());  // minutes between 1 and 60
+        $iUpdated += osc_set_preference('cron_minutely_interval', $iCronMinutelyInterval, 'osclass', 'INTEGER');
         $iUpdated += osc_set_preference('always_gen_canonical', $bAlwaysGenCanonical);
         $iUpdated += osc_set_preference('enhance_canonical_url_enabled', $bEnhanceCanonicalUrlEnabled);
         $iUpdated += osc_set_preference('block_indexing_enabled', $bBlockIndexingEnabled);

@@ -306,7 +306,7 @@ switch(Params::getParam('page')){
 }
 
 
-// Built-in auto-cron: at most once per 5 minutes (MINUTELY), never from a cron/self request
+// Built-in auto-cron: at most once per minutely interval (default 5 minutes), never from a cron/self request
 if(
   !defined('__FROM_CRON__')
   && Params::getParam('page') != 'cron'
@@ -320,7 +320,7 @@ if(
     $i_next = (isset($cron_minutely['d_next_exec']) && $cron_minutely['d_next_exec'] !== '' ? (strtotime($cron_minutely['d_next_exec']) ?: 0) : 0);
     if((time() - $i_next) >= 0) {
       // Claim slot first so concurrent page loads cannot stampede
-      $d_next = date('Y-m-d H:i:s', strtotime(date('Y-m-d H:i:00')) + (5 * 60));
+      $d_next = date('Y-m-d H:i:s', strtotime(date('Y-m-d H:i:00')) + (osc_cron_minutely_interval() * 60));
       Cron::newInstance()->update(array('d_next_exec' => $d_next), array('e_type' => 'MINUTELY'));
       osc_doRequest(osc_base_url(true) . '?page=cron', array('page' => 'cron', 'auto_cron' => 1), 5, false);
     }

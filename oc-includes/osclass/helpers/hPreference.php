@@ -1368,6 +1368,16 @@ function osc_auto_cron() {
 }
 
 /**
+ * Gets minutes between minutely cron runs over HTTP and built-in cron (1-60, default 5)
+ *
+ * @return int
+ */
+function osc_cron_minutely_interval() {
+  $interval = (int)getPreference('cron_minutely_interval');
+  return ($interval >= 1 && $interval <= 60 ? $interval : 5);
+}
+
+/**
  * Gets if recaptcha for items is enabled or not
  *
  * @return boolean
@@ -2780,6 +2790,93 @@ function osc_mailserver_password() {
  */
 function osc_mailserver_ssl() {
   return (getPreference('mailserver_ssl'));
+}
+
+/**
+ * Gets if emails go to the mail queue and are sent by cron
+ *
+ * @return boolean
+ */
+function osc_mail_queue_enabled() {
+  return getBoolPreference('mail_queue_enabled');
+}
+
+/**
+ * Gets if sending from the mail queue is paused (emails are still queued)
+ *
+ * @return boolean
+ */
+function osc_mail_queue_paused() {
+  return getBoolPreference('mail_queue_paused');
+}
+
+/**
+ * Gets max emails sent from the mail queue in one cron run
+ *
+ * @return int
+ */
+function osc_mail_queue_per_run() {
+  $value = (int)getPreference('mail_queue_per_run');
+  return ($value > 0 ? min($value, 5000) : 50);
+}
+
+/**
+ * Gets max bulk emails sent from the mail queue in one cron run
+ *
+ * @return int
+ */
+function osc_mail_queue_bulk_per_run() {
+  $value = (int)getPreference('mail_queue_bulk_per_run');
+  return ($value > 0 ? min($value, 5000) : 30);
+}
+
+/**
+ * Gets max bulk emails of one group (sender) sent in one cron run
+ *
+ * @return int
+ */
+function osc_mail_queue_group_per_run() {
+  $value = (int)getPreference('mail_queue_group_per_run');
+  return ($value > 0 ? min($value, 5000) : 15);
+}
+
+/**
+ * Gets seconds the mail queue may spend sending in one cron run
+ *
+ * @return int
+ */
+function osc_mail_queue_time_budget() {
+  $value = (int)getPreference('mail_queue_time_budget');
+  return ($value > 0 ? min($value, 3600) : 40);
+}
+
+/**
+ * Gets how many times the mail queue tries to send an email before it is marked as failed
+ *
+ * @return int
+ */
+function osc_mail_queue_max_attempts() {
+  $value = (int)getPreference('mail_queue_max_attempts');
+  return ($value > 0 ? min($value, 10) : 3);
+}
+
+/**
+ * Gets days sent, failed and cancelled emails stay in the mail queue history
+ *
+ * @return int
+ */
+function osc_mail_queue_keep_days() {
+  $value = (int)getPreference('mail_queue_keep_days');
+  return ($value > 0 ? min($value, 365) : 14);
+}
+
+/**
+ * Gets email types sent immediately (logged in the mail queue)
+ *
+ * @return array
+ */
+function osc_mail_queue_instant_types() {
+  return array_values(array_filter(array_map('trim', explode(',', (string)getPreference('mail_queue_instant_types')))));
 }
 
 /**

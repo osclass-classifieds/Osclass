@@ -657,3 +657,32 @@ CREATE TABLE /*TABLE_PREFIX*/t_site (
 
   PRIMARY KEY (s_site)
 ) ENGINE=InnoDB DEFAULT CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_unicode_ci';
+
+CREATE TABLE /*TABLE_PREFIX*/t_mail_queue (
+  pk_i_id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  i_priority TINYINT(1) UNSIGNED NOT NULL DEFAULT 2,
+  e_status ENUM('PENDING','SENDING','SENT','FAILED','CANCELLED') NOT NULL DEFAULT 'PENDING',
+  s_type VARCHAR(64) NOT NULL DEFAULT '',
+  s_group VARCHAR(40) NULL,
+  s_ref VARCHAR(64) NULL,
+  s_to_email VARCHAR(150) NOT NULL DEFAULT '',
+  s_subject VARCHAR(255) NOT NULL DEFAULT '',
+  s_params LONGTEXT NULL,
+  s_lock VARCHAR(32) NULL,
+  i_attempts TINYINT(3) UNSIGNED NOT NULL DEFAULT 0,
+  b_attachment TINYINT(1) NOT NULL DEFAULT 0,
+  b_private TINYINT(1) NOT NULL DEFAULT 0,
+  s_error VARCHAR(500) NULL,
+  dt_created DATETIME NOT NULL,
+  dt_send_after DATETIME NOT NULL,
+  dt_expire DATETIME NULL,
+  dt_lock DATETIME NULL,
+  dt_done DATETIME NULL,
+
+  PRIMARY KEY (pk_i_id),
+  INDEX idx_status_priority_send (e_status, i_priority, dt_send_after, s_group),
+  INDEX idx_status_done (e_status, dt_done),
+  INDEX idx_group_status (s_group, e_status),
+  INDEX idx_to_email (s_to_email),
+  INDEX idx_ref (s_ref)
+) ENGINE=InnoDB DEFAULT CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_unicode_ci';

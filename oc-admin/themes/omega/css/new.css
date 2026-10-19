@@ -2236,3 +2236,16 @@ input[readonly], textarea[readonly], select[readonly] {opacity:0.7;cursor:defaul
 .iframe-category label.apply-subcats-label {display:block;clear:both;margin:8px 0 5px 0;float:left;}
 .iframe-category .category-form-divider {padding:0;}
 .iframe-category .category-form-divider hr {display:block;width:100%;margin:12px 0;border:0;border-top:1px solid #ddd;}
+#mail-queue .mq-health {clear:both;display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:16px;margin:0 0 20px;}
+#mail-queue .mq-health > span {display:block;padding:12px 16px;border:1px solid #ddd;background:#fff;}
+#mail-queue .mq-label {display:block;margin:0 0 6px;font-size:13px;line-height:18px;font-weight:600;color:#616161;}
+#mail-queue .mq-value {display:block;font-size:24px;line-height:28px;font-weight:600;color:#222;}
+#mail-queue .mq-sub {display:block;margin-top:4px;font-size:12px;line-height:16px;color:#616161;}
+#mail-queue .mq-tabs, #mail-queue .mq-filters, #mail-queue .mq-filters form {clear:both;display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 12px;}
+#mail-queue .mq-filters form {clear:none;margin:0;}
+#mail-queue .mq-tabs .btn, #mail-queue .mq-filters .btn, #mail-queue .mq-filters select, #mail-queue .mq-filters input {float:none;margin:0;}
+#mail-queue .mq-filters input[name="type"], #mail-queue .mq-filters input[name="group"] {width:120px;}
+#mail-queue .table td.col-to {min-width:180px;word-break:break-all;}
+#mail-queue .table td.col-error {max-width:240px;word-break:break-word;}
+#mail-queue .mq-detail .form-controls {word-break:break-word;}
+#mail-queue .mq-body {display:block;width:100%;min-height:520px;border:1px solid #ddd;background:#fff;}

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-19 17:23+0200\n"
+"POT-Creation-Date: 2026-10-19 21:48+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -157,11 +157,12 @@ msgstr ""
 
 #: oc-admin/admins.php:393 oc-admin/appearance.php:170
 #: oc-admin/categories.php:478 oc-admin/comments.php:463
-#: oc-admin/currencies.php:349 oc-admin/custom_fields.php:223
-#: oc-admin/items.php:748 oc-admin/languages.php:455 oc-admin/languages.php:456
-#: oc-admin/media.php:176 oc-admin/pages.php:344 oc-admin/plugins.php:688
-#: oc-admin/plugins.php:757 oc-admin/reports.php:475
-#: oc-admin/themes/omega/admins/index.php:298
+#: oc-admin/controller/settings/mailqueue.php:216
+#: oc-admin/controller/settings/mailqueue.php:227 oc-admin/currencies.php:349
+#: oc-admin/custom_fields.php:223 oc-admin/items.php:748
+#: oc-admin/languages.php:455 oc-admin/languages.php:456 oc-admin/media.php:176
+#: oc-admin/pages.php:344 oc-admin/plugins.php:688 oc-admin/plugins.php:757
+#: oc-admin/reports.php:475 oc-admin/themes/omega/admins/index.php:298
 #: oc-admin/themes/omega/admins/index.php:309
 #: oc-admin/themes/omega/appearance/index.php:216
 #: oc-admin/themes/omega/appearance/index.php:299
@@ -190,6 +191,7 @@ msgstr ""
 #: oc-admin/themes/omega/plugins/index.php:449
 #: oc-admin/themes/omega/reports/index.php:298
 #: oc-admin/themes/omega/reports/index.php:309
+#: oc-admin/themes/omega/settings/mailqueue_view.php:112
 #: oc-admin/themes/omega/tools/backup.php:127
 #: oc-admin/themes/omega/tools/logs.php:270
 #: oc-admin/themes/omega/tools/logs.php:282
@@ -423,22 +425,22 @@ msgstr ""
 msgid "Product not updated: %s"
 msgstr ""
 
-#: oc-admin/ajax/ajax.php:673 oc-includes/osclass/utils.php:3418
+#: oc-admin/ajax/ajax.php:673 oc-includes/osclass/utils.php:3519
 msgid "Everything looks good!"
 msgstr ""
 
-#: oc-admin/ajax/ajax.php:708 oc-includes/osclass/utils.php:2989
-#: oc-includes/osclass/utils.php:3436
+#: oc-admin/ajax/ajax.php:708 oc-includes/osclass/utils.php:3090
+#: oc-includes/osclass/utils.php:3537
 msgid "Nothing to copy"
 msgstr ""
 
-#: oc-admin/ajax/ajax.php:712 oc-includes/osclass/utils.php:2995
-#: oc-includes/osclass/utils.php:3440
+#: oc-admin/ajax/ajax.php:712 oc-includes/osclass/utils.php:3096
+#: oc-includes/osclass/utils.php:3541
 msgid "Unzip failed"
 msgstr ""
 
-#: oc-admin/ajax/ajax.php:716 oc-includes/osclass/utils.php:3001
-#: oc-includes/osclass/utils.php:3444
+#: oc-admin/ajax/ajax.php:716 oc-includes/osclass/utils.php:3102
+#: oc-includes/osclass/utils.php:3545
 msgid "Download failed"
 msgstr ""
 
@@ -686,14 +688,266 @@ msgstr ""
 msgid "Are you sure you want to %s the selected comments?"
 msgstr ""
 
-#: oc-admin/controller/settings/main.php:206
+#: oc-admin/controller/settings/mailqueue.php:125
+#: oc-admin/themes/omega/settings/mailqueue.php:121
+#: oc-admin/themes/omega/settings/mailqueue_view.php:38
+#: oc-includes/osclass/helpers/hUsers.php:938
+msgid "Instant"
+msgstr ""
+
+#: oc-admin/controller/settings/mailqueue.php:125
+#: oc-admin/themes/omega/settings/mailqueue.php:122
+#: oc-admin/themes/omega/settings/mailqueue_view.php:38
+#: oc-includes/osclass/classes/datatables/MediaDataTable.php:234
+msgid "Normal"
+msgstr ""
+
+#: oc-admin/controller/settings/mailqueue.php:125
+#: oc-admin/themes/omega/settings/mailqueue.php:123
+#: oc-admin/themes/omega/settings/mailqueue_view.php:38
+msgid "Bulk"
+msgstr ""
+
+#: oc-admin/controller/settings/mailqueue.php:126
+#: oc-admin/themes/omega/settings/mailqueue.php:51
+#: oc-admin/themes/omega/settings/mailqueue_view.php:39
+#: oc-admin/themes/omega/stats/comments.php:87
+#: oc-admin/themes/omega/stats/comments.php:164
+#: oc-admin/themes/omega/stats/overview.php:75
+#: oc-admin/themes/omega/stats/overview.php:84
+#: oc-admin/themes/omega/stats/users.php:84
+#: oc-includes/osclass/helpers/hCustomDataTable.php:850
+#: oc-includes/osclass/helpers/hItemStats.php:2368
+#: oc-includes/osclass/helpers/hItemStats.php:2373
+msgid "Pending"
+msgstr ""
+
+#: oc-admin/controller/settings/mailqueue.php:126
+#: oc-admin/themes/omega/settings/mailqueue.php:97
+#: oc-admin/themes/omega/settings/mailqueue_view.php:39
+msgid "Sending"
+msgstr ""
+
+#: oc-admin/controller/settings/mailqueue.php:126
+#: oc-admin/themes/omega/settings/mailqueue.php:51
+#: oc-admin/themes/omega/settings/mailqueue_view.php:39
+msgid "Sent"
+msgstr ""
+
+#: oc-admin/controller/settings/mailqueue.php:126
+#: oc-admin/themes/omega/settings/mailqueue.php:51
+#: oc-admin/themes/omega/settings/mailqueue_view.php:39
+msgid "Failed"
+msgstr ""
+
+#: oc-admin/controller/settings/mailqueue.php:126
+#: oc-admin/themes/omega/settings/mailqueue.php:51
+#: oc-admin/themes/omega/settings/mailqueue_view.php:39
+#: oc-includes/osclass/helpers/hReport.php:158
+msgid "Cancelled"
+msgstr ""
+
+#: oc-admin/controller/settings/mailqueue.php:148
+#: oc-admin/themes/omega/settings/mailqueue_view.php:60
+msgid "Recipient"
+msgstr ""
+
+#: oc-admin/controller/settings/mailqueue.php:149
+#: oc-admin/themes/omega/settings/mailqueue_view.php:64
+msgid "Subject"
+msgstr ""
+
+#: oc-admin/controller/settings/mailqueue.php:150
+#: oc-admin/themes/omega/admins/index.php:170
+#: oc-admin/themes/omega/fields/frm.php:151
+#: oc-admin/themes/omega/fields/iframe.php:63
+#: oc-admin/themes/omega/reports/edit.php:164
+#: oc-admin/themes/omega/settings/mailqueue.php:125
+#: oc-admin/themes/omega/settings/mailqueue_view.php:66
+#: oc-admin/themes/omega/stats/comments.php:98
+#: oc-admin/themes/omega/tools/backup.php:112
+#: oc-admin/themes/omega/tools/info.php:255
+#: oc-admin/themes/omega/translations/edit.php:315
+#: oc-admin/themes/omega/translations/index.php:221
+#: oc-admin/themes/omega/translations/index.php:303
+#: oc-includes/osclass/classes/datatables/AdminsDataTable.php:81
+#: oc-includes/osclass/classes/datatables/FieldsDataTable.php:102
+#: oc-includes/osclass/classes/datatables/ReportsDataTable.php:116
+#: oc-includes/osclass/helpers/hItemStats.php:2419
+msgid "Type"
+msgstr ""
+
+#: oc-admin/controller/settings/mailqueue.php:151
+#: oc-admin/themes/omega/settings/mailqueue.php:126
+#: oc-admin/themes/omega/settings/mailqueue_view.php:68
+msgid "Group"
+msgstr ""
+
+#: oc-admin/controller/settings/mailqueue.php:152
+#: oc-admin/themes/omega/settings/mailqueue_view.php:67
+msgid "Priority"
+msgstr ""
+
+#: oc-admin/controller/settings/mailqueue.php:153
+#: oc-admin/themes/omega/settings/mailqueue.php:209
+#: oc-admin/themes/omega/settings/mailqueue_view.php:74
+msgid "Attempts"
+msgstr ""
+
+#: oc-admin/controller/settings/mailqueue.php:154
+#: oc-admin/themes/omega/reports/edit.php:268
+#: oc-admin/themes/omega/settings/mailqueue_view.php:70
+#: oc-admin/themes/omega/tools/backup.php:114
+#: oc-includes/osclass/classes/datatables/ReportsDataTable.php:122
+msgid "Created"
+msgstr ""
+
+#: oc-admin/controller/settings/mailqueue.php:155
+#: oc-admin/themes/omega/settings/mailqueue_view.php:71
+msgid "Send after"
+msgstr ""
+
+#: oc-admin/controller/settings/mailqueue.php:156
+#: oc-admin/themes/omega/settings/mailqueue_view.php:73
+msgid "Finished"
+msgstr ""
+
+#: oc-admin/controller/settings/mailqueue.php:157
+#: oc-admin/themes/omega/settings/mailqueue_view.php:75
+#: oc-includes/osclass/functions.php:2739
+msgid "Error"
+msgstr ""
+
+#: oc-admin/controller/settings/mailqueue.php:178
+#: oc-admin/themes/omega/reports/edit.php:252
+#: oc-admin/themes/omega/reports/edit.php:309
+#: oc-admin/themes/omega/reports/settings.php:233
+#: oc-admin/themes/omega/users/frm.php:622
+#: oc-includes/osclass/helpers/hReport.php:908
+msgid "Attachment"
+msgstr ""
+
+#: oc-admin/controller/settings/mailqueue.php:197
+#: oc-includes/osclass/classes/datatables/MediaDataTable.php:137
+#: oc-includes/osclass/helpers/hCustomDataTable.php:864
+msgid "View"
+msgstr ""
+
+#: oc-admin/controller/settings/mailqueue.php:200
+#: oc-admin/themes/omega/settings/mailqueue_view.php:103
+msgid "Send now"
+msgstr ""
+
+#: oc-admin/controller/settings/mailqueue.php:204
+#: oc-admin/controller/settings/mailqueue.php:225 oc-admin/reports.php:478
+#: oc-admin/themes/omega/admins/frm.php:155
+#: oc-admin/themes/omega/admins/index.php:299
+#: oc-admin/themes/omega/admins/index.php:310
+#: oc-admin/themes/omega/appearance/add.php:114
+#: oc-admin/themes/omega/appearance/add_widget.php:352
+#: oc-admin/themes/omega/appearance/index.php:279
+#: oc-admin/themes/omega/appearance/index.php:300
+#: oc-admin/themes/omega/appearance/widgets.php:305
+#: oc-admin/themes/omega/appearance/widgets.php:316
+#: oc-admin/themes/omega/categories/frm.php:193
+#: oc-admin/themes/omega/categories/index.php:267
+#: oc-admin/themes/omega/categories/index.php:280
+#: oc-admin/themes/omega/categories/reorder.php:49
+#: oc-admin/themes/omega/categories/reorder.php:307
+#: oc-admin/themes/omega/comments/frm.php:186
+#: oc-admin/themes/omega/comments/index.php:283
+#: oc-admin/themes/omega/comments/index.php:294
+#: oc-admin/themes/omega/currencies/frm.php:205
+#: oc-admin/themes/omega/currencies/index.php:233
+#: oc-admin/themes/omega/currencies/index.php:245
+#: oc-admin/themes/omega/emails/frm.php:171
+#: oc-admin/themes/omega/fields/frm.php:187
+#: oc-admin/themes/omega/fields/iframe.php:96
+#: oc-admin/themes/omega/fields/index.php:268
+#: oc-admin/themes/omega/fields/index.php:279
+#: oc-admin/themes/omega/fields/reorder.php:285
+#: oc-admin/themes/omega/items/frm.php:476
+#: oc-admin/themes/omega/items/index.php:456
+#: oc-admin/themes/omega/items/index.php:467
+#: oc-admin/themes/omega/languages/index.php:238
+#: oc-admin/themes/omega/languages/index.php:250
+#: oc-admin/themes/omega/languages/index.php:290
+#: oc-admin/themes/omega/locations/index.php:139
+#: oc-admin/themes/omega/locations/index.php:220
+#: oc-admin/themes/omega/locations/index.php:262
+#: oc-admin/themes/omega/locations/index.php:287
+#: oc-admin/themes/omega/locations/index.php:318
+#: oc-admin/themes/omega/locations/index.php:345
+#: oc-admin/themes/omega/locations/index.php:384
+#: oc-admin/themes/omega/locations/index.php:475
+#: oc-admin/themes/omega/locations/index.php:507
+#: oc-admin/themes/omega/market/languages.php:225
+#: oc-admin/themes/omega/market/languages_plugins.php:221
+#: oc-admin/themes/omega/market/languages_themes.php:214
+#: oc-admin/themes/omega/market/locations.php:197
+#: oc-admin/themes/omega/market/plugins.php:327
+#: oc-admin/themes/omega/market/themes.php:341
+#: oc-admin/themes/omega/media/index.php:256
+#: oc-admin/themes/omega/media/index.php:267
+#: oc-admin/themes/omega/pages/frm.php:221
+#: oc-admin/themes/omega/pages/index.php:299
+#: oc-admin/themes/omega/pages/index.php:310
+#: oc-admin/themes/omega/plugins/add.php:120
+#: oc-admin/themes/omega/plugins/index.php:422
+#: oc-admin/themes/omega/plugins/index.php:439
+#: oc-admin/themes/omega/plugins/index.php:450
+#: oc-admin/themes/omega/reports/edit.php:88
+#: oc-admin/themes/omega/reports/edit.php:423
+#: oc-admin/themes/omega/reports/index.php:299
+#: oc-admin/themes/omega/reports/index.php:310
+#: oc-admin/themes/omega/settings/mailqueue_view.php:106
+#: oc-admin/themes/omega/tools/logs.php:271
+#: oc-admin/themes/omega/tools/logs.php:283
+#: oc-admin/themes/omega/users/alerts.php:318
+#: oc-admin/themes/omega/users/alerts.php:329
+#: oc-admin/themes/omega/users/ban.php:269
+#: oc-admin/themes/omega/users/ban.php:281
+#: oc-admin/themes/omega/users/frm.php:630
+#: oc-admin/themes/omega/users/index.php:417
+#: oc-admin/themes/omega/users/index.php:429
+#: oc-includes/osclass/classes/datatables/ReportsDataTable.php:147
+#: oc-includes/osclass/frm/Item.form.class.php:2386
+#: oc-includes/osclass/frm/User.form.class.php:712
+#: oc-includes/osclass/functions.php:452 oc-includes/osclass/functions.php:483
+#: oc-includes/osclass/functions.php:552
+#: oc-includes/osclass/helpers/hCustomDataTable.php:488
+msgid "Cancel"
+msgstr ""
+
+#: oc-admin/controller/settings/mailqueue.php:207
+msgid "Cancel all pending emails of this group?"
+msgstr ""
+
+#: oc-admin/controller/settings/mailqueue.php:207
+msgid "Cancel group"
+msgstr ""
+
+#: oc-admin/controller/settings/mailqueue.php:212
+#: oc-admin/controller/settings/mailqueue.php:226
+#: oc-admin/themes/omega/settings/mailqueue_view.php:109
+#: oc-includes/osclass/frm/Item.form.class.php:2385
+#: oc-includes/osclass/functions.php:482
+msgid "Retry"
+msgstr ""
+
+#: oc-admin/controller/settings/mailqueue.php:216
+#: oc-admin/themes/omega/settings/mailqueue_view.php:112
+msgid "Delete this email from the queue?"
+msgstr ""
+
+#: oc-admin/controller/settings/main.php:207
 #: oc-admin/themes/omega/settings/index.php:92
 #: oc-admin/themes/omega/settings/index.php:93
 #: oc-admin/themes/omega/settings/index.php:203
 msgid "Page title"
 msgstr ""
 
-#: oc-admin/controller/settings/main.php:209
+#: oc-admin/controller/settings/main.php:210
 #: oc-admin/themes/omega/items/index.php:245
 #: oc-admin/themes/omega/items/index.php:347
 #: oc-admin/themes/omega/settings/index.php:213
@@ -1073,84 +1327,6 @@ msgstr ""
 msgid "Reject"
 msgstr ""
 
-#: oc-admin/reports.php:478 oc-admin/themes/omega/admins/frm.php:155
-#: oc-admin/themes/omega/admins/index.php:299
-#: oc-admin/themes/omega/admins/index.php:310
-#: oc-admin/themes/omega/appearance/add.php:114
-#: oc-admin/themes/omega/appearance/add_widget.php:352
-#: oc-admin/themes/omega/appearance/index.php:279
-#: oc-admin/themes/omega/appearance/index.php:300
-#: oc-admin/themes/omega/appearance/widgets.php:305
-#: oc-admin/themes/omega/appearance/widgets.php:316
-#: oc-admin/themes/omega/categories/frm.php:193
-#: oc-admin/themes/omega/categories/index.php:267
-#: oc-admin/themes/omega/categories/index.php:280
-#: oc-admin/themes/omega/categories/reorder.php:49
-#: oc-admin/themes/omega/categories/reorder.php:307
-#: oc-admin/themes/omega/comments/frm.php:186
-#: oc-admin/themes/omega/comments/index.php:283
-#: oc-admin/themes/omega/comments/index.php:294
-#: oc-admin/themes/omega/currencies/frm.php:205
-#: oc-admin/themes/omega/currencies/index.php:233
-#: oc-admin/themes/omega/currencies/index.php:245
-#: oc-admin/themes/omega/emails/frm.php:171
-#: oc-admin/themes/omega/fields/frm.php:187
-#: oc-admin/themes/omega/fields/iframe.php:96
-#: oc-admin/themes/omega/fields/index.php:268
-#: oc-admin/themes/omega/fields/index.php:279
-#: oc-admin/themes/omega/fields/reorder.php:285
-#: oc-admin/themes/omega/items/frm.php:476
-#: oc-admin/themes/omega/items/index.php:456
-#: oc-admin/themes/omega/items/index.php:467
-#: oc-admin/themes/omega/languages/index.php:238
-#: oc-admin/themes/omega/languages/index.php:250
-#: oc-admin/themes/omega/languages/index.php:290
-#: oc-admin/themes/omega/locations/index.php:139
-#: oc-admin/themes/omega/locations/index.php:220
-#: oc-admin/themes/omega/locations/index.php:262
-#: oc-admin/themes/omega/locations/index.php:287
-#: oc-admin/themes/omega/locations/index.php:318
-#: oc-admin/themes/omega/locations/index.php:345
-#: oc-admin/themes/omega/locations/index.php:384
-#: oc-admin/themes/omega/locations/index.php:475
-#: oc-admin/themes/omega/locations/index.php:507
-#: oc-admin/themes/omega/market/languages.php:225
-#: oc-admin/themes/omega/market/languages_plugins.php:221
-#: oc-admin/themes/omega/market/languages_themes.php:214
-#: oc-admin/themes/omega/market/locations.php:197
-#: oc-admin/themes/omega/market/plugins.php:327
-#: oc-admin/themes/omega/market/themes.php:341
-#: oc-admin/themes/omega/media/index.php:256
-#: oc-admin/themes/omega/media/index.php:267
-#: oc-admin/themes/omega/pages/frm.php:221
-#: oc-admin/themes/omega/pages/index.php:299
-#: oc-admin/themes/omega/pages/index.php:310
-#: oc-admin/themes/omega/plugins/add.php:120
-#: oc-admin/themes/omega/plugins/index.php:422
-#: oc-admin/themes/omega/plugins/index.php:439
-#: oc-admin/themes/omega/plugins/index.php:450
-#: oc-admin/themes/omega/reports/edit.php:88
-#: oc-admin/themes/omega/reports/edit.php:423
-#: oc-admin/themes/omega/reports/index.php:299
-#: oc-admin/themes/omega/reports/index.php:310
-#: oc-admin/themes/omega/tools/logs.php:271
-#: oc-admin/themes/omega/tools/logs.php:283
-#: oc-admin/themes/omega/users/alerts.php:318
-#: oc-admin/themes/omega/users/alerts.php:329
-#: oc-admin/themes/omega/users/ban.php:269
-#: oc-admin/themes/omega/users/ban.php:281
-#: oc-admin/themes/omega/users/frm.php:630
-#: oc-admin/themes/omega/users/index.php:417
-#: oc-admin/themes/omega/users/index.php:429
-#: oc-includes/osclass/classes/datatables/ReportsDataTable.php:147
-#: oc-includes/osclass/frm/Item.form.class.php:2386
-#: oc-includes/osclass/frm/User.form.class.php:712
-#: oc-includes/osclass/functions.php:452 oc-includes/osclass/functions.php:483
-#: oc-includes/osclass/functions.php:552
-#: oc-includes/osclass/helpers/hCustomDataTable.php:488
-msgid "Cancel"
-msgstr ""
-
 #: oc-admin/reports.php:479
 #, php-format
 msgid "Are you sure you want to move the selected reports to %s?"
@@ -1181,8 +1357,8 @@ msgstr ""
 
 #: oc-admin/themes/omega/admins/frm.php:44
 #: oc-admin/themes/omega/admins/index.php:37
-#: oc-includes/osclass/classes/AdminMenu.php:152
 #: oc-includes/osclass/classes/AdminMenu.php:153
+#: oc-includes/osclass/classes/AdminMenu.php:154
 #: oc-includes/osclass/helpers/hPage.php:230
 msgid "Admins"
 msgstr ""
@@ -1247,23 +1423,6 @@ msgstr ""
 msgid "Filters"
 msgstr ""
 
-#: oc-admin/themes/omega/admins/index.php:170
-#: oc-admin/themes/omega/fields/frm.php:151
-#: oc-admin/themes/omega/fields/iframe.php:63
-#: oc-admin/themes/omega/reports/edit.php:164
-#: oc-admin/themes/omega/stats/comments.php:98
-#: oc-admin/themes/omega/tools/backup.php:112
-#: oc-admin/themes/omega/tools/info.php:255
-#: oc-admin/themes/omega/translations/edit.php:315
-#: oc-admin/themes/omega/translations/index.php:221
-#: oc-admin/themes/omega/translations/index.php:303
-#: oc-includes/osclass/classes/datatables/AdminsDataTable.php:81
-#: oc-includes/osclass/classes/datatables/FieldsDataTable.php:102
-#: oc-includes/osclass/classes/datatables/ReportsDataTable.php:116
-#: oc-includes/osclass/helpers/hItemStats.php:2419
-msgid "Type"
-msgstr ""
-
 #: oc-admin/themes/omega/admins/index.php:173
 #: oc-admin/themes/omega/items/index.php:258
 #: oc-admin/themes/omega/items/index.php:270
@@ -1305,7 +1464,7 @@ msgstr ""
 #: oc-admin/themes/omega/admins/index.php:215
 #: oc-admin/themes/omega/appearance/widgets.php:209
 #: oc-admin/themes/omega/comments/index.php:188
-#: oc-admin/themes/omega/emails/index.php:136
+#: oc-admin/themes/omega/emails/index.php:137
 #: oc-admin/themes/omega/fields/index.php:179
 #: oc-admin/themes/omega/items/index.php:309
 #: oc-admin/themes/omega/items/index.php:335
@@ -1313,6 +1472,7 @@ msgstr ""
 #: oc-admin/themes/omega/pages/index.php:211
 #: oc-admin/themes/omega/plugins/index.php:241
 #: oc-admin/themes/omega/reports/index.php:202
+#: oc-admin/themes/omega/settings/mailqueue.php:132
 #: oc-admin/themes/omega/tools/logs.php:180
 #: oc-admin/themes/omega/users/alerts.php:207
 #: oc-admin/themes/omega/users/ban.php:181
@@ -1368,7 +1528,7 @@ msgstr ""
 #: oc-admin/themes/omega/categories/index.php:180
 #: oc-admin/themes/omega/comments/index.php:198
 #: oc-admin/themes/omega/currencies/index.php:146
-#: oc-admin/themes/omega/emails/index.php:142
+#: oc-admin/themes/omega/emails/index.php:143
 #: oc-admin/themes/omega/fields/index.php:182
 #: oc-admin/themes/omega/items/index.php:374
 #: oc-admin/themes/omega/languages/index.php:151
@@ -1376,6 +1536,7 @@ msgstr ""
 #: oc-admin/themes/omega/pages/index.php:217
 #: oc-admin/themes/omega/plugins/index.php:245
 #: oc-admin/themes/omega/reports/index.php:213
+#: oc-admin/themes/omega/settings/mailqueue.php:130
 #: oc-admin/themes/omega/tools/logs.php:183
 #: oc-admin/themes/omega/users/alerts.php:225
 #: oc-admin/themes/omega/users/ban.php:161
@@ -1413,7 +1574,7 @@ msgstr ""
 #: oc-admin/themes/omega/categories/index.php:231
 #: oc-admin/themes/omega/comments/index.php:239
 #: oc-admin/themes/omega/currencies/index.php:186
-#: oc-admin/themes/omega/emails/index.php:172
+#: oc-admin/themes/omega/emails/index.php:173
 #: oc-admin/themes/omega/fields/index.php:233
 #: oc-admin/themes/omega/items/index.php:410
 #: oc-admin/themes/omega/languages/index.php:191
@@ -1636,7 +1797,8 @@ msgstr ""
 #: oc-admin/themes/omega/settings/advanced.php:229
 #: oc-admin/themes/omega/settings/breadcrumbs.php:250
 #: oc-admin/themes/omega/settings/comments.php:232
-#: oc-admin/themes/omega/settings/index.php:862
+#: oc-admin/themes/omega/settings/index.php:872
+#: oc-admin/themes/omega/settings/mailqueue.php:234
 #: oc-admin/themes/omega/settings/mailserver.php:227
 #: oc-admin/themes/omega/settings/media.php:636
 #: oc-admin/themes/omega/settings/optimization.php:155
@@ -1901,7 +2063,7 @@ msgstr ""
 #: oc-admin/themes/omega/appearance/add_widget.php:304
 #: oc-admin/themes/omega/emails/frm.php:147
 #: oc-admin/themes/omega/pages/frm.php:157
-#: oc-includes/osclass/classes/datatables/EmailTemplatesDataTable.php:72
+#: oc-includes/osclass/classes/datatables/EmailTemplatesDataTable.php:77
 #: oc-includes/osclass/classes/datatables/PagesDataTable.php:89
 #: oc-includes/osclass/classes/datatables/WidgetsDataTable.php:79
 msgid "Internal name"
@@ -2120,7 +2282,7 @@ msgstr ""
 #: oc-admin/themes/omega/translations/index.php:500
 #: oc-includes/osclass/classes/AdminMenu.php:101
 #: oc-includes/osclass/classes/AdminMenu.php:106
-#: oc-includes/osclass/classes/AdminMenu.php:202
+#: oc-includes/osclass/classes/AdminMenu.php:203
 msgid "Plugins"
 msgstr ""
 
@@ -2467,7 +2629,8 @@ msgstr ""
 #: oc-admin/themes/omega/categories/frm.php:171
 #: oc-admin/themes/omega/categories/iframe.php:62
 #: oc-admin/themes/omega/items/settings.php:275
-#: oc-admin/themes/omega/settings/index.php:833
+#: oc-admin/themes/omega/settings/index.php:843
+#: oc-admin/themes/omega/settings/mailqueue.php:221
 #: oc-includes/osclass/helpers/hUsers.php:1093
 msgid "days"
 msgstr ""
@@ -2617,7 +2780,7 @@ msgstr ""
 #: oc-includes/osclass/classes/datatables/CategoriesDataTable.php:261
 #: oc-includes/osclass/classes/datatables/CommentsDataTable.php:159
 #: oc-includes/osclass/classes/datatables/CurrenciesDataTable.php:159
-#: oc-includes/osclass/classes/datatables/EmailTemplatesDataTable.php:101
+#: oc-includes/osclass/classes/datatables/EmailTemplatesDataTable.php:109
 #: oc-includes/osclass/classes/datatables/FieldsDataTable.php:202
 #: oc-includes/osclass/classes/datatables/ItemsDataTable.php:152
 #: oc-includes/osclass/classes/datatables/LanguagesDataTable.php:175
@@ -2665,7 +2828,7 @@ msgstr ""
 #: oc-admin/themes/omega/stats/users.php:125
 #: oc-admin/themes/omega/translations/edit.php:196
 #: oc-includes/osclass/classes/AdminMenu.php:92
-#: oc-includes/osclass/classes/AdminMenu.php:126
+#: oc-includes/osclass/classes/AdminMenu.php:127
 #: oc-includes/osclass/helpers/hItemStats.php:130
 #: oc-includes/osclass/helpers/hItemStats.php:2262
 #: oc-includes/osclass/helpers/hItemStats.php:2326
@@ -2727,7 +2890,7 @@ msgstr ""
 #: oc-admin/themes/omega/functions.php:282
 #: oc-admin/themes/omega/items/index.php:201
 #: oc-admin/themes/omega/items/index.php:346
-#: oc-includes/osclass/classes/datatables/EmailTemplatesDataTable.php:71
+#: oc-includes/osclass/classes/datatables/EmailTemplatesDataTable.php:76
 #: oc-includes/osclass/classes/datatables/ItemsDataTable.php:82
 #: oc-includes/osclass/classes/datatables/PagesDataTable.php:88
 #: oc-includes/osclass/classes/datatables/ReportsDataTable.php:115
@@ -2817,6 +2980,8 @@ msgstr ""
 #: oc-admin/themes/omega/settings/breadcrumbs.php:80
 #: oc-admin/themes/omega/settings/comments.php:90
 #: oc-admin/themes/omega/settings/index.php:173
+#: oc-admin/themes/omega/settings/mailqueue.php:30
+#: oc-admin/themes/omega/settings/mailqueue_view.php:22
 #: oc-admin/themes/omega/settings/mailserver.php:110
 #: oc-admin/themes/omega/settings/media.php:323
 #: oc-admin/themes/omega/settings/optimization.php:36
@@ -3020,12 +3185,12 @@ msgid "Legend"
 msgstr ""
 
 #: oc-admin/themes/omega/emails/frm.php:170
-#: oc-includes/osclass/classes/datatables/EmailTemplatesDataTable.php:102
+#: oc-includes/osclass/classes/datatables/EmailTemplatesDataTable.php:110
 msgid "Test - Send email"
 msgstr ""
 
 #: oc-admin/themes/omega/emails/frm.php:184
-#: oc-admin/themes/omega/emails/index.php:206
+#: oc-admin/themes/omega/emails/index.php:207
 msgid "Send email"
 msgstr ""
 
@@ -3042,19 +3207,19 @@ msgstr ""
 msgid "Email templates"
 msgstr ""
 
-#: oc-admin/themes/omega/emails/index.php:129
 #: oc-admin/themes/omega/emails/index.php:130
 #: oc-admin/themes/omega/emails/index.php:131
 #: oc-admin/themes/omega/emails/index.php:132
-#: oc-admin/themes/omega/emails/index.php:197
+#: oc-admin/themes/omega/emails/index.php:133
 #: oc-admin/themes/omega/emails/index.php:198
 #: oc-admin/themes/omega/emails/index.php:199
 #: oc-admin/themes/omega/emails/index.php:200
+#: oc-admin/themes/omega/emails/index.php:201
 #, php-format
 msgid "%d Templates"
 msgstr ""
 
-#: oc-admin/themes/omega/emails/index.php:141
+#: oc-admin/themes/omega/emails/index.php:142
 msgid "Search template"
 msgstr ""
 
@@ -3274,7 +3439,7 @@ msgid "Enabled"
 msgstr ""
 
 #: oc-admin/themes/omega/functions.php:515
-#: oc-admin/themes/omega/settings/index.php:701
+#: oc-admin/themes/omega/settings/index.php:711
 #: oc-admin/themes/omega/tools/debug.php:88
 #: oc-admin/themes/omega/tools/debug.php:89
 #: oc-admin/themes/omega/tools/debug.php:90
@@ -3862,7 +4027,7 @@ msgstr ""
 #: oc-admin/themes/omega/tools/statistics.php:192
 #: oc-admin/themes/omega/translations/edit.php:367
 #: oc-includes/osclass/classes/AdminMenu.php:87
-#: oc-includes/osclass/classes/AdminMenu.php:148
+#: oc-includes/osclass/classes/AdminMenu.php:149
 msgid "Statistics"
 msgstr ""
 
@@ -4417,7 +4582,7 @@ msgstr ""
 #: oc-admin/themes/omega/main/index.php:279
 #: oc-admin/themes/omega/main/settings.php:106
 #: oc-admin/themes/omega/tools/info.php:142
-#: oc-includes/osclass/classes/AdminMenu.php:137
+#: oc-includes/osclass/classes/AdminMenu.php:138
 msgid "Optimization"
 msgstr ""
 
@@ -5452,6 +5617,7 @@ msgid "and counting"
 msgstr ""
 
 #: oc-admin/themes/omega/market/section.php:59
+#: oc-admin/themes/omega/settings/mailqueue.php:51
 #: oc-includes/osclass/frm/User.form.class.php:176
 msgid "All"
 msgstr ""
@@ -5987,6 +6153,7 @@ msgstr ""
 
 #: oc-admin/themes/omega/reports/edit.php:220
 #: oc-admin/themes/omega/reports/edit.php:378
+#: oc-admin/themes/omega/settings/mailqueue_view.php:59
 #: oc-admin/themes/omega/stats/alerts.php:117
 #: oc-admin/themes/omega/stats/comments.php:99
 #: oc-admin/themes/omega/stats/overview.php:112
@@ -6030,26 +6197,12 @@ msgstr ""
 msgid "Original report text"
 msgstr ""
 
-#: oc-admin/themes/omega/reports/edit.php:252
-#: oc-admin/themes/omega/reports/edit.php:309
-#: oc-admin/themes/omega/reports/settings.php:233
-#: oc-admin/themes/omega/users/frm.php:622
-#: oc-includes/osclass/helpers/hReport.php:908
-msgid "Attachment"
-msgstr ""
-
 #: oc-admin/themes/omega/reports/edit.php:260
 msgid "Admin note"
 msgstr ""
 
 #: oc-admin/themes/omega/reports/edit.php:263
 msgid "Internal note, not visible to users"
-msgstr ""
-
-#: oc-admin/themes/omega/reports/edit.php:268
-#: oc-admin/themes/omega/tools/backup.php:114
-#: oc-includes/osclass/classes/datatables/ReportsDataTable.php:122
-msgid "Created"
 msgstr ""
 
 #: oc-admin/themes/omega/reports/edit.php:285
@@ -6082,7 +6235,7 @@ msgstr ""
 #: oc-includes/osclass/emails.php:1095 oc-includes/osclass/emails.php:1611
 #: oc-includes/osclass/emails.php:1717
 #: oc-includes/osclass/helpers/hReport.php:495
-#: oc-includes/osclass/utils.php:3180
+#: oc-includes/osclass/utils.php:3281
 msgid "Admin"
 msgstr ""
 
@@ -6390,7 +6543,7 @@ msgid "Retention"
 msgstr ""
 
 #: oc-admin/themes/omega/reports/settings.php:226
-#: oc-admin/themes/omega/settings/index.php:822
+#: oc-admin/themes/omega/settings/index.php:832
 #: oc-admin/themes/omega/stats/settings.php:435
 #: oc-admin/themes/omega/users/settings.php:201
 #: oc-admin/themes/omega/users/settings.php:210
@@ -7280,6 +7433,7 @@ msgid ""
 msgstr ""
 
 #: oc-admin/themes/omega/settings/index.php:604
+#: oc-admin/themes/omega/settings/mailqueue_view.php:65
 msgid "Attachments"
 msgstr ""
 
@@ -7309,25 +7463,46 @@ msgid ""
 msgstr ""
 
 #: oc-admin/themes/omega/settings/index.php:630
+msgid "Minutely cron interval"
+msgstr ""
+
+#: oc-admin/themes/omega/settings/index.php:632
+msgid "Run minutely jobs every"
+msgstr ""
+
+#: oc-admin/themes/omega/settings/index.php:634
+msgid "minutes"
+msgstr ""
+
+#: oc-admin/themes/omega/settings/index.php:635
+msgid ""
+"Applies to the built-in cron and to a server cron calling the cron URL. A "
+"command line cron with type minutely runs on every call. Default is 5."
+msgstr ""
+
+#: oc-admin/themes/omega/settings/index.php:640
 msgid "Cron execution history (last/next)"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:642
+#: oc-admin/themes/omega/settings/index.php:652
 msgid "Minutely"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:643
-#: oc-admin/themes/omega/settings/index.php:644
-#: oc-admin/themes/omega/settings/index.php:649
-#: oc-admin/themes/omega/settings/index.php:650
-#: oc-admin/themes/omega/settings/index.php:655
-#: oc-admin/themes/omega/settings/index.php:656
-#: oc-admin/themes/omega/settings/index.php:661
-#: oc-admin/themes/omega/settings/index.php:662
-#: oc-admin/themes/omega/settings/index.php:667
-#: oc-admin/themes/omega/settings/index.php:668
-#: oc-admin/themes/omega/settings/index.php:673
-#: oc-admin/themes/omega/settings/index.php:674
+#: oc-admin/themes/omega/settings/index.php:653
+#: oc-admin/themes/omega/settings/index.php:654
+#: oc-admin/themes/omega/settings/index.php:659
+#: oc-admin/themes/omega/settings/index.php:660
+#: oc-admin/themes/omega/settings/index.php:665
+#: oc-admin/themes/omega/settings/index.php:666
+#: oc-admin/themes/omega/settings/index.php:671
+#: oc-admin/themes/omega/settings/index.php:672
+#: oc-admin/themes/omega/settings/index.php:677
+#: oc-admin/themes/omega/settings/index.php:678
+#: oc-admin/themes/omega/settings/index.php:683
+#: oc-admin/themes/omega/settings/index.php:684
+#: oc-admin/themes/omega/settings/mailqueue.php:67
+#: oc-admin/themes/omega/settings/mailqueue.php:93
+#: oc-admin/themes/omega/settings/mailqueue.php:94
 #: oc-admin/themes/omega/settings/media.php:291
 #: oc-admin/themes/omega/tools/statistics.php:36
 #: oc-includes/osclass/classes/datatables/BanRulesDataTable.php:167
@@ -7335,253 +7510,474 @@ msgstr ""
 msgid "Never"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:648
+#: oc-admin/themes/omega/settings/index.php:658
 #: oc-includes/osclass/helpers/hUsers.php:941
 msgid "Hourly"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:654
+#: oc-admin/themes/omega/settings/index.php:664
 #: oc-admin/themes/omega/settings/optimization.php:177
 #: oc-includes/osclass/helpers/hUsers.php:944
 msgid "Daily"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:660
+#: oc-admin/themes/omega/settings/index.php:670
 #: oc-admin/themes/omega/settings/optimization.php:73
 #: oc-admin/themes/omega/settings/optimization.php:178
 #: oc-includes/osclass/helpers/hUsers.php:947
 msgid "Weekly"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:666
+#: oc-admin/themes/omega/settings/index.php:676
 #: oc-admin/themes/omega/settings/optimization.php:74
 #: oc-admin/themes/omega/settings/optimization.php:179
 msgid "Monthly"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:672
+#: oc-admin/themes/omega/settings/index.php:682
 msgid "Yearly"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:680
+#: oc-admin/themes/omega/settings/index.php:690
 msgid "Software updates"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:683
+#: oc-admin/themes/omega/settings/index.php:693
 msgid "OsclassPoint API Key"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:688
-#: oc-admin/themes/omega/settings/index.php:690
+#: oc-admin/themes/omega/settings/index.php:698
+#: oc-admin/themes/omega/settings/index.php:700
 #: oc-includes/osclass/helpers/hCustomDataTable.php:915
 msgid "Validate"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:690
+#: oc-admin/themes/omega/settings/index.php:700
 msgid "Enter and save your api key before you validate it"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:693
+#: oc-admin/themes/omega/settings/index.php:703
 #, php-format
 msgid "You can find your API key at %s section"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:693
+#: oc-admin/themes/omega/settings/index.php:703
 msgid "OsclassPoint > Account > My profile"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:698
+#: oc-admin/themes/omega/settings/index.php:708
 msgid "Core updates"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:702
+#: oc-admin/themes/omega/settings/index.php:712
 msgid "New branch (new osclass version - 4.x.x) + Major + Minor"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:703
+#: oc-admin/themes/omega/settings/index.php:713
 msgid "Major updates (new features - x.4.x) + Minor"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:704
+#: oc-admin/themes/omega/settings/index.php:714
 msgid "Minor updates (bug fixes - x.x.4)"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:710
+#: oc-admin/themes/omega/settings/index.php:720
 #: oc-includes/osclass/functions.php:3422
 msgid "Plugin updates"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:715
+#: oc-admin/themes/omega/settings/index.php:725
 msgid "Allow auto-updates of plugins"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:722
+#: oc-admin/themes/omega/settings/index.php:732
 #: oc-includes/osclass/functions.php:3496
 msgid "Theme updates"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:727
+#: oc-admin/themes/omega/settings/index.php:737
 msgid "Allow auto-updates of themes"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:734
+#: oc-admin/themes/omega/settings/index.php:744
 #: oc-includes/osclass/functions.php:3563
 msgid "Language updates"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:739
+#: oc-admin/themes/omega/settings/index.php:749
 msgid "Allow auto-updates of languages"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:746
+#: oc-admin/themes/omega/settings/index.php:756
 msgid "Content folder updates"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:751
+#: oc-admin/themes/omega/settings/index.php:761
 msgid "Allow updates of oc-content folder"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:755
+#: oc-admin/themes/omega/settings/index.php:765
 msgid ""
 "Include update of default theme (sigma), languages folder (replace en_US) "
 "etc. Applicable for manual & auto update."
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:761
+#: oc-admin/themes/omega/settings/index.php:771
 msgid "Market external sources"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:766
+#: oc-admin/themes/omega/settings/index.php:776
 msgid "Allow updates and installations of non-official plugins and themes"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:778
+#: oc-admin/themes/omega/settings/index.php:788
 #, php-format
 msgid "Last checked on %s"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:780
+#: oc-admin/themes/omega/settings/index.php:790
 msgid "Never checked"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:783
+#: oc-admin/themes/omega/settings/index.php:793
 msgid "Check updates"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:788
+#: oc-admin/themes/omega/settings/index.php:798
 msgid "Logging settings"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:790
+#: oc-admin/themes/omega/settings/index.php:800
 msgid "Logs"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:795
+#: oc-admin/themes/omega/settings/index.php:805
 #: oc-admin/themes/omega/tools/debug.php:95
 msgid "Enable logs"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:799
+#: oc-admin/themes/omega/settings/index.php:809
 msgid ""
 "Osclass automatically generates logs for various actions, including "
 "publishing items, editing items, updating user profiles, and more."
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:804
+#: oc-admin/themes/omega/settings/index.php:814
 #: oc-admin/themes/omega/tools/cleanup.php:41
 msgid "Cleanup"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:809
+#: oc-admin/themes/omega/settings/index.php:819
 msgid "Automatically purge outdated logs"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:813
+#: oc-admin/themes/omega/settings/index.php:823
 msgid ""
 "Based on your retention policy, old logs are automatically purged daily by a "
 "cron job."
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:818
+#: oc-admin/themes/omega/settings/index.php:828
 msgid "Retention policy"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:820
+#: oc-admin/themes/omega/settings/index.php:830
 msgid "Remove logs after"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:826
+#: oc-admin/themes/omega/settings/index.php:836
 msgid "Automatic cleanup settings"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:829
+#: oc-admin/themes/omega/settings/index.php:839
 msgid "Threshold"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:831
+#: oc-admin/themes/omega/settings/index.php:841
 msgid "Remove records older than"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:838
+#: oc-admin/themes/omega/settings/index.php:848
 msgid "Cleanup sections"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:842
+#: oc-admin/themes/omega/settings/index.php:852
 #: oc-admin/themes/omega/tools/cleanup.php:92
 msgid "Inactive listings"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:843
+#: oc-admin/themes/omega/settings/index.php:853
 #: oc-admin/themes/omega/tools/cleanup.php:113
 msgid "Blocked & Spam listings"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:844
+#: oc-admin/themes/omega/settings/index.php:854
 #: oc-admin/themes/omega/tools/cleanup.php:134
 msgid "Expired listings"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:845
+#: oc-admin/themes/omega/settings/index.php:855
 #: oc-admin/themes/omega/tools/cleanup.php:155
 #: oc-admin/themes/omega/users/settings.php:252
 msgid "Inactive users"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:846
+#: oc-admin/themes/omega/settings/index.php:856
 #: oc-admin/themes/omega/tools/cleanup.php:176
 msgid "Blocked users"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:847
+#: oc-admin/themes/omega/settings/index.php:857
 #: oc-admin/themes/omega/tools/cleanup.php:197
 msgid "Inactive comments"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:848
+#: oc-admin/themes/omega/settings/index.php:858
 #: oc-admin/themes/omega/tools/cleanup.php:218
 msgid "Blocked comments"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:849
+#: oc-admin/themes/omega/settings/index.php:859
 #: oc-admin/themes/omega/tools/cleanup.php:239
 msgid "Unsubscribed alerts"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:850
+#: oc-admin/themes/omega/settings/index.php:860
 #: oc-admin/themes/omega/tools/cleanup.php:260
 msgid "Expired alerts"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:851
+#: oc-admin/themes/omega/settings/index.php:861
 #: oc-admin/themes/omega/tools/cleanup.php:282
 msgid "Expired ban rules"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/index.php:854
+#: oc-admin/themes/omega/settings/index.php:864
 msgid ""
 "Selected sections are automatically cleaned once per day by cron_daily. Set "
 "threshold to 0 to disable this feature. Hold Ctrl/Cmd to select multiple "
 "entries."
+msgstr ""
+
+#: oc-admin/themes/omega/settings/mailqueue.php:21
+msgid ""
+"With the mail queue on, emails wait in a queue and the cron sends them in "
+"small batches. Codes, password resets and account emails are still sent "
+"right away. Here you see what waits, what was sent and what failed."
+msgstr ""
+
+#: oc-admin/themes/omega/settings/mailqueue.php:22
+msgid ""
+"The queue needs a real cron on your server that calls the cron URL at least "
+"every 5 minutes. Without it, queued emails are not sent."
+msgstr ""
+
+#: oc-admin/themes/omega/settings/mailqueue.php:40
+#: oc-admin/themes/omega/settings/mailqueue.php:57
+#: oc-admin/themes/omega/settings/mailqueue.php:152
+#: oc-admin/themes/omega/settings/mailqueue_view.php:30
+#: oc-includes/osclass/classes/AdminMenu.php:126
+msgid "Mail queue"
+msgstr ""
+
+#: oc-admin/themes/omega/settings/mailqueue.php:61
+msgid ""
+"The mail queue is off. Emails are sent right away, as before. Turn it on in "
+"the settings below only when a real cron runs on your server."
+msgstr ""
+
+#: oc-admin/themes/omega/settings/mailqueue.php:67
+#, php-format
+msgid ""
+"Emails are waiting too long. The oldest one should have been sent at %s. "
+"Check that your cron runs (last run: %s)."
+msgstr ""
+
+#: oc-admin/themes/omega/settings/mailqueue.php:73
+msgid "Sending is paused. New emails still wait in the queue."
+msgstr ""
+
+#: oc-admin/themes/omega/settings/mailqueue.php:79
+msgid "Waiting"
+msgstr ""
+
+#: oc-admin/themes/omega/settings/mailqueue.php:81
+#, php-format
+msgid "Oldest due: %s"
+msgstr ""
+
+#: oc-admin/themes/omega/settings/mailqueue.php:81
+msgid "Nothing is due"
+msgstr ""
+
+#: oc-admin/themes/omega/settings/mailqueue.php:84
+msgid "Sent in last 24 hours"
+msgstr ""
+
+#: oc-admin/themes/omega/settings/mailqueue.php:88
+msgid "Failed in last 24 hours"
+msgstr ""
+
+#: oc-admin/themes/omega/settings/mailqueue.php:92
+msgid "Cron"
+msgstr ""
+
+#: oc-admin/themes/omega/settings/mailqueue.php:93
+#, php-format
+msgid "Last run: %s"
+msgstr ""
+
+#: oc-admin/themes/omega/settings/mailqueue.php:94
+#, php-format
+msgid "Next run: %s"
+msgstr ""
+
+#: oc-admin/themes/omega/settings/mailqueue.php:99
+msgid "Resume sending"
+msgstr ""
+
+#: oc-admin/themes/omega/settings/mailqueue.php:101
+#: oc-admin/themes/omega/settings/mailqueue.php:165
+msgid "Pause sending"
+msgstr ""
+
+#: oc-admin/themes/omega/settings/mailqueue.php:120
+msgid "All priorities"
+msgstr ""
+
+#: oc-admin/themes/omega/settings/mailqueue.php:127
+msgid "Created from"
+msgstr ""
+
+#: oc-admin/themes/omega/settings/mailqueue.php:128
+msgid "Created to"
+msgstr ""
+
+#: oc-admin/themes/omega/settings/mailqueue.php:129
+msgid "Recipient or subject"
+msgstr ""
+
+#: oc-admin/themes/omega/settings/mailqueue.php:144
+msgid "Mail queue settings"
+msgstr ""
+
+#: oc-admin/themes/omega/settings/mailqueue.php:157
+msgid "Put emails into the queue and send them by cron"
+msgstr ""
+
+#: oc-admin/themes/omega/settings/mailqueue.php:160
+msgid ""
+"Turn on only when a real cron calls the cron URL at least every 5 minutes. "
+"Emails left in the queue are still sent after you turn it off."
+msgstr ""
+
+#: oc-admin/themes/omega/settings/mailqueue.php:170
+msgid "Keep emails in the queue and send nothing"
+msgstr ""
+
+#: oc-admin/themes/omega/settings/mailqueue.php:177
+msgid "Emails per cron run"
+msgstr ""
+
+#: oc-admin/themes/omega/settings/mailqueue.php:180
+msgid ""
+"Instant and normal emails go first. Match the limits of your mail provider."
+msgstr ""
+
+#: oc-admin/themes/omega/settings/mailqueue.php:185
+msgid "Bulk emails per cron run"
+msgstr ""
+
+#: oc-admin/themes/omega/settings/mailqueue.php:188
+msgid "Alert digests and other bulk emails, part of the emails per run."
+msgstr ""
+
+#: oc-admin/themes/omega/settings/mailqueue.php:193
+msgid "Bulk emails per group"
+msgstr ""
+
+#: oc-admin/themes/omega/settings/mailqueue.php:196
+msgid ""
+"Most bulk emails of one group (for example one sender) in one run, so one "
+"big mailing does not hold back the others."
+msgstr ""
+
+#: oc-admin/themes/omega/settings/mailqueue.php:201
+msgid "Time limit per run"
+msgstr ""
+
+#: oc-admin/themes/omega/settings/mailqueue.php:204
+#: oc-admin/themes/omega/stats/settings.php:161
+msgid "seconds"
+msgstr ""
+
+#: oc-admin/themes/omega/settings/mailqueue.php:212
+msgid ""
+"A failed email is tried again after 5 minutes, 30 minutes and then every 2 "
+"hours. After the last attempt it is marked as failed."
+msgstr ""
+
+#: oc-admin/themes/omega/settings/mailqueue.php:217
+msgid "History"
+msgstr ""
+
+#: oc-admin/themes/omega/settings/mailqueue.php:219
+msgid "Remove sent, failed and cancelled emails after"
+msgstr ""
+
+#: oc-admin/themes/omega/settings/mailqueue.php:226
+msgid "Instant email types"
+msgstr ""
+
+#: oc-admin/themes/omega/settings/mailqueue.php:229
+msgid ""
+"Comma separated. These emails are sent right away and still shown in the "
+"list. Back office emails without a type are always sent right away."
+msgstr ""
+
+#: oc-admin/themes/omega/settings/mailqueue_view.php:61
+msgid "Reply to"
+msgstr ""
+
+#: oc-admin/themes/omega/settings/mailqueue_view.php:62
+msgid "Bcc"
+msgstr ""
+
+#: oc-admin/themes/omega/settings/mailqueue_view.php:63
+#: oc-includes/osclass/helpers/hItems.php:1552
+msgid "From"
+msgstr ""
+
+#: oc-admin/themes/omega/settings/mailqueue_view.php:69
+msgid "Reference"
+msgstr ""
+
+#: oc-admin/themes/omega/settings/mailqueue_view.php:72
+msgid "Expires"
+msgstr ""
+
+#: oc-admin/themes/omega/settings/mailqueue_view.php:85
+#, php-format
+msgid "Email #%d"
+msgstr ""
+
+#: oc-admin/themes/omega/settings/mailqueue_view.php:86
+msgid "Back to mail queue"
+msgstr ""
+
+#: oc-admin/themes/omega/settings/mailqueue_view.php:100
+msgid "Actions"
+msgstr ""
+
+#: oc-admin/themes/omega/settings/mailqueue_view.php:118
+#: oc-admin/themes/omega/settings/mailqueue_view.php:124
+msgid "Email text"
+msgstr ""
+
+#: oc-admin/themes/omega/settings/mailqueue_view.php:121
+msgid ""
+"The text was removed after sending because it contained a code, link or "
+"password for one person."
 msgstr ""
 
 #: oc-admin/themes/omega/settings/mailserver.php:67
@@ -8631,7 +9027,7 @@ msgid ""
 msgstr ""
 
 #: oc-admin/themes/omega/settings/permalinks.php:517
-#: oc-includes/osclass/classes/AdminMenu.php:135
+#: oc-includes/osclass/classes/AdminMenu.php:136
 msgid "Permalinks"
 msgstr ""
 
@@ -8968,7 +9364,7 @@ msgid "Latest searches settings"
 msgstr ""
 
 #: oc-admin/themes/omega/settings/searches.php:113
-#: oc-includes/osclass/classes/AdminMenu.php:136
+#: oc-includes/osclass/classes/AdminMenu.php:137
 msgid "Latest searches"
 msgstr ""
 
@@ -9100,7 +9496,7 @@ msgstr ""
 
 #: oc-admin/themes/omega/settings/spamNbots.php:43
 #: oc-admin/themes/omega/settings/spamNbots.php:52
-#: oc-includes/osclass/classes/AdminMenu.php:128
+#: oc-includes/osclass/classes/AdminMenu.php:129
 msgid "Spam and bots"
 msgstr ""
 
@@ -9449,17 +9845,6 @@ msgstr ""
 #: oc-admin/themes/omega/stats/comments.php:160
 #: oc-includes/osclass/helpers/hItemStats.php:2418
 msgid "Replies"
-msgstr ""
-
-#: oc-admin/themes/omega/stats/comments.php:87
-#: oc-admin/themes/omega/stats/comments.php:164
-#: oc-admin/themes/omega/stats/overview.php:75
-#: oc-admin/themes/omega/stats/overview.php:84
-#: oc-admin/themes/omega/stats/users.php:84
-#: oc-includes/osclass/helpers/hCustomDataTable.php:850
-#: oc-includes/osclass/helpers/hItemStats.php:2368
-#: oc-includes/osclass/helpers/hItemStats.php:2373
-msgid "Pending"
 msgstr ""
 
 #: oc-admin/themes/omega/stats/comments.php:93
@@ -9818,10 +10203,6 @@ msgstr ""
 msgid "Engaged view after"
 msgstr ""
 
-#: oc-admin/themes/omega/stats/settings.php:161
-msgid "seconds"
-msgstr ""
-
 #: oc-admin/themes/omega/stats/settings.php:162
 msgid "Minimum 5, maximum 600. The visitor must keep the listing tab visible."
 msgstr ""
@@ -10157,7 +10538,7 @@ msgstr ""
 #: oc-admin/themes/omega/tools/maintenance.php:33
 #: oc-admin/themes/omega/tools/upgrade.php:120
 #: oc-admin/themes/omega/upgrade/index.php:22
-#: oc-includes/osclass/classes/AdminMenu.php:140
+#: oc-includes/osclass/classes/AdminMenu.php:141
 msgid "Tools"
 msgstr ""
 
@@ -10383,7 +10764,7 @@ msgid "Check your debug/error log settings and debug output."
 msgstr ""
 
 #: oc-admin/themes/omega/tools/debug.php:33
-#: oc-includes/osclass/classes/AdminMenu.php:144
+#: oc-includes/osclass/classes/AdminMenu.php:145
 msgid "Debug/Error log"
 msgstr ""
 
@@ -10471,7 +10852,7 @@ msgid ""
 msgstr ""
 
 #: oc-admin/themes/omega/tools/import.php:62
-#: oc-includes/osclass/classes/AdminMenu.php:145
+#: oc-includes/osclass/classes/AdminMenu.php:146
 msgid "Import SQL data"
 msgstr ""
 
@@ -10826,7 +11207,7 @@ msgid ""
 msgstr ""
 
 #: oc-admin/themes/omega/tools/logs.php:29
-#: oc-includes/osclass/classes/AdminMenu.php:143
+#: oc-includes/osclass/classes/AdminMenu.php:144
 msgid "Action logs"
 msgstr ""
 
@@ -10868,7 +11249,7 @@ msgid ""
 msgstr ""
 
 #: oc-admin/themes/omega/tools/maintenance.php:55
-#: oc-includes/osclass/classes/AdminMenu.php:149
+#: oc-includes/osclass/classes/AdminMenu.php:150
 msgid "Maintenance mode"
 msgstr ""
 
@@ -12225,39 +12606,39 @@ msgstr ""
 msgid "Mail server"
 msgstr ""
 
-#: oc-includes/osclass/classes/AdminMenu.php:127
+#: oc-includes/osclass/classes/AdminMenu.php:128
 msgid "Media"
 msgstr ""
 
-#: oc-includes/osclass/classes/AdminMenu.php:134
+#: oc-includes/osclass/classes/AdminMenu.php:135
 msgid "Breadcrumbs"
 msgstr ""
 
-#: oc-includes/osclass/classes/AdminMenu.php:138
+#: oc-includes/osclass/classes/AdminMenu.php:139
 msgid "Subdomains & Advanced"
 msgstr ""
 
-#: oc-includes/osclass/classes/AdminMenu.php:141
+#: oc-includes/osclass/classes/AdminMenu.php:142
 msgid "Configuration info"
 msgstr ""
 
-#: oc-includes/osclass/classes/AdminMenu.php:142
+#: oc-includes/osclass/classes/AdminMenu.php:143
 msgid "Data clean up"
 msgstr ""
 
-#: oc-includes/osclass/classes/AdminMenu.php:146
+#: oc-includes/osclass/classes/AdminMenu.php:147
 msgid "Backup data"
 msgstr ""
 
-#: oc-includes/osclass/classes/AdminMenu.php:147
+#: oc-includes/osclass/classes/AdminMenu.php:148
 msgid "Upgrade Osclass"
 msgstr ""
 
-#: oc-includes/osclass/classes/AdminMenu.php:150
+#: oc-includes/osclass/classes/AdminMenu.php:151
 msgid "Changelog"
 msgstr ""
 
-#: oc-includes/osclass/classes/AdminMenu.php:154
+#: oc-includes/osclass/classes/AdminMenu.php:155
 msgid "Your Profile"
 msgstr ""
 
@@ -12454,11 +12835,11 @@ msgstr ""
 msgid "Show more"
 msgstr ""
 
-#: oc-includes/osclass/classes/datatables/EmailTemplatesDataTable.php:73
+#: oc-includes/osclass/classes/datatables/EmailTemplatesDataTable.php:78
 msgid "Create date"
 msgstr ""
 
-#: oc-includes/osclass/classes/datatables/EmailTemplatesDataTable.php:74
+#: oc-includes/osclass/classes/datatables/EmailTemplatesDataTable.php:79
 msgid "Update date"
 msgstr ""
 
@@ -12538,11 +12919,6 @@ msgstr ""
 msgid "Upload date"
 msgstr ""
 
-#: oc-includes/osclass/classes/datatables/MediaDataTable.php:137
-#: oc-includes/osclass/helpers/hCustomDataTable.php:864
-msgid "View"
-msgstr ""
-
 #: oc-includes/osclass/classes/datatables/MediaDataTable.php:140
 msgid "View all item media"
 msgstr ""
@@ -12553,10 +12929,6 @@ msgstr ""
 
 #: oc-includes/osclass/classes/datatables/MediaDataTable.php:141
 msgid "Delete all listing media"
-msgstr ""
-
-#: oc-includes/osclass/classes/datatables/MediaDataTable.php:234
-msgid "Normal"
 msgstr ""
 
 #: oc-includes/osclass/classes/datatables/MediaDataTable.php:235
@@ -13000,7 +13372,7 @@ msgid "Email: %s"
 msgstr ""
 
 #: oc-includes/osclass/controller/contact.php:85
-#: oc-includes/osclass/helpers/hReport.php:958
+#: oc-includes/osclass/helpers/hReport.php:994
 #, php-format
 msgid "Subject: %s"
 msgstr ""
@@ -13053,59 +13425,60 @@ msgstr ""
 msgid "Last execution date (alerts - items pub date) is set to: %s"
 msgstr ""
 
-#: oc-includes/osclass/cron.php:102 oc-includes/osclass/cron.php:145
-#: oc-includes/osclass/cron.php:217 oc-includes/osclass/cron.php:293
-#: oc-includes/osclass/cron.php:348 oc-includes/osclass/cron.php:397
+#: oc-includes/osclass/cron.php:102 oc-includes/osclass/cron.php:149
+#: oc-includes/osclass/cron.php:221 oc-includes/osclass/cron.php:300
+#: oc-includes/osclass/cron.php:355 oc-includes/osclass/cron.php:404
 #, php-format
 msgid "Starting cron type \"%s\", last run: %s, next run at %s"
 msgstr ""
 
-#: oc-includes/osclass/cron.php:105 oc-includes/osclass/cron.php:150
-#: oc-includes/osclass/cron.php:159 oc-includes/osclass/cron.php:171
-#: oc-includes/osclass/cron.php:177 oc-includes/osclass/cron.php:223
-#: oc-includes/osclass/cron.php:226 oc-includes/osclass/cron.php:238
-#: oc-includes/osclass/cron.php:253 oc-includes/osclass/cron.php:298
+#: oc-includes/osclass/cron.php:105 oc-includes/osclass/cron.php:109
+#: oc-includes/osclass/cron.php:154 oc-includes/osclass/cron.php:163
+#: oc-includes/osclass/cron.php:175 oc-includes/osclass/cron.php:181
+#: oc-includes/osclass/cron.php:227 oc-includes/osclass/cron.php:230
+#: oc-includes/osclass/cron.php:242 oc-includes/osclass/cron.php:245
+#: oc-includes/osclass/cron.php:260 oc-includes/osclass/cron.php:305
 #, php-format
 msgid "Executed explicit function \"%s\""
 msgstr ""
 
-#: oc-includes/osclass/cron.php:111 oc-includes/osclass/cron.php:183
-#: oc-includes/osclass/cron.php:259 oc-includes/osclass/cron.php:313
-#: oc-includes/osclass/cron.php:365 oc-includes/osclass/cron.php:414
-#: oc-includes/osclass/cron.php:433
+#: oc-includes/osclass/cron.php:115 oc-includes/osclass/cron.php:187
+#: oc-includes/osclass/cron.php:266 oc-includes/osclass/cron.php:320
+#: oc-includes/osclass/cron.php:372 oc-includes/osclass/cron.php:421
+#: oc-includes/osclass/cron.php:440
 #, php-format
 msgid "Starting to run functions of \"%s\""
 msgstr ""
 
-#: oc-includes/osclass/cron.php:117 oc-includes/osclass/cron.php:189
-#: oc-includes/osclass/cron.php:265 oc-includes/osclass/cron.php:319
-#: oc-includes/osclass/cron.php:371 oc-includes/osclass/cron.php:420
+#: oc-includes/osclass/cron.php:121 oc-includes/osclass/cron.php:193
+#: oc-includes/osclass/cron.php:272 oc-includes/osclass/cron.php:326
+#: oc-includes/osclass/cron.php:378 oc-includes/osclass/cron.php:427
 #, php-format
 msgid "Executed cron function \"%s\" with priority %s"
 msgstr ""
 
-#: oc-includes/osclass/cron.php:125 oc-includes/osclass/cron.php:197
-#: oc-includes/osclass/cron.php:273 oc-includes/osclass/cron.php:327
-#: oc-includes/osclass/cron.php:379 oc-includes/osclass/cron.php:428
+#: oc-includes/osclass/cron.php:129 oc-includes/osclass/cron.php:201
+#: oc-includes/osclass/cron.php:280 oc-includes/osclass/cron.php:334
+#: oc-includes/osclass/cron.php:386 oc-includes/osclass/cron.php:435
 #, php-format
 msgid "Cron type \"%s\" finished at %s"
 msgstr ""
 
-#: oc-includes/osclass/cron.php:155 oc-includes/osclass/cron.php:230
-#: oc-includes/osclass/cron.php:234 oc-includes/osclass/cron.php:302
-#: oc-includes/osclass/cron.php:306 oc-includes/osclass/cron.php:354
-#: oc-includes/osclass/cron.php:358 oc-includes/osclass/cron.php:403
-#: oc-includes/osclass/cron.php:407
+#: oc-includes/osclass/cron.php:159 oc-includes/osclass/cron.php:234
+#: oc-includes/osclass/cron.php:238 oc-includes/osclass/cron.php:309
+#: oc-includes/osclass/cron.php:313 oc-includes/osclass/cron.php:361
+#: oc-includes/osclass/cron.php:365 oc-includes/osclass/cron.php:410
+#: oc-includes/osclass/cron.php:414
 #, php-format
 msgid "Executed explicit function \"%s\" (%s)"
 msgstr ""
 
-#: oc-includes/osclass/cron.php:439
+#: oc-includes/osclass/cron.php:446
 #, php-format
 msgid "Cron finished at %s"
 msgstr ""
 
-#: oc-includes/osclass/cron.php:440
+#: oc-includes/osclass/cron.php:447
 #, php-format
 msgid "Execution time: %s sec"
 msgstr ""
@@ -13743,11 +14116,6 @@ msgstr ""
 #: oc-includes/osclass/frm/User.form.class.php:710
 #: oc-includes/osclass/functions.php:469
 msgid "Rotate"
-msgstr ""
-
-#: oc-includes/osclass/frm/Item.form.class.php:2385
-#: oc-includes/osclass/functions.php:482
-msgid "Retry"
 msgstr ""
 
 #: oc-includes/osclass/frm/Item.form.class.php:2387
@@ -14433,10 +14801,6 @@ msgstr ""
 msgid "Alert #%d: %s"
 msgstr ""
 
-#: oc-includes/osclass/functions.php:2739
-msgid "Error"
-msgstr ""
-
 #: oc-includes/osclass/functions.php:2760
 msgid "Show all listings"
 msgstr ""
@@ -14531,10 +14895,6 @@ msgstr ""
 
 #: oc-includes/osclass/helpers/hItems.php:1455
 msgid "Check with seller"
-msgstr ""
-
-#: oc-includes/osclass/helpers/hItems.php:1552
-msgid "From"
 msgstr ""
 
 #: oc-includes/osclass/helpers/hItemStats.php:109
@@ -15023,27 +15383,27 @@ msgstr ""
 msgid "Custom %d"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hPreference.php:1971
+#: oc-includes/osclass/helpers/hPreference.php:1981
 msgid ""
 "ImageMagick is active in Media Settings, but this format is not supported by "
 "your ImageMagick build."
 msgstr ""
 
-#: oc-includes/osclass/helpers/hPreference.php:1975
+#: oc-includes/osclass/helpers/hPreference.php:1985
 msgid ""
 "HEIF/HEIC requires ImageMagick with HEIC/HEIF support enabled in Media "
 "Settings."
 msgstr ""
 
-#: oc-includes/osclass/helpers/hPreference.php:1979
+#: oc-includes/osclass/helpers/hPreference.php:1989
 msgid "AVIF requires PHP 8.1+ GD (imageavif) or ImageMagick with AVIF support."
 msgstr ""
 
-#: oc-includes/osclass/helpers/hPreference.php:1983
+#: oc-includes/osclass/helpers/hPreference.php:1993
 msgid "WebP requires GD (imagewebp) or ImageMagick with WebP support."
 msgstr ""
 
-#: oc-includes/osclass/helpers/hPreference.php:1986
+#: oc-includes/osclass/helpers/hPreference.php:1996
 msgid ""
 "This image format is not supported by the active image library on this "
 "server."
@@ -15121,10 +15481,6 @@ msgstr ""
 msgid "Rejected"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hReport.php:158
-msgid "Cancelled"
-msgstr ""
-
 #: oc-includes/osclass/helpers/hReport.php:169
 msgid "Blog"
 msgstr ""
@@ -15154,12 +15510,12 @@ msgstr ""
 msgid "Send report"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hReport.php:955
+#: oc-includes/osclass/helpers/hReport.php:991
 #, php-format
 msgid "From: %s"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hReport.php:969
+#: oc-includes/osclass/helpers/hReport.php:1005
 msgid "Website contact form"
 msgstr ""
 
@@ -15177,10 +15533,6 @@ msgstr ""
 
 #: oc-includes/osclass/helpers/hSearch.php:60
 msgid "Higher price first"
-msgstr ""
-
-#: oc-includes/osclass/helpers/hUsers.php:938
-msgid "Instant"
 msgstr ""
 
 #: oc-includes/osclass/helpers/hUsers.php:1004
@@ -16304,22 +16656,22 @@ msgid ""
 "forums.osclasspoint.com\">ask in our forums</a>."
 msgstr ""
 
-#: oc-includes/osclass/upgrade-funcs.php:1002
-#: oc-includes/osclass/utils.php:3149
+#: oc-includes/osclass/upgrade-funcs.php:1047
+#: oc-includes/osclass/utils.php:3250
 msgid "Osclass has been updated"
 msgstr ""
 
-#: oc-includes/osclass/upgrade-funcs.php:1003
+#: oc-includes/osclass/upgrade-funcs.php:1048
 msgid ""
 "Osclass has been updated successfully. <a href=\"https://"
 "forums.osclasspoint.com\">Need more help?</a>"
 msgstr ""
 
-#: oc-includes/osclass/utils.php:2968
+#: oc-includes/osclass/utils.php:3069
 msgid "Everything looks good! Your Osclass installation is up-to-date"
 msgstr ""
 
-#: oc-includes/osclass/utils.php:2972
+#: oc-includes/osclass/utils.php:3073
 #, php-format
 msgid ""
 "Nearly everything looks good! Your Osclass installation is up-to-date, but "
@@ -16327,95 +16679,95 @@ msgid ""
 "\"%s/downloads/oc-temp\" folder"
 msgstr ""
 
-#: oc-includes/osclass/utils.php:2979
+#: oc-includes/osclass/utils.php:3080
 msgid "Problems when upgrading the database"
 msgstr ""
 
-#: oc-includes/osclass/utils.php:2984 oc-includes/osclass/utils.php:3425
+#: oc-includes/osclass/utils.php:3085 oc-includes/osclass/utils.php:3526
 msgid "Problems when copying files. Please check your permissions. "
 msgstr ""
 
-#: oc-includes/osclass/utils.php:3007
+#: oc-includes/osclass/utils.php:3108
 msgid "Missing download URL"
 msgstr ""
 
-#: oc-includes/osclass/utils.php:3013
+#: oc-includes/osclass/utils.php:3114
 msgid ""
 "We had some errors upgrading your database. The following queries failed:"
 msgstr ""
 
-#: oc-includes/osclass/utils.php:3143
+#: oc-includes/osclass/utils.php:3244
 msgid "[{WEB_TITLE}] has been auto-upgraded"
 msgstr ""
 
-#: oc-includes/osclass/utils.php:3145
+#: oc-includes/osclass/utils.php:3246
 msgid "Hi Admin!"
 msgstr ""
 
-#: oc-includes/osclass/utils.php:3146
+#: oc-includes/osclass/utils.php:3247
 msgid ""
 "Let us inform you, that your osclass website {WEB_TITLE} on {WEB_URL} has "
 "been auto-upgraded. List of upgraded items is bellow."
 msgstr ""
 
-#: oc-includes/osclass/utils.php:3150
+#: oc-includes/osclass/utils.php:3251
 msgid "Old version"
 msgstr ""
 
-#: oc-includes/osclass/utils.php:3151
+#: oc-includes/osclass/utils.php:3252
 msgid "Current version"
 msgstr ""
 
-#: oc-includes/osclass/utils.php:3155 oc-includes/osclass/utils.php:3163
+#: oc-includes/osclass/utils.php:3256 oc-includes/osclass/utils.php:3264
 #, php-format
 msgid "%s plugin(s) have been updated"
 msgstr ""
 
-#: oc-includes/osclass/utils.php:3159
+#: oc-includes/osclass/utils.php:3260
 #, php-format
 msgid "%s theme(s) have been updated"
 msgstr ""
 
-#: oc-includes/osclass/utils.php:3167
+#: oc-includes/osclass/utils.php:3268
 msgid ""
 "This is an automatic email, if you already did that, please ignore this "
 "email."
 msgstr ""
 
-#: oc-includes/osclass/utils.php:3168
+#: oc-includes/osclass/utils.php:3269
 msgid "Thank you"
 msgstr ""
 
-#: oc-includes/osclass/utils.php:3421
+#: oc-includes/osclass/utils.php:3522
 msgid ""
 "Nearly everything looks good! but there were some errors removing temporary "
 "files. Please manually remove the \\\"oc-content/downloads/oc-temp\\\" folder"
 msgstr ""
 
-#: oc-includes/osclass/utils.php:3430
+#: oc-includes/osclass/utils.php:3531
 #, php-format
 msgid ""
 "NOTE: Web user and destination folder user is not the same, you might have "
 "an issue there. <br/>Do this in your console:<br/>chown -R %s:%s %s"
 msgstr ""
 
-#: oc-includes/osclass/utils.php:3453
+#: oc-includes/osclass/utils.php:3554
 msgid ""
 "This is a paid item, you need to buy it before you are able to download it"
 msgstr ""
 
-#: oc-includes/osclass/utils.php:3456
+#: oc-includes/osclass/utils.php:3557
 msgid "Login has failed"
 msgstr ""
 
-#: oc-includes/osclass/utils.php:3461
+#: oc-includes/osclass/utils.php:3562
 msgid "Missing product key"
 msgstr ""
 
-#: oc-load.php:244
+#: oc-load.php:246
 msgid "The website is currently undergoing maintenance"
 msgstr ""
 
-#: oc-load.php:274
+#: oc-load.php:276
 msgid "This subdomain is restricted based on user IP"
 msgstr ""

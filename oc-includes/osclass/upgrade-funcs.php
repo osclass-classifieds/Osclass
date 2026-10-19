@@ -967,6 +967,45 @@ if($current_version < 841) {
   $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'item_phone_required', '0', 'BOOLEAN')", DB_TABLE_PREFIX));
   $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'password_min_length', '1', 'INTEGER')", DB_TABLE_PREFIX));
   $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'rewrite_user_public_profile', '', 'STRING')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'cron_minutely_interval', '5', 'INTEGER')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'mail_queue_enabled', '0', 'BOOLEAN')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'mail_queue_paused', '0', 'BOOLEAN')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'mail_queue_per_run', '50', 'INTEGER')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'mail_queue_bulk_per_run', '30', 'INTEGER')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'mail_queue_group_per_run', '15', 'INTEGER')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'mail_queue_time_budget', '40', 'INTEGER')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'mail_queue_max_attempts', '3', 'INTEGER')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'mail_queue_keep_days', '14', 'INTEGER')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'mail_queue_instant_types', 'user_registration,user_validation,user_forgot_password,new_email,item_validation,item_validation_non_register_user,alert_validation,new_admin', 'STRING')", DB_TABLE_PREFIX));
+
+  // Mail queue (off by default), same structure as struct.sql
+  $comm->query(sprintf("CREATE TABLE IF NOT EXISTS %st_mail_queue (
+  pk_i_id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  i_priority TINYINT(1) UNSIGNED NOT NULL DEFAULT 2,
+  e_status ENUM('PENDING','SENDING','SENT','FAILED','CANCELLED') NOT NULL DEFAULT 'PENDING',
+  s_type VARCHAR(64) NOT NULL DEFAULT '',
+  s_group VARCHAR(40) NULL,
+  s_ref VARCHAR(64) NULL,
+  s_to_email VARCHAR(150) NOT NULL DEFAULT '',
+  s_subject VARCHAR(255) NOT NULL DEFAULT '',
+  s_params LONGTEXT NULL,
+  s_lock VARCHAR(32) NULL,
+  i_attempts TINYINT(3) UNSIGNED NOT NULL DEFAULT 0,
+  b_attachment TINYINT(1) NOT NULL DEFAULT 0,
+  b_private TINYINT(1) NOT NULL DEFAULT 0,
+  s_error VARCHAR(500) NULL,
+  dt_created DATETIME NOT NULL,
+  dt_send_after DATETIME NOT NULL,
+  dt_expire DATETIME NULL,
+  dt_lock DATETIME NULL,
+  dt_done DATETIME NULL,
+  PRIMARY KEY (pk_i_id),
+  INDEX idx_status_priority_send (e_status, i_priority, dt_send_after, s_group),
+  INDEX idx_status_done (e_status, dt_done),
+  INDEX idx_group_status (s_group, e_status),
+  INDEX idx_to_email (s_to_email),
+  INDEX idx_ref (s_ref)
+) ENGINE=InnoDB DEFAULT CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_unicode_ci'", DB_TABLE_PREFIX));
 
   // Index for the history of one object (section + id, ordered by date)
   $log_index = $comm->query(sprintf("SHOW INDEX FROM %st_log WHERE Key_name = 'idx_section_id_date'", DB_TABLE_PREFIX))->result();

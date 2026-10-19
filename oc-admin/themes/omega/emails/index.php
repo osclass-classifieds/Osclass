@@ -119,6 +119,7 @@ osc_current_admin_theme_path( 'parts/header.php' );
 <div class="relative" id="emails-list">
   <div id="emails-toolbar" class="table-toolbar">
     <div class="float-right">
+      <?php osc_run_hook('admin_emails_list_top'); ?>
       <form method="get" action="<?php echo osc_admin_base_url(true); ?>" class="inline nocsrf">
         <?php foreach(Params::getParamsAsArray('get') as $key => $value) { ?>
           <?php if($key != 'iDisplayLength') { ?>

@@ -627,6 +627,16 @@ osc_current_admin_theme_path('parts/header.php');
           </div>
 
           <div class="form-row">
+            <div class="form-label"><?php _e('Minutely cron interval'); ?></div>
+            <div class="form-controls has-intext-input">
+              <?php _e('Run minutely jobs every'); ?>
+              <input type="number" class="input-small in-text" name="cron_minutely_interval" min=1 max=60 value="<?php echo osc_esc_html(osc_cron_minutely_interval()); ?>"/>
+              <?php _e('minutes'); ?>
+              <span class="help-box"><?php _e('Applies to the built-in cron and to a server cron calling the cron URL. A command line cron with type minutely runs on every call. Default is 5.'); ?></span>
+            </div>
+          </div>
+
+          <div class="form-row">
             <div class="form-label"><?php _e('Cron execution history (last/next)'); ?></div>
             <div class="form-controls cron-exec">
               <?php

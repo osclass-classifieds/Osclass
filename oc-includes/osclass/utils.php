@@ -612,11 +612,112 @@ function osc_doRequestQuick($url, $_data, $timeout = 2) {
 
 
 /**
- * @param $params
+ * Send email now, or put it into the mail queue when the queue is enabled (Settings > Mail queue)
+ *
+ * Optional $params['queue'] = array(
+ *   'priority' => 'INSTANT' (send now, logged), 'NORMAL' (next cron run) or 'BULK' (paced),
+ *   'send_after' => unix time, 'expire' => unix time (cancel instead of sending late),
+ *   'group' => fairness key for bulk mails (max 40 chars), 'ref' => plugin reference (max 64 chars),
+ *   'private' => true to remove the body after sending (one-time codes)
+ * )
+ *
+ * @param array  $params
+ * @param string $type
+ *
+ * @return bool  true when sent or queued
+ */
+function osc_sendMail($params, $type = '') {
+  $queue = array();
+  if(is_array($params) && isset($params['queue'])) {
+    $queue = (is_array($params['queue']) ? $params['queue'] : array());
+    unset($params['queue']);
+  }
+
+  // Send in this request: queue off, demo, forced, or per-call SMTP credentials (never stored)
+  if(defined('DEMO') || defined('OSC_MAIL_NOW') || !osc_mail_queue_enabled() || !is_array($params) || array_key_exists('host', $params) || array_key_exists('username', $params) || array_key_exists('password', $params)) {
+    return osc_sendMailNow($params, $type);
+  }
+
+  // Mail stopped by some process is never queued
+  $check = osc_apply_filter('pre_send_mail_filter', $params, $type);
+
+  if(is_array($check) && isset($check['stop']) && $check['stop'] === true) {
+    return false;
+  }
+
+  $priorities = array('INSTANT' => 1, 'NORMAL' => 2, 'BULK' => 3);
+  $priority = strtoupper(isset($queue['priority']) ? (string)$queue['priority'] : '');
+
+  if(!isset($priorities[$priority])) {
+    $priority = 'NORMAL';
+
+    if(($type != '' && in_array($type, osc_mail_queue_instant_types())) || ($type == '' && defined('OC_ADMIN') && OC_ADMIN)) {
+      $priority = 'INSTANT';
+    } else if(in_array($type, array('alert_email_hourly', 'alert_email_daily', 'alert_email_weekly'))) {
+      $priority = 'BULK';
+    }
+  }
+
+  $priority = strtoupper((string)osc_apply_filter('mail_queue_priority', $priority, $params, $type));
+  $priority = (isset($priorities[$priority]) ? $priority : 'NORMAL');
+
+  $now = time();
+  $send_after = (isset($queue['send_after']) && (int)$queue['send_after'] > $now ? (int)$queue['send_after'] : $now);
+  $instant = ($priority == 'INSTANT' && $send_after <= $now);
+  $to = (isset($params['to']) ? $params['to'] : '');
+  $private_types = array('user_validation', 'user_forgot_password', 'new_email', 'alert_validation', 'item_validation', 'item_validation_non_register_user', 'new_admin');
+  $json_flags = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE | JSON_PARTIAL_OUTPUT_ON_ERROR;
+  $json = json_encode($params, $json_flags);
+
+  $row = array(
+    'i_priority' => $priorities[$priority],
+    'e_status' => ($instant ? 'SENDING' : 'PENDING'),
+    's_type' => osc_substr((string)$type, 0, 64),
+    's_group' => (isset($queue['group']) && trim((string)$queue['group']) != '' ? osc_substr(trim((string)$queue['group']), 0, 40) : null),
+    's_ref' => (isset($queue['ref']) && trim((string)$queue['ref']) != '' ? osc_substr(trim((string)$queue['ref']), 0, 64) : null),
+    's_to_email' => osc_substr(trim((string)(is_array($to) ? key($to) : $to)), 0, 150),
+    's_subject' => osc_substr((string)(isset($params['subject']) ? $params['subject'] : ''), 0, 255),
+    's_params' => $json,
+    'i_attempts' => ($instant ? 1 : 0),
+    'b_attachment' => (!empty($params['attachment']) ? 1 : 0),
+    'b_private' => (!empty($queue['private']) || in_array($type, $private_types) ? 1 : 0),
+    'dt_created' => date('Y-m-d H:i:s', $now),
+    'dt_send_after' => date('Y-m-d H:i:s', $send_after),
+    'dt_expire' => (isset($queue['expire']) && (int)$queue['expire'] > 0 ? date('Y-m-d H:i:s', (int)$queue['expire']) : null),
+    'dt_lock' => ($instant ? date('Y-m-d H:i:s', $now) : null)
+  );
+
+  // Queue table not usable: keep the old behaviour
+  $mq = MailQueue::newInstance();
+  if($json === false || !$mq->insert($row)) {
+    return osc_sendMailNow($params, $type);
+  }
+
+  $row['pk_i_id'] = (int)$mq->dao->insertedId();
+
+  if($instant) {
+    return osc_mail_queue_send($row, $params);
+  }
+
+  // Callers may delete their attachment files right after this call, keep own copies
+  if($row['b_attachment'] == 1) {
+    $params = osc_mail_queue_attachments($row['pk_i_id'], $params);
+    $mq->update(array('s_params' => json_encode($params, $json_flags)), array('pk_i_id' => $row['pk_i_id']));
+  }
+
+  return true;
+}
+
+
+/**
+ * Send email in this request (no mail queue)
+ *
+ * @param array  $params
+ * @param string $type
  *
  * @return bool
  */
-function osc_sendMail($params, $type = '') {
+function osc_sendMailNow($params, $type = '') {
   // DO NOT send mail if it's a demo
   if(defined('DEMO')) {
     return false;

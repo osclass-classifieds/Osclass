@@ -25,6 +25,12 @@ Osclass 8.4.1
 - IMPORTANT: The log table gets an index on section, object and date for fast object history. On a site with millions of log rows the upgrade can take a while.
 - Plugins can react to every new report with the report_created action, and create reports with the same emails through osc_report_create().
 - Tools > Logs rows can be changed by plugins with the logs_processing_row filter.
+- IMPORTANT: New mail queue (Settings > Mail queue). Emails can wait in a queue and go out in small batches from the cron, so pages load faster and a slow or limited mail server does not hold up visitors. The queue is off by default on new installs and upgrades. Turn it on only when a real server cron calls the cron URL at least every 5 minutes, otherwise queued emails are not sent.
+- With the queue on, codes, password resets, account emails and back office test emails are still sent right away and are shown in the queue list too. A failed email is tried again after 5 minutes, 30 minutes and 2 hours, then marked as failed with the error text.
+- The Mail queue screen lists waiting, sent, failed and cancelled emails with filters, warns when emails wait more than 30 minutes, has a Pause sending switch and lets you view, send now, retry, cancel or delete an email. Sent, failed and cancelled emails are removed after 14 days (setting).
+- Plugins keep calling osc_sendMail() with the same arguments and result. A new "queue" option sets priority, send date, expiry, group and reference. New filter mail_queue_priority, new actions mail_queue_sent and mail_queue_failed, new functions osc_sendMailNow() (always sends at once) and osc_mail_queue_stats() (counters for dashboards).
+- New Cron setting: how often minutely jobs run through the built-in cron or the cron URL (1 to 60 minutes, default 5). A command line cron with type minutely still runs on every call.
+- Email templates list: plugins can add columns, row actions and a control above the list, and hide or add templates (admin_emails_table, actions_manage_emails, more_actions_manage_emails, emails_processing_row, admin_emails_list, admin_emails_list_top).
 
 
 Osclass 8.4.0
