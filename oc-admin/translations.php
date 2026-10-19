@@ -215,57 +215,7 @@ class CAdminTranslations extends AdminSecBaseModel {
 
         // For core translations, update index.php with correct author and version
         if(Params::getParam('type') == 'CORE' && Params::getParam('section') == 'CORE') {
-          $path_index = $this->get_path_index(Params::getParam('language'));
-          $locales_all = osc_listLocales();
-          $locale_data = isset($locales_all[Params::getParam('language')]) ? $locales_all[Params::getParam('language')] : array();
-          $db_data = OSCLocale::newInstance()->findByPrimaryKey(Params::getParam('language'));
-
-          if(file_exists($path_index)) {
-            $index_content = file_get_contents($path_index);
-            $index_content = file($path_index, FILE_IGNORE_NEW_LINES);
-            $function_name = 'locale_' . Params::getParam('language') . '_info';
-            $function_data = array();
-
-            if(function_exists($function_name)) {
-              $function_data = call_user_func($function_name);
-            }
-
-            $save_data = array(
-              'name' => isset($function_data['name']) ? $function_data['name'] : (isset($db_data['s_name']) ? $db_data['s_name'] : Params::getParam('language')),
-              'short_name' => isset($function_data['short_name']) ? $function_data['short_name'] : (isset($db_data['s_short_name']) ? $db_data['s_short_name'] : Params::getParam('language')),
-              'description' => isset($function_data['description']) ? $function_data['description'] : (isset($db_data['s_description']) ? $db_data['s_description'] : ''),
-              'version' => osc_version(true),
-              'author_name' => 'OsclassPoint',
-              'author_url' => 'https://osclass-classifieds.com/',
-              'currency_format' => isset($function_data['currency_format']) ? $function_data['currency_format'] : (isset($db_data['s_currency_format']) ? $db_data['s_currency_format'] : '{NUMBER} {CURRENCY}'),
-              'date_format' => isset($function_data['date_format']) ? $function_data['date_format'] : (isset($db_data['s_date_format']) ? $db_data['s_date_format'] : 'd/m/Y'),
-              'stop_words' => isset($function_data['stop_words']) ? $function_data['stop_words'] : (isset($db_data['s_stop_words']) ? $db_data['s_stop_words'] : ''),
-              'native_locations' => isset($function_data['native_locations']) ? $function_data['native_locations'] : (isset($db_data['b_locations_native']) ? $db_data['b_locations_native'] : 0),
-              'direction' => isset($function_data['direction']) ? $function_data['direction'] : (isset($db_data['b_rtl']) ? ($db_data['b_rtl'] == 1 ? 'rtl' : 'ltr') : 'ltr')
-            );
-
-            $save_content = '';
-            $save_content .= '<?php' . PHP_EOL;
-            $save_content .= 'function ' . $function_name . '() {' . PHP_EOL;
-            $save_content .= '  return array(' . PHP_EOL;
-
-            $j = 1;
-            foreach($save_data as $k => $v) {
-              if($k == 'native_locations') {
-                $save_content .= "    '" . $k . "' => " . ($v == 1 ? 1 : 0) . ($j < count($save_data) ? "," : "") . PHP_EOL;
-              } else {
-                $save_content .= "    '" . $k . "' => '" . osc_esc_js($v) . "'" . ($j < count($save_data) ? "," : "") . PHP_EOL;
-              }
-
-              $j++;
-            }
-
-            $save_content .= '  );' . PHP_EOL;
-            $save_content .= '}' . PHP_EOL;
-            $save_content .= '?>';
-
-            file_put_contents($path_index, $save_content);
-          }
+          $this->update_index(Params::getParam('language'));
         }
 
         osc_add_flash_ok_message(_m('Translations have been updated'), 'admin');
@@ -431,6 +381,10 @@ class CAdminTranslations extends AdminSecBaseModel {
 
         $zip_name = $this->generate_zip_name(Params::getParam('language'), Params::getParam('type'), Params::getParam('section'), Params::getParam('plugin'), Params::getParam('theme'));
         $zip_path = osc_uploads_path() . 'temp/' . $zip_name;
+
+        if(Params::getParam('type') == 'CORE') {
+          $this->update_index(Params::getParam('language'));
+        }
 
         // Check if all required files are in translation folder
         $required_files = $this->get_allowed_files(Params::getParam('type'));
@@ -739,6 +693,57 @@ class CAdminTranslations extends AdminSecBaseModel {
     $path .= '.po';
 
     return $path;
+  }
+
+  // Rewrite index.php of core translation with correct author and current Osclass version
+  function update_index($language) {
+    $path_index = $this->get_path_index($language);
+    $db_data = OSCLocale::newInstance()->findByPrimaryKey($language);
+
+    if(!file_exists($path_index)) {
+      return;
+    }
+
+    $function_name = 'locale_' . $language . '_info';
+    $function_data = array();
+
+    if(function_exists($function_name)) {
+      $function_data = call_user_func($function_name);
+    }
+
+    $save_data = array(
+      'name' => isset($function_data['name']) ? $function_data['name'] : (isset($db_data['s_name']) ? $db_data['s_name'] : $language),
+      'short_name' => isset($function_data['short_name']) ? $function_data['short_name'] : (isset($db_data['s_short_name']) ? $db_data['s_short_name'] : $language),
+      'description' => isset($function_data['description']) ? $function_data['description'] : (isset($db_data['s_description']) ? $db_data['s_description'] : ''),
+      'version' => OSCLASS_VERSION,
+      'author_name' => 'OsclassPoint.com',
+      'author_url' => 'https://osclass-classifieds.com/',
+      'currency_format' => isset($function_data['currency_format']) ? $function_data['currency_format'] : (isset($db_data['s_currency_format']) ? $db_data['s_currency_format'] : '{NUMBER} {CURRENCY}'),
+      'date_format' => isset($function_data['date_format']) ? $function_data['date_format'] : (isset($db_data['s_date_format']) ? $db_data['s_date_format'] : 'd/m/Y'),
+      'stop_words' => isset($function_data['stop_words']) ? $function_data['stop_words'] : (isset($db_data['s_stop_words']) ? $db_data['s_stop_words'] : ''),
+      'native_locations' => isset($function_data['native_locations']) ? $function_data['native_locations'] : (isset($db_data['b_locations_native']) ? $db_data['b_locations_native'] : 0),
+      'direction' => isset($function_data['direction']) ? $function_data['direction'] : (isset($db_data['b_rtl']) ? ($db_data['b_rtl'] == 1 ? 'rtl' : 'ltr') : 'ltr')
+    );
+
+    $save_content = '<?php' . PHP_EOL;
+    $save_content .= 'function ' . $function_name . '() {' . PHP_EOL;
+    $save_content .= '  return array(' . PHP_EOL;
+
+    $j = 1;
+    foreach($save_data as $k => $v) {
+      if($k == 'native_locations') {
+        $save_content .= "    '" . $k . "' => " . ($v == 1 ? 1 : 0) . ($j < count($save_data) ? "," : "") . PHP_EOL;
+      } else {
+        $save_content .= "    '" . $k . "' => '" . osc_esc_js($v) . "'" . ($j < count($save_data) ? "," : "") . PHP_EOL;
+      }
+
+      $j++;
+    }
+
+    $save_content .= '  );' . PHP_EOL;
+    $save_content .= '}' . PHP_EOL;
+
+    file_put_contents($path_index, $save_content);
   }
 
   // Get path of index.php file (core translation)

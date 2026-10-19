@@ -20,9 +20,9 @@ function locale_en_US_info() {
   return array(
     'name'            => 'English (US)',
     'short_name'      => 'English',
-    'description'     => 'American english translation',
-    'version'         => '8.4.0',
-    'author_name'     => 'OsclassPoint',
+    'description'     => 'American English translation',
+    'version'         => '8.4.1',
+    'author_name'     => 'OsclassPoint.com',
     'author_url'      => 'https://osclass-classifieds.com/',
     'currency_format' => '{NUMBER} {CURRENCY}',
     'date_format'     => 'm/d/Y',
