@@ -12,6 +12,12 @@ Osclass 8.4.1
 - Saving a category without moving it works again in trees deeper than the category level limit.
 - Exporting or saving a core translation updates its index.php with the current Osclass version and author.
 - Word length fields in Search settings are no longer stretched.
+- IMPORTANT: Changing or resetting a password now signs the account out on all other devices, including "Remember me" logins. The device where the password was changed stays signed in. Same when an admin sets a new password for a user.
+- New Users setting: minimum password length. It is checked on registration, password change, password reset and when an admin sets a password. Existing sites keep 1 (any password that is not empty); new installs start at 8. Plugins can add own rules.
+- New permalink setting for the public user profile, so it can live on its own address (for example /u/name). Empty keeps today's behaviour.
+- Plugins can now change listing URLs, like they already can for user URLs.
+- Listing view statistics work on themes without jQuery.
+- "Login as user" in the back office now sends users to the same page a plugin chooses for a normal login.
 
 
 Osclass 8.4.0

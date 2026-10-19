@@ -318,6 +318,70 @@ function osc_hash_password($password) {
 
 
 /**
+ * Validate a new password, returns error message or empty string when valid.
+ * Plugins add own rules via filter user_password_error.
+ *
+ * @param string $password plain-text
+ * @param array|null $user user row (null on registration)
+ * @param string $context register, edit, change, reset, admin
+ *
+ * @return string
+ * @since 8.4.1
+ */
+function osc_validate_password($password, $user = null, $context = '') {
+  $error = '';
+  $min_length = osc_password_min_length();
+
+  if(mb_strlen((string)$password, 'UTF-8') < $min_length) {
+    $error = sprintf(_m('The password must be at least %d characters long'), $min_length);
+  }
+
+  return (string)osc_apply_filter('user_password_error', $error, $password, $user, $context);
+}
+
+
+/**
+ * Remember user secret of current login in session, so a password change on another device ends this session.
+ *
+ * @param array $user user row
+ *
+ * @since 8.4.1
+ */
+function osc_set_user_session_secret($user) {
+  Session::newInstance()->_set('userSecret', hash('sha256', (string)(isset($user['s_secret']) ? $user['s_secret'] : '')));
+}
+
+
+/**
+ * Rotate user secret after password change: other devices (sessions and remember-me cookies) are logged out, current device stays logged in.
+ *
+ * @param int $user_id
+ * @param string $context change, reset, admin
+ *
+ * @return string new secret
+ * @since 8.4.1
+ */
+function osc_rotate_user_secret($user_id, $context = '') {
+  $secret = osc_genRandomPassword();
+  User::newInstance()->update(array('s_secret' => $secret), array('pk_i_id' => (int)$user_id));
+
+  // keep current device logged in
+  if(!OC_ADMIN && osc_logged_user_id() == $user_id) {
+    osc_set_user_session_secret(array('s_secret' => $secret));
+
+    if(Cookie::newInstance()->get_value('oc_userSecret') != '') {
+      Cookie::newInstance()->push('oc_userId', $user_id);
+      Cookie::newInstance()->push('oc_userSecret', $secret);
+      Cookie::newInstance()->set();
+    }
+  }
+
+  osc_run_hook('user_password_changed', $user_id, $context);
+  return $secret;
+}
+
+
+/**
  * @param $alert
  *
  * @return string

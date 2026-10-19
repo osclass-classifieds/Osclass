@@ -962,6 +962,14 @@ osc_current_admin_theme_path('parts/header.php');
           </div>
 
           <div class="form-row">
+            <div class="form-label"><?php _e('User public profile'); ?></div>
+            <div class="form-controls">
+              <input type="text" class="input-medium" size="20" name="rewrite_user_public_profile" value="<?php echo osc_esc_html(osc_get_preference('rewrite_user_public_profile')); ?>" />
+              <div class="help-box"><?php _e('Optional. Own address for public profiles, for example "u" gives /u/username. Leave empty to use the user profile prefix.'); ?></div>
+            </div>
+          </div>
+
+          <div class="form-row">
             <div class="form-label"><?php _e('User listings'); ?></div>
             <div class="form-controls">
               <input type="text" class="input-medium" size="20" name="rewrite_user_items" value="<?php echo osc_esc_html(osc_get_preference('rewrite_user_items')); ?>" />

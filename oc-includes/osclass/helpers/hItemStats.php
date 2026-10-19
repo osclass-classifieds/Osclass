@@ -1782,7 +1782,7 @@ function osc_item_stats_enqueue() {
   if(file_exists($js_file)) {
     $js .= '?v=' . filemtime($js_file);
   }
-  osc_register_script('osc-item-stats', $js, array('jquery'));
+  osc_register_script('osc-item-stats', $js, array());
   osc_enqueue_script('osc-item-stats');
   osc_add_hook('header', 'osc_item_stats_print_vars', 9);
   osc_add_hook('footer', 'osc_item_stats_print_vars');

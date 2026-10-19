@@ -680,6 +680,7 @@ class CAdminUsers extends AdminSecBaseModel {
         $alertsDefaultNonExpiring = Params::getParam('alerts_default_non_expiring');
         $alertsDefaultNonExpiring = (($alertsDefaultNonExpiring != '') ? true : false);
         $alertsUnsubInactiveMonths = max(0, (int)Params::getParam('alerts_unsub_inactive_months'));
+        $passwordMinLength = min(64, max(1, (int)Params::getParam('password_min_length')));
 
         foreach($usernameBlacklistTmp as $k => $v) {
           $usernameBlacklistTmp[$k] = strtolower(trim($v));
@@ -694,6 +695,7 @@ class CAdminUsers extends AdminSecBaseModel {
         $iUpdated += osc_set_preference('notify_new_user', $notifyNewUser);
         $iUpdated += osc_set_preference('username_generator', $usernameGenerator);
         $iUpdated += osc_set_preference('username_blacklist', $usernameBlacklist);
+        $iUpdated += osc_set_preference('password_min_length', $passwordMinLength, 'osclass', 'INTEGER');
         $iUpdated += osc_set_preference('alerts_enabled', $alertsEnabled, 'osclass', 'BOOLEAN');
         $iUpdated += osc_set_preference('alerts_guest_validation', $alertsGuestValidation, 'osclass', 'BOOLEAN');
         $iUpdated += osc_set_preference('alerts_expiration_months_user', $alertsExpireMonthsUser, 'osclass', 'INTEGER');
@@ -945,10 +947,11 @@ class CAdminUsers extends AdminSecBaseModel {
         Session::newInstance()->_set('userName', $user['s_name']);
         Session::newInstance()->_set('userEmail', $user['s_email']);
         Session::newInstance()->_set('userPhone', $user['s_phone_mobile'] ? $user['s_phone_mobile'] : $user['s_phone_land']);
+        osc_set_user_session_secret($user);
 
         osc_run_hook('after_login', $user, osc_user_dashboard_url());
         osc_add_flash_ok_message(sprintf(_m('You have logged in as %s'), '<strong>' . $user['s_name'] . '</strong>'));
-        $this->redirectTo(osc_apply_filter('correct_login_url_redirect', osc_user_dashboard_url()));
+        $this->redirectTo(osc_apply_filter('correct_login_url_redirect', osc_user_dashboard_url(), $user));
 
       default:        // manage users view
         if(Params::getParam("action") != "") {

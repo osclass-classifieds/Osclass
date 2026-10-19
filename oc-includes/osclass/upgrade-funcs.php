@@ -965,6 +965,8 @@ if($current_version < 840) {
 if($current_version < 841) {
   $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'alerts_guest_validation', '1', 'BOOLEAN')", DB_TABLE_PREFIX));
   $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'item_phone_required', '0', 'BOOLEAN')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'password_min_length', '1', 'INTEGER')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'rewrite_user_public_profile', '', 'STRING')", DB_TABLE_PREFIX));
 
   $updated_version = 841;       // Version 8.4.1
 }

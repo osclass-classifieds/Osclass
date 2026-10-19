@@ -140,6 +140,23 @@ function osc_is_web_user_logged_in() {
   if(Session::newInstance()->_get("userId") > 0) {
     $user = osc_get_user_row(Session::newInstance()->_get("userId"));
 
+    // password was changed on another device: end this session (sessions started before 8.4.1 have no secret stored)
+    $session_secret = (string)Session::newInstance()->_get('userSecret');
+    if($session_secret != '' && isset($user['pk_i_id']) && !hash_equals($session_secret, hash('sha256', (string)$user['s_secret']))) {
+      Session::newInstance()->_drop('userId');
+      Session::newInstance()->_drop('userName');
+      Session::newInstance()->_drop('userEmail');
+      Session::newInstance()->_drop('userPhone');
+      Session::newInstance()->_drop('userSecret');
+
+      Cookie::newInstance()->pop('oc_userId');
+      Cookie::newInstance()->pop('oc_userSecret');
+      Cookie::newInstance()->set();
+
+      osc_run_hook('user_session_expired', $user);
+      return false;
+    }
+
     View::newInstance()->_exportVariableToView('_loggedUser', $user);
 
     if(isset($user['b_enabled']) && $user['b_enabled']==1) {
@@ -159,6 +176,7 @@ function osc_is_web_user_logged_in() {
       Session::newInstance()->_set('userEmail', $user['s_email']);
       $phone = osc_esc_html($user['s_phone_mobile'] ? $user['s_phone_mobile'] : $user['s_phone_land']);
       Session::newInstance()->_set('userPhone', $phone);
+      osc_set_user_session_secret($user);
 
       return true;
     } else {

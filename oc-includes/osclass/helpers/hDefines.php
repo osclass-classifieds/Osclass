@@ -1044,7 +1044,7 @@ function osc_item_url_from_item($item, $locale = '') {
     $item_url = osc_item_url_ns(isset($item['pk_i_id']) ? $item['pk_i_id'] : null, $locale);
   }
 
-  return $item_url;
+  return osc_apply_filter('item_url', $item_url, $item, $locale);
 }
 
 
@@ -1290,10 +1290,10 @@ function osc_user_public_profile_url($id = null, $user = false, $mode = 'usernam
 
       // if($mode == 'username' && trim((string)$user['s_username']) != '') {
       if(isset($user['s_username']) && trim((string)$user['s_username']) != '') {
-        $url = osc_base_url(false, true) . osc_get_preference('rewrite_user_profile') . '/' . $user['s_username'];
+        $url = osc_base_url(false, true) . osc_user_public_profile_prefix() . '/' . $user['s_username'];
 
       } elseif($id > 0) {
-        $url = osc_base_url(false, true) . osc_get_preference('rewrite_user_profile') . '/' . $id;
+        $url = osc_base_url(false, true) . osc_user_public_profile_prefix() . '/' . $id;
 
       } else {
         $url = '';

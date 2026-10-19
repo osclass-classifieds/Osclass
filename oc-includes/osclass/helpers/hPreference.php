@@ -1501,6 +1501,25 @@ function osc_item_phone_required() {
 }
 
 /**
+ * Gets minimum length of user password (at least 1)
+ *
+ * @return int
+ */
+function osc_password_min_length() {
+  return max(1, (int)getPreference('password_min_length'));
+}
+
+/**
+ * Gets URL prefix of public user profile, falls back to user profile prefix when empty
+ *
+ * @return string
+ */
+function osc_user_public_profile_prefix() {
+  $prefix = trim((string)getPreference('rewrite_user_public_profile'));
+  return ($prefix != '' ? $prefix : osc_get_preference('rewrite_user_profile'));
+}
+
+/**
  * Gets if the prices are o not enabled on the item's form
  *
  * @return boolean

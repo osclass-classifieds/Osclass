@@ -182,14 +182,8 @@ class CWebLogin extends BaseModel {
 
         } else if($logged==3) {
           if(Params::getParam('remember') == 1) {
-            // disabled, otherwise you could not keep login from different devices
-            // currently it only updates secret if it is blank
-            if($user['s_secret'] == '') {
-              require_once osc_lib_path() . 'osclass/helpers/hSecurity.php';
-              $secret = osc_genRandomPassword();
-              User::newInstance()->update(array('s_secret' => $secret), array('pk_i_id' => $user['pk_i_id']));
-              $user['s_secret'] = $secret;
-            }
+            // secret is shared by all devices, bootstrap_login creates it when blank
+            $user = User::newInstance()->findByPrimaryKey($user['pk_i_id']);
 
             // Cookie::newInstance()->set_expires(osc_time_cookie());
             Cookie::newInstance()->push('oc_userId', $user['pk_i_id']);
@@ -319,6 +313,12 @@ class CWebLogin extends BaseModel {
         $user = User::newInstance()->findByIdPasswordSecret(Params::getParam('userId'), Params::getParam('code'));
 
         if(isset($user['b_enabled']) && $user['b_enabled'] == 1) {
+          $password_error = osc_validate_password(Params::getParam('new_password', false, false), $user, 'reset');
+          if($password_error != '') {
+            osc_add_flash_error_message($password_error);
+            $this->redirectTo(osc_forgot_user_password_confirm_url(Params::getParam('userId'), Params::getParam('code')));
+          }
+
           if(Params::getParam('new_password', false, false)==Params::getParam('new_password2', false, false)) {
             User::newInstance()->update(
               array(
@@ -329,6 +329,7 @@ class CWebLogin extends BaseModel {
              ),
               array('pk_i_id' => $user['pk_i_id'])
            );
+            osc_rotate_user_secret($user['pk_i_id'], 'reset');
             osc_add_flash_ok_message(_m('The password has been changed'));
             $this->redirectTo(osc_user_login_url());
           } else {

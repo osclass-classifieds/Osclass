@@ -52,6 +52,12 @@ class UserActions {
     if(Params::getParam('s_password', false, false) == '') {
       $flash_error .= _m('The password cannot be empty') . PHP_EOL;
       $error[] = 6;
+    } else {
+      $password_error = osc_validate_password(Params::getParam('s_password', false, false), null, ($this->is_admin ? 'admin' : 'register'));
+      if($password_error != '') {
+        $flash_error .= $password_error . PHP_EOL;
+        $error[] = 6;
+      }
     }
 
     if(Params::getParam('s_password', false, false) != Params::getParam('s_password2', false, false)) {
@@ -207,6 +213,14 @@ class UserActions {
         $flash_error .= _m('The passwords do not match') . PHP_EOL;
         $error[] = 7;
       }
+
+      if(Params::getParam('s_password', false, false) != '') {
+        $password_error = osc_validate_password(Params::getParam('s_password', false, false), $this->manager->findByPrimaryKey($userId), 'admin');
+        if($password_error != '') {
+          $flash_error .= $password_error . PHP_EOL;
+          $error[] = 6;
+        }
+      }
     }
 
     $flash_error = osc_apply_filter('user_edit_flash_error', $flash_error, $userId);
@@ -219,6 +233,11 @@ class UserActions {
     $this->manager->update($input, array('pk_i_id' => $userId));
 
     if($this->is_admin) {
+      // password changed by admin, devices of user are logged out
+      if(isset($input['s_password'])) {
+        osc_rotate_user_secret($userId, 'admin');
+      }
+
       Item::newInstance()->update(array('s_contact_name' => $input['s_name'], 's_contact_email' => $input['s_email']), array('fk_i_user_id' => $userId));
       ItemComment::newInstance()->update(array('s_author_name' => $input['s_name'], 's_author_email' => $input['s_email']), array('fk_i_user_id' => $userId));
       Alerts::newInstance()->update(array('s_email' => $input['s_email']), array('fk_i_user_id' => $userId));
@@ -590,12 +609,19 @@ class UserActions {
       return 2;
     }
 
+    // secret is needed to end sessions on other devices after password change
+    if($user['s_secret'] == '') {
+      $user['s_secret'] = osc_genRandomPassword();
+      User::newInstance()->update(array('s_secret' => $user['s_secret']), array('pk_i_id' => $user['pk_i_id']));
+    }
+
     //we are logged in... let's go!
     Session::newInstance()->_set('userId', $user['pk_i_id']);
     Session::newInstance()->_set('userName', $user['s_name']);
     Session::newInstance()->_set('userEmail', $user['s_email']);
     $phone = $user['s_phone_mobile'] ?: $user['s_phone_land'];
     Session::newInstance()->_set('userPhone', $phone);
+    osc_set_user_session_secret($user);
 
     return 3;
   }

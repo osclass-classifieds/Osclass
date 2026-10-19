@@ -258,7 +258,14 @@ class CWebUser extends WebSecBaseModel {
           $this->redirectTo(osc_change_user_password_url());
         }
 
+        $password_error = osc_validate_password(Params::getParam('new_password', false, false), $user, 'change');
+        if($password_error != '') {
+          osc_add_flash_error_message($password_error);
+          $this->redirectTo(osc_change_user_password_url());
+        }
+
         User::newInstance()->update(array('s_password' => osc_hash_password(Params::getParam ('new_password', false, false))), array('pk_i_id' => Session::newInstance()->_get('userId')));
+        osc_rotate_user_secret($user['pk_i_id'], 'change');
 
         osc_add_flash_ok_message(_m('The password has been changed'));
         $this->redirectTo(osc_user_profile_url());

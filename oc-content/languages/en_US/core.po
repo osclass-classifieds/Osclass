@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Osclass by OsclassPoint.com\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-19 15:47+0200\n"
+"POT-Creation-Date: 2026-10-19 16:06+0200\n"
 "PO-Revision-Date: 2026-10-01 14:14+0200\n"
 "Last-Translator: Translations <translations@osclass>\n"
 "Language-Team: OsclassPoint\n"
@@ -152,7 +152,7 @@ msgstr ""
 #: oc-admin/themes/omega/users/alerts.php:323
 #: oc-admin/themes/omega/users/ban.php:275
 #: oc-admin/themes/omega/users/index.php:423 oc-admin/tools.php:346
-#: oc-admin/users.php:845 oc-admin/users.php:1015
+#: oc-admin/users.php:847 oc-admin/users.php:1018
 #: oc-includes/osclass/helpers/hCustomDataTable.php:408
 msgid "Bulk actions"
 msgstr ""
@@ -207,7 +207,7 @@ msgstr ""
 #: oc-admin/themes/omega/users/ban.php:280
 #: oc-admin/themes/omega/users/index.php:416
 #: oc-admin/themes/omega/users/index.php:428 oc-admin/tools.php:347
-#: oc-admin/users.php:846 oc-admin/users.php:1020
+#: oc-admin/users.php:848 oc-admin/users.php:1023
 #: oc-includes/osclass/classes/datatables/AdminsDataTable.php:98
 #: oc-includes/osclass/classes/datatables/AlertsDataTable.php:142
 #: oc-includes/osclass/classes/datatables/BanRulesDataTable.php:112
@@ -410,7 +410,7 @@ msgstr ""
 #: oc-admin/ajax/ajax.php:645 oc-admin/themes/omega/gui/login.php:61
 #: oc-admin/themes/omega/market/languages_plugins.php:200
 #: oc-admin/themes/omega/market/languages_themes.php:193
-#: oc-admin/themes/omega/settings/permalinks.php:1038
+#: oc-admin/themes/omega/settings/permalinks.php:1046
 #: oc-admin/themes/omega/translations/edit.php:313
 #: oc-admin/themes/omega/translations/index.php:206
 #: oc-admin/themes/omega/translations/index.php:288
@@ -617,7 +617,7 @@ msgstr ""
 
 #: oc-admin/comments.php:276 oc-admin/comments.php:465 oc-admin/items.php:364
 #: oc-admin/items.php:750 oc-admin/themes/omega/users/alerts.php:240
-#: oc-admin/users.php:120 oc-admin/users.php:1017
+#: oc-admin/users.php:120 oc-admin/users.php:1020
 #: oc-includes/osclass/classes/datatables/AlertsDataTable.php:145
 #: oc-includes/osclass/classes/datatables/CommentsDataTable.php:161
 #: oc-includes/osclass/classes/datatables/ItemsDataTable.php:121
@@ -630,7 +630,7 @@ msgstr ""
 #: oc-admin/themes/omega/market/languages.php:164
 #: oc-admin/themes/omega/market/themes.php:216
 #: oc-admin/themes/omega/users/alerts.php:239 oc-admin/users.php:122
-#: oc-admin/users.php:1016
+#: oc-admin/users.php:1019
 #: oc-includes/osclass/classes/datatables/AlertsDataTable.php:147
 #: oc-includes/osclass/classes/datatables/CommentsDataTable.php:163
 #: oc-includes/osclass/classes/datatables/ItemsDataTable.php:123
@@ -641,7 +641,7 @@ msgstr ""
 #: oc-admin/comments.php:282 oc-admin/comments.php:466 oc-admin/items.php:369
 #: oc-admin/items.php:751 oc-admin/themes/omega/items/index.php:278
 #: oc-admin/themes/omega/users/index.php:271 oc-admin/users.php:126
-#: oc-admin/users.php:1019
+#: oc-admin/users.php:1022
 #: oc-includes/osclass/classes/datatables/CommentsDataTable.php:143
 #: oc-includes/osclass/classes/datatables/ItemsDataTable.php:126
 #: oc-includes/osclass/classes/datatables/UsersDataTable.php:134
@@ -649,7 +649,7 @@ msgid "Block"
 msgstr ""
 
 #: oc-admin/comments.php:284 oc-admin/comments.php:467 oc-admin/items.php:371
-#: oc-admin/items.php:752 oc-admin/users.php:128 oc-admin/users.php:1018
+#: oc-admin/items.php:752 oc-admin/users.php:128 oc-admin/users.php:1021
 #: oc-includes/osclass/classes/datatables/CommentsDataTable.php:145
 #: oc-includes/osclass/classes/datatables/ItemsDataTable.php:128
 #: oc-includes/osclass/classes/datatables/UsersDataTable.php:137
@@ -1648,12 +1648,12 @@ msgstr ""
 #: oc-admin/themes/omega/settings/media.php:636
 #: oc-admin/themes/omega/settings/optimization.php:155
 #: oc-admin/themes/omega/settings/optimization.php:200
-#: oc-admin/themes/omega/settings/permalinks.php:1048
+#: oc-admin/themes/omega/settings/permalinks.php:1056
 #: oc-admin/themes/omega/settings/searches.php:207
 #: oc-admin/themes/omega/settings/spamNbots.php:91
 #: oc-admin/themes/omega/settings/spamNbots.php:145
 #: oc-admin/themes/omega/stats/settings.php:444
-#: oc-admin/themes/omega/users/settings.php:288
+#: oc-admin/themes/omega/users/settings.php:298
 #: oc-includes/osclass/functions.php:527
 msgid "Save changes"
 msgstr ""
@@ -2475,7 +2475,7 @@ msgstr ""
 #: oc-admin/themes/omega/categories/iframe.php:62
 #: oc-admin/themes/omega/items/settings.php:275
 #: oc-admin/themes/omega/settings/index.php:833
-#: oc-includes/osclass/helpers/hUsers.php:1071
+#: oc-includes/osclass/helpers/hUsers.php:1089
 msgid "days"
 msgstr ""
 
@@ -3366,13 +3366,13 @@ msgid "Expiration date"
 msgstr ""
 
 #: oc-admin/themes/omega/items/frm.php:311
-#: oc-includes/osclass/helpers/hUsers.php:1125
+#: oc-includes/osclass/helpers/hUsers.php:1143
 #, php-format
 msgid "Expired on %s"
 msgstr ""
 
 #: oc-admin/themes/omega/items/frm.php:314
-#: oc-includes/osclass/helpers/hUsers.php:1131
+#: oc-includes/osclass/helpers/hUsers.php:1149
 #, php-format
 msgid "Expire on %s"
 msgstr ""
@@ -3585,7 +3585,7 @@ msgstr ""
 #: oc-includes/osclass/helpers/hItemStats.php:2368
 #: oc-includes/osclass/helpers/hItemStats.php:2373
 #: oc-includes/osclass/helpers/hItemStats.php:2432
-#: oc-includes/osclass/helpers/hUsers.php:1030
+#: oc-includes/osclass/helpers/hUsers.php:1048
 msgid "Active"
 msgstr ""
 
@@ -3823,6 +3823,7 @@ msgstr ""
 
 #: oc-admin/themes/omega/items/settings.php:302
 #: oc-admin/themes/omega/items/settings.php:312
+#: oc-admin/themes/omega/users/settings.php:143
 msgid "characters"
 msgstr ""
 
@@ -5345,7 +5346,7 @@ msgstr ""
 #: oc-includes/osclass/frm/User.form.class.php:933
 #: oc-includes/osclass/helpers/hItemStats.php:2303
 #: oc-includes/osclass/helpers/hItemStats.php:2432
-#: oc-includes/osclass/helpers/hUsers.php:1032
+#: oc-includes/osclass/helpers/hUsers.php:1050
 msgid "Expired"
 msgstr ""
 
@@ -5682,14 +5683,14 @@ msgstr ""
 #: oc-admin/themes/omega/parts/header.php:16
 #: oc-includes/osclass/frm/Item.form.class.php:480
 #: oc-includes/osclass/frm/Item.form.class.php:492
-#: oc-includes/osclass/helpers/hUsers.php:1089
+#: oc-includes/osclass/helpers/hUsers.php:1107
 msgid "1 day"
 msgstr ""
 
 #: oc-admin/themes/omega/parts/header.php:17
 #: oc-includes/osclass/frm/Item.form.class.php:481
 #: oc-includes/osclass/frm/Item.form.class.php:495
-#: oc-includes/osclass/helpers/hUsers.php:1089
+#: oc-includes/osclass/helpers/hUsers.php:1107
 #, php-format
 msgid "%d days"
 msgstr ""
@@ -6398,9 +6399,9 @@ msgstr ""
 #: oc-admin/themes/omega/reports/settings.php:226
 #: oc-admin/themes/omega/settings/index.php:822
 #: oc-admin/themes/omega/stats/settings.php:435
-#: oc-admin/themes/omega/users/settings.php:191
-#: oc-admin/themes/omega/users/settings.php:200
-#: oc-admin/themes/omega/users/settings.php:246
+#: oc-admin/themes/omega/users/settings.php:201
+#: oc-admin/themes/omega/users/settings.php:210
+#: oc-admin/themes/omega/users/settings.php:256
 msgid "months"
 msgstr ""
 
@@ -6729,12 +6730,12 @@ msgid "Item edit"
 msgstr ""
 
 #: oc-admin/themes/omega/settings/breadcrumbs.php:179
-#: oc-admin/themes/omega/settings/permalinks.php:965
+#: oc-admin/themes/omega/settings/permalinks.php:973
 msgid "User listings"
 msgstr ""
 
 #: oc-admin/themes/omega/settings/breadcrumbs.php:184
-#: oc-admin/themes/omega/settings/permalinks.php:972
+#: oc-admin/themes/omega/settings/permalinks.php:980
 msgid "User alerts"
 msgstr ""
 
@@ -6744,17 +6745,17 @@ msgid "User profile"
 msgstr ""
 
 #: oc-admin/themes/omega/settings/breadcrumbs.php:194
-#: oc-admin/themes/omega/settings/permalinks.php:1000
+#: oc-admin/themes/omega/settings/permalinks.php:1008
 msgid "User change email"
 msgstr ""
 
 #: oc-admin/themes/omega/settings/breadcrumbs.php:199
-#: oc-admin/themes/omega/settings/permalinks.php:993
+#: oc-admin/themes/omega/settings/permalinks.php:1001
 msgid "User change password"
 msgstr ""
 
 #: oc-admin/themes/omega/settings/breadcrumbs.php:204
-#: oc-admin/themes/omega/settings/permalinks.php:1014
+#: oc-admin/themes/omega/settings/permalinks.php:1022
 msgid "User change username"
 msgstr ""
 
@@ -6781,7 +6782,7 @@ msgid "Static page"
 msgstr ""
 
 #: oc-admin/themes/omega/settings/breadcrumbs.php:234
-#: oc-admin/themes/omega/settings/permalinks.php:1024
+#: oc-admin/themes/omega/settings/permalinks.php:1032
 #: oc-includes/osclass/classes/Breadcrumb.php:555
 #: oc-includes/osclass/controller/contact.php:104
 #: oc-includes/osclass/functions.php:2838
@@ -7342,20 +7343,20 @@ msgid "Never"
 msgstr ""
 
 #: oc-admin/themes/omega/settings/index.php:648
-#: oc-includes/osclass/helpers/hUsers.php:919
+#: oc-includes/osclass/helpers/hUsers.php:937
 msgid "Hourly"
 msgstr ""
 
 #: oc-admin/themes/omega/settings/index.php:654
 #: oc-admin/themes/omega/settings/optimization.php:177
-#: oc-includes/osclass/helpers/hUsers.php:922
+#: oc-includes/osclass/helpers/hUsers.php:940
 msgid "Daily"
 msgstr ""
 
 #: oc-admin/themes/omega/settings/index.php:660
 #: oc-admin/themes/omega/settings/optimization.php:73
 #: oc-admin/themes/omega/settings/optimization.php:178
-#: oc-includes/osclass/helpers/hUsers.php:925
+#: oc-includes/osclass/helpers/hUsers.php:943
 msgid "Weekly"
 msgstr ""
 
@@ -7549,7 +7550,7 @@ msgstr ""
 
 #: oc-admin/themes/omega/settings/index.php:845
 #: oc-admin/themes/omega/tools/cleanup.php:155
-#: oc-admin/themes/omega/users/settings.php:242
+#: oc-admin/themes/omega/users/settings.php:252
 msgid "Inactive users"
 msgstr ""
 
@@ -7785,12 +7786,12 @@ msgid "Media settings"
 msgstr ""
 
 #: oc-admin/themes/omega/settings/media.php:353
-#: oc-admin/themes/omega/users/settings.php:267
+#: oc-admin/themes/omega/users/settings.php:277
 msgid "Image uploader library"
 msgstr ""
 
 #: oc-admin/themes/omega/settings/media.php:356
-#: oc-admin/themes/omega/users/settings.php:271
+#: oc-admin/themes/omega/users/settings.php:281
 msgid "Uppy.io"
 msgstr ""
 
@@ -8901,41 +8902,51 @@ msgstr ""
 msgid "User activate alert"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:979
+#: oc-admin/themes/omega/settings/permalinks.php:965
+msgid "User public profile"
+msgstr ""
+
+#: oc-admin/themes/omega/settings/permalinks.php:968
+msgid ""
+"Optional. Own address for public profiles, for example \"u\" gives /u/"
+"username. Leave empty to use the user profile prefix."
+msgstr ""
+
+#: oc-admin/themes/omega/settings/permalinks.php:987
 msgid "User recover"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:986
+#: oc-admin/themes/omega/settings/permalinks.php:994
 msgid "User forgot"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:1007
+#: oc-admin/themes/omega/settings/permalinks.php:1015
 msgid "User change email confirm"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:1021
+#: oc-admin/themes/omega/settings/permalinks.php:1029
 msgid "Other pages structure"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:1031
+#: oc-admin/themes/omega/settings/permalinks.php:1039
 msgid "Feed"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:1053
+#: oc-admin/themes/omega/settings/permalinks.php:1061
 msgid "Configuration of .htaccess file"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:1058
+#: oc-admin/themes/omega/settings/permalinks.php:1066
 msgid ""
 "Permalinks will be functional just thanks to .htaccess file. Your .htaccess "
 "file could not be found! Ask your hosting provider for help."
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:1065
+#: oc-admin/themes/omega/settings/permalinks.php:1073
 msgid "Your .htaccess file"
 msgstr ""
 
-#: oc-admin/themes/omega/settings/permalinks.php:1074
+#: oc-admin/themes/omega/settings/permalinks.php:1082
 msgid "What your .htaccess file should contain:"
 msgstr ""
 
@@ -9217,7 +9228,7 @@ msgstr ""
 #: oc-includes/osclass/classes/datatables/LanguagesDataTable.php:198
 #: oc-includes/osclass/classes/datatables/UsersDataTable.php:427
 #: oc-includes/osclass/helpers/hItemStats.php:2432
-#: oc-includes/osclass/helpers/hUsers.php:1036
+#: oc-includes/osclass/helpers/hUsers.php:1054
 msgid "Inactive"
 msgstr ""
 
@@ -9309,7 +9320,7 @@ msgstr ""
 #: oc-admin/themes/omega/stats/alerts.php:118
 #: oc-admin/themes/omega/stats/overview.php:183
 #: oc-admin/themes/omega/users/alerts.php:28
-#: oc-admin/themes/omega/users/settings.php:166
+#: oc-admin/themes/omega/users/settings.php:176
 #: oc-includes/osclass/classes/AdminMenu.php:79
 #: oc-includes/osclass/classes/AdminMenu.php:93
 #: oc-includes/osclass/helpers/hItemStats.php:2348
@@ -11501,7 +11512,7 @@ msgstr ""
 
 #: oc-admin/themes/omega/users/alerts.php:242
 #: oc-includes/osclass/classes/datatables/AlertsDataTable.php:159
-#: oc-includes/osclass/helpers/hUsers.php:1137
+#: oc-includes/osclass/helpers/hUsers.php:1155
 msgid "Expire"
 msgstr ""
 
@@ -11884,143 +11895,153 @@ msgid "List of terms not allowed in usernames, separated by commas"
 msgstr ""
 
 #: oc-admin/themes/omega/users/settings.php:140
+msgid "Minimum password length"
+msgstr ""
+
+#: oc-admin/themes/omega/users/settings.php:145
+msgid ""
+"Checked on registration, password change, password reset and when an admin "
+"sets a password. Plugins can add more rules."
+msgstr ""
+
+#: oc-admin/themes/omega/users/settings.php:150
 msgid "Public profile page"
 msgstr ""
 
-#: oc-admin/themes/omega/users/settings.php:143
+#: oc-admin/themes/omega/users/settings.php:153
 msgid "Enabled for all registered users"
 msgstr ""
 
-#: oc-admin/themes/omega/users/settings.php:144
+#: oc-admin/themes/omega/users/settings.php:154
 msgid "Enabled for users registered as company only"
 msgstr ""
 
-#: oc-admin/themes/omega/users/settings.php:147
+#: oc-admin/themes/omega/users/settings.php:157
 msgid ""
 "Specify when user public profile URL is enabled, otherwise public profile "
 "page shows 404."
 msgstr ""
 
-#: oc-admin/themes/omega/users/settings.php:152
+#: oc-admin/themes/omega/users/settings.php:162
 msgid "Public profile min. items"
 msgstr ""
 
-#: oc-admin/themes/omega/users/settings.php:156
+#: oc-admin/themes/omega/users/settings.php:166
 msgid "items"
 msgstr ""
 
-#: oc-admin/themes/omega/users/settings.php:158
+#: oc-admin/themes/omega/users/settings.php:168
 msgid ""
 "Public profile page will be enabled just in case user has at least defined "
 "number of items. Default: 0"
 msgstr ""
 
-#: oc-admin/themes/omega/users/settings.php:163
+#: oc-admin/themes/omega/users/settings.php:173
 msgid "Alerts settings"
 msgstr ""
 
-#: oc-admin/themes/omega/users/settings.php:170
+#: oc-admin/themes/omega/users/settings.php:180
 msgid "Alerts enabled"
 msgstr ""
 
-#: oc-admin/themes/omega/users/settings.php:176
+#: oc-admin/themes/omega/users/settings.php:186
 msgid "Guest alert validation"
 msgstr ""
 
-#: oc-admin/themes/omega/users/settings.php:180
+#: oc-admin/themes/omega/users/settings.php:190
 msgid ""
 "Require email confirmation before activating alerts for non-registered users"
 msgstr ""
 
-#: oc-admin/themes/omega/users/settings.php:182
+#: oc-admin/themes/omega/users/settings.php:192
 msgid ""
 "If disabled, guest alerts are activated immediately without a validation "
 "email."
 msgstr ""
 
-#: oc-admin/themes/omega/users/settings.php:187
+#: oc-admin/themes/omega/users/settings.php:197
 msgid "Default expiration"
 msgstr ""
 
-#: oc-admin/themes/omega/users/settings.php:189
+#: oc-admin/themes/omega/users/settings.php:199
 msgid "Logged user alerts expire after"
 msgstr ""
 
-#: oc-admin/themes/omega/users/settings.php:198
+#: oc-admin/themes/omega/users/settings.php:208
 msgid "Non-logged alerts expire after"
 msgstr ""
 
-#: oc-admin/themes/omega/users/settings.php:201
+#: oc-admin/themes/omega/users/settings.php:211
 msgid ""
 "Set to 0 to disable expiration for both logged and non-logged alerts (only "
 "applies if alerts are not set as non-expiring)."
 msgstr ""
 
-#: oc-admin/themes/omega/users/settings.php:206
+#: oc-admin/themes/omega/users/settings.php:216
 msgid "Allow non-expiring alerts"
 msgstr ""
 
-#: oc-admin/themes/omega/users/settings.php:211
+#: oc-admin/themes/omega/users/settings.php:221
 msgid "Allow users to set alerts as non-expiring in user menu"
 msgstr ""
 
-#: oc-admin/themes/omega/users/settings.php:218
+#: oc-admin/themes/omega/users/settings.php:228
 msgid "Expiration controls"
 msgstr ""
 
-#: oc-admin/themes/omega/users/settings.php:223
+#: oc-admin/themes/omega/users/settings.php:233
 msgid "Enable users to change expiration of alert in user menu"
 msgstr ""
 
-#: oc-admin/themes/omega/users/settings.php:230
+#: oc-admin/themes/omega/users/settings.php:240
 msgid "Alerts are non-expiring"
 msgstr ""
 
-#: oc-admin/themes/omega/users/settings.php:235
+#: oc-admin/themes/omega/users/settings.php:245
 msgid "New alerts are created as non-expiring by default"
 msgstr ""
 
-#: oc-admin/themes/omega/users/settings.php:244
+#: oc-admin/themes/omega/users/settings.php:254
 msgid "Unsubscribe alerts if user has not logged in for"
 msgstr ""
 
-#: oc-admin/themes/omega/users/settings.php:247
+#: oc-admin/themes/omega/users/settings.php:257
 msgid "Set to 0 to disable this feature."
 msgstr ""
 
-#: oc-admin/themes/omega/users/settings.php:252
+#: oc-admin/themes/omega/users/settings.php:262
 msgid "Profile picture settings"
 msgstr ""
 
-#: oc-admin/themes/omega/users/settings.php:255
+#: oc-admin/themes/omega/users/settings.php:265
 msgid "Profile pictures"
 msgstr ""
 
-#: oc-admin/themes/omega/users/settings.php:259
+#: oc-admin/themes/omega/users/settings.php:269
 msgid "Enable users to upload their profile picture"
 msgstr ""
 
-#: oc-admin/themes/omega/users/settings.php:262
+#: oc-admin/themes/omega/users/settings.php:272
 msgid ""
 "Required scripts and styles on user profile page will be automatically "
 "loaded."
 msgstr ""
 
-#: oc-admin/themes/omega/users/settings.php:270
+#: oc-admin/themes/omega/users/settings.php:280
 msgid "Cropper.js"
 msgstr ""
 
-#: oc-admin/themes/omega/users/settings.php:274
+#: oc-admin/themes/omega/users/settings.php:284
 msgid ""
 "Select library you want to use for profile pictures. Uppy.io is more "
 "advanced."
 msgstr ""
 
-#: oc-admin/themes/omega/users/settings.php:279
+#: oc-admin/themes/omega/users/settings.php:289
 msgid "Profile picture size"
 msgstr ""
 
-#: oc-admin/themes/omega/users/settings.php:282
+#: oc-admin/themes/omega/users/settings.php:292
 msgid ""
 "The size listed below determine the optimal dimensions in pixels to use when "
 "uploading a profile picture. Format: <b>Width</b> x <b>Height</b>."
@@ -12079,22 +12100,22 @@ msgstr ""
 msgid "expired"
 msgstr ""
 
-#: oc-admin/users.php:846
+#: oc-admin/users.php:848
 #, php-format
 msgid "Are you sure you want to %s the selected ban rules?"
 msgstr ""
 
-#: oc-admin/users.php:1016 oc-admin/users.php:1017 oc-admin/users.php:1018
-#: oc-admin/users.php:1019 oc-admin/users.php:1020 oc-admin/users.php:1024
+#: oc-admin/users.php:1019 oc-admin/users.php:1020 oc-admin/users.php:1021
+#: oc-admin/users.php:1022 oc-admin/users.php:1023 oc-admin/users.php:1027
 #, php-format
 msgid "Are you sure you want to %s the selected users?"
 msgstr ""
 
-#: oc-admin/users.php:1024
+#: oc-admin/users.php:1027
 msgid "Resend the activation to"
 msgstr ""
 
-#: oc-admin/users.php:1024
+#: oc-admin/users.php:1027
 msgid "Resend activation"
 msgstr ""
 
@@ -12322,7 +12343,7 @@ msgid "Unsubscribe date"
 msgstr ""
 
 #: oc-includes/osclass/classes/datatables/AlertsDataTable.php:134
-#: oc-includes/osclass/helpers/hUsers.php:1034
+#: oc-includes/osclass/helpers/hUsers.php:1052
 msgid "Unsubscribed"
 msgstr ""
 
@@ -12910,8 +12931,8 @@ msgstr ""
 #: oc-includes/osclass/controller/ajax.php:389
 #: oc-includes/osclass/controller/ajax.php:434
 #: oc-includes/osclass/controller/ajax.php:457
-#: oc-includes/osclass/controller/user.php:517
-#: oc-includes/osclass/controller/user-non-secure.php:119
+#: oc-includes/osclass/controller/user.php:524
+#: oc-includes/osclass/controller/user-non-secure.php:120
 #, php-format
 msgid "Alert #%d activated by %s"
 msgstr ""
@@ -14714,7 +14735,7 @@ msgid "Listing life"
 msgstr ""
 
 #: oc-includes/osclass/helpers/hItemStats.php:546
-#: oc-includes/osclass/helpers/hUsers.php:928
+#: oc-includes/osclass/helpers/hUsers.php:946
 msgid "Custom"
 msgstr ""
 
@@ -14997,27 +15018,27 @@ msgstr ""
 msgid "Custom %d"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hPreference.php:1952
+#: oc-includes/osclass/helpers/hPreference.php:1971
 msgid ""
 "ImageMagick is active in Media Settings, but this format is not supported by "
 "your ImageMagick build."
 msgstr ""
 
-#: oc-includes/osclass/helpers/hPreference.php:1956
+#: oc-includes/osclass/helpers/hPreference.php:1975
 msgid ""
 "HEIF/HEIC requires ImageMagick with HEIC/HEIF support enabled in Media "
 "Settings."
 msgstr ""
 
-#: oc-includes/osclass/helpers/hPreference.php:1960
+#: oc-includes/osclass/helpers/hPreference.php:1979
 msgid "AVIF requires PHP 8.1+ GD (imageavif) or ImageMagick with AVIF support."
 msgstr ""
 
-#: oc-includes/osclass/helpers/hPreference.php:1964
+#: oc-includes/osclass/helpers/hPreference.php:1983
 msgid "WebP requires GD (imagewebp) or ImageMagick with WebP support."
 msgstr ""
 
-#: oc-includes/osclass/helpers/hPreference.php:1967
+#: oc-includes/osclass/helpers/hPreference.php:1986
 msgid ""
 "This image format is not supported by the active image library on this "
 "server."
@@ -15153,114 +15174,114 @@ msgstr ""
 msgid "Higher price first"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hUsers.php:916
+#: oc-includes/osclass/helpers/hUsers.php:934
 msgid "Instant"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hUsers.php:982
+#: oc-includes/osclass/helpers/hUsers.php:1000
 msgid "1 email notification sent"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hUsers.php:985
+#: oc-includes/osclass/helpers/hUsers.php:1003
 #, php-format
 msgid "%d email notifications sent"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hUsers.php:1053
+#: oc-includes/osclass/helpers/hUsers.php:1071
 msgid "Alert is active and notifications can be sent"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hUsers.php:1055
+#: oc-includes/osclass/helpers/hUsers.php:1073
 msgid "Alert has expired and notifications are no longer sent"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hUsers.php:1057
+#: oc-includes/osclass/helpers/hUsers.php:1075
 msgid "Alert was unsubscribed and notifications are stopped"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hUsers.php:1059
+#: oc-includes/osclass/helpers/hUsers.php:1077
 msgid "Alert is inactive and notifications are not sent"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hUsers.php:1076
-#: oc-includes/osclass/helpers/hUsers.php:1122
+#: oc-includes/osclass/helpers/hUsers.php:1094
+#: oc-includes/osclass/helpers/hUsers.php:1140
 msgid "1 year"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hUsers.php:1076
+#: oc-includes/osclass/helpers/hUsers.php:1094
 #, php-format
 msgid "%d years"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hUsers.php:1081
+#: oc-includes/osclass/helpers/hUsers.php:1099
 msgid "1 month"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hUsers.php:1081
-#: oc-includes/osclass/helpers/hUsers.php:1121
+#: oc-includes/osclass/helpers/hUsers.php:1099
+#: oc-includes/osclass/helpers/hUsers.php:1139
 #, php-format
 msgid "%d months"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hUsers.php:1086
+#: oc-includes/osclass/helpers/hUsers.php:1104
 msgid "1 week"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hUsers.php:1086
+#: oc-includes/osclass/helpers/hUsers.php:1104
 #, php-format
 msgid "%d weeks"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hUsers.php:1118
+#: oc-includes/osclass/helpers/hUsers.php:1136
 msgid "Non-expiring"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hUsers.php:1128
+#: oc-includes/osclass/helpers/hUsers.php:1146
 msgid "Renew alert"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hUsers.php:1134
+#: oc-includes/osclass/helpers/hUsers.php:1152
 #, php-format
 msgid "+%d months"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hUsers.php:1139
+#: oc-includes/osclass/helpers/hUsers.php:1157
 #, php-format
 msgid "-%d months"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hUsers.php:1159
+#: oc-includes/osclass/helpers/hUsers.php:1177
 msgid "Change alert expiration date"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hUsers.php:1166
+#: oc-includes/osclass/helpers/hUsers.php:1184
 #, php-format
 msgid "Change alert expiration date - will expire in %d months"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hUsers.php:1168
+#: oc-includes/osclass/helpers/hUsers.php:1186
 #, php-format
 msgid "Change alert expiration date - shorten by %d months"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hUsers.php:1170
+#: oc-includes/osclass/helpers/hUsers.php:1188
 msgid "Set alert as expired immediately"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hUsers.php:1172
+#: oc-includes/osclass/helpers/hUsers.php:1190
 msgid "Change alert expiration date - will expire in 3 months"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hUsers.php:1174
+#: oc-includes/osclass/helpers/hUsers.php:1192
 msgid "Change alert expiration date - will expire in 1 year"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hUsers.php:1180
+#: oc-includes/osclass/helpers/hUsers.php:1198
 #, php-format
 msgid "Renew alert from today (+%d months)"
 msgstr ""
 
-#: oc-includes/osclass/helpers/hUsers.php:1182
+#: oc-includes/osclass/helpers/hUsers.php:1200
 msgid "Change alert expiration date - alert will never expire"
 msgstr ""
 
@@ -16278,12 +16299,12 @@ msgid ""
 "forums.osclasspoint.com\">ask in our forums</a>."
 msgstr ""
 
-#: oc-includes/osclass/upgrade-funcs.php:1000
+#: oc-includes/osclass/upgrade-funcs.php:1002
 #: oc-includes/osclass/utils.php:3149
 msgid "Osclass has been updated"
 msgstr ""
 
-#: oc-includes/osclass/upgrade-funcs.php:1001
+#: oc-includes/osclass/upgrade-funcs.php:1003
 msgid ""
 "Osclass has been updated successfully. <a href=\"https://"
 "forums.osclasspoint.com\">Need more help?</a>"

@@ -44,8 +44,9 @@ class CWebUserNonSecure extends BaseModel {
         $this->redirectTo($canonical_url, 301);
       }
 
-      $parts = explode(osc_get_preference('rewrite_user_profile'), $this->uri);
-      $last_part = ltrim(end($parts), '/');
+      // part after the profile prefix segment (prefix may be short, for example "u")
+      $last_part = preg_replace('#^.*?(^|/)' . preg_quote(osc_user_public_profile_prefix(), '#') . '/#', '', $this->uri, 1);
+      $last_part = ltrim($last_part, '/');
       
       // Get rid of user name that is first part of param values
       $value_parts = explode('/', $last_part);

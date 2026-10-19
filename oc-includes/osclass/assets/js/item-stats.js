@@ -38,19 +38,18 @@
       if(tok && url.indexOf('octoken=') === -1) {
         url += (url.indexOf('?') === -1 ? '?' : '&') + 'octoken=' + encodeURIComponent(tok);
       }
-      var payload = {
-        itemId: cfg.itemId,
-        octoken: tok,
-        measure: measure
-      };
+      var body = 'itemId=' + encodeURIComponent(cfg.itemId) + '&octoken=' + encodeURIComponent(tok) + '&measure=' + encodeURIComponent(measure);
       if(beacon && navigator.sendBeacon) {
-        var body = 'itemId=' + encodeURIComponent(cfg.itemId) + '&octoken=' + encodeURIComponent(tok) + '&measure=' + encodeURIComponent(measure);
         navigator.sendBeacon(url, new Blob([body], {type: 'application/x-www-form-urlencoded'}));
         return;
       }
-      if(window.jQuery) {
-        window.jQuery.post(url, payload);
-      }
+
+      // plain XHR, works without jQuery
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', url, true);
+      xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+      xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+      xhr.send(body);
     }
 
     function accumulateVisible(useBeacon) {
