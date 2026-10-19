@@ -110,6 +110,13 @@ osc_current_admin_theme_path( 'parts/header.php');
                   </label>
                 </div>
 
+                <div class="form-label-checkbox">
+                  <label>
+                    <input type="checkbox" <?php echo ( osc_item_phone_required() ? 'checked="checked"' : ''); ?> name="item_phone_required" value="1" />
+                    <?php _e('Phone number is required to publish a listing'); ?>
+                  </label>
+                </div>
+
                 <div>
                   <?php printf( __('An user has to wait %s seconds between each listing added'), '<input type="text" class="input-small" name="items_wait_time" value="' . osc_items_wait_time() . '" />'); ?>
                   <div class="help-box">

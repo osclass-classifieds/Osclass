@@ -151,6 +151,7 @@ class ItemActions {
     $flash_error .= (($aItem['price'] !== null && (int)$aItem['price'] < 0) ? _m('Price must be positive number.') . PHP_EOL : '');
     $flash_error .= ((!osc_validate_max($contactName, 35)) ? _m('Name too long.') . PHP_EOL : '');
     $flash_error .= ((!osc_validate_max($contactPhone, 100)) ? _m('Phone too long.') . PHP_EOL : '');
+    $flash_error .= ((osc_item_phone_required() && !$this->is_admin && $contactPhone === '') ? _m('Phone is required.') . PHP_EOL : '');
     $flash_error .= ((!osc_validate_max($contactOther, 100)) ? _m('Other contact information too long.') . PHP_EOL : '');
     $flash_error .= ((!osc_validate_email($contactEmail)) ? _m('The email is not valid') . PHP_EOL : '');
     $flash_error .= ((!osc_validate_text($aItem['countryName'], 2, false)) ? _m('Country too short.') . PHP_EOL : '');
@@ -773,6 +774,7 @@ class ItemActions {
     $flash_error .= ((!osc_validate_max($aItem['cityArea'] ?? '', 50)) ? _m('Municipality too long.') . PHP_EOL : '');
     $flash_error .= ((!osc_validate_text($aItem['address'] ?? '', 3, false)) ? _m('Address too short.') . PHP_EOL : '');
     $flash_error .= ((!osc_validate_max($aItem['address'] ?? '', 100)) ? _m('Address too long.') . PHP_EOL : '');
+    $flash_error .= ((osc_item_phone_required() && !$this->is_admin && isset($aItem['contactPhone']) && trim((string)$aItem['contactPhone']) === '') ? _m('Phone is required.') . PHP_EOL : '');
 
     $_meta = Field::newInstance()->findByCategory($aItem['catId'] ?? '');
     $meta = Params::getParam('meta');

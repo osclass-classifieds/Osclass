@@ -555,6 +555,7 @@ class CAdminItems extends AdminSecBaseModel {
         $loggedUserItemValidation = (($loggedUserItemValidation != '') ? true : false);
         $regUserPost = Params::getParam('reg_user_post');
         $regUserPost = (($regUserPost != '') ? true : false);
+        $itemPhoneRequired = (Params::getParam('item_phone_required') != '' ? true : false);
         $canDeactivateItems = Params::getParam('can_deactivate_items');
         $canDeactivateItems = (($canDeactivateItems != '') ? true : false);
         $notifyNewItem = Params::getParam('notify_new_item');
@@ -655,6 +656,7 @@ class CAdminItems extends AdminSecBaseModel {
         $iUpdated += osc_set_preference('logged_user_item_validation', $loggedUserItemValidation);
         $iUpdated += osc_set_preference('can_deactivate_items', $canDeactivateItems);
         $iUpdated += osc_set_preference('reg_user_post', $regUserPost);
+        $iUpdated += osc_set_preference('item_phone_required', $itemPhoneRequired);
         $iUpdated += osc_set_preference('notify_new_item', $notifyNewItem);
         $iUpdated += osc_set_preference('notify_contact_item', $notifyContactItem);
         $iUpdated += osc_set_preference('notify_contact_friends', $notifyContactFriends);

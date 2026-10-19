@@ -1492,6 +1492,15 @@ function osc_reg_user_post() {
 }
 
 /**
+ * Gets if the contact phone is required when a listing is published or edited
+ *
+ * @return boolean
+ */
+function osc_item_phone_required() {
+  return getBoolPreference('item_phone_required');
+}
+
+/**
  * Gets if the prices are o not enabled on the item's form
  *
  * @return boolean
