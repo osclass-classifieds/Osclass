@@ -9,6 +9,9 @@ Osclass 8.4.1
 - Report friendly URLs (report/item, report/user, report/view) work right after upgrade. No need to re-save Permalinks.
 - New Listing setting: require a phone number to publish a listing. Off by default; admins are not affected. Registration never requires a phone.
 - Expired listings now return 410 Gone to visitors and search engines, so they drop out of search results. Owners and admins still see them. Inactive, unvalidated and blocked listings now return 404 instead of 400.
+- Saving a category without moving it works again in trees deeper than the category level limit.
+- Exporting or saving a core translation updates its index.php with the current Osclass version and author.
+- Word length fields in Search settings are no longer stretched.
 
 
 Osclass 8.4.0

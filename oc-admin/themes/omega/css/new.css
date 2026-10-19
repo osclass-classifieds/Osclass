@@ -526,7 +526,7 @@ select[multiple], body .mb-box select[multiple] {height:auto;-webkit-appearance:
 
 .help-box.hlp1 {padding-left: 170px;}
 .inpt-desc, .input-desc, .inp-desc {display: inline-block; float: left; cursor: default; height: 31px; position: relative; z-index: 2; margin-left: -3px; padding: 6px 8px; font-size: 13px; font-weight: normal; line-height: 15px; color: #32373c; text-align: center; background-color: #fff; border: 1px solid #7e8993; border-top-right-radius: 3px; border-bottom-right-radius: 3px;}
-input[type="text"][name="items_wait_time"], input[type="text"][name="numImages@items"], input[type="text"][name="renewal_limit"], input[type="number"].in-text, input[type="text"].in-text {float: none; display: inline-block; margin: 0 5px; min-width:40px;width: 40px; text-align: center;}
+input[type="text"][name="items_wait_time"], input[type="text"][name="numImages@items"], input[type="text"][name="renewal_limit"], input[type="text"][name="latest_searches_min_length"], input[type="text"][name="latest_searches_max_length"], input[type="number"].in-text, input[type="text"].in-text {float: none; display: inline-block; margin: 0 5px; min-width:40px;width: 40px; text-align: center;}
 input[type="text"][name="mailserver_ssl"] {float:none;margin-right:10px;margin-bottom:6px;}
 input#custom_queries {float:none;margin-right:1px;margin-bottom:6px;}
 hr {border:none;border-top:1px solid rgba(0,0,0,0.1);margin-bottom:20px;}
