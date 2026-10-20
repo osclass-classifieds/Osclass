@@ -818,13 +818,8 @@ class CWebItem extends BaseModel {
 
         $isOwnerOrAdmin = (($this->userId == $item['fk_i_user_id']) && ($this->userId > 0)) || osc_is_admin_user_logged_in();
 
-        if(osc_isExpired($item['dt_expiration'])) {
-          // expired listing is gone for visitors and bots, owner and admin can still see it
-          if(!$isOwnerOrAdmin) {
-            $this->do410();
-            return;
-          }
-
+        // status codes: expired = 200 (page stays, can be renewed), deleted, deactivated, blocked, spam = 410
+        if(osc_isExpired($item['dt_expiration']) && $isOwnerOrAdmin) {
           osc_add_flash_warning_message(_m("The listing has expired. Please renew it in order to make it public"));
         }
 
@@ -838,12 +833,11 @@ class CWebItem extends BaseModel {
             }
 
           } else {
-            // may be validated later, so 404 instead of 410
-            $this->do404();
+            $this->do410();
             return;
           }
 
-        } else if($item['b_enabled'] == 0) {
+        } else if($item['b_enabled'] == 0 || $item['b_spam'] == 1) {
           if(osc_is_admin_user_logged_in()) {
             osc_add_flash_warning_message(_m("The listing has not been enabled. Enable it to make it public"));
 
@@ -851,7 +845,7 @@ class CWebItem extends BaseModel {
             osc_add_flash_warning_message(_m("The listing has been blocked or is awaiting moderation from the admin"));
 
           } else {
-            $this->do404();
+            $this->do410();
             return;
           }
         }
