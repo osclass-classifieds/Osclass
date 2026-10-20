@@ -333,6 +333,9 @@ class UserActions {
       $input['dt_access_date'] = $date;
       $input['s_secret'] = osc_genRandomPassword(32);
       $input['s_access_ip'] = osc_get_ip(); //Params::getServerParam('REMOTE_ADDR');
+
+      // Preferred language for emails: the one the user registers in (admin-created users get the site default)
+      $input['fk_c_locale_code'] = (OC_ADMIN ? osc_language() : osc_current_user_locale());
     } else {
       $input['dt_mod_date'] = date('Y-m-d H:i:s');
 
