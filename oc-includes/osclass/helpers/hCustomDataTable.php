@@ -39,8 +39,10 @@ CONTROLLER (list action):
     'status_columns' => true,
     'bulk_actions' => array('input_name' => 'id[]', 'value_key' => 'pk_i_id'),
     'columns' => array(
-      array('id' => 'title', 'label' => __('Title'), 'sortable' => true, 'sort_column' => 's_title', 'source' => 's_title', 'priority' => 4),
-      array('id' => 'date', 'label' => __('Date'), 'sortable' => true, 'sort_column' => 'dt_date', 'source' => 'dt_date', 'priority' => 5),
+      // 'width' = percent of the table in steps of 5 (5-95) or 'min' (as narrow as the content);
+      // give every column a width, the widths should add up to about 100. 'class' = extra CSS class, e.g. text-center.
+      array('id' => 'title', 'label' => __('Title'), 'width' => 60, 'sortable' => true, 'sort_column' => 's_title', 'source' => 's_title', 'priority' => 4),
+      array('id' => 'date', 'label' => __('Date'), 'width' => 'min', 'sortable' => true, 'sort_column' => 'dt_date', 'source' => 'dt_date', 'priority' => 5),
     ),
     'callbacks' => array(
       'actions_column' => 'title',
@@ -54,8 +56,9 @@ CONTROLLER (list action):
         );
       },
       'process_row' => function($raw, $table) {
+        // the class colours the status cell and the row border (see osc_custom_datatable_status_cells)
         return array_merge(
-          osc_custom_datatable_status_cells(__('Active')),
+          osc_custom_datatable_status_cells(__('Active'), array('class' => 'status-active')),
           array(
             'title' => osc_esc_html($raw['s_title']),
             'date' => osc_format_date($raw['dt_date']),
@@ -99,6 +102,7 @@ VIEW (admin/list.php) — toolbar, search, bulk, table, pagination:
   $aRawRows = __get('aRawRows');
 
   <div class="table-toolbar float-right">
+    <?php osc_custom_datatable_toolbar_filters(array('fields' => array('status' => array('type' => 'select', 'options' => array('' => __('All statuses'), 'a' => __('Active')))), 'reset_url' => $listUrl)); ?>
     <?php osc_custom_datatable_toolbar_per_page(array('sizes' => array(10, 25, 50, 100))); ?>
     <?php osc_custom_datatable_toolbar_search(array(
       'hidden_params' => array('page' => 'plugins', 'action' => 'list'),
@@ -240,14 +244,22 @@ function osc_custom_datatable_bulk_checkbox($value, $options = array()) {
 
 
 /**
- * Status column pair for datatable rows.
+ * Status column pair for datatable rows (needs 'status_columns' => true).
+ *
+ * The class colours the status cell and the left border of the row, the same as in Listings.
+ * Ready classes: status-active (teal), status-success (green), status-info (blue),
+ * status-warning (yellow), status-premium (yellow), status-inactive (grey),
+ * status-blocked (red), status-spam (dark grey), status-expired (white).
+ * Need another colour? Add .status-{name} for td.col-status-border and td.col-status
+ * in oc-admin/themes/omega/css/new.css, next to the others.
  *
  * @param string $statusLabel  Visible status text
  * @param array  $options {
+ *   @type string $class   One of the status-* classes above (default none = no colour)
  *   @type string $border  status-border cell content (default empty)
  * }
  *
- * @return array  Keys status-border and status
+ * @return array  Keys status-border, status and status-class
  */
 function osc_custom_datatable_status_cells($statusLabel, $options = array()) {
   $options = (is_array($options) ? $options : array());
@@ -255,7 +267,8 @@ function osc_custom_datatable_status_cells($statusLabel, $options = array()) {
 
   return array(
     'status-border' => $border,
-    'status' => $statusLabel
+    'status' => $statusLabel,
+    'status-class' => (isset($options['class']) ? $options['class'] : '')
   );
 }
 
@@ -559,7 +572,7 @@ function osc_custom_datatable_toolbar_per_page($options = array()) {
     $current = 25;
   }
 
-  echo '<form method="get" action="' . osc_esc_html($actionUrl) . '" class="inline nocsrf">' . PHP_EOL;
+  echo '<form method="get" action="' . osc_esc_html($actionUrl) . '" class="inline nocsrf toolbar-form">' . PHP_EOL;
   echo osc_custom_datatable_hidden_get_params($exclude);
 
   echo '<select name="iDisplayLength" class="select-box-extra select-box-medium float-left" onchange="this.form.submit();">' . PHP_EOL;
@@ -573,6 +586,62 @@ function osc_custom_datatable_toolbar_per_page($options = array()) {
     echo '<option value="' . $size . '"' . ($current == $size ? ' selected' : '') . '>' . osc_esc_html($label) . '</option>' . PHP_EOL;
   }
   echo '</select></form>' . PHP_EOL;
+}
+
+
+/**
+ * Filter toolbar form (GET): dropdowns and short text fields with a Filter button.
+ * Put it before osc_custom_datatable_toolbar_per_page(). The values come back as GET
+ * params named like the fields, read them in the fetch callback with Params::getParam().
+ *
+ * @param array $options {
+ *   @type array  $fields  name => array(
+ *                           'type' => 'select' | 'text',
+ *                           'options' => value => label (select; the first one is the "all" choice),
+ *                           'placeholder' => text field hint,
+ *                           'class' => text field size, input-small | input-medium (default input-medium)
+ *                         )
+ *   @type string $reset_url   Link of the Reset filters button, shown while any field has a value
+ *   @type string $action_url
+ * }
+ */
+function osc_custom_datatable_toolbar_filters($options = array()) {
+  $options = (is_array($options) ? $options : array());
+  $fields = (isset($options['fields']) && is_array($options['fields']) ? $options['fields'] : array());
+  $actionUrl = (isset($options['action_url']) ? $options['action_url'] : osc_admin_base_url(true));
+  $active = false;
+
+  foreach($fields as $name => $field) {
+    if((string)Params::getParam($name) !== '') {
+      $active = true;
+    }
+  }
+
+  echo '<form method="get" action="' . osc_esc_html($actionUrl) . '" class="inline nocsrf toolbar-form">' . PHP_EOL;
+  echo osc_custom_datatable_hidden_get_params(array_merge(array_keys($fields), array('iPage')));
+
+  if($active && isset($options['reset_url']) && $options['reset_url'] != '') {
+    echo '<a href="' . osc_esc_html($options['reset_url']) . '" class="btn">' . __('Reset filters') . '</a>' . PHP_EOL;
+  }
+
+  foreach($fields as $name => $field) {
+    $value = (string)Params::getParam($name);
+
+    if(isset($field['type']) && $field['type'] == 'select') {
+      echo '<select name="' . osc_esc_html($name) . '" class="select-box-extra">' . PHP_EOL;
+      $choices = (isset($field['options']) && is_array($field['options']) ? $field['options'] : array());
+      foreach($choices as $k => $label) {
+        echo '<option value="' . osc_esc_html($k) . '"' . ((string)$k === $value ? ' selected="selected"' : '') . '>' . osc_esc_html($label) . '</option>' . PHP_EOL;
+      }
+      echo '</select>' . PHP_EOL;
+    } else {
+      $size = (isset($field['class']) && $field['class'] == 'input-small' ? 'input-small' : 'input-medium');
+      echo '<input type="text" name="' . osc_esc_html($name) . '" class="input-text input-actions ' . $size . '" value="' . osc_esc_html($value) . '" placeholder="' . osc_esc_html(isset($field['placeholder']) ? $field['placeholder'] : '') . '" />' . PHP_EOL;
+    }
+  }
+
+  echo '<input type="submit" class="btn" value="' . osc_esc_html(__('Filter')) . '" />' . PHP_EOL;
+  echo '</form>' . PHP_EOL;
 }
 
 
@@ -596,7 +665,7 @@ function osc_custom_datatable_toolbar_search($options = array()) {
   $placeholder = (isset($options['placeholder']) ? $options['placeholder'] : __('Search'));
   $searchValue = Params::getParam('sSearch');
 
-  echo '<form method="get" action="' . osc_esc_html($actionUrl) . '" class="inline nocsrf">' . PHP_EOL;
+  echo '<form method="get" action="' . osc_esc_html($actionUrl) . '" class="inline nocsrf toolbar-form">' . PHP_EOL;
 
   if(isset($options['hidden_params']) && is_array($options['hidden_params'])) {
     foreach($options['hidden_params'] as $key => $value) {
@@ -720,7 +789,8 @@ function osc_custom_datatable_print_table($aData, $aRawRows = null, $options = a
   $rows = (isset($aData['aRows']) ? $aData['aRows'] : array());
   $sort = Params::getParam('sort');
   $direction = Params::getParam('direction');
-  $rowClassFilter = (isset($options['row_class_filter']) ? $options['row_class_filter'] : __get('datatable_row_class_filter'));
+  $columnClasses = (isset($aData['aColumnClasses']) && is_array($aData['aColumnClasses']) ? $aData['aColumnClasses'] : array());
+  $rowClassFilter = (isset($options['row_class_filter']) ? $options['row_class_filter'] : (isset($aData['sRowClassFilter']) ? $aData['sRowClassFilter'] : __get('datatable_row_class_filter')));
 
   if($rowClassFilter == '') {
     $rowClassFilter = 'datatable_custom_class';
@@ -731,7 +801,8 @@ function osc_custom_datatable_print_table($aData, $aRawRows = null, $options = a
     $sourceCol = (isset($columnSources[$k]) ? $columnSources[$k] : '');
     $isSortable = ((in_array($k, $sortableColumns, true) || strpos((string)$v, 'sort=') !== false) ? 'is-sortable' : '');
     $sortClass = ($sort == $k ? ($direction == 'desc' ? 'sort-desc' : 'sort-asc') : '');
-    echo '<th class="col-' . osc_esc_html($k) . ' ' . $isSortable . ' ' . $sortClass . '" data-source-col="' . osc_esc_html($sourceCol) . '">' . $v . '</th>';
+    $extraClass = (isset($columnClasses[$k]) ? $columnClasses[$k] : '');
+    echo '<th class="col-' . osc_esc_html($k) . ' ' . $isSortable . ' ' . $sortClass . ' ' . osc_esc_html($extraClass) . '" data-source-col="' . osc_esc_html($sourceCol) . '">' . $v . '</th>';
   }
   echo '</tr></thead><tbody>';
 
@@ -741,7 +812,7 @@ function osc_custom_datatable_print_table($aData, $aRawRows = null, $options = a
       $trClass = implode(' ', osc_apply_filter($rowClassFilter, array(), $raw, $row));
       echo '<tr class="' . osc_esc_html($trClass) . '">';
       foreach($row as $k => $v) {
-        echo '<td class="col-' . osc_esc_html($k) . '">' . $v . '</td>';
+        echo '<td class="col-' . osc_esc_html($k) . (isset($columnClasses[$k]) ? ' ' . osc_esc_html($columnClasses[$k]) : '') . '">' . $v . '</td>';
       }
       echo '</tr>';
     }
