@@ -1080,7 +1080,16 @@ table {max-width:100%;background-color:transparent;border-spacing:0}
 .table .status-active td.col-status {background:#9ae1ec;color:#1f7a83}
 .table .status-expired td.col-status-border {background:#000}
 .table .status-expired td.col-status {background:#fff;color:#797979}
-.table td.col-status {font-size:13px;}
+.table .status-info td.col-status-border {background:#2a7ab8}
+.table .status-info td.col-status {background:#c9e2f5;color:#1d5c8f}
+.table .status-success td.col-status-border {background:#2e9d4f}
+.table .status-success td.col-status {background:#b9e7c6;color:#1b6b34}
+.table td.col-status {font-size:13px;white-space:nowrap;}
+.table th.col-status-border {width:1px;padding:0;border:0}
+.table .w-min {width:1%;white-space:nowrap}
+.table .w-5 {width:5%}.table .w-10 {width:10%}.table .w-15 {width:15%}.table .w-20 {width:20%}.table .w-25 {width:25%}.table .w-30 {width:30%}.table .w-35 {width:35%}.table .w-40 {width:40%}.table .w-45 {width:45%}.table .w-50 {width:50%}.table .w-55 {width:55%}.table .w-60 {width:60%}.table .w-65 {width:65%}.table .w-70 {width:70%}.table .w-75 {width:75%}.table .w-80 {width:80%}.table .w-85 {width:85%}.table .w-90 {width:90%}.table .w-95 {width:95%}
+.table .text-right {text-align:right}
+.table-toolbar .toolbar-form {float:left;margin-left:8px}
 .even {background:#f9f9f9}
 .page-tools.action-info .grid-row.grid-50:last-child .row-wrapper {margin-right:0;}
 .page-tools.action-debug .grid-row.grid-60:last-child .row-wrapper {margin-right:0;}
