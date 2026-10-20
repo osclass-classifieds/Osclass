@@ -447,7 +447,7 @@ function fn_email_user_forgot_password($user, $password_url) {
   if(!isset($user['pk_i_id'])) { return false; }
 
   $aPage = Page::newInstance()->findByInternalName('email_user_forgot_password');
-  $locale = osc_current_user_locale();
+  $locale = (osc_user_def_locale_code($user['pk_i_id']) <> '' ? osc_user_def_locale_code($user['pk_i_id']) : osc_current_user_locale());
 
   if(isset($aPage['locale'][$locale]['s_title'])) {
     $content = $aPage['locale'][$locale];
@@ -496,7 +496,7 @@ function fn_email_user_registration($user) {
   if(!isset($user['pk_i_id'])) { return false; }
 
   $pageManager = new Page();
-  $locale = osc_current_user_locale();
+  $locale = (osc_user_def_locale_code($user['pk_i_id']) <> '' ? osc_user_def_locale_code($user['pk_i_id']) : osc_current_user_locale());
   $aPage = $pageManager->findByInternalName('email_user_registration');
 
   if(isset($aPage['locale'][$locale]['s_title'])) {
@@ -542,7 +542,7 @@ osc_add_hook('hook_email_user_registration', 'fn_email_user_registration');
 function fn_email_new_email($new_email, $validation_url) {
   if($new_email == '') { return false; }
 
-  $locale = osc_current_user_locale();
+  $locale = (osc_is_web_user_logged_in() && osc_user_def_locale_code(osc_logged_user_id()) <> '' ? osc_user_def_locale_code(osc_logged_user_id()) : osc_current_user_locale());
   $aPage = Page::newInstance()->findByInternalName('email_new_email');
 
   if(isset($aPage['locale'][$locale]['s_title'])) {
@@ -598,7 +598,7 @@ function fn_email_user_validation($user, $input) {
   if(!isset($user['pk_i_id'])) { return false; }
 
   $mPages = new Page();
-  $locale = osc_current_user_locale();
+  $locale = (osc_user_def_locale_code($user['pk_i_id']) <> '' ? osc_user_def_locale_code($user['pk_i_id']) : osc_current_user_locale());
   $aPage = $mPages->findByInternalName('email_user_validation');
 
   if(isset($aPage['locale'][$locale]['s_title'])) {
