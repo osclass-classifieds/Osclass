@@ -2258,3 +2258,5 @@ input[readonly], textarea[readonly], select[readonly] {opacity:0.7;cursor:defaul
 #mail-queue .table td.col-error {max-width:240px;word-break:break-word;}
 #mail-queue .mq-detail .form-controls {word-break:break-word;}
 #mail-queue .mq-body {display:block;width:100%;min-height:520px;border:1px solid #ddd;background:#fff;}
+#emails-toolbar .emails-filter {float:left;display:flex;align-items:center;gap:6px;margin:0 6px 0 4px;}
+#emails-toolbar .emails-filter select {float:none;}

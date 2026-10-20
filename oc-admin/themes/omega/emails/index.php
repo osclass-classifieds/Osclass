@@ -91,11 +91,18 @@ $columns = $aData['aColumns'];
 $columnSources = (isset($aData['aColumnSources']) ? $aData['aColumnSources'] : array());
 $sortableColumns = (isset($aData['aSortableColumns']) ? $aData['aSortableColumns'] : array());
 $rows = $aData['aRows'];
+$filters = __get('aFilters');
+$filters = (is_array($filters) ? $filters : array());
 $hasActiveFilters = false;
 $filterExclude = array('page', 'action', 'iDisplayLength', 'sort', 'direction', 'iPage');
 
 foreach(Params::getParamsAsArray('get') as $key => $value) {
   if(in_array($key, $filterExclude, true)) {
+    continue;
+  }
+
+  // Plugin filter left at its default is not an active filter
+  if(isset($filters[$key]['default']) && !is_array($value) && (string)$value === (string)$filters[$key]['default']) {
     continue;
   }
 
@@ -139,6 +146,19 @@ osc_current_admin_theme_path( 'parts/header.php' );
       <form method="get" action="<?php echo osc_admin_base_url(true); ?>" id="shortcut-filters" class="inline nocsrf">
         <input type="hidden" name="page" value="emails" />
         <input type="hidden" name="iDisplayLength" value="<?php echo (int)$iDisplayLength; ?>" />
+        <?php foreach($filters as $name => $filter) { ?>
+          <?php $choices = (isset($filter['options']) && is_array($filter['options']) ? $filter['options'] : array()); ?>
+          <?php if(count($choices) > 0) { ?>
+            <label class="emails-filter">
+              <?php if(isset($filter['label']) && $filter['label'] != '') { ?><span><?php echo osc_esc_html($filter['label']); ?></span><?php } ?>
+              <select name="<?php echo osc_esc_html($name); ?>" class="select-box-extra" onchange="this.form.submit();">
+                <?php foreach($choices as $k => $label) { ?>
+                  <option value="<?php echo osc_esc_html($k); ?>" <?php if((string)$k === (string)Params::getParam($name)) { echo 'selected="selected"'; } ?>><?php echo osc_esc_html($label); ?></option>
+                <?php } ?>
+              </select>
+            </label>
+          <?php } ?>
+        <?php } ?>
         <input id="fPattern" type="text" name="sSearch" value="<?php echo osc_esc_html(Params::getParam('sSearch')); ?>" class="input-text input-actions" placeholder="<?php echo osc_esc_html(__('Search template')); ?>" />
         <input type="submit" class="btn submit-right" value="<?php echo osc_esc_html(__('Find')); ?>">
       </form>

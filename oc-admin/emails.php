@@ -119,6 +119,16 @@ class CAdminEmails extends AdminSecBaseModel {
         }
         Params::setParam('iPage', $p_iPage);
 
+        // Plugins can add dropdown filters above the list: name => array('label', 'options' => value => label, 'default')
+        // The default applies while the param is not in the URL, read the value in admin_emails_list with Params::getParam()
+        $filters = osc_apply_filter('admin_emails_filters', array());
+        $filters = (is_array($filters) ? $filters : array());
+        foreach($filters as $name => $filter) {
+          if((string)Params::getParam($name) === '' && isset($filter['default'])) {
+            Params::setParam($name, (string)$filter['default']);
+          }
+        }
+
         $params = Params::getParamsAsArray();
         $emailTemplatesDataTable = new EmailTemplatesDataTable();
         $emailTemplatesDataTable->table($params);
@@ -143,6 +153,7 @@ class CAdminEmails extends AdminSecBaseModel {
         $this->_exportVariableToView('aData', $aData);
         $this->_exportVariableToView('aRawRows', $emailTemplatesDataTable->rawRows());
         $this->_exportVariableToView('iDisplayLength', Params::getParam('iDisplayLength'));
+        $this->_exportVariableToView('aFilters', $filters);
 
         $this->doView("emails/index.php");
     }
