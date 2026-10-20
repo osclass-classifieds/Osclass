@@ -35,6 +35,7 @@ class CustomDataTable extends DataTable {
   private $listParams = array();
   private $orderBy = array('column_name' => '', 'type' => 'DESC');
   private $rowClassRegistered = false;
+  private $columnClasses = array();
 
   /**
    * @param array $options
@@ -125,7 +126,8 @@ class CustomDataTable extends DataTable {
   }
 
   /**
-   * Default row_class filter handler when callbacks.row_class is set.
+   * Row class filter handler: the status class set by osc_custom_datatable_status_cells(),
+   * then callbacks.row_class when it is set.
    *
    * @param array $class
    * @param array $rawRow
@@ -135,6 +137,11 @@ class CustomDataTable extends DataTable {
    */
   public function row_class($class, $rawRow, $row) {
     $class = (is_array($class) ? $class : array());
+
+    if(isset($rawRow['_status_class'])) {
+      $class[] = $rawRow['_status_class'];
+    }
+
     $callback = $this->getCallback('row_class');
 
     if(is_callable($callback)) {
@@ -142,6 +149,19 @@ class CustomDataTable extends DataTable {
     }
 
     return $class;
+  }
+
+  /**
+   * Table payload plus the CSS classes of the columns and the row class filter name,
+   * so the print helpers need no extra view variables.
+   *
+   * @return array
+   */
+  public function getData() {
+    $data = parent::getData();
+    $data['aColumnClasses'] = $this->columnClasses;
+    $data['sRowClassFilter'] = 'datatable_' . $this->getConfigId() . '_class';
+    return $data;
   }
 
   /**
@@ -244,6 +264,7 @@ class CustomDataTable extends DataTable {
 
     $this->clearSortColumns();
     $this->clearSourceColumns();
+    $this->columnClasses = array();
 
     $defaultSort = (isset($this->config['default_sort']) && is_array($this->config['default_sort']) ? $this->config['default_sort'] : array());
     if(isset($defaultSort['key']) && $defaultSort['key'] != '') {
@@ -257,6 +278,8 @@ class CustomDataTable extends DataTable {
       $this->addColumn('status', __('Status'), $priority++);
       $this->addSourceColumn('status-border', '');
       $this->addSourceColumn('status', 'status');
+      $this->columnClasses['status-border'] = 'w-min';
+      $this->columnClasses['status'] = 'w-min';
     }
 
     $bulk = $this->config['bulk_actions'];
@@ -267,6 +290,7 @@ class CustomDataTable extends DataTable {
       }
       $this->addColumn('bulkactions', $checkAll, $priority++);
       $this->addSourceColumn('bulkactions', '');
+      $this->columnClasses['bulkactions'] = 'w-min';
     }
 
     $columns = (isset($this->config['columns']) && is_array($this->config['columns']) ? $this->config['columns'] : array());
@@ -290,6 +314,22 @@ class CustomDataTable extends DataTable {
 
       if(isset($column['source'])) {
         $this->addSourceColumn($colId, $column['source']);
+      }
+
+      // width: percent in steps of 5 (5-95) or 'min' (as narrow as the content); class: extra CSS classes
+      $classes = array();
+      if(isset($column['width'])) {
+        if($column['width'] === 'min') {
+          $classes[] = 'w-min';
+        } else if((int)$column['width'] > 0) {
+          $classes[] = 'w-' . max(5, min(95, (int)(round((int)$column['width'] / 5) * 5)));
+        }
+      }
+      if(isset($column['class'])) {
+        $classes[] = trim(preg_replace('/[^a-z0-9_\- ]/i', '', (string)$column['class']));
+      }
+      if(count($classes) > 0) {
+        $this->columnClasses[$colId] = trim(implode(' ', $classes));
       }
 
       $header = '';
@@ -328,6 +368,14 @@ class CustomDataTable extends DataTable {
     foreach($rows as $rawRow) {
       $row = call_user_func($processRow, $rawRow, $this);
       $row = (is_array($row) ? $row : array());
+
+      // status class from osc_custom_datatable_status_cells(): becomes the row class (row_class filter)
+      if(isset($row['status-class'])) {
+        if(is_array($rawRow) && preg_match('/^status-[a-z0-9_\-]+$/', (string)$row['status-class'])) {
+          $rawRow['_status_class'] = (string)$row['status-class'];
+        }
+        unset($row['status-class']);
+      }
 
       $row = $this->applyBulkCheckbox($row, $rawRow);
       $row = $this->applyRowActions($row, $rawRow);
@@ -441,17 +489,15 @@ class CustomDataTable extends DataTable {
   }
 
   /**
-   * Register datatable_{id}_class filter when row_class callback exists.
+   * Register the datatable_{id}_class filter (status class and callbacks.row_class).
    */
   private function registerRowClassFilter() {
     if($this->rowClassRegistered) {
       return;
     }
 
-    if(is_callable($this->getCallback('row_class'))) {
-      osc_add_filter('datatable_' . $this->getConfigId() . '_class', array(&$this, 'row_class'));
-      $this->rowClassRegistered = true;
-    }
+    osc_add_filter('datatable_' . $this->getConfigId() . '_class', array(&$this, 'row_class'));
+    $this->rowClassRegistered = true;
   }
 }
 
