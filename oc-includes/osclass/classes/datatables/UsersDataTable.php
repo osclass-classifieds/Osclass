@@ -369,6 +369,12 @@ class UsersDataTable extends DataTable {
       $this->withFilters = true;
     }
 
+    // plugins can add conditions (return same array to leave unchanged)
+    $before = count($this->conditions);
+    $this->conditions = osc_apply_filter('users_datatable_conditions', $this->conditions, $params);
+    if(count($this->conditions) > $before) {
+      $this->withFilters = true;
+    }
 
     // set start and limit using iPage param
     $start = ($this->iPage - 1) * $params['iDisplayLength'];

@@ -341,7 +341,7 @@ osc_current_admin_theme_path('parts/header.php');
 <div class="settings-user">
   <?php if($aux['edit'] && $user['b_enabled'] != 0 && $user['b_active'] != 0 && osc_user_public_profile_is_enabled($user) === false) { ?>
     <div class="flashmessage flashmessage-warning">
-      <p class="info"><?php _e('Public profile for this user is not enabled and return 404 page - based on User > Settings configuration.'); ?></p>
+      <p class="info"><?php echo osc_apply_filter('admin_user_public_profile_notice', __('Public profile for this user is not enabled and return 404 page - based on User > Settings configuration.'), $user); ?></p>
     </div>
   <?php } ?>
 
