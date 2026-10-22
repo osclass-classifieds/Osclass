@@ -171,6 +171,18 @@ ul.tabbernav li.tabberactive a:hover {}
 .tabberlive > button {margin-top:10px;}
 .additional-info .tabberlive .tabbertab {padding:0;background:transparent;}
 
+/* LANGUAGE PILLS (osc_admin_locale_fields, or any .osc-ltabs box with [data-ltab] parts) */
+.osc-ltabs {clear:both;}
+.osc-ltabs-nav {display:inline-flex;flex-wrap:wrap;gap:3px;max-width:100%;padding:3px;margin:0 0 14px 0;background:#f0f0f1;border:1px solid #dcdcde;border-radius:6px;box-sizing:border-box;vertical-align:top;}
+.osc-ltabs-nav button {display:inline-flex;align-items:center;gap:7px;height:28px;padding:0 12px;margin:0;border:1px solid transparent;border-radius:4px;background:transparent;color:#50575e;font:inherit;font-size:13px;line-height:26px;cursor:pointer;white-space:nowrap;box-shadow:none;}
+.osc-ltabs-nav button:hover {color:#1d2327;background:rgba(255,255,255,0.7);}
+.osc-ltabs-nav button[aria-selected="true"] {background:#fff;border-color:#c3c4c7;color:#1d2327;font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,0.06);}
+.osc-ltabs-nav button:focus-visible {outline:2px solid #007cba;outline-offset:1px;}
+.form-horizontal .osc-ltabs-row .form-label {padding-top:9px;}
+.form-horizontal .osc-ltabs-row .osc-ltabs-nav, td > .osc-ltabs-nav {margin-bottom:0;}
+.osc-ltabs textarea {width:100%;max-width:720px;box-sizing:border-box;}
+.osc-ltab-off {display:none !important;}
+
 !.mb-box .mb-head select.mb-select-locale {margin:-10px 0;}
 .mb-box input {max-width:75%;}
 .log-details code {padding:4px 6px;width:100%;font-size:13px;line-height:16px;display:inline-block;margin:10px 0 4px 0;box-sizing: border-box;background:#f4f4f4;}

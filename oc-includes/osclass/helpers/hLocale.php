@@ -546,3 +546,66 @@ function osc_current_admin_locale() {
 function osc_current_admin_locale_code() {
   return osc_current_admin_locale();
 }
+
+/**
+ * Print per-language fields in oc-admin as language pills: one language visible at a time.
+ * All pill boxes on a page switch together and the last choice is remembered.
+ *
+ * Example:
+ *   osc_admin_locale_fields(array(
+ *     'title' => array('label' => __('Title'), 'maxlength' => 80, 'class' => 'input-large', 'help' => __('Shown on top')),
+ *     'text' => array('label' => __('Text'), 'type' => 'textarea', 'rows' => 6)
+ *   ), $values);   // $values[$locale_code][$key]; posted as title[en_US], text[en_US], ...
+ *
+ * Field options: label, name (default "key[{code}]", {code} is replaced), type (text|textarea), rows, class,
+ * maxlength, placeholder, help (HTML).
+ *
+ * Own markup works too: put elements with data-ltab="code" (and data-ltab-label="English") inside a
+ * <div class="osc-ltabs" data-ltabs-group="lang"> (group optional). Pills are added on top, or into an inner .osc-ltabs-nav element if there is one
+ * (for example a table cell). Elements can be anything, also table rows. After adding such markup by
+ * JavaScript, call oscLtabs(element).
+ *
+ * @param array $fields key => options
+ * @param array $values [code][key] => value
+ * @param array|null $locales key => pill label, default all enabled locales. Any set works (countries, types, plans):
+ *                            then pass the keys as the first index of $values and a $group of your own.
+ * @param string $group boxes with the same group switch together and remember the choice (default "lang")
+ * @param string|null $title label left of the pills (default "Language")
+ */
+function osc_admin_locale_fields($fields, $values = array(), $locales = null, $group = 'lang', $title = null) {
+  if($locales === null) {
+    $locales = array();
+    foreach(osc_get_locales() as $l) {
+      $locales[$l['pk_c_code']] = (isset($l['s_short_name']) && $l['s_short_name'] != '' ? $l['s_short_name'] : $l['s_name']);
+    }
+  }
+
+  echo '<div class="osc-ltabs" data-ltabs-group="' . osc_esc_html($group) . '">';
+  if(count($locales) > 1) {
+    echo '<div class="form-row osc-ltabs-row"><div class="form-label">' . osc_esc_html($title === null ? __('Language') : $title) . '</div><div class="form-controls"><div class="osc-ltabs-nav"></div></div></div>';
+  }
+
+  foreach($locales as $code => $label) {
+    echo '<div data-ltab="' . osc_esc_html($code) . '" data-ltab-label="' . osc_esc_html($label) . '">';
+    foreach($fields as $key => $f) {
+      $name = (isset($f['name']) ? str_replace('{code}', $code, $f['name']) : $key . '[' . $code . ']');
+      $id = 'ltab-' . trim(preg_replace('/[^a-zA-Z0-9_-]+/', '-', $name), '-');
+      $value = (isset($values[$code][$key]) ? (string)$values[$code][$key] : '');
+      $attr = ' id="' . osc_esc_html($id) . '" name="' . osc_esc_html($name) . '"' . (isset($f['class']) ? ' class="' . osc_esc_html($f['class']) . '"' : '') . (isset($f['maxlength']) ? ' maxlength="' . (int)$f['maxlength'] . '"' : '') . (isset($f['placeholder']) ? ' placeholder="' . osc_esc_html($f['placeholder']) . '"' : '');
+
+      echo '<div class="form-row"><div class="form-label"><label for="' . osc_esc_html($id) . '">' . osc_esc_html(isset($f['label']) ? $f['label'] : $key) . '</label></div><div class="form-controls">';
+      if(isset($f['type']) && $f['type'] == 'textarea') {
+        echo '<textarea' . $attr . ' rows="' . (isset($f['rows']) ? (int)$f['rows'] : 4) . '">' . osc_esc_html($value) . '</textarea>';
+      } else {
+        echo '<input type="text"' . $attr . ' value="' . osc_esc_html($value) . '" />';
+      }
+
+      echo (isset($f['help']) && $f['help'] != '' ? '<div class="help-box">' . $f['help'] . '</div>' : '');
+      echo '</div></div>';
+    }
+
+    echo '</div>';
+  }
+
+  echo '</div>';
+}

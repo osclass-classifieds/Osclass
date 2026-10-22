@@ -34,6 +34,7 @@ Osclass 8.4.1
 - New Cron setting: how often minutely jobs run through the built-in cron or the cron URL (1 to 60 minutes, default 5). A command line cron with type minutely still runs on every call.
 - Email templates list: plugins can add columns, row actions and a control above the list, and hide or add templates (admin_emails_table, actions_manage_emails, more_actions_manage_emails, emails_processing_row, admin_emails_list, admin_emails_list_top).
 - Email templates list: plugins can add dropdown filters above the list with their own default value (admin_emails_filters).
+- Back office: new language pills for fields that have a value per language. One language is shown at a time, all language switches on a page move together and the last choice is remembered. Plugins use osc_admin_locale_fields() or add class osc-ltabs and data-ltab to their own markup.
 
 
 Osclass 8.4.0

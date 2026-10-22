@@ -282,3 +282,116 @@ function adminMenuSticky() {
     $('#content-page').css('min-height', 'auto');
   }
 }
+
+
+// Pills: each .osc-ltabs box gets one pill per [data-ltab] key and shows one part at a time.
+// Used for languages (default), but any set works: countries, types, plans. Boxes with the same
+// data-ltabs-group (default "lang") switch together and remember the last choice. Call oscLtabs(el) for markup added later.
+var oscLtabCur = {};
+
+function oscLtabParts(box) {
+  return Array.prototype.filter.call(box.querySelectorAll('[data-ltab]'), function(p) { return p.closest('.osc-ltabs') === box; });
+}
+
+function oscLtabs(root) {
+  (root || document).querySelectorAll('.osc-ltabs:not([data-ltabs-ready])').forEach(function(box) {
+    var codes = [], labels = {};
+    box.setAttribute('data-ltabs-ready', '1');
+    oscLtabParts(box).forEach(function(p) {
+      var c = p.getAttribute('data-ltab');
+      if(codes.indexOf(c) < 0) { codes.push(c); }
+      if(!labels[c] && p.getAttribute('data-ltab-label')) { labels[c] = p.getAttribute('data-ltab-label'); }
+    });
+
+    if(codes.length < 2) { return; }
+
+    var nav = Array.prototype.filter.call(box.querySelectorAll('.osc-ltabs-nav'), function(n) { return n.closest('.osc-ltabs') === box; })[0];
+    if(!nav) {
+      nav = document.createElement('div');
+      nav.className = 'osc-ltabs-nav';
+      box.insertBefore(nav, box.firstChild);
+    }
+
+    nav.setAttribute('role', 'tablist');
+    codes.forEach(function(c) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.setAttribute('role', 'tab');
+      b.setAttribute('data-ltab-btn', c);
+      b.appendChild(document.createTextNode(labels[c] || c.toUpperCase()));
+      nav.appendChild(b);
+    });
+
+    nav.addEventListener('click', function(e) {
+      var b = e.target.closest('[data-ltab-btn]');
+      if(b) { oscLtabShow(b.getAttribute('data-ltab-btn'), true, box); }
+    });
+
+    nav.addEventListener('keydown', function(e) {
+      var list = Array.prototype.slice.call(nav.querySelectorAll('[data-ltab-btn]'));
+      var i = list.indexOf(document.activeElement), step = {ArrowRight: 1, ArrowLeft: -1}[e.key];
+      if(i < 0 || !step) { return; }
+      e.preventDefault();
+      var b = list[(i + step + list.length) % list.length];
+      oscLtabShow(b.getAttribute('data-ltab-btn'), true, box);
+      b.focus();
+    });
+  });
+
+  // first show of every group found in this root
+  var groups = [];
+  (root || document).querySelectorAll('.osc-ltabs[data-ltabs-ready]').forEach(function(box) {
+    var g = box.getAttribute('data-ltabs-group') || 'lang';
+    if(groups.indexOf(g) < 0) { groups.push(g); }
+  });
+
+  groups.forEach(function(g) {
+    if(oscLtabCur[g] === undefined) {
+      try { oscLtabCur[g] = localStorage.getItem('osc_ltab_' + g) || ''; } catch(e) { oscLtabCur[g] = ''; }
+    }
+
+    oscLtabShow(oscLtabCur[g] || (g == 'lang' && window.osc && osc.locales ? osc.locales._default : ''), false, null, g);
+  });
+}
+
+// Show key "code" in every box of the group (the group of "from" box, or "group"). A box without that key shows its
+// first part; in the language group the same two letters also match (en and en_US).
+function oscLtabShow(code, remember, from, group) {
+  code = String(code || '');
+  var g = group || (from ? from.getAttribute('data-ltabs-group') : '') || 'lang';
+  if(remember) {
+    oscLtabCur[g] = code;
+    try { localStorage.setItem('osc_ltab_' + g, code); } catch(e) {}
+  }
+
+  document.querySelectorAll('.osc-ltabs[data-ltabs-ready]').forEach(function(box) {
+    if((box.getAttribute('data-ltabs-group') || 'lang') != g) { return; }
+
+    var btns = Array.prototype.filter.call(box.querySelectorAll('[data-ltab-btn]'), function(b) { return b.closest('.osc-ltabs') === box; });
+    if(!btns.length) { return; }
+
+    var key = function(b) { return b.getAttribute('data-ltab-btn'); };
+    var pick = btns.filter(function(b) { return key(b) == code; })[0] || (g == 'lang' ? btns.filter(function(b) { return key(b).substr(0, 2).toLowerCase() == code.substr(0, 2).toLowerCase(); })[0] : null) || btns[0];
+    var cur = key(pick);
+
+    btns.forEach(function(b) {
+      var on = (b === pick);
+      b.setAttribute('aria-selected', on ? 'true' : 'false');
+      b.tabIndex = (on ? 0 : -1);
+    });
+
+    oscLtabParts(box).forEach(function(p) {
+      p.classList.toggle('osc-ltab-off', p.getAttribute('data-ltab') != cur);
+    });
+  });
+}
+
+// a required or invalid field in a hidden part opens that part before the browser shows its message
+document.addEventListener('invalid', function(e) {
+  var p = (e.target.closest ? e.target.closest('.osc-ltabs[data-ltabs-ready] [data-ltab]') : null);
+  if(p) { oscLtabShow(p.getAttribute('data-ltab'), false, p.closest('.osc-ltabs')); }
+}, true);
+
+$(function() {
+  oscLtabs(document);
+});
