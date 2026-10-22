@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Osclass by OsclassPoint.com\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-22 11:04+0200\n"
+"POT-Creation-Date: 2026-10-22 11:39+0200\n"
 "PO-Revision-Date: 2026-09-01 12:54+0200\n"
 "Last-Translator: Translations <translations@osclass>\n"
 "Language-Team: OsclassPoint\n"
@@ -30,8 +30,7 @@ msgstr ""
 #: oc-admin/admins.php:51 oc-admin/admins.php:177 oc-admin/admins.php:303
 #: oc-admin/ajax/ajax.php:726 oc-admin/appearance.php:37
 #: oc-admin/appearance.php:89 oc-admin/controller/settings/advanced.php:33
-#: oc-admin/controller/settings/mailqueue.php:40
-#: oc-admin/controller/settings/mailqueue.php:74
+#: oc-admin/controller/settings/mailqueue.php:35
 #: oc-admin/controller/settings/mailserver.php:33
 #: oc-admin/controller/settings/media.php:256 oc-admin/languages.php:47
 #: oc-admin/locations.php:31 oc-admin/locations.php:79
@@ -383,76 +382,72 @@ msgid ""
 "invalid"
 msgstr ""
 
-#: oc-admin/controller/settings/mailqueue.php:64
-msgid "Mail queue settings have been updated"
-msgstr ""
-
-#: oc-admin/controller/settings/mailqueue.php:84
+#: oc-admin/controller/settings/mailqueue.php:45
 msgid "Sending is paused. New emails still wait in the queue."
 msgstr ""
 
-#: oc-admin/controller/settings/mailqueue.php:84
+#: oc-admin/controller/settings/mailqueue.php:45
 msgid "Sending is resumed"
 msgstr ""
 
-#: oc-admin/controller/settings/mailqueue.php:99
+#: oc-admin/controller/settings/mailqueue.php:60
 msgid "Select at least one email"
 msgstr ""
 
-#: oc-admin/controller/settings/mailqueue.php:109
+#: oc-admin/controller/settings/mailqueue.php:70
 #, php-format
 msgid "One email has been updated"
 msgid_plural "%s emails have been updated"
 msgstr[0] ""
 msgstr[1] ""
 
-#: oc-admin/controller/settings/mailqueue.php:111
+#: oc-admin/controller/settings/mailqueue.php:72
 msgid "No email was changed. Emails being sent right now cannot be changed."
 msgstr ""
 
-#: oc-admin/controller/settings/mailqueue.php:117
+#: oc-admin/controller/settings/mailqueue.php:78
 #, php-format
 msgid "One email has been deleted"
 msgid_plural "%s emails have been deleted"
 msgstr[0] ""
 msgstr[1] ""
 
-#: oc-admin/controller/settings/mailqueue.php:119
+#: oc-admin/controller/settings/mailqueue.php:80
 msgid "No email was deleted. Emails being sent right now cannot be deleted."
 msgstr ""
 
-#: oc-admin/controller/settings/mailqueue.php:129
+#: oc-admin/controller/settings/mailqueue.php:90
 #, php-format
 msgid "One email has been sent"
 msgid_plural "%s emails have been sent"
 msgstr[0] ""
 msgstr[1] ""
 
-#: oc-admin/controller/settings/mailqueue.php:133
+#: oc-admin/controller/settings/mailqueue.php:94
 #, php-format
 msgid "One email was not sent. See the error in its history."
 msgid_plural "%s emails were not sent. See the error in their history."
 msgstr[0] ""
 msgstr[1] ""
 
-#: oc-admin/controller/settings/mailqueue.php:137
+#: oc-admin/controller/settings/mailqueue.php:98
 #, php-format
 msgid "One email will be sent with the next cron run"
 msgid_plural "%s emails will be sent with the next cron run"
 msgstr[0] ""
 msgstr[1] ""
 
-#: oc-admin/controller/settings/mailqueue.php:141
+#: oc-admin/controller/settings/mailqueue.php:102
 msgid ""
 "No email was sent. Emails being sent right now and sent private emails "
 "(their text was removed) cannot be sent again."
 msgstr ""
 
-#: oc-admin/controller/settings/mailqueue.php:144
+#: oc-admin/controller/settings/mailqueue.php:105
 msgid "Choose an action"
 msgstr ""
 
-#: oc-admin/controller/settings/mailqueue.php:155
+#: oc-admin/controller/settings/mailqueue.php:116
 msgid "Email not found in the mail queue"
 msgstr ""
 
@@ -460,7 +455,7 @@ msgstr ""
 msgid "Mail server type is incorrect"
 msgstr ""
 
-#: oc-admin/controller/settings/mailserver.php:70
+#: oc-admin/controller/settings/mailserver.php:89
 msgid "Mail server configuration has changed"
 msgstr ""
 
@@ -2661,6 +2656,6 @@ msgstr ""
 msgid "This email is already used by %s"
 msgstr ""
 
-#: oc-includes/osclass/utils.php:1680
+#: oc-includes/osclass/utils.php:1685
 msgid "Empty server response"
 msgstr ""

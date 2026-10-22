@@ -29,7 +29,7 @@ osc_add_hook('help_box','addHelp');
 function customPageHeader() {
   ?>
   <h1><?php _e('Mail queue'); ?>
-    <a href="<?php echo osc_admin_base_url(true); ?>?page=settings&amp;action=mailqueue_settings" class="btn ico ico-32 ico-engine float-right" title="<?php echo osc_esc_html(__('Mail queue settings')); ?>"></a>
+    <a href="<?php echo osc_admin_base_url(true); ?>?page=settings&amp;action=mailserver#mail-queue" class="btn ico ico-32 ico-engine float-right" title="<?php echo osc_esc_html(__('Mail queue settings')); ?>"></a>
     <a href="#" class="btn ico ico-32 ico-help float-right"></a>
   </h1>
   <?php
@@ -169,6 +169,20 @@ $date_format = osc_date_format() . ' ' . osc_time_format();
 $list_url = osc_admin_base_url(true) . '?page=settings&action=mailqueue';
 $action_url = osc_admin_base_url(true) . '?page=settings&action=mailqueue_action&' . osc_csrf_token_url() . '&do=';
 $status_options = array('' => __('All emails'), 'pending' => __('Pending'), 'sending' => __('Sending'), 'sent' => __('Sent'), 'failed' => __('Failed'), 'cancelled' => __('Cancelled'));
+// Last cron run as "5 min ago"; late = more than 3 intervals (at least 15 minutes)
+$cron_age = ($stats['last_run'] != '' ? max(0, time() - strtotime($stats['last_run'])) : -1);
+$cron_late = ($cron_age < 0 || $cron_age > max(900, osc_cron_minutely_interval() * 180));
+if($cron_age < 0) {
+  $cron_ago = __('Never');
+} else if($cron_age < 60) {
+  $cron_ago = __('Just now');
+} else if($cron_age < 3600) {
+  $cron_ago = sprintf(_n('%d minute ago', '%d minutes ago', floor($cron_age / 60)), floor($cron_age / 60));
+} else if($cron_age < 86400) {
+  $cron_ago = sprintf(_n('%d hour ago', '%d hours ago', floor($cron_age / 3600)), floor($cron_age / 3600));
+} else {
+  $cron_ago = sprintf(_n('%d day ago', '%d days ago', floor($cron_age / 86400)), floor($cron_age / 86400));
+}
 $filter_params = array('mailId', 'email', 'type', 'group', 'ref', 'priority', 'date_from', 'date_to');
 
 osc_current_admin_theme_path('parts/header.php');
@@ -176,7 +190,7 @@ osc_current_admin_theme_path('parts/header.php');
 
 <?php if(!$stats['enabled']) { ?>
   <div class="flashmessage flashmessage-inline flashmessage-info">
-    <p><?php printf(__('The mail queue is off, so emails are sent right away as before. Turn it on in the <a href="%s">mail queue settings</a> only when a real cron runs on your server.'), osc_admin_base_url(true) . '?page=settings&amp;action=mailqueue_settings'); ?></p>
+    <p><?php printf(__('The mail queue is off, so emails are sent right away as before. Turn it on in the <a href="%s">mail queue settings</a> only when a real cron runs on your server.'), osc_admin_base_url(true) . '?page=settings&amp;action=mailserver#mail-queue'); ?></p>
   </div>
 <?php } ?>
 
@@ -300,10 +314,10 @@ osc_current_admin_theme_path('parts/header.php');
     <span class="mail-queue-label"><?php _e('Failed in last 24 hours'); ?></span>
     <strong><?php echo (int)$stats['failed_24h']; ?></strong>
   </div>
-  <div>
-    <span class="mail-queue-label"><?php _e('Cron'); ?></span>
-    <span class="mail-queue-sub"><?php printf(__('Last run: %s'), ($stats['last_run'] != '' ? osc_esc_html(osc_format_date($stats['last_run'], $date_format)) : __('Never'))); ?></span>
-    <span class="mail-queue-sub"><?php printf(__('Next run: %s'), ($stats['next_run'] != '' ? osc_esc_html(osc_format_date($stats['next_run'], $date_format)) : __('Never'))); ?></span>
+  <div class="<?php echo ($cron_late ? 'mail-queue-bad' : ''); ?>">
+    <span class="mail-queue-label"><?php _e('Last cron run'); ?></span>
+    <strong title="<?php echo osc_esc_html($stats['last_run'] != '' ? osc_format_date($stats['last_run'], $date_format) : ''); ?>"><?php echo $cron_ago; ?></strong>
+    <span class="mail-queue-sub"><?php echo ($cron_late ? __('The cron does not run, queued emails are not sent') : sprintf(__('Runs every %d min'), osc_cron_minutely_interval())); ?></span>
   </div>
 </div>
 

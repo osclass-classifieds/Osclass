@@ -22,51 +22,12 @@ class CAdminSettingsMailqueue extends AdminSecBaseModel {
   // Mail queue: list, email detail with history, row and bulk actions, settings
   function doModel() {
     $list_url = osc_admin_base_url(true) . '?page=settings&action=mailqueue';
-    $settings_url = osc_admin_base_url(true) . '?page=settings&action=mailqueue_settings';
 
     // Back to the list the admin came from (keeps filters and page)
     $referer = (string)Params::getServerParam('HTTP_REFERER', false, false);
     $back_url = (strpos($referer, osc_admin_base_url(true) . '?page=settings&action=mailqueue') === 0 && strpos($referer, 'action=mailqueue_') === false ? $referer : $list_url);
 
     switch($this->action) {
-      case('mailqueue_settings'):
-        $this->doView('settings/mailqueue_settings.php');
-        break;
-
-      case('mailqueue_settings_post'):
-        osc_csrf_check();
-
-        if(defined('DEMO')) {
-          osc_add_flash_warning_message(_m('This action cannot be done because it is a demo site'), 'admin');
-          $this->redirectTo($settings_url);
-        }
-
-        $instant_types = array_filter(array_map('trim', explode(',', (string)Params::getParam('mail_queue_instant_types'))), function($v) { return preg_match('/^[a-zA-Z0-9_\-]+$/', $v); });
-        $delays = array();
-        foreach(explode(',', (string)Params::getParam('mail_queue_retry_delays')) as $delay) {
-          if((int)$delay >= 1) {
-            $delays[] = min((int)$delay, 10080);
-          }
-        }
-
-        $iUpdated = 0;
-        $iUpdated += osc_set_preference('mail_queue_enabled', (Params::getParam('mail_queue_enabled') != '' ? 1 : 0), 'osclass', 'BOOLEAN');
-        $iUpdated += osc_set_preference('mail_queue_paused', (Params::getParam('mail_queue_paused') != '' ? 1 : 0), 'osclass', 'BOOLEAN');
-        $iUpdated += osc_set_preference('mail_queue_per_run', max(1, min(5000, (int)Params::getParam('mail_queue_per_run'))), 'osclass', 'INTEGER');
-        $iUpdated += osc_set_preference('mail_queue_bulk_per_run', max(1, min(5000, (int)Params::getParam('mail_queue_bulk_per_run'))), 'osclass', 'INTEGER');
-        $iUpdated += osc_set_preference('mail_queue_group_per_run', max(1, min(5000, (int)Params::getParam('mail_queue_group_per_run'))), 'osclass', 'INTEGER');
-        $iUpdated += osc_set_preference('mail_queue_time_budget', max(5, min(3600, (int)Params::getParam('mail_queue_time_budget'))), 'osclass', 'INTEGER');
-        $iUpdated += osc_set_preference('mail_queue_retry_delays', (!empty($delays) ? implode(',', array_slice($delays, 0, 10)) : '0'), 'osclass', 'STRING');
-        $iUpdated += osc_set_preference('mail_queue_keep_days', max(1, min(365, (int)Params::getParam('mail_queue_keep_days'))), 'osclass', 'INTEGER');
-        $iUpdated += osc_set_preference('mail_queue_instant_types', implode(',', array_unique($instant_types)), 'osclass', 'STRING');
-
-        if($iUpdated > 0) {
-          osc_add_flash_ok_message(_m('Mail queue settings have been updated'), 'admin');
-        }
-
-        $this->redirectTo($settings_url);
-        break;
-
       case('mailqueue_action'):
         osc_csrf_check();
 

@@ -27,8 +27,9 @@ osc_add_hook('help_box','addHelp');
 function customPageHeader() {
   ?>
   <h1><?php _e('Mail queue'); ?>
-    <a href="<?php echo osc_admin_base_url(true); ?>?page=settings&amp;action=mailqueue_settings" class="btn ico ico-32 ico-engine float-right" title="<?php echo osc_esc_html(__('Mail queue settings')); ?>"></a>
+    <a href="<?php echo osc_admin_base_url(true); ?>?page=settings&amp;action=mailserver#mail-queue" class="btn ico ico-32 ico-engine float-right" title="<?php echo osc_esc_html(__('Mail queue settings')); ?>"></a>
     <a href="#" class="btn ico ico-32 ico-help float-right"></a>
+    <a href="<?php echo osc_admin_base_url(true); ?>?page=settings&amp;action=mailqueue" class="btn float-right mail-queue-head-btn"><?php _e('Back to list'); ?></a>
   </h1>
   <?php
 }
@@ -133,9 +134,7 @@ $body = (isset($params['body']) ? (string)$params['body'] : '');
 osc_current_admin_theme_path('parts/header.php');
 ?>
 
-<h2 class="render-title"><?php printf(__('Email #%d'), $id); ?>
-  <a href="<?php echo osc_esc_html($list_url); ?>" class="btn btn-mini mail-queue-back"><?php _e('Back to mail queue'); ?></a>
-</h2>
+<h2 class="render-title"><?php printf(__('Email #%d'), $id); ?></h2>
 
 <div id="mail-queue-view" class="form-horizontal">
   <div class="form-row">

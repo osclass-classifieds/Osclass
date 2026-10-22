@@ -65,8 +65,6 @@ class CAdminSettings extends AdminSecBaseModel {
       case('mailqueue'):
       case('mailqueue_action'):
       case('mailqueue_view'):
-      case('mailqueue_settings'):
-      case('mailqueue_settings_post'):
         require_once(osc_admin_base_path() . 'controller/settings/mailqueue.php');
         $do = new CAdminSettingsMailqueue();
         break;

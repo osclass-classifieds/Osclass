@@ -2255,7 +2255,8 @@ input[readonly], textarea[readonly], select[readonly] {opacity:0.7;cursor:defaul
 .mail-queue-health .mail-queue-bad strong {color:#b32d2e;}
 .render-title a.btn-mini.mail-queue-pause:before {content:"\f04c";}
 .render-title a.btn-mini.mail-queue-resume:before {content:"\f04b";}
-.render-title a.btn-mini.mail-queue-back:before {content:"\f060";}
+#mail-queue-toolbar select[name="status"] {margin-left:8px;}
+h1 a.btn.mail-queue-head-btn {margin-left:8px;}
 .action-mailqueue .table td.col-to {min-width:160px;word-break:break-all;}
 .action-mailqueue .table td.col-subject {min-width:180px;word-break:break-word;}
 .action-mailqueue .table td.col-attempts, .action-mailqueue .table td.col-priority {white-space:nowrap;}
@@ -2272,8 +2273,10 @@ input[readonly], textarea[readonly], select[readonly] {opacity:0.7;cursor:defaul
 .mail-queue-history td.col-message {word-break:break-word;}
 .mail-queue-history tr.mail-queue-event-error td.col-event, .mail-queue-history tr.mail-queue-event-failed td.col-event {color:#b32d2e;}
 .mail-queue-history tr.mail-queue-event-sent td.col-event {color:#1b6b34;}
-#mail-queue-settings input.mail-queue-delays {width:160px;}
-#mail-queue-settings input.mail-queue-types {width:100%;max-width:720px;box-sizing:border-box;}
+.mail-queue-settings .has-intext-input > input.in-text:first-child {margin-left:0;}
+.mail-queue-settings .has-intext-input > input.in-text[name="mail_queue_keep_days"] {margin-left:5px;}
+.mail-queue-settings input.mail-queue-delays {width:160px;text-align:left;}
+.mail-queue-settings input.mail-queue-types {width:100%;max-width:720px;box-sizing:border-box;}
 .mail-queue-body {display:block;width:100%;min-height:520px;box-sizing:border-box;border:1px solid #ccd0d4;background:#fff;}
 @media screen and (max-width:767px) {
   .mail-queue-health {grid-template-columns:repeat(2,minmax(0,1fr));}

@@ -66,6 +66,25 @@ class CAdminSettingsMailserver extends AdminSecBaseModel
         $iUpdated += osc_set_preference('mailserver_mail_from', $mailserverMailFrom);
         $iUpdated += osc_set_preference('mailserver_name_from', $mailserverNameFrom);
 
+        // Mail queue
+        $instant_types = array_filter(array_map('trim', explode(',', (string)Params::getParam('mail_queue_instant_types'))), function($v) { return preg_match('/^[a-zA-Z0-9_\-]+$/', $v); });
+        $delays = array();
+        foreach(explode(',', (string)Params::getParam('mail_queue_retry_delays')) as $delay) {
+          if((int)$delay >= 1) {
+            $delays[] = min((int)$delay, 10080);
+          }
+        }
+
+        $iUpdated += osc_set_preference('mail_queue_enabled', (Params::getParam('mail_queue_enabled') != '' ? 1 : 0), 'osclass', 'BOOLEAN');
+        $iUpdated += osc_set_preference('mail_queue_paused', (Params::getParam('mail_queue_paused') != '' ? 1 : 0), 'osclass', 'BOOLEAN');
+        $iUpdated += osc_set_preference('mail_queue_per_run', max(1, min(5000, (int)Params::getParam('mail_queue_per_run'))), 'osclass', 'INTEGER');
+        $iUpdated += osc_set_preference('mail_queue_bulk_per_run', max(1, min(5000, (int)Params::getParam('mail_queue_bulk_per_run'))), 'osclass', 'INTEGER');
+        $iUpdated += osc_set_preference('mail_queue_group_per_run', max(1, min(5000, (int)Params::getParam('mail_queue_group_per_run'))), 'osclass', 'INTEGER');
+        $iUpdated += osc_set_preference('mail_queue_time_budget', max(5, min(3600, (int)Params::getParam('mail_queue_time_budget'))), 'osclass', 'INTEGER');
+        $iUpdated += osc_set_preference('mail_queue_retry_delays', (!empty($delays) ? implode(',', array_slice($delays, 0, 10)) : '0'), 'osclass', 'STRING');
+        $iUpdated += osc_set_preference('mail_queue_keep_days', max(1, min(365, (int)Params::getParam('mail_queue_keep_days'))), 'osclass', 'INTEGER');
+        $iUpdated += osc_set_preference('mail_queue_instant_types', implode(',', array_unique($instant_types)), 'osclass', 'STRING');
+
         if($iUpdated > 0) {
           osc_add_flash_ok_message( _m('Mail server configuration has changed'), 'admin');
         }
