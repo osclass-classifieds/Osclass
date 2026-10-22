@@ -131,7 +131,7 @@ class ImageProcessing {
           imagecopy($bg, $this->im, 0, 0, 0, 0, $this->_width, $this->_height);
 
           if(PHP_VERSION_ID < 80500) {
-            imagedestroy($this->im);
+            if(PHP_VERSION_ID < 80500) { imagedestroy($this->im); }
           }
 
           $this->im = null;
@@ -159,7 +159,7 @@ class ImageProcessing {
       $this->im->destroy();
     } else {
       if(PHP_VERSION_ID < 80500) {
-        imagedestroy($this->im);
+        if(PHP_VERSION_ID < 80500) { imagedestroy($this->im); }
       }
 
       $this->im = null;
@@ -290,7 +290,7 @@ class ImageProcessing {
       }
 
       if(PHP_VERSION_ID < 80500) {
-        imagedestroy($this->im);
+        if(PHP_VERSION_ID < 80500) { imagedestroy($this->im); }
       }
 
       $this->im = null;
@@ -823,7 +823,7 @@ class ImageProcessing {
       $this->_imagecopymerge_alpha($this->im, $watermark, $dest_x, $dest_y, 0, 0, $watermark_width, $watermark_height, 100);
 
       if(PHP_VERSION_ID < 80500) {
-        imagedestroy($watermark);
+        if(PHP_VERSION_ID < 80500) { imagedestroy($watermark); }
       }
 
       unset($watermark);
@@ -934,7 +934,7 @@ if(!function_exists('imageflip')) {
     }
 
     if(PHP_VERSION_ID < 80500) {
-      imagedestroy($tmp);
+      if(PHP_VERSION_ID < 80500) { imagedestroy($tmp); }
     }
 
     unset($tmp);

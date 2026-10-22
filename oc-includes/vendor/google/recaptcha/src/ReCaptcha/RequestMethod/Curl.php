@@ -77,6 +77,8 @@ class Curl
      */
     public function close($ch)
     {
-        curl_close($ch);
+        if (PHP_VERSION_ID < 80000) {
+            curl_close($ch);
+        }
     }
 }

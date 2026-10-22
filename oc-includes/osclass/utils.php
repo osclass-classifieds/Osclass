@@ -535,7 +535,7 @@ function osc_doRequest($url, $_data, $timeout = 5, $follow_redirects = true) {
 
         $response = curl_exec($ch);
         $http_code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
+        if(PHP_VERSION_ID < 80000) { curl_close($ch); }   // no effect since PHP 8.0, deprecated in 8.5
 
         if($response !== false && $http_code >= 200 && $http_code < 300) {
           return (strlen($data) > 0 ? strlen($data) : 1);
