@@ -520,20 +520,30 @@ osc_current_admin_theme_path('parts/header.php');
         </div>
       </div>
 
-      <h3 class="render-title separate-top border-top"><?php _e('Additional data'); ?> (<?php _e('hooks'); ?>)</h3>
+      <?php
+        // Back-office sections of plugins: own <h3 class="render-title separate-top border-top"> and form-row blocks, saved with this form
+        // (hooks user_edit_completed / user_register_completed). $user is null on Add new user
+        osc_run_hook('admin_user_form', ($aux['edit'] ? $user : null));
 
-      <div class="form-row">
-        <?php
-          if(!$aux['edit']) {
-            osc_run_hook('user_register_form');
-          } else {
-            osc_run_hook('user_profile_form', $user);
-            osc_run_hook('user_form', $user);
-          }
-        ?>
+        // Front form hooks: the section is shown only when a plugin prints something
+        ob_start();
+        if(!$aux['edit']) {
+          osc_run_hook('user_register_form');
+        } else {
+          osc_run_hook('user_profile_form', $user);
+          osc_run_hook('user_form', $user);
+        }
+        $hooks_html = trim(ob_get_clean());
+      ?>
 
-        <div class="clear"></div>
-      </div>
+      <?php if($hooks_html !== '') { ?>
+        <h3 class="render-title separate-top border-top"><?php _e('Additional data'); ?> (<?php _e('hooks'); ?>)</h3>
+
+        <div class="form-row">
+          <?php echo $hooks_html; ?>
+          <div class="clear"></div>
+        </div>
+      <?php } ?>
 
       <h3 class="render-title separate-top border-top"><?php _e('Password'); ?></h3>
       <div class="form-row">
