@@ -8,7 +8,7 @@ Osclass 8.4.1
 - Widget Content from the visual editor is saved when you add or edit a widget. The Code field already saved; Content does now too.
 - Report friendly URLs (report/item, report/user, report/view) work right after upgrade. No need to re-save Permalinks.
 - New Listing setting: require a phone number to publish a listing. Off by default; admins are not affected. Registration never requires a phone.
-- Expired listings now return 410 Gone to visitors and search engines, so they drop out of search results. Owners and admins still see them. Inactive, unvalidated and blocked listings now return 404 instead of 400.
+- Listing page status codes: expired listings return 200 so they can be renewed. Deleted, deactivated, unvalidated, blocked and spam listings return 410 Gone, so they drop out of search results. Owners and admins still see them. Spam listings were shown before; now they are hidden from visitors.
 - Saving a category without moving it works again in trees deeper than the category level limit.
 - Exporting or saving a core translation updates its index.php with the current Osclass version and author.
 - Word length fields in Search settings are no longer stretched.
@@ -22,6 +22,7 @@ Osclass 8.4.1
 - "Login as user" in the back office now sends users to the same page a plugin chooses for a normal login.
 - Security: signing in (front and back office) and changing a password now start a new session, so a session id planted before login cannot be used.
 - Security: secret codes (password reset links, "Remember me" logins, listing edit links, alert links) now come from a secure random source, and new "Remember me" secrets are longer.
+- Plugins can add their own sections to the back-office user form (hook admin_user_form) in the same layout as the core fields. The "Additional data" section is shown only when a plugin fills it.
 - IMPORTANT: The log table gets an index on section, object and date for fast object history. On a site with millions of log rows the upgrade can take a while.
 - Plugins can react to every new report with the report_created action, and create reports with the same emails through osc_report_create().
 - Tools > Logs rows can be changed by plugins with the logs_processing_row filter.
@@ -34,7 +35,11 @@ Osclass 8.4.1
 - New Cron setting: how often minutely jobs run through the built-in cron or the cron URL (1 to 60 minutes, default 5). A command line cron with type minutely still runs on every call.
 - Email templates list: plugins can add columns, row actions and a control above the list, and hide or add templates (admin_emails_table, actions_manage_emails, more_actions_manage_emails, emails_processing_row, admin_emails_list, admin_emails_list_top).
 - Email templates list: plugins can add dropdown filters above the list with their own default value (admin_emails_filters).
+- Plugin lists in the back office (custom data tables): status colours now work without extra code, just pass the status class to osc_custom_datatable_status_cells(). New status colours status-info (blue) and status-success (green).
+- Plugin lists: every column can set its width (width in percent steps of 5, or min) and an extra CSS class; classes w-5 to w-95 and w-min are available for any table. The empty gap before the Status column is gone.
+- New osc_custom_datatable_toolbar_filters() for dropdown and text filters above a plugin list, spaced like the listing toolbar.
 - Back office: new language pills for fields that have a value per language. One language is shown at a time, all language switches on a page move together and the last choice is remembered. Plugins use osc_admin_locale_fields() or add class osc-ltabs and data-ltab to their own markup.
+- Users keep the language they registered in, and the welcome, account confirmation, forgot password and new email messages use it, like search alerts already did. Before, they used the language of the page where the action happened. Users created in the back office get the site default language.
 
 
 Osclass 8.4.0

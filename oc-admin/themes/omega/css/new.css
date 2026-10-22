@@ -171,6 +171,7 @@ ul.tabbernav li.tabberactive a:hover {}
 .tabberlive > button {margin-top:10px;}
 .additional-info .tabberlive .tabbertab {padding:0;background:transparent;}
 
+
 /* LANGUAGE PILLS (osc_admin_locale_fields, or any .osc-ltabs box with [data-ltab] parts) */
 .osc-ltabs {clear:both;}
 .osc-ltabs-nav {display:inline-flex;flex-wrap:wrap;gap:3px;max-width:100%;padding:3px;margin:0 0 14px 0;background:#f0f0f1;border:1px solid #dcdcde;border-radius:6px;box-sizing:border-box;vertical-align:top;}
@@ -182,7 +183,6 @@ ul.tabbernav li.tabberactive a:hover {}
 .form-horizontal .osc-ltabs-row .osc-ltabs-nav, td > .osc-ltabs-nav {margin-bottom:0;}
 .osc-ltabs textarea {width:100%;max-width:720px;box-sizing:border-box;}
 .osc-ltab-off {display:none !important;}
-
 !.mb-box .mb-head select.mb-select-locale {margin:-10px 0;}
 .mb-box input {max-width:75%;}
 .log-details code {padding:4px 6px;width:100%;font-size:13px;line-height:16px;display:inline-block;margin:10px 0 4px 0;box-sizing: border-box;background:#f4f4f4;}
@@ -1079,7 +1079,7 @@ table {max-width:100%;background-color:transparent;border-spacing:0}
 .col-bulkactions {opacity:1!important;text-align:center!important}
 .table-contains-actions, .table-contains-actions-wrap {position:relative}
 .table div.actions {display:none}
-.table td.col-status-border {width:1px;margin:0;padding:0;border-top:0;border-bottom:0;border-right:0}
+.table td.col-status-border {width:1px;margin:0;padding:3px;border-top:0;border-bottom:0;border-right:0}
 .table td.col-status {border-top:1px solid rgba(0,  0,  0,  0.1);border-bottom:0;width:50px;padding:0 10px;margin:0;font-weight:bold;vertical-align:middle;border-left:0}
 .table .status-spam td.col-status-border {background:#323a45}
 .table .status-spam td.col-status {background:#7a8288;color:#fff}
