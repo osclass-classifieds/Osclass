@@ -2851,13 +2851,30 @@ function osc_mail_queue_time_budget() {
 }
 
 /**
- * Gets how many times the mail queue tries to send an email before it is marked as failed
+ * Gets minutes to wait before each retry of a failed email (default 3, 10, 60; "0" = no retry), at most 10 retries
+ *
+ * @return array
+ */
+function osc_mail_queue_retry_delays() {
+  $value = trim((string)getPreference('mail_queue_retry_delays'));
+  $delays = array();
+
+  foreach(explode(',', ($value !== '' ? $value : '3,10,60')) as $delay) {
+    if((int)$delay >= 1) {
+      $delays[] = min((int)$delay, 10080);
+    }
+  }
+
+  return array_slice($delays, 0, 10);
+}
+
+/**
+ * Gets how many times the mail queue tries to send an email before it is marked as failed (first send + retries)
  *
  * @return int
  */
 function osc_mail_queue_max_attempts() {
-  $value = (int)getPreference('mail_queue_max_attempts');
-  return ($value > 0 ? min($value, 10) : 3);
+  return count(osc_mail_queue_retry_delays()) + 1;
 }
 
 /**

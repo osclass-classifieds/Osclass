@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-19 21:48+0200\n"
+"POT-Creation-Date: 2026-10-22 11:04+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -26,8 +26,8 @@ msgstr ""
 #: oc-admin/admins.php:51 oc-admin/admins.php:177 oc-admin/admins.php:303
 #: oc-admin/ajax/ajax.php:726 oc-admin/appearance.php:37
 #: oc-admin/appearance.php:89 oc-admin/controller/settings/advanced.php:33
-#: oc-admin/controller/settings/mailqueue.php:34
-#: oc-admin/controller/settings/mailqueue.php:62
+#: oc-admin/controller/settings/mailqueue.php:40
+#: oc-admin/controller/settings/mailqueue.php:74
 #: oc-admin/controller/settings/mailserver.php:33
 #: oc-admin/controller/settings/media.php:256 oc-admin/languages.php:47
 #: oc-admin/locations.php:31 oc-admin/locations.php:79
@@ -379,23 +379,23 @@ msgid ""
 "invalid"
 msgstr ""
 
-#: oc-admin/controller/settings/mailqueue.php:52
+#: oc-admin/controller/settings/mailqueue.php:64
 msgid "Mail queue settings have been updated"
 msgstr ""
 
-#: oc-admin/controller/settings/mailqueue.php:74
+#: oc-admin/controller/settings/mailqueue.php:84
 msgid "Sending is paused. New emails still wait in the queue."
 msgstr ""
 
-#: oc-admin/controller/settings/mailqueue.php:74
+#: oc-admin/controller/settings/mailqueue.php:84
 msgid "Sending is resumed"
 msgstr ""
 
-#: oc-admin/controller/settings/mailqueue.php:98
-msgid "The email was not sent. See the error in the list."
+#: oc-admin/controller/settings/mailqueue.php:99
+msgid "Select at least one email"
 msgstr ""
 
-#: oc-admin/controller/settings/mailqueue.php:103
+#: oc-admin/controller/settings/mailqueue.php:109
 #, php-format
 msgid "One email has been updated"
 msgid_plural "%s emails have been updated"
@@ -403,6 +403,52 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: oc-admin/controller/settings/mailqueue.php:111
+msgid "No email was changed. Emails being sent right now cannot be changed."
+msgstr ""
+
+#: oc-admin/controller/settings/mailqueue.php:117
+#, php-format
+msgid "One email has been deleted"
+msgid_plural "%s emails have been deleted"
+msgstr[0] ""
+msgstr[1] ""
+
+#: oc-admin/controller/settings/mailqueue.php:119
+msgid "No email was deleted. Emails being sent right now cannot be deleted."
+msgstr ""
+
+#: oc-admin/controller/settings/mailqueue.php:129
+#, php-format
+msgid "One email has been sent"
+msgid_plural "%s emails have been sent"
+msgstr[0] ""
+msgstr[1] ""
+
+#: oc-admin/controller/settings/mailqueue.php:133
+#, php-format
+msgid "One email was not sent. See the error in its history."
+msgid_plural "%s emails were not sent. See the error in their history."
+msgstr[0] ""
+msgstr[1] ""
+
+#: oc-admin/controller/settings/mailqueue.php:137
+#, php-format
+msgid "One email will be sent with the next cron run"
+msgid_plural "%s emails will be sent with the next cron run"
+msgstr[0] ""
+msgstr[1] ""
+
+#: oc-admin/controller/settings/mailqueue.php:141
+msgid ""
+"No email was sent. Emails being sent right now and sent private emails "
+"(their text was removed) cannot be sent again."
+msgstr ""
+
+#: oc-admin/controller/settings/mailqueue.php:144
+msgid "Choose an action"
+msgstr ""
+
+#: oc-admin/controller/settings/mailqueue.php:155
 msgid "Email not found in the mail queue"
 msgstr ""
 
@@ -2014,23 +2060,23 @@ msgstr ""
 msgid "The comment was not added by you, you cannot delete it"
 msgstr ""
 
-#: oc-includes/osclass/controller/item.php:828
+#: oc-includes/osclass/controller/item.php:823
 msgid "The listing has expired. Please renew it in order to make it public"
 msgstr ""
 
-#: oc-includes/osclass/controller/item.php:834
+#: oc-includes/osclass/controller/item.php:829
 msgid "The listing has not been validated. Validate it to make it public"
 msgstr ""
 
-#: oc-includes/osclass/controller/item.php:837
+#: oc-includes/osclass/controller/item.php:832
 msgid "The listing is deactivated"
 msgstr ""
 
-#: oc-includes/osclass/controller/item.php:848
+#: oc-includes/osclass/controller/item.php:842
 msgid "The listing has not been enabled. Enable it to make it public"
 msgstr ""
 
-#: oc-includes/osclass/controller/item.php:851
+#: oc-includes/osclass/controller/item.php:845
 msgid "The listing has been blocked or is awaiting moderation from the admin"
 msgstr ""
 
@@ -2587,7 +2633,7 @@ msgid ""
 "Your rating has been removed as you already rated this listing %d time(s)"
 msgstr ""
 
-#: oc-includes/osclass/upgrade-funcs.php:1043
+#: oc-includes/osclass/upgrade-funcs.php:1059
 msgid ""
 "Osclass has been updated successfully. <a href=\"https://"
 "forums.osclasspoint.com\">Need more help?</a>"
@@ -2611,6 +2657,6 @@ msgstr ""
 msgid "This email is already used by %s"
 msgstr ""
 
-#: oc-includes/osclass/utils.php:1677
+#: oc-includes/osclass/utils.php:1680
 msgid "Empty server response"
 msgstr ""

@@ -624,7 +624,7 @@ function osc_doRequestQuick($url, $_data, $timeout = 2) {
  * @param array  $params
  * @param string $type
  *
- * @return bool  true when sent or queued
+ * @return bool  true when sent or queued; an instant email returns the result of its first attempt (false = the queue tries it again)
  */
 function osc_sendMail($params, $type = '') {
   $queue = array();
@@ -684,8 +684,14 @@ function osc_sendMail($params, $type = '') {
     'dt_created' => date('Y-m-d H:i:s', $now),
     'dt_send_after' => date('Y-m-d H:i:s', $send_after),
     'dt_expire' => (isset($queue['expire']) && (int)$queue['expire'] > 0 ? date('Y-m-d H:i:s', (int)$queue['expire']) : null),
-    'dt_lock' => ($instant ? date('Y-m-d H:i:s', $now) : null)
+    'dt_lock' => ($instant ? date('Y-m-d H:i:s', $now) : null),
+    's_lock' => ($instant ? bin2hex(random_bytes(16)) : null)
   );
+
+  // Not due before its attachment copies are stored (the cron could take it in between)
+  if(!$instant && !empty($params['attachment'])) {
+    $row['dt_send_after'] = '9999-12-31 00:00:00';
+  }
 
   // Queue table not usable: keep the old behaviour
   $mq = MailQueue::newInstance();
@@ -694,6 +700,7 @@ function osc_sendMail($params, $type = '') {
   }
 
   $row['pk_i_id'] = (int)$mq->dao->insertedId();
+  $mq->addLog($row['pk_i_id'], 'CREATED', 0, '', null, (defined('OC_ADMIN') && OC_ADMIN ? osc_logged_admin_id() : 0));
 
   if($instant) {
     return osc_mail_queue_send($row, $params);
@@ -702,7 +709,7 @@ function osc_sendMail($params, $type = '') {
   // Callers may delete their attachment files right after this call, keep own copies
   if($row['b_attachment'] == 1) {
     $params = osc_mail_queue_attachments($row['pk_i_id'], $params);
-    $mq->update(array('s_params' => json_encode($params, $json_flags)), array('pk_i_id' => $row['pk_i_id']));
+    $mq->update(array('s_params' => json_encode($params, $json_flags), 'dt_send_after' => date('Y-m-d H:i:s', $send_after)), array('pk_i_id' => $row['pk_i_id']));
   }
 
   return true;
@@ -938,7 +945,8 @@ function osc_sendMailNow($params, $type = '') {
     return false;
 
   } catch(Exception $e) {
-    trigger_error($e->errorMessage(), (OSC_DEBUG ? E_USER_NOTICE : E_USER_WARNING));      // E_USER_NOTICE, E_USER_WARNING, E_USER_ERROR
+    // ErrorInfo also holds the reply of the mail server (code and detail)
+    trigger_error(($mail->ErrorInfo != '' ? $mail->ErrorInfo : $e->errorMessage()), (OSC_DEBUG ? E_USER_NOTICE : E_USER_WARNING));      // E_USER_NOTICE, E_USER_WARNING, E_USER_ERROR
     return false;
   }
 

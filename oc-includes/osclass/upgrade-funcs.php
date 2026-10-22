@@ -974,7 +974,8 @@ if($current_version < 841) {
   $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'mail_queue_bulk_per_run', '30', 'INTEGER')", DB_TABLE_PREFIX));
   $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'mail_queue_group_per_run', '15', 'INTEGER')", DB_TABLE_PREFIX));
   $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'mail_queue_time_budget', '40', 'INTEGER')", DB_TABLE_PREFIX));
-  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'mail_queue_max_attempts', '3', 'INTEGER')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'mail_queue_retry_delays', '3,10,60', 'STRING')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("DELETE FROM %st_preference WHERE s_section = 'osclass' AND s_name = 'mail_queue_max_attempts'", DB_TABLE_PREFIX));
   $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'mail_queue_keep_days', '14', 'INTEGER')", DB_TABLE_PREFIX));
   $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'mail_queue_instant_types', 'user_registration,user_validation,user_forgot_password,new_email,item_validation,item_validation_non_register_user,alert_validation,new_admin', 'STRING')", DB_TABLE_PREFIX));
 
@@ -1006,6 +1007,21 @@ if($current_version < 841) {
   INDEX idx_to_email (s_to_email),
   INDEX idx_ref (s_ref)
 ) ENGINE=InnoDB DEFAULT CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_unicode_ci'", DB_TABLE_PREFIX));
+
+  // Mail queue history: one row per attempt and status change, removed with its email
+  $comm->query(sprintf("CREATE TABLE IF NOT EXISTS %st_mail_queue_log (
+  pk_i_id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  fk_i_mail_id BIGINT(20) UNSIGNED NOT NULL,
+  dt_date DATETIME NOT NULL,
+  s_event VARCHAR(20) NOT NULL,
+  i_attempt TINYINT(3) UNSIGNED NOT NULL DEFAULT 0,
+  i_duration INT(10) UNSIGNED NULL,
+  s_message VARCHAR(500) NULL,
+  fk_i_admin_id INT(10) UNSIGNED NULL,
+  PRIMARY KEY (pk_i_id),
+  INDEX idx_mail_id (fk_i_mail_id, pk_i_id),
+  FOREIGN KEY (fk_i_mail_id) REFERENCES %st_mail_queue (pk_i_id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_unicode_ci'", DB_TABLE_PREFIX, DB_TABLE_PREFIX));
 
   // Index for the history of one object (section + id, ordered by date)
   $log_index = $comm->query(sprintf("SHOW INDEX FROM %st_log WHERE Key_name = 'idx_section_id_date'", DB_TABLE_PREFIX))->result();

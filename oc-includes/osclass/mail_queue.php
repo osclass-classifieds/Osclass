@@ -19,25 +19,37 @@ if(!defined('ABS_PATH')) exit('ABS_PATH is not loaded. Direct access is not allo
 
 
 /**
- * Send one claimed queue row (status SENDING) and store the result.
- * Used by the cron worker, instant mails ($params = original params) and admin "Send now".
+ * Send one claimed queue row (status SENDING) and store the result in the row and its history.
+ * Used by the cron worker, instant mails ($params = original params) and admin "Send now" ($admin_id).
+ * A failed attempt is tried again after the retry delays (default 3, 10 and 60 minutes), then the row is FAILED.
  * Fires actions mail_queue_sent($row) and mail_queue_failed($row).
  *
  * @param array      $row
  * @param array|null $params
+ * @param int        $admin_id
  *
  * @return bool
  */
-function osc_mail_queue_send($row, $params = null) {
+function osc_mail_queue_send($row, $params = null, $admin_id = 0) {
   $mq = MailQueue::newInstance();
   $now = date('Y-m-d H:i:s');
   $instant = is_array($params);
+  $attempt = (int)$row['i_attempts'];
   $note = '';
+
+  // Update only while the row is still ours (not recovered and claimed by another run)
+  $where = array('pk_i_id' => $row['pk_i_id'], 'e_status' => 'SENDING');
+  if((string)$row['s_lock'] != '') {
+    $where['s_lock'] = $row['s_lock'];
+  }
 
   // Expired mail is cancelled instead of being sent late
   if(!empty($row['dt_expire']) && $row['dt_expire'] < $now) {
     $set = array('e_status' => 'CANCELLED', 's_lock' => null, 'dt_lock' => null, 'dt_done' => $now, 's_error' => 'Expired before it could be sent');
-    $mq->update($set, array('pk_i_id' => $row['pk_i_id']));
+    if($mq->update($set, $where)) {
+      $mq->addLog($row['pk_i_id'], 'EXPIRED', $attempt, '', null, $admin_id);
+    }
+
     return false;
   }
 
@@ -69,8 +81,13 @@ function osc_mail_queue_send($row, $params = null) {
     }
   }
 
+  $to = (isset($params['to']) ? $params['to'] : '');
+  $has_recipient = (count(array_filter(array_map('trim', array_map('strval', (is_array($to) ? array_keys($to) : array($to)))), 'strlen')) > 0);
+
   // Keep the transport error text (trigger_error in osc_sendMailNow), normal error handling continues
   $error = '';
+  $permanent = !$has_recipient;
+  $start = microtime(true);
   set_error_handler(function($errno, $errstr) use (&$error) {
     if($errno & (E_USER_ERROR | E_USER_WARNING | E_USER_NOTICE)) {
       $error = (string)$errstr;
@@ -80,53 +97,116 @@ function osc_mail_queue_send($row, $params = null) {
   });
 
   try {
-    $sent = osc_sendMailNow($params, (string)$row['s_type']);
+    $sent = ($has_recipient ? osc_sendMailNow($params, (string)$row['s_type']) : false);
   } catch(Throwable $e) {
     $sent = false;
     $error = $e->getMessage();
   }
 
   restore_error_handler();
+  $duration = (int)round((microtime(true) - $start) * 1000);
+  $error = trim(preg_replace('/\s+/', ' ', html_entity_decode(strip_tags($error), ENT_QUOTES, 'UTF-8')));
   $now = date('Y-m-d H:i:s');
 
   if($sent) {
     $set = array('e_status' => 'SENT', 's_lock' => null, 'dt_lock' => null, 'dt_done' => $now, 's_error' => ($note != '' ? osc_substr(trim($note), 0, 500) : null));
 
-    // One-time codes and passwords: keep only headers in the history
+    // One-time codes and passwords: keep only headers in the history (2 = text removed)
     if($row['b_private'] == 1) {
-      $stored = json_decode((string)$row['s_params'], true);
-      $stored = (is_array($stored) ? $stored : array());
-      $stored['body'] = '';
-      $stored['alt_body'] = '';
-      $set['s_params'] = json_encode($stored, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE | JSON_PARTIAL_OUTPUT_ON_ERROR);
+      $set['s_params'] = osc_mail_queue_strip_body($row['s_params']);
+      $set['b_private'] = 2;
     }
 
-    $mq->update($set, array('pk_i_id' => $row['pk_i_id']));
-    osc_run_hook('mail_queue_sent', array_merge($row, $set));
+    if($mq->update($set, $where)) {
+      $mq->addLog($row['pk_i_id'], 'SENT', $attempt, trim($note), $duration, $admin_id);
+      osc_run_hook('mail_queue_sent', array_merge($row, $set));
+    }
+
     return true;
   }
 
-  $error = osc_substr(trim($note . ($error != '' ? $error : 'Not sent: stopped by a plugin or no recipient')), 0, 500);
+  // Stopped on purpose (plugin filter, no SMTP error): cancel, retrying gives the same answer
+  if($error == '' && $has_recipient) {
+    $set = array('e_status' => 'CANCELLED', 's_lock' => null, 'dt_lock' => null, 'dt_done' => $now, 's_error' => 'Stopped by a plugin');
+    if($mq->update($set, $where)) {
+      $mq->addLog($row['pk_i_id'], 'CANCELLED', $attempt, $set['s_error'], $duration, $admin_id);
+    }
 
-  if((int)$row['i_attempts'] >= osc_mail_queue_max_attempts()) {
-    $set = array('e_status' => 'FAILED', 's_lock' => null, 'dt_lock' => null, 'dt_done' => $now, 's_error' => $error);
-    $mq->update($set, array('pk_i_id' => $row['pk_i_id']));
-    osc_run_hook('mail_queue_failed', array_merge($row, $set));
     return false;
   }
 
-  // Next attempt in 5 minutes, 30 minutes, then every 2 hours
-  $delays = array(1 => 5, 2 => 30);
-  $delay = (isset($delays[(int)$row['i_attempts']]) ? $delays[(int)$row['i_attempts']] : 120);
-  $set = array('e_status' => 'PENDING', 's_lock' => null, 'dt_lock' => null, 'dt_send_after' => date('Y-m-d H:i:s', time() + $delay * 60), 's_error' => $error);
+  // Wrong or missing recipient never works on the next attempt (a wrong sender setting can be fixed, so it is retried)
+  if(!$has_recipient) {
+    $error = 'No recipient';
+  } else if(preg_match('/invalid address:\s*\((to|cc|bcc)\)|at least one recipient/i', $error)) {
+    $permanent = true;
+  }
+
+  $error = osc_substr(trim($note . $error), 0, 500);
+  $delays = osc_mail_queue_retry_delays();
+
+  if($permanent || $attempt > count($delays)) {
+    $set = array('e_status' => 'FAILED', 's_lock' => null, 'dt_lock' => null, 'dt_done' => $now, 's_error' => $error);
+    if($mq->update($set, $where)) {
+      $mq->addLog($row['pk_i_id'], 'FAILED', $attempt, $error, $duration, $admin_id);
+      osc_run_hook('mail_queue_failed', array_merge($row, $set));
+    }
+
+    return false;
+  }
+
+  // Next attempt after 3, 10, then 60 minutes (Settings > Mail queue)
+  $set = array('e_status' => 'PENDING', 's_lock' => null, 'dt_lock' => null, 'dt_send_after' => date('Y-m-d H:i:s', time() + $delays[max(0, $attempt - 1)] * 60), 's_error' => $error);
 
   // Instant mail goes back to the queue: copy its attachments while they still exist
   if($instant && $row['b_attachment'] == 1) {
     $set['s_params'] = json_encode(osc_mail_queue_attachments($row['pk_i_id'], $params), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE | JSON_PARTIAL_OUTPUT_ON_ERROR);
   }
 
-  $mq->update($set, array('pk_i_id' => $row['pk_i_id']));
+  if($mq->update($set, $where)) {
+    $mq->addLog($row['pk_i_id'], 'ERROR', $attempt, $error, $duration, $admin_id);
+  }
+
   return false;
+}
+
+
+/**
+ * Stored params without the email text (private mails after sending)
+ *
+ * @param string $json
+ *
+ * @return string
+ */
+function osc_mail_queue_strip_body($json) {
+  $params = json_decode((string)$json, true);
+  $params = (is_array($params) ? $params : array());
+  $params['body'] = '';
+  $params['alt_body'] = '';
+
+  return json_encode($params, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE | JSON_PARTIAL_OUTPUT_ON_ERROR);
+}
+
+
+/**
+ * Translated mail queue statuses
+ *
+ * @return array
+ */
+function osc_mail_queue_status_labels() {
+  return array('PENDING' => __('Pending'), 'SENDING' => __('Sending'), 'SENT' => __('Sent'), 'FAILED' => __('Failed'), 'CANCELLED' => __('Cancelled'));
+}
+
+
+/**
+ * True when the row can be sent (again): not being sent and its text was not removed after sending (b_private = 2)
+ *
+ * @param array $row
+ *
+ * @return bool
+ */
+function osc_mail_queue_can_send($row) {
+  return ($row['e_status'] != 'SENDING' && (int)$row['b_private'] != 2);
 }
 
 
@@ -173,13 +253,13 @@ function osc_mail_queue_attachments($id, $params) {
 
 
 /**
- * Mail queue worker (minutely cron): recover crashed rows, claim due rows (instant and normal first,
- * then bulk round-robin by group) and send them within the time budget.
+ * Mail queue worker (minutely cron): one run at a time, recover crashed rows, claim due rows
+ * (instant and normal first, then bulk round-robin by group) and send them within the time budget.
  *
- * @return array  sent, not_sent, released
+ * @return array  sent, not_sent, released, busy
  */
 function osc_mail_queue_run() {
-  $result = array('sent' => 0, 'not_sent' => 0, 'released' => 0);
+  $result = array('sent' => 0, 'not_sent' => 0, 'released' => 0, 'busy' => false);
   $mq = MailQueue::newInstance();
 
   // Queue switched off later still sends what is left in it
@@ -187,20 +267,31 @@ function osc_mail_queue_run() {
     return $result;
   }
 
-  $end = microtime(true) + osc_mail_queue_time_budget();
+  // Another run is still sending
+  if(!$mq->lock()) {
+    $result['busy'] = true;
+    return $result;
+  }
+
+  $budget = osc_mail_queue_time_budget();
+  $end = microtime(true) + $budget;
   $max_time = (int)ini_get('max_execution_time');
   if($max_time > 0) {
     $end = min($end, (isset($_SERVER['REQUEST_TIME_FLOAT']) ? (float)$_SERVER['REQUEST_TIME_FLOAT'] : microtime(true)) + $max_time - 5);
   }
 
-  // Rows left in SENDING for 10 minutes: back to the queue, failed after the last attempt
-  foreach($mq->findStuck(date('Y-m-d H:i:s', time() - 600), 100) as $row) {
+  // Rows left in SENDING (crash, timeout): back to the queue, failed after the last attempt
+  foreach($mq->findStuck(date('Y-m-d H:i:s', time() - max(600, $budget + 120)), 100) as $row) {
+    $where = array('pk_i_id' => $row['pk_i_id'], 'e_status' => 'SENDING');
+
     if((int)$row['i_attempts'] >= osc_mail_queue_max_attempts()) {
       $set = array('e_status' => 'FAILED', 's_lock' => null, 'dt_lock' => null, 'dt_done' => date('Y-m-d H:i:s'), 's_error' => 'Sending was interrupted');
-      $mq->update($set, array('pk_i_id' => $row['pk_i_id']));
-      osc_run_hook('mail_queue_failed', array_merge($row, $set));
-    } else {
-      $mq->update(array('e_status' => 'PENDING', 's_lock' => null, 'dt_lock' => null), array('pk_i_id' => $row['pk_i_id']));
+      if($mq->update($set, $where)) {
+        $mq->addLog($row['pk_i_id'], 'FAILED', $row['i_attempts'], $set['s_error']);
+        osc_run_hook('mail_queue_failed', array_merge($row, $set));
+      }
+    } else if($mq->update(array('e_status' => 'PENDING', 's_lock' => null, 'dt_lock' => null, 's_error' => 'Sending was interrupted'), $where)) {
+      $mq->addLog($row['pk_i_id'], 'INTERRUPTED', $row['i_attempts']);
     }
   }
 
@@ -258,17 +349,29 @@ function osc_mail_queue_run() {
   }
 
   if(empty($ids)) {
+    $mq->unlock();
     return $result;
   }
 
   $token = bin2hex(random_bytes(16));
   $rows = $mq->claim($ids, $token);
+  $left = array_column($rows, 'pk_i_id');
 
-  foreach($rows as $i => $row) {
+  // A fatal error in a send: the rows not started yet go back to the queue at once
+  register_shutdown_function(function() use (&$left, $token) {
+    if(!empty($left)) {
+      MailQueue::newInstance()->release($left, $token);
+    }
+  });
+
+  foreach($rows as $row) {
     if(microtime(true) >= $end) {
-      $result['released'] = $mq->release(array_column(array_slice($rows, $i), 'pk_i_id'), $token);
+      $result['released'] = $mq->release($left, $token);
+      $left = array();
       break;
     }
+
+    array_shift($left);
 
     if(osc_mail_queue_send($row)) {
       $result['sent']++;
@@ -277,6 +380,122 @@ function osc_mail_queue_run() {
     }
   }
 
+  $mq->unlock();
+  return $result;
+}
+
+
+/**
+ * Change the status of queue rows from oc-admin. Rows being sent are never changed.
+ * PENDING = send again at the next cron run (attempts start again), SENT / FAILED / CANCELLED = finished.
+ * Fires action mail_queue_status_changed($row, $old_status, $admin_id).
+ *
+ * @param array  $ids
+ * @param string $status
+ * @param int    $admin_id
+ *
+ * @return int  changed rows
+ */
+function osc_mail_queue_set_status($ids, $status, $admin_id = 0) {
+  if(!in_array($status, array('PENDING', 'SENT', 'FAILED', 'CANCELLED'))) {
+    return 0;
+  }
+
+  $mq = MailQueue::newInstance();
+  $now = date('Y-m-d H:i:s');
+  $count = 0;
+
+  foreach($mq->findByIds($ids) as $row) {
+    if($row['e_status'] == 'SENDING' || $row['e_status'] == $status || ($status == 'PENDING' && !osc_mail_queue_can_send($row))) {
+      continue;
+    }
+
+    if($status == 'PENDING') {
+      $set = array('e_status' => 'PENDING', 'i_attempts' => 0, 'dt_send_after' => $now, 'dt_done' => null, 's_error' => null);
+
+      // Sent again on purpose: an old expiry date would cancel it
+      if($row['dt_expire'] != '' && $row['dt_expire'] < $now) {
+        $set['dt_expire'] = null;
+      }
+    } else {
+      $set = array('e_status' => $status, 'dt_done' => $now);
+
+      if($status == 'SENT' && $row['b_private'] == 1) {
+        $set['s_params'] = osc_mail_queue_strip_body($row['s_params']);
+        $set['b_private'] = 2;
+      }
+    }
+
+    if($mq->update($set, array('pk_i_id' => $row['pk_i_id'], 'e_status' => $row['e_status']))) {
+      $mq->addLog($row['pk_i_id'], $status, $row['i_attempts'], '', null, $admin_id);
+      osc_run_hook('mail_queue_status_changed', array_merge($row, $set), $row['e_status'], $admin_id);
+      $count++;
+    }
+  }
+
+  return $count;
+}
+
+
+/**
+ * Send queue rows now from oc-admin (also sent, failed and cancelled ones). What does not fit
+ * into the time limit stays pending and goes with the next cron run.
+ *
+ * @param array $ids
+ * @param int   $admin_id
+ *
+ * @return array  sent, not_sent, queued, skipped
+ */
+function osc_mail_queue_send_now($ids, $admin_id = 0) {
+  $result = array('sent' => 0, 'not_sent' => 0, 'queued' => 0, 'skipped' => 0);
+  $mq = MailQueue::newInstance();
+  $pending = array();
+
+  foreach($mq->findByIds($ids) as $row) {
+    if(!osc_mail_queue_can_send($row)) {
+      $result['skipped']++;
+    } else if($row['e_status'] == 'PENDING') {
+      $set = array('i_attempts' => 0);
+      if($row['dt_expire'] != '' && $row['dt_expire'] < date('Y-m-d H:i:s')) {
+        $set['dt_expire'] = null;
+      }
+
+      $mq->update($set, array('pk_i_id' => $row['pk_i_id'], 'e_status' => 'PENDING'));
+      $pending[] = $row['pk_i_id'];
+    } else if(osc_mail_queue_set_status(array($row['pk_i_id']), 'PENDING', $admin_id) > 0) {
+      $pending[] = $row['pk_i_id'];
+    } else {
+      $result['skipped']++;
+    }
+  }
+
+  $end = microtime(true) + min(30, osc_mail_queue_time_budget());
+  $max_time = (int)ini_get('max_execution_time');
+  if($max_time > 0) {
+    $end = min($end, (isset($_SERVER['REQUEST_TIME_FLOAT']) ? (float)$_SERVER['REQUEST_TIME_FLOAT'] : microtime(true)) + $max_time - 5);
+  }
+
+  $token = bin2hex(random_bytes(16));
+  $rows = $mq->claim($pending, $token);
+  $left = array_column($rows, 'pk_i_id');
+
+  foreach($rows as $row) {
+    if(microtime(true) >= $end) {
+      $result['queued'] = $mq->release($left, $token);
+      break;
+    }
+
+    array_shift($left);
+
+    if(osc_mail_queue_send($row, null, $admin_id)) {
+      $result['sent']++;
+    } else {
+      $result['not_sent']++;
+    }
+  }
+
+  // Claimed by the cron meanwhile: it sends them
+  $result['queued'] += count($pending) - count($rows);
   return $result;
 }
 
@@ -304,7 +523,7 @@ function osc_mail_queue_purge() {
 
 
 /**
- * Delete queue rows (never rows being sent) and their stored attachments
+ * Delete queue rows (never rows being sent), their history and stored attachments
  *
  * @param array $ids
  *
@@ -312,16 +531,21 @@ function osc_mail_queue_purge() {
  */
 function osc_mail_queue_delete($ids) {
   $mq = MailQueue::newInstance();
+  $attachment_ids = $mq->findAttachmentIds($ids);
+  $deleted = $mq->deleteIds($ids);
 
-  foreach($mq->findAttachmentIds($ids) as $id) {
-    $dirs = glob(osc_uploads_path() . 'mail_queue/' . (int)$id . '_*', GLOB_ONLYDIR);
+  // Folders only of rows that are really gone (a row claimed by the cron meanwhile keeps its files)
+  if(!empty($attachment_ids)) {
+    $kept = array_column($mq->findByIds($attachment_ids), 'pk_i_id');
 
-    foreach(($dirs ?: array()) as $dir) {
-      osc_deleteDir($dir);
+    foreach(array_diff($attachment_ids, $kept) as $id) {
+      foreach((glob(osc_uploads_path() . 'mail_queue/' . (int)$id . '_*', GLOB_ONLYDIR) ?: array()) as $dir) {
+        osc_deleteDir($dir);
+      }
     }
   }
 
-  return $mq->deleteIds($ids);
+  return $deleted;
 }
 
 
@@ -336,6 +560,8 @@ function osc_mail_queue_stats() {
   if($stats === null) {
     $data = MailQueue::newInstance()->stats(date('Y-m-d H:i:s', time() - 86400));
     $cron = Cron::newInstance()->getCronByType('MINUTELY');
+    $last_run = (isset($cron['d_last_exec']) && strtotime((string)$cron['d_last_exec']) > 0 ? $cron['d_last_exec'] : '');
+    $next_run = (isset($cron['d_next_exec']) && strtotime((string)$cron['d_next_exec']) > 0 ? $cron['d_next_exec'] : '');
 
     $stats = array(
       'pending' => $data['PENDING'],
@@ -348,8 +574,8 @@ function osc_mail_queue_stats() {
       'late' => ($data['oldest_due'] != '' && strtotime($data['oldest_due']) < time() - 1800),
       'sent_24h' => $data['sent_since'],
       'failed_24h' => $data['failed_since'],
-      'last_run' => (isset($cron['d_last_exec']) ? $cron['d_last_exec'] : ''),
-      'next_run' => (isset($cron['d_next_exec']) ? $cron['d_next_exec'] : ''),
+      'last_run' => $last_run,
+      'next_run' => $next_run,
       'enabled' => osc_mail_queue_enabled(),
       'paused' => osc_mail_queue_paused()
     );

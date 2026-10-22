@@ -686,3 +686,18 @@ CREATE TABLE /*TABLE_PREFIX*/t_mail_queue (
   INDEX idx_to_email (s_to_email),
   INDEX idx_ref (s_ref)
 ) ENGINE=InnoDB DEFAULT CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_unicode_ci';
+
+CREATE TABLE /*TABLE_PREFIX*/t_mail_queue_log (
+  pk_i_id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  fk_i_mail_id BIGINT(20) UNSIGNED NOT NULL,
+  dt_date DATETIME NOT NULL,
+  s_event VARCHAR(20) NOT NULL,
+  i_attempt TINYINT(3) UNSIGNED NOT NULL DEFAULT 0,
+  i_duration INT(10) UNSIGNED NULL,
+  s_message VARCHAR(500) NULL,
+  fk_i_admin_id INT(10) UNSIGNED NULL,
+
+  PRIMARY KEY (pk_i_id),
+  INDEX idx_mail_id (fk_i_mail_id, pk_i_id),
+  FOREIGN KEY (fk_i_mail_id) REFERENCES /*TABLE_PREFIX*/t_mail_queue (pk_i_id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_unicode_ci';

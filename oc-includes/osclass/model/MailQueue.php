@@ -19,7 +19,7 @@ if(!defined('ABS_PATH')) exit('ABS_PATH is not loaded. Direct access is not allo
 
 
 /**
- * Mail queue (t_mail_queue). Priority 1 instant, 2 normal, 3 bulk.
+ * Mail queue (t_mail_queue) and its history (t_mail_queue_log). Priority 1 instant, 2 normal, 3 bulk.
  */
 class MailQueue extends DAO {
   private static $instance;
@@ -63,6 +63,12 @@ class MailQueue extends DAO {
   }
 
 
+  // History table name
+  public function getLogTableName() {
+    return $this->getTablePrefix() . 't_mail_queue_log';
+  }
+
+
   // Ids of due pending rows of one priority, oldest first. With $skip_groups only rows of other named groups.
   public function findDue($priority, $limit, $skip_groups = null) {
     $sql = sprintf("SELECT pk_i_id, s_group FROM %s WHERE e_status = 'PENDING' AND i_priority = %d AND dt_send_after <= '%s'", $this->getTableName(), (int)$priority, date('Y-m-d H:i:s'));
@@ -86,7 +92,7 @@ class MailQueue extends DAO {
 
   // Claim pending rows for one run (safe with parallel runs) and return them in the given order
   public function claim($ids, $token) {
-    $ids = array_values(array_filter(array_map('intval', (array)$ids)));
+    $ids = $this->cleanIds($ids);
     if(empty($ids)) {
       return array();
     }
@@ -106,7 +112,7 @@ class MailQueue extends DAO {
 
   // Give claimed but not sent rows back to the queue
   public function release($ids, $token) {
-    $ids = array_values(array_filter(array_map('intval', (array)$ids)));
+    $ids = $this->cleanIds($ids);
     if(empty($ids)) {
       return 0;
     }
@@ -138,9 +144,37 @@ class MailQueue extends DAO {
   }
 
 
+  // Full rows by ids, in the given order
+  public function findByIds($ids) {
+    $ids = $this->cleanIds($ids);
+    if(empty($ids)) {
+      return array();
+    }
+
+    $list = implode(',', $ids);
+    $result = $this->dao->query(sprintf('SELECT * FROM %s WHERE pk_i_id IN (%s) ORDER BY FIELD(pk_i_id, %s)', $this->getTableName(), $list, $list));
+    if($result) {
+      return $result->result();
+    }
+
+    return array();
+  }
+
+
+  // Ids of pending rows of one group
+  public function findGroupPending($group, $limit = 5000) {
+    $result = $this->dao->query(sprintf("SELECT pk_i_id FROM %s WHERE s_group = '%s' AND e_status = 'PENDING' LIMIT %d", $this->getTableName(), $this->dao->escapeStr((string)$group), (int)$limit));
+    if($result) {
+      return array_column($result->result(), 'pk_i_id');
+    }
+
+    return array();
+  }
+
+
   // Ids among $ids that have stored attachments and are not being sent
   public function findAttachmentIds($ids) {
-    $ids = array_values(array_filter(array_map('intval', (array)$ids)));
+    $ids = $this->cleanIds($ids);
     if(empty($ids)) {
       return array();
     }
@@ -154,9 +188,9 @@ class MailQueue extends DAO {
   }
 
 
-  // Delete rows that are not being sent
+  // Delete rows that are not being sent (history goes with them)
   public function deleteIds($ids) {
-    $ids = array_values(array_filter(array_map('intval', (array)$ids)));
+    $ids = $this->cleanIds($ids);
     if(empty($ids)) {
       return 0;
     }
@@ -166,49 +200,61 @@ class MailQueue extends DAO {
   }
 
 
-  // Change rows in one of $from statuses, by ids or by group
-  public function changeStatus($ids, $group, $from, $values) {
-    $where = array();
-    $ids = array_values(array_filter(array_map('intval', (array)$ids)));
+  // Add a history line of one email
+  public function addLog($mail_id, $event, $attempt = 0, $message = '', $duration = null, $admin_id = null) {
+    $this->dao->from($this->getLogTableName());
+    $this->dao->set(array(
+      'fk_i_mail_id' => (int)$mail_id,
+      'dt_date' => date('Y-m-d H:i:s'),
+      's_event' => osc_substr((string)$event, 0, 20),
+      'i_attempt' => max(0, min(255, (int)$attempt)),
+      'i_duration' => ($duration !== null ? max(0, (int)$duration) : null),
+      's_message' => (trim((string)$message) != '' ? osc_substr(trim((string)$message), 0, 500) : null),
+      'fk_i_admin_id' => ((int)$admin_id > 0 ? (int)$admin_id : null)
+    ));
 
-    if(!empty($ids)) {
-      $where[] = 'pk_i_id IN (' . implode(',', $ids) . ')';
-    } else if(trim((string)$group) != '') {
-      $where[] = "s_group = '" . $this->dao->escapeStr(trim((string)$group)) . "'";
-    } else {
-      return 0;
-    }
-
-    $where[] = "e_status IN ('" . implode("','", array_map(array($this->dao, 'escapeStr'), (array)$from)) . "')";
-
-    $set = array();
-    foreach($values as $k => $v) {
-      if(in_array($k, $this->getFields())) {
-        $set[] = $k . ' = ' . ($v === null ? 'NULL' : "'" . $this->dao->escapeStr((string)$v) . "'");
-      }
-    }
-
-    if(empty($set)) {
-      return 0;
-    }
-
-    $this->dao->query('UPDATE ' . $this->getTableName() . ' SET ' . implode(', ', $set) . ' WHERE ' . implode(' AND ', $where));
-    return $this->dao->affectedRows();
+    return $this->dao->insert();
   }
 
 
-  // Admin list (no body), totals for pagination
+  // History of one email, oldest first, with the admin name
+  public function findLogs($mail_id) {
+    $result = $this->dao->query(sprintf('SELECT l.*, a.s_name AS s_admin_name, a.s_username AS s_admin_username FROM %s l LEFT JOIN %st_admin a ON a.pk_i_id = l.fk_i_admin_id WHERE l.fk_i_mail_id = %d ORDER BY l.pk_i_id ASC LIMIT 500', $this->getLogTableName(), $this->getTablePrefix(), (int)$mail_id));
+    if($result) {
+      return $result->result();
+    }
+
+    return array();
+  }
+
+
+  // Email types in the queue, for the filter
+  public function findTypes() {
+    $result = $this->dao->query(sprintf("SELECT s_type FROM %s WHERE s_type <> '' GROUP BY s_type ORDER BY s_type ASC LIMIT 200", $this->getTableName()));
+    if($result) {
+      return array_column($result->result(), 's_type');
+    }
+
+    return array();
+  }
+
+
+  // Admin list (no body) and the number of matching rows
   public function search($options = array()) {
     $start = (isset($options['start']) ? max(0, (int)$options['start']) : 0);
     $limit = (isset($options['limit']) ? max(1, (int)$options['limit']) : 25);
     $order_column = (isset($options['order_column']) ? (string)$options['order_column'] : 'pk_i_id');
     $order_direction = (isset($options['order_direction']) && strtoupper((string)$options['order_direction']) == 'ASC' ? 'ASC' : 'DESC');
 
-    if(!in_array($order_column, array('pk_i_id', 'dt_send_after', 'dt_done', 's_to_email', 's_subject', 's_type', 's_group', 'i_priority', 'i_attempts'))) {
+    if(!in_array($order_column, array('pk_i_id', 'dt_send_after', 'dt_done', 's_to_email', 's_subject', 's_type', 's_group', 'i_priority', 'i_attempts', 'e_status'))) {
       $order_column = 'pk_i_id';
     }
 
     $where = array();
+
+    if(!empty($options['id'])) {
+      $where[] = 'pk_i_id = ' . (int)$options['id'];
+    }
 
     if(!empty($options['status'])) {
       $where[] = "e_status = '" . $this->dao->escapeStr((string)$options['status']) . "'";
@@ -218,16 +264,10 @@ class MailQueue extends DAO {
       $where[] = 'i_priority = ' . (int)$options['priority'];
     }
 
-    if(isset($options['type']) && $options['type'] != '') {
-      $where[] = "s_type = '" . $this->dao->escapeStr((string)$options['type']) . "'";
-    }
-
-    if(isset($options['group']) && $options['group'] != '') {
-      $where[] = "s_group = '" . $this->dao->escapeStr((string)$options['group']) . "'";
-    }
-
-    if(isset($options['ref']) && $options['ref'] != '') {
-      $where[] = "s_ref = '" . $this->dao->escapeStr((string)$options['ref']) . "'";
+    foreach(array('type' => 's_type', 'group' => 's_group', 'ref' => 's_ref', 'email' => 's_to_email') as $key => $column) {
+      if(isset($options[$key]) && trim((string)$options[$key]) != '') {
+        $where[] = $column . " = '" . $this->dao->escapeStr(trim((string)$options[$key])) . "'";
+      }
     }
 
     if(isset($options['date_from']) && $options['date_from'] != '') {
@@ -269,6 +309,23 @@ class MailQueue extends DAO {
   }
 
 
+  // One worker at a time per site (MySQL releases it when the connection ends, also after a crash)
+  public function lock() {
+    $result = $this->dao->query(sprintf("SELECT GET_LOCK('%s', 0) AS locked", $this->lockName()));
+    if($result) {
+      $row = $result->row();
+      return (isset($row['locked']) && (int)$row['locked'] === 1);
+    }
+
+    return false;
+  }
+
+
+  public function unlock() {
+    $this->dao->query(sprintf("SELECT RELEASE_LOCK('%s')", $this->lockName()));
+  }
+
+
   // Counters: rows per status, oldest due pending send date, sent and failed since $since
   public function stats($since) {
     $stats = array('PENDING' => 0, 'SENDING' => 0, 'SENT' => 0, 'FAILED' => 0, 'CANCELLED' => 0, 'oldest_due' => '', 'sent_since' => 0, 'failed_since' => 0);
@@ -299,6 +356,16 @@ class MailQueue extends DAO {
     }
 
     return $stats;
+  }
+
+
+  private function cleanIds($ids) {
+    return array_values(array_unique(array_filter(array_map('intval', (array)$ids))));
+  }
+
+
+  private function lockName() {
+    return 'osc_mail_queue_' . md5(DB_NAME . '|' . DB_TABLE_PREFIX);
   }
 }
 
