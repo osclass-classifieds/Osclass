@@ -42,7 +42,11 @@ class CAdminSettingsMailqueue extends AdminSecBaseModel {
 
         if($do == 'pause' || $do == 'resume') {
           osc_set_preference('mail_queue_paused', ($do == 'pause' ? 1 : 0), 'osclass', 'BOOLEAN');
-          osc_add_flash_ok_message(($do == 'pause' ? _m('Sending is paused. New emails still wait in the queue.') : _m('Sending is resumed')), 'admin');
+          // The list shows a notice while sending is paused, so only resuming needs a message
+          if($do == 'resume') {
+            osc_add_flash_ok_message(_m('Sending is resumed'), 'admin');
+          }
+
           $this->redirectTo($back_url);
         }
 

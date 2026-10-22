@@ -369,7 +369,8 @@ body .mb-footer {z-index:1;}
 .newflash {float:left;clear:both;width:100%;margin:0 ;padding-right:20px;}
 .newflash:empty {display:none;}
 .newflash .flashmessage, .flashmessage, .flashmessage.flashmessage-inline, .list-fields #fields-empty {z-index:9;position:relative;line-height:18px;font-size:14px;float:left;clear:both;width:100%;margin:0 0 20px 0;background: #fff; border: 1px solid #ccd0d4; border-left-width: 4px; box-shadow: 0 1px 1px rgba(0,0,0,.04);padding: 12px 38px 12px 12px;height:auto;min-height:0;}
-.newflash .flashmessage + .flashmessage, .newflash .flashmessage + #flash_js + .flashmessage {margin-top:-10px;}
+.newflash .flashmessage:not(.hide) {margin-bottom:8px;}
+.newflash .flashmessage + .flashmessage, .newflash .flashmessage + #flash_js + .flashmessage {margin-top:0;}
 .newflash .flashmessage.flashmessage-small, .flashmessage.flashmessage-small {padding: 8px; font-size: 13px; line-height: 17px; width: auto; min-width: 280px; max-width: 100%; border-left-width: 3px; margin-bottom: 12px;}
 .newflash .flashmessage.flashmessage-ok, .flashmessage.flashmessage-ok, .widget-box.widget-ok {border-left-color:#46b450;background-color:#e5f5e6;}
 .newflash .flashmessage.flashmessage-warning, .flashmessage.flashmessage-warning, .widget-box.widget-warning, .list-fields #fields-empty {border-left-color:#ffb900;background-color:#fff9e8;}
@@ -394,7 +395,9 @@ body .mb-footer {z-index:1;}
 img#loading_image { vertical-align: -3px; margin-right: 4px; }
 .flashmessage p {margin:0;}
 .flashmessage p + p {margin-top:8px;}
-.flashmessage.flashmessage-inline {margin:5px 0 20px 0;}
+.flashmessage.flashmessage-inline {margin:0 0 8px 0;}
+.flashmessage.flashmessage-inline:last-child, .flashmessage.flashmessage-inline:has(+ :not(.flashmessage)) {margin-bottom:20px;}
+.newflash:has(.flashmessage:not(.hide)) ~ .grid-first-row .row-wrapper > .flashmessage.flashmessage-inline:first-child {margin-top:-10px;}
 body .osp-st-line.pt601 {top:30px;}
 .htaccess-label {font-size:14px;font-weight:600;}
 ul.version-list {padding-left:21px;list-style-type:disc;margin:5px 0;}

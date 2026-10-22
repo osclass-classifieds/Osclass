@@ -32,6 +32,7 @@ Osclass 8.4.1
 - Only one cron run sends from the queue at a time, an email is never picked by two runs, and emails left half-sent by a crash go back to the queue.
 - Plugins keep calling osc_sendMail() with the same arguments and result. A new "queue" option sets priority, send date, expiry, group and reference. New filter mail_queue_priority, new actions mail_queue_sent, mail_queue_failed, mail_queue_status_changed and admin_mail_queue_table, list filters actions_manage_mail_queue, more_actions_manage_mail_queue, mail_queue_processing_row, mail_queue_bulk_filter, new functions osc_sendMailNow() (always sends at once) and osc_mail_queue_stats() (counters for dashboards).
 - Failed emails now record the full reply of the mail server (code and detail) in the error log, not only the short PHPMailer message.
+- Back office: several messages shown together (saved notice plus warnings on the same page) now sit close together with the same small gap, instead of large empty gaps between them.
 - New Cron setting: how often minutely jobs run through the built-in cron or the cron URL (1 to 60 minutes, default 5). A command line cron with type minutely still runs on every call.
 - Email templates list: plugins can add columns, row actions and a control above the list, and hide or add templates (admin_emails_table, actions_manage_emails, more_actions_manage_emails, emails_processing_row, admin_emails_list, admin_emails_list_top).
 - Email templates list: plugins can add dropdown filters above the list with their own default value (admin_emails_filters).
