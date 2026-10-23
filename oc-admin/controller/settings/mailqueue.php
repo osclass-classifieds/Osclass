@@ -50,6 +50,27 @@ class CAdminSettingsMailqueue extends AdminSecBaseModel {
           $this->redirectTo($back_url);
         }
 
+        // Send due emails now (no cron): one worker batch, same limits and lock as the cron
+        if($do == 'process') {
+          $result = osc_mail_queue_run();
+
+          if($result['busy']) {
+            osc_add_flash_warning_message(_m('Emails are being sent right now. Try again in a minute.'), 'admin');
+          } else if($result['sent'] + $result['not_sent'] == 0) {
+            osc_add_flash_info_message(_m('No email is due right now'), 'admin');
+          }
+
+          if($result['sent'] > 0) {
+            osc_add_flash_ok_message(sprintf(_mn('One email has been sent', '%s emails have been sent', $result['sent']), $result['sent']), 'admin');
+          }
+
+          if($result['not_sent'] > 0) {
+            osc_add_flash_error_message(sprintf(_mn('One email was not sent. See the error in its history.', '%s emails were not sent. See the error in their history.', $result['not_sent']), $result['not_sent']), 'admin');
+          }
+
+          $this->redirectTo($back_url);
+        }
+
         // Back to the detail when the action came from there
         if(Params::getParam('from') == 'view' && count($ids) == 1) {
           $back_url = osc_admin_base_url(true) . '?page=settings&action=mailqueue_view&id=' . $ids[0];

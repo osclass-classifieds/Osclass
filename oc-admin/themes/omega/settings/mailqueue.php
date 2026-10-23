@@ -21,6 +21,7 @@ function addHelp() {
   echo '<p>' . __('With the mail queue on, emails wait in the queue and the cron sends them in small batches. Codes, password resets and account emails are still sent right away and listed here too.') . '</p>';
   echo '<p>' . __('An email that cannot be sent is tried again after 3, 10 and 60 minutes, then it is marked as failed. Open an email to see its text and every attempt with the error.') . '</p>';
   echo '<p>' . __('The queue needs a real cron on your server that calls the cron URL at least every 5 minutes. Without it, queued emails are not sent.') . '</p>';
+  echo '<p>' . __('No cron yet? Click Send pending emails to send the waiting emails yourself. Each click sends one batch, so the server is not overloaded.') . '</p>';
 }
 
 osc_add_hook('help_box','addHelp');
@@ -31,6 +32,9 @@ function customPageHeader() {
   <h1><?php _e('Mail queue'); ?>
     <a href="<?php echo osc_admin_base_url(true); ?>?page=settings&amp;action=mailserver#mail-queue" class="btn ico ico-32 ico-engine float-right" title="<?php echo osc_esc_html(__('Mail queue settings')); ?>"></a>
     <a href="#" class="btn ico ico-32 ico-help float-right"></a>
+    <?php if(osc_mail_queue_stats()['pending'] > 0 && !osc_mail_queue_paused()) { ?>
+      <a href="<?php echo osc_esc_html(osc_admin_base_url(true) . '?page=settings&action=mailqueue_action&' . osc_csrf_token_url() . '&do=process'); ?>" class="btn btn-green ico float-right" title="<?php echo osc_esc_html(sprintf(__('Sends up to %d due emails now, the same batch the cron sends. Click again for the next batch.'), osc_mail_queue_per_run())); ?>"><?php _e('Send pending emails'); ?></a>
+    <?php } ?>
   </h1>
   <?php
 }
