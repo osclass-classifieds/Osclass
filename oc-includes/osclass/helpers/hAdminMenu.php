@@ -121,8 +121,10 @@ function osc_draw_admin_menu() {
       foreach($aSubmenu as $aSub) {
         $sub_url = str_replace(array(osc_admin_base_url(true) . '?' , osc_admin_base_url()) , '' , $aSub[1]);
 
-        if(strpos($actual_url, $sub_url) === 0 && strlen($sub_url) > $match_length) {
+        // longest matching url wins (route=x-ai must not stay active on route=x-ai-jobs)
+        if($sub_url != '' && strpos($actual_url, $sub_url) === 0 && strlen($sub_url) > $match_length) {
           $current_submenu = $aSub[2];
+          $match_length = strlen($sub_url);
         }
       }
     }

@@ -768,7 +768,7 @@ input.input-actions {height:24px}
 #filter-select {margin-left:10px;border-top-right-radius:0;border-bottom-right-radius:0;}
 #report-filter-status, #widget-filter-section {margin-left:10px;}
 input.input-has-select {box-shadow:none;background-color:#f3f3f3;border-left:0;margin-right:5px;margin-left:-5px;}
-.btn-mini {height:16px;font-size:11px;font-weight:bold;line-height:14px;height:24px;padding-top:4px;padding-bottom:5px}
+.btn-mini {font-size:13px;font-weight:600;line-height:14px;height:26px;padding-top:5px;padding-bottom:5px}
 input.btn-mini, button.btn-mini {height:28px;padding-top:6px}
 #shortcut-filters .submit-right {border-top-left-radius:0;border-bottom-left-radius:0;}
 .display-select-top #shortcut-filters #fPattern {border-top-left-radius:4px;border-bottom-left-radius:4px;}
@@ -875,6 +875,27 @@ input[type=color]::-webkit-color-swatch-wrapper { padding: 0; }
 input[type=color]::-webkit-color-swatch { border: none;box-shadow:0 0 0 1px rgba(0,0,0,0.2) inset;border-radius:50px;}
 
 .action-renderplugin input[type="text"], .action-renderplugin input[type="number"], .action-renderplugin input[type="search"], .action-renderplugin input[type="password"], .action-renderplugin input[type="tel"], .action-renderplugin input[type="phone"], .action-renderplugin input[type="email"], .action-renderplugin input[type="date"], .action-renderplugin input[type="datetime"] {width:240px;max-width:100%;min-width:0;}
+/* Plugin settings: field sizes (input-small/medium/large, xlarge; select-small/medium/large) */
+.action-renderplugin input:is([type=text],[type=number],[type=password],[type=email],[type=tel],[type=url],[type=search]).input-small {width:72px;}
+.action-renderplugin input:is([type=text],[type=number],[type=password],[type=email],[type=tel],[type=url],[type=search]).input-medium {width:160px;}
+.action-renderplugin input:is([type=text],[type=number],[type=password],[type=email],[type=tel],[type=url],[type=search]).input-large {width:320px;min-width:0;}
+.action-renderplugin input:is([type=text],[type=number],[type=password],[type=email],[type=tel],[type=url],[type=search]).xlarge {width:480px;}
+.action-renderplugin input:is([type=text],[type=number],[type=password],[type=email],[type=tel],[type=url],[type=search]).input-full, .action-renderplugin textarea.input-full {width:100%;max-width:720px;}
+.action-renderplugin select.select-small {width:120px;}
+.action-renderplugin select.select-medium {width:240px;}
+.action-renderplugin select.select-large {width:320px;}
+/* Plugin settings: input inside a sentence ("Gate everyone for [ 2 ] hours") */
+.action-renderplugin input:is([type=text],[type=number]).in-text, .form-label-checkbox input:is([type=text],[type=number]).in-text {float:none;display:inline-block;width:64px;min-width:0;margin:-6px 6px 0 6px;text-align:center;vertical-align:middle;}
+.form-controls.has-intext-input {line-height:31px;}
+/* Plugin settings: gap between fields placed side by side, new line after a textarea */
+.form-horizontal .form-controls > :is(input:not([type=hidden]),select,.inpt-desc,.input-desc,.inp-desc,.btn,form.inline) + :is(input[type=text],input[type=number],input[type=password],input[type=email],input[type=tel],input[type=url],select,.btn,button,input[type=submit],form.inline) {margin-left:8px;}
+.form-horizontal .form-controls > textarea + :is(input,select,.btn,button,form.inline,textarea) {clear:left;margin-left:0;margin-top:8px;}
+.form-horizontal .form-controls > form.inline {float:left;margin:0;}
+.form-horizontal .form-controls > form.inline .btn {margin:0;}
+/* Plugin settings: a plain value shown next to a button ("Not read yet [Check now]") */
+.form-horizontal .form-controls .form-static {float:left;min-height:31px;line-height:31px;margin-right:12px;font-size:14px;color:#32373c;}
+.form-horizontal .form-controls .form-static + form.inline, .form-horizontal .form-controls .form-static + .btn {margin-left:0;}
+.form-horizontal .form-controls .help-box {clear:both;}
 .action-renderplugin .form-actions {padding: 15px; background: transparent; border-top: 1px solid rgba(0,0,0,0.11);}
 .action-renderplugin .render-title {margin-bottom:18px;}
 select {min-width:90px;}
