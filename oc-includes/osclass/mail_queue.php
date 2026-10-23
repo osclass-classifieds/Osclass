@@ -364,7 +364,14 @@ function osc_mail_queue_run() {
     }
   });
 
+  $pause = osc_mail_queue_pause();
+
   foreach($rows as $row) {
+    // Wait between emails, not before the first one
+    if($pause > 0 && $result['sent'] + $result['not_sent'] > 0) {
+      usleep($pause * 1000);
+    }
+
     if(microtime(true) >= $end) {
       $result['released'] = $mq->release($left, $token);
       $left = array();
@@ -479,7 +486,13 @@ function osc_mail_queue_send_now($ids, $admin_id = 0) {
   $rows = $mq->claim($pending, $token);
   $left = array_column($rows, 'pk_i_id');
 
+  $pause = osc_mail_queue_pause();
+
   foreach($rows as $row) {
+    if($pause > 0 && $result['sent'] + $result['not_sent'] > 0) {
+      usleep($pause * 1000);
+    }
+
     if(microtime(true) >= $end) {
       $result['queued'] = $mq->release($left, $token);
       break;

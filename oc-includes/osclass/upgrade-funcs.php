@@ -974,6 +974,7 @@ if($current_version < 841) {
   $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'mail_queue_bulk_per_run', '30', 'INTEGER')", DB_TABLE_PREFIX));
   $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'mail_queue_group_per_run', '15', 'INTEGER')", DB_TABLE_PREFIX));
   $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'mail_queue_time_budget', '40', 'INTEGER')", DB_TABLE_PREFIX));
+  $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'mail_queue_pause', '100', 'INTEGER')", DB_TABLE_PREFIX));
   $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'mail_queue_retry_delays', '3,10,60', 'STRING')", DB_TABLE_PREFIX));
   $comm->query(sprintf("DELETE FROM %st_preference WHERE s_section = 'osclass' AND s_name = 'mail_queue_max_attempts'", DB_TABLE_PREFIX));
   $comm->query(sprintf("INSERT INTO %st_preference VALUES ('osclass', 'mail_queue_keep_days', '14', 'INTEGER')", DB_TABLE_PREFIX));

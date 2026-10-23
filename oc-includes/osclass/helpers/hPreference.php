@@ -2851,6 +2851,16 @@ function osc_mail_queue_time_budget() {
 }
 
 /**
+ * Gets milliseconds the mail queue waits between two emails (0 = no pause)
+ *
+ * @return int
+ */
+function osc_mail_queue_pause() {
+  $value = getPreference('mail_queue_pause');
+  return ($value === '' ? 100 : max(0, min((int)$value, 5000)));
+}
+
+/**
  * Gets minutes to wait before each retry of a failed email (default 3, 10, 60; "0" = no retry), at most 10 retries
  *
  * @return array

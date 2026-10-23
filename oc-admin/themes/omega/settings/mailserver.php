@@ -286,6 +286,15 @@ osc_current_admin_theme_path( 'parts/header.php' );
         </div>
 
         <div class="form-row">
+          <div class="form-label"><?php _e('Pause between emails'); ?></div>
+          <div class="form-controls has-intext-input">
+            <input type="number" class="input-small in-text" name="mail_queue_pause" min="0" max="5000" value="<?php echo (int)osc_mail_queue_pause(); ?>" />
+            <?php _e('milliseconds'); ?>
+            <div class="help-box"><?php _e('Short wait after each email, so sending does not overload your server or mail provider. 100 ms suits most sites. Enter 0 for no wait.'); ?></div>
+          </div>
+        </div>
+
+        <div class="form-row">
           <div class="form-label"><?php _e('Try again after'); ?></div>
           <div class="form-controls has-intext-input">
             <input type="text" class="input-medium in-text mail-queue-delays" name="mail_queue_retry_delays" value="<?php echo osc_esc_html(implode(', ', osc_mail_queue_retry_delays())); ?>" />

@@ -81,6 +81,7 @@ class CAdminSettingsMailserver extends AdminSecBaseModel
         $iUpdated += osc_set_preference('mail_queue_bulk_per_run', max(1, min(5000, (int)Params::getParam('mail_queue_bulk_per_run'))), 'osclass', 'INTEGER');
         $iUpdated += osc_set_preference('mail_queue_group_per_run', max(1, min(5000, (int)Params::getParam('mail_queue_group_per_run'))), 'osclass', 'INTEGER');
         $iUpdated += osc_set_preference('mail_queue_time_budget', max(5, min(3600, (int)Params::getParam('mail_queue_time_budget'))), 'osclass', 'INTEGER');
+        $iUpdated += osc_set_preference('mail_queue_pause', max(0, min(5000, (int)Params::getParam('mail_queue_pause'))), 'osclass', 'INTEGER');
         $iUpdated += osc_set_preference('mail_queue_retry_delays', (!empty($delays) ? implode(',', array_slice($delays, 0, 10)) : '0'), 'osclass', 'STRING');
         $iUpdated += osc_set_preference('mail_queue_keep_days', max(1, min(365, (int)Params::getParam('mail_queue_keep_days'))), 'osclass', 'INTEGER');
         $iUpdated += osc_set_preference('mail_queue_instant_types', implode(',', array_unique($instant_types)), 'osclass', 'STRING');
