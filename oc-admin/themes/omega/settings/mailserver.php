@@ -252,53 +252,53 @@ osc_current_admin_theme_path( 'parts/header.php' );
 
         <div class="form-row">
           <div class="form-label"><?php _e('Emails per cron run'); ?></div>
-          <div class="form-controls has-intext-input">
-            <input type="number" class="input-small in-text" name="mail_queue_per_run" min="1" max="5000" value="<?php echo (int)osc_mail_queue_per_run(); ?>" />
-            <?php _e('emails'); ?>
+          <div class="form-controls">
+            <input type="number" class="input-small" name="mail_queue_per_run" min="1" max="5000" value="<?php echo (int)osc_mail_queue_per_run(); ?>" />
+            <div class="inpt-desc"><?php _e('emails'); ?></div>
             <div class="help-box"><?php _e('Instant and normal emails go first. Match the limits of your mail provider.'); ?></div>
           </div>
         </div>
 
         <div class="form-row">
           <div class="form-label"><?php _e('Bulk emails per cron run'); ?></div>
-          <div class="form-controls has-intext-input">
-            <input type="number" class="input-small in-text" name="mail_queue_bulk_per_run" min="1" max="5000" value="<?php echo (int)osc_mail_queue_bulk_per_run(); ?>" />
-            <?php _e('emails'); ?>
+          <div class="form-controls">
+            <input type="number" class="input-small" name="mail_queue_bulk_per_run" min="1" max="5000" value="<?php echo (int)osc_mail_queue_bulk_per_run(); ?>" />
+            <div class="inpt-desc"><?php _e('emails'); ?></div>
             <div class="help-box"><?php _e('Alert digests and other bulk emails, part of the emails per run.'); ?></div>
           </div>
         </div>
 
         <div class="form-row">
           <div class="form-label"><?php _e('Bulk emails per group'); ?></div>
-          <div class="form-controls has-intext-input">
-            <input type="number" class="input-small in-text" name="mail_queue_group_per_run" min="1" max="5000" value="<?php echo (int)osc_mail_queue_group_per_run(); ?>" />
-            <?php _e('emails'); ?>
+          <div class="form-controls">
+            <input type="number" class="input-small" name="mail_queue_group_per_run" min="1" max="5000" value="<?php echo (int)osc_mail_queue_group_per_run(); ?>" />
+            <div class="inpt-desc"><?php _e('emails'); ?></div>
             <div class="help-box"><?php _e('Most bulk emails of one group (for example one sender) in one run, so one big mailing does not hold back the others.'); ?></div>
           </div>
         </div>
 
         <div class="form-row">
           <div class="form-label"><?php _e('Time limit per run'); ?></div>
-          <div class="form-controls has-intext-input">
-            <input type="number" class="input-small in-text" name="mail_queue_time_budget" min="5" max="3600" value="<?php echo (int)osc_mail_queue_time_budget(); ?>" />
-            <?php _e('seconds'); ?>
+          <div class="form-controls">
+            <input type="number" class="input-small" name="mail_queue_time_budget" min="5" max="3600" value="<?php echo (int)osc_mail_queue_time_budget(); ?>" />
+            <div class="inpt-desc"><?php _e('seconds'); ?></div>
           </div>
         </div>
 
         <div class="form-row">
           <div class="form-label"><?php _e('Pause between emails'); ?></div>
-          <div class="form-controls has-intext-input">
-            <input type="number" class="input-small in-text" name="mail_queue_pause" min="0" max="5000" value="<?php echo (int)osc_mail_queue_pause(); ?>" />
-            <?php _e('milliseconds'); ?>
+          <div class="form-controls">
+            <input type="number" class="input-small" name="mail_queue_pause" min="0" max="5000" value="<?php echo (int)osc_mail_queue_pause(); ?>" />
+            <div class="inpt-desc"><?php _e('milliseconds'); ?></div>
             <div class="help-box"><?php _e('Short wait after each email, so sending does not overload your server or mail provider. 100 ms suits most sites. Enter 0 for no wait.'); ?></div>
           </div>
         </div>
 
         <div class="form-row">
           <div class="form-label"><?php _e('Try again after'); ?></div>
-          <div class="form-controls has-intext-input">
-            <input type="text" class="input-medium in-text mail-queue-delays" name="mail_queue_retry_delays" value="<?php echo osc_esc_html(implode(', ', osc_mail_queue_retry_delays())); ?>" />
-            <?php _e('minutes'); ?>
+          <div class="form-controls">
+            <input type="text" class="input-medium mail-queue-delays" name="mail_queue_retry_delays" value="<?php echo osc_esc_html(implode(', ', osc_mail_queue_retry_delays())); ?>" />
+            <div class="inpt-desc"><?php _e('minutes'); ?></div>
             <div class="help-box"><?php _e('Minutes between the attempts, comma separated, at most 10. With 3, 10, 60 a failed email is tried again after 3, 10 and 60 minutes, then it is marked as failed. Enter 0 to never try again.'); ?></div>
           </div>
         </div>
