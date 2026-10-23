@@ -898,6 +898,8 @@ input[type=color]::-webkit-color-swatch { border: none;box-shadow:0 0 0 1px rgba
 .form-horizontal .form-controls .help-box {clear:both;}
 .action-renderplugin .form-actions {padding: 15px; background: transparent; border-top: 1px solid rgba(0,0,0,0.11);}
 .action-renderplugin .render-title {margin-bottom:18px;}
+/* Plugin settings: a wide table inside a form scrolls in its box instead of widening the page (fieldset defaults to min-width:min-content) */
+.action-renderplugin fieldset {min-width:0;}
 select {min-width:90px;}
 body select, body .ui-widget select {font-size:14px;}
 .widget-box h4 {margin:0 0 6px 0;font-size:13px;color:#111;font-weight:bold;}
@@ -1738,7 +1740,7 @@ body .ui-dialog .table {min-width:0;}
   .form-horizontal .form-row:not(.has-blank-label) {margin-top:10px;}
   .form-horizontal .form-controls {width:100%;margin-left:0;max-width:100%;}
   .page-plugins {overflow-x:auto;}
-  .page-plugins:not(.file-none) > *, .page-appearance.author-osclasspoint {width:auto;min-width:827px;}
+  body:not(.plugin-responsive) .page-plugins:not(.file-none) > *, body.page-plugins:not(.file-none):not(.plugin-responsive) > *, .page-appearance.author-osclasspoint:not(.plugin-responsive) {width:auto;min-width:827px;}
   body .mb-head {padding:15px 15px 15px 15px;}
   body .mb-body {padding:15px;}
   body .mb-head ul.mb-menu {margin-bottom:-22px;margin-top:-7px;}
