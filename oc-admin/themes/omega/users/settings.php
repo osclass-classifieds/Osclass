@@ -139,8 +139,8 @@ osc_current_admin_theme_path('parts/header.php');
       <div class="form-row">
         <div class="form-label"><?php _e('Minimum password length'); ?></div>
         <div class="form-controls">
-          <input type="text" class="input-small in-text" name="password_min_length" value="<?php echo osc_esc_html(osc_password_min_length()); ?>" />
-          <?php _e('characters'); ?>
+          <input type="text" class="input-small" name="password_min_length" value="<?php echo osc_esc_html(osc_password_min_length()); ?>" />
+          <div class="inpt-desc"><?php _e('characters'); ?></div>
 
           <span class="help-box"><?php _e('Checked on registration, password change, password reset and when an admin sets a password. Plugins can add more rules.'); ?></span>
         </div>
