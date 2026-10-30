@@ -58,21 +58,11 @@ $(function(){
         $containterOffset = $('.table-contains-actions').first().offset();
       }
       $thisOffset = $(this).offset();
-	  var extra_offset = 0;
-	  colStatusBorderOuterWidth = $('td.col-status-border').outerWidth();
-	  if(!isNaN(colStatusBorderOuterWidth)){
-		extra_offset += colStatusBorderOuterWidth;
-	  }
-	  colStatusOuterWidth = $('td.col-status').outerWidth();
-	  if(!isNaN(colStatusOuterWidth)){
-		extra_offset += colStatusOuterWidth;
-	  }
-	  colBulkactionsOuterWidth = $('td.col-bulkactions').outerWidth();
-	  if(!isNaN(colBulkactionsOuterWidth)){
-		extra_offset += colBulkactionsOuterWidth;
-	  }
+      // the bar starts at the cell that holds the actions (any column order, with or without status and bulk columns) and ends at the row end
+      var $cell = $actions.closest('td');
+      var extra_offset = $cell.offset().left - $containterOffset.left + ($container.is('div') ? $container.scrollLeft() : 0) - 1;
       $rowActions.empty().append($actions.clone()).css({
-			width: $(this).width() - extra_offset + 0,   // update 420, originally +14
+			width: $(this).offset().left + $(this).width() - $cell.offset().left + 1,
 			top: ($thisOffset.top - 13 - $containterOffset.top) + $(this).height()-1,
         left: extra_offset
       }).show();
