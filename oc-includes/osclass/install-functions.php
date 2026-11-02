@@ -328,7 +328,7 @@ function oc_install() {
 
     if($error_num == 0) {
       $error_num = $master_conn->getErrorLevel();
-      $error_desc = $comaster_connnn->getErrorDesc();
+      $error_desc = $master_conn->getErrorDesc();
     }
 
     if($error_num > 0) {
