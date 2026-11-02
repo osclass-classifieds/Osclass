@@ -207,6 +207,7 @@ class CAdminSettingsMailqueue extends AdminSecBaseModel {
         $this->_exportVariableToView('withFilters', $mailQueueDataTable->withFilters());
         $this->_exportVariableToView('mail_queue_stats', osc_mail_queue_stats());
         $this->_exportVariableToView('mail_queue_types', MailQueue::newInstance()->findTypes());
+        $this->_exportVariableToView('mail_queue_queue_types', MailQueue::newInstance()->findQueueTypes());
 
         $bulk_options = array(
           array('value' => '', 'data-dialog-content' => '', 'label' => __('Bulk actions')),

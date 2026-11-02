@@ -55,6 +55,13 @@ function customHead() {
         title: '<?php echo osc_esc_js(__('Delete email')); ?>'
       });
 
+      $(".mail-queue-views a").click(function() {
+        $(".mail-queue-views a").removeClass("btn-submit");
+        $(this).addClass("btn-submit");
+        $(".mail-queue-body").css("width", $(this).data("width"));
+        return false;
+      });
+
       $("#mail-delete").click(function() {
         $("#dialog-mail-delete").dialog('open');
         return false;
@@ -129,7 +136,9 @@ $events = array(
   'PENDING' => array(__('Back in the queue'), __('Marked as pending'))
 );
 
-$body = (isset($params['body']) ? (string)$params['body'] : '');
+// Preview as the customer gets it: html and plain text. Plugins that style the email at send time return the finished versions here
+$preview = osc_apply_filter('mail_queue_preview', array('html' => (isset($params['body']) ? (string)$params['body'] : ''), 'text' => (isset($params['alt_body']) ? (string)$params['alt_body'] : '')), $mail, $params);
+$body = (string)$preview['html'];
 
 osc_current_admin_theme_path('parts/header.php');
 ?>
@@ -227,7 +236,15 @@ osc_current_admin_theme_path('parts/header.php');
     <p><?php _e('The text was removed after sending because it contained a code, link or password for one person.'); ?></p>
   </div>
 <?php } else { ?>
+  <div class="mail-queue-views">
+    <a href="#" class="btn btn-submit" data-width="100%"><?php _e('Desktop'); ?></a>
+    <a href="#" class="btn" data-width="375px"><?php _e('Mobile'); ?></a>
+  </div>
   <iframe class="mail-queue-body" sandbox="" referrerpolicy="no-referrer" title="<?php echo osc_esc_html(__('Email text')); ?>" srcdoc="<?php echo htmlspecialchars($body, ENT_QUOTES, 'UTF-8'); ?>"></iframe>
+  <?php if(trim((string)$preview['text']) !== '') { ?>
+    <h2 class="render-title separate-top"><?php _e('Plain text version'); ?></h2>
+    <pre class="mail-queue-text"><?php echo osc_esc_html((string)$preview['text']); ?></pre>
+  <?php } ?>
 <?php } ?>
 
 <form id="dialog-mail-delete" method="post" action="<?php echo osc_admin_base_url(true); ?>" class="has-form-actions hide">

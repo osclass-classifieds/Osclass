@@ -251,6 +251,16 @@ class MailQueue extends DAO {
   }
 
 
+  // Queue types in use (default, marketing, ...), for the admin filter
+  public function findQueueTypes() {
+    $result = $this->dao->query(sprintf("SELECT s_queue_type FROM %s GROUP BY s_queue_type ORDER BY s_queue_type ASC LIMIT 50", $this->getTableName()));
+    if($result) {
+      return array_column($result->result(), 's_queue_type');
+    }
+
+    return array();
+  }
+
   // Admin list (no body) and the number of matching rows
   public function search($options = array()) {
     $start = (isset($options['start']) ? max(0, (int)$options['start']) : 0);
@@ -258,7 +268,7 @@ class MailQueue extends DAO {
     $order_column = (isset($options['order_column']) ? (string)$options['order_column'] : 'pk_i_id');
     $order_direction = (isset($options['order_direction']) && strtoupper((string)$options['order_direction']) == 'ASC' ? 'ASC' : 'DESC');
 
-    if(!in_array($order_column, array('pk_i_id', 'dt_send_after', 'dt_done', 's_to_email', 's_subject', 's_type', 's_group', 'i_priority', 'i_attempts', 'e_status'))) {
+    if(!in_array($order_column, array('pk_i_id', 'dt_send_after', 'dt_done', 's_to_email', 's_subject', 's_type', 's_queue_type', 's_group', 'i_priority', 'i_attempts', 'e_status'))) {
       $order_column = 'pk_i_id';
     }
 
@@ -276,7 +286,7 @@ class MailQueue extends DAO {
       $where[] = 'i_priority = ' . (int)$options['priority'];
     }
 
-    foreach(array('type' => 's_type', 'group' => 's_group', 'ref' => 's_ref', 'email' => 's_to_email') as $key => $column) {
+    foreach(array('type' => 's_type', 'queue_type' => 's_queue_type', 'group' => 's_group', 'ref' => 's_ref', 'email' => 's_to_email') as $key => $column) {
       if(isset($options[$key]) && trim((string)$options[$key]) != '') {
         $where[] = $column . " = '" . $this->dao->escapeStr(trim((string)$options[$key])) . "'";
       }
@@ -299,7 +309,7 @@ class MailQueue extends DAO {
     $sql_where = (count($where) > 0 ? ' WHERE ' . implode(' AND ', $where) : '');
     $data = array('rows' => array(), 'total_filtered' => 0);
 
-    $result = $this->dao->query('SELECT pk_i_id, i_priority, e_status, s_type, s_group, s_ref, s_to_email, s_subject, i_attempts, b_attachment, b_private, s_error, dt_created, dt_send_after, dt_expire, dt_lock, dt_done FROM ' . $this->getTableName() . $sql_where . ' ORDER BY ' . $order_column . ' ' . $order_direction . ($order_column != 'pk_i_id' ? ', pk_i_id ' . $order_direction : '') . ' LIMIT ' . $start . ', ' . $limit);
+    $result = $this->dao->query('SELECT pk_i_id, i_priority, e_status, s_type, s_queue_type, s_group, s_ref, s_to_email, s_subject, i_attempts, b_attachment, b_private, s_error, dt_created, dt_send_after, dt_expire, dt_lock, dt_done FROM ' . $this->getTableName() . $sql_where . ' ORDER BY ' . $order_column . ' ' . $order_direction . ($order_column != 'pk_i_id' ? ', pk_i_id ' . $order_direction : '') . ' LIMIT ' . $start . ', ' . $limit);
     if($result) {
       $data['rows'] = $result->result();
     }

@@ -75,6 +75,7 @@ class MailQueueDataTable extends DataTable {
     $this->addSortColumn('to', 's_to_email');
     $this->addSortColumn('subject', 's_subject');
     $this->addSortColumn('type', 's_type');
+    $this->addSortColumn('queue_type', 's_queue_type');
     $this->addSortColumn('priority', 'i_priority');
     $this->addSortColumn('attempts', 'i_attempts');
     $this->addSortColumn('created', 'pk_i_id');
@@ -86,6 +87,7 @@ class MailQueueDataTable extends DataTable {
     $this->addSourceColumn('to', 's_to_email');
     $this->addSourceColumn('subject', 's_subject|s_error');
     $this->addSourceColumn('type', 's_type|s_group');
+    $this->addSourceColumn('queue_type', 's_queue_type');
     $this->addSourceColumn('priority', 'i_priority');
     $this->addSourceColumn('attempts', 'i_attempts');
     $this->addSourceColumn('created', 'dt_created');
@@ -99,6 +101,7 @@ class MailQueueDataTable extends DataTable {
     $this->addColumn('to', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('to', $sort, $direction)) . '">' . __('Recipient') . '</a>');
     $this->addColumn('subject', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('subject', $sort, $direction)) . '">' . __('Subject') . '</a>');
     $this->addColumn('type', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('type', $sort, $direction)) . '">' . __('Type') . '</a>');
+    $this->addColumn('queue_type', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('queue_type', $sort, $direction)) . '">' . __('Queue') . '</a>');
     $this->addColumn('priority', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('priority', $sort, $direction)) . '">' . __('Priority') . '</a>');
     $this->addColumn('attempts', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('attempts', $sort, $direction)) . '">' . __('Attempts') . '</a>');
     $this->addColumn('created', '<a href="' . osc_esc_html($url_base . $this->buildSortArgs('created', $sort, $direction)) . '">' . __('Created') . '</a>');
@@ -196,6 +199,7 @@ class MailQueueDataTable extends DataTable {
           $row['type'] .= '<span class="mail-queue-sub">' . __('Group') . ': <a href="' . osc_esc_html($this->buildFilterUrl(array('group' => $aRow['s_group']))) . '">' . osc_esc_html($aRow['s_group']) . '</a></span>';
         }
 
+        $row['queue_type'] = '<a href="' . osc_esc_html($this->buildFilterUrl(array('queue_type' => $aRow['s_queue_type']))) . '">' . osc_esc_html($aRow['s_queue_type']) . '</a>';
         $row['priority'] = (isset($priorities[(int)$aRow['i_priority']]) ? $priorities[(int)$aRow['i_priority']] : (int)$aRow['i_priority']);
         $row['attempts'] = sprintf(__('%1$d of %2$d'), (int)$aRow['i_attempts'], max($max_attempts, (int)$aRow['i_attempts']));
         $row['created'] = osc_format_date($aRow['dt_created'], $date_format);
@@ -236,6 +240,7 @@ class MailQueueDataTable extends DataTable {
       'status' => (isset($statuses[$status]) ? $statuses[$status] : ''),
       'priority' => (isset($params['priority']) ? (int)$params['priority'] : 0),
       'type' => (isset($params['type']) ? trim((string)$params['type']) : ''),
+      'queue_type' => (isset($params['queue_type']) ? trim((string)$params['queue_type']) : ''),
       'group' => (isset($params['group']) ? trim((string)$params['group']) : ''),
       'ref' => (isset($params['ref']) ? trim((string)$params['ref']) : ''),
       'email' => (isset($params['email']) ? trim((string)$params['email']) : ''),

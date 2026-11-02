@@ -159,6 +159,7 @@ $aData = __get('aData');
 $aRawRows = __get('aRawRows');
 $stats = __get('mail_queue_stats');
 $types = __get('mail_queue_types');
+$queue_types = __get('mail_queue_queue_types');
 $withFilters = __get('withFilters');
 $sort = Params::getParam('sort');
 $direction = Params::getParam('direction');
@@ -187,7 +188,7 @@ if($cron_age < 0) {
 } else {
   $cron_ago = sprintf(_n('%d day ago', '%d days ago', floor($cron_age / 86400)), floor($cron_age / 86400));
 }
-$filter_params = array('mailId', 'email', 'type', 'group', 'ref', 'priority', 'date_from', 'date_to');
+$filter_params = array('mailId', 'email', 'type', 'queue_type', 'group', 'ref', 'priority', 'date_from', 'date_to');
 
 osc_current_admin_theme_path('parts/header.php');
 ?>
@@ -234,6 +235,17 @@ osc_current_admin_theme_path('parts/header.php');
                 <option value=""><?php _e('Choose an option'); ?></option>
                 <?php foreach($types as $type) { ?>
                   <option value="<?php echo osc_esc_html($type); ?>" <?php echo (Params::getParam('type') == $type ? 'selected="selected"' : ''); ?>><?php echo osc_esc_html($type); ?></option>
+                <?php } ?>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-label"><?php _e('Queue'); ?></div>
+            <div class="form-controls">
+              <select name="queue_type">
+                <option value=""><?php _e('Choose an option'); ?></option>
+                <?php foreach($queue_types as $queue_type) { ?>
+                  <option value="<?php echo osc_esc_html($queue_type); ?>" <?php echo (Params::getParam('queue_type') == $queue_type ? 'selected="selected"' : ''); ?>><?php echo osc_esc_html($queue_type); ?></option>
                 <?php } ?>
               </select>
             </div>

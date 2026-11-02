@@ -2315,7 +2315,10 @@ h1 a.btn.mail-queue-head-btn {margin-left:8px;}
 .mail-queue-settings .has-intext-input > input.in-text[name="mail_queue_keep_days"] {margin-left:5px;}
 .mail-queue-settings input.mail-queue-delays {width:160px;text-align:left;}
 .mail-queue-settings input.mail-queue-types {width:100%;max-width:720px;box-sizing:border-box;}
-.mail-queue-body {display:block;width:100%;min-height:520px;box-sizing:border-box;border:1px solid #ccd0d4;background:#fff;}
+.mail-queue-body {display:block;width:100%;max-width:100%;min-height:520px;box-sizing:border-box;border:1px solid #ccd0d4;background:#fff;}
+.mail-queue-views {margin:0 0 10px;overflow:hidden;}
+.mail-queue-views .btn {margin:0 8px 0 0;}
+.mail-queue-text {white-space:pre-wrap;word-break:break-word;max-width:100%;box-sizing:border-box;margin:0;padding:12px 16px;border:1px solid #ccd0d4;background:#fff;font:13px/1.5 monospace;}
 @media screen and (max-width:767px) {
   .mail-queue-health {grid-template-columns:repeat(2,minmax(0,1fr));}
   .mail-queue-health > div:nth-child(3) {border-left:0;}
