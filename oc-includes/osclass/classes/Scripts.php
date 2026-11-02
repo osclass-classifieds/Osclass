@@ -153,18 +153,13 @@ class Scripts extends Dependencies {
           if(strpos($url, osc_base_url()) !== false && !osc_string_contains_array($url, $banned_words)) {
             $internal[] = $id;
 
-            if(is_file($path) && is_readable($path)){
-              $modtime = filemtime($path);
-            } else {
-              $modtime = date('YmdHis');
-            }
-
-            $name .= $id . '_' . $modtime . ';';
+            // footprint: change time and size of the file (missing file = 0, so the name stays the same)
+            $name .= $id . '_' . (is_file($path) && is_readable($path) ? filemtime($path) . '-' . filesize($path) : 0) . ';';
           }
         }
       }
 
-      $name = md5($name) . '.js';
+      $name = md5($name . ($compress ? 'min' : 'raw')) . '.js';
       $save_path = osc_uploads_path() . 'minify/';
       $save_url = str_replace(osc_base_path(), osc_base_url(), $save_path);
 
@@ -190,18 +185,23 @@ class Scripts extends Dependencies {
                   $minifier->add($path);
                 } else {
                   $file = file_get_contents($path);
-                  $content .= $file;
+                  $content .= $file . PHP_EOL . ';' . PHP_EOL;
                 }
               }
             }
           }
         }
 
+        // write a temp file first, so a request never gets a half-written file
+        $tmp = $save_path . uniqid('tmp') . '.js';
+
         if($compress) {
-          $minifier->minify($save_path . $name);
+          $minifier->minify($tmp);
         } else {
-          file_put_contents($save_path . $name, $content);
+          file_put_contents($tmp, $content);
         }
+
+        rename($tmp, $save_path . $name);
       }
 
       // print merged, it should contain all dependencies

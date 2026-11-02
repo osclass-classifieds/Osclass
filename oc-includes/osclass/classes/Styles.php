@@ -98,24 +98,25 @@ class Styles {
             $url = substr($url, 0, strpos($url, '?v='));
           }
 
+          // same folder names as the merge below, so the footprint reads the real file
+          if(strpos($url, osc_base_url()) !== false) {
+            $url = str_replace('/oc-content/', '/' . osc_content_folder() . '/', $url);
+            $url = str_replace('/oc-includes/', '/' . osc_includes_folder() . '/', $url);
+          }
+
           $path = str_replace(osc_base_url(), osc_base_path(), $url);
 
           // font and awesome are blocked names, these styles will not be minified
           if(strpos($url, osc_base_url()) !== false && !osc_string_contains_array($url, $banned_words)) {
             $internal[] = $id;
 
-            if(is_file($path) && is_readable($path)){
-              $modtime = filemtime($path);
-            } else {
-              $modtime = date('YmdHis');
-            }
-
-            $name .= $id . '_' . $modtime . ';';
+            // footprint: change time and size of the file (missing file = 0, so the name stays the same)
+            $name .= $id . '_' . (is_file($path) && is_readable($path) ? filemtime($path) . '-' . filesize($path) : 0) . ';';
           }
         }
       }
 
-      $name = md5($name) . '.css';
+      $name = md5($name . ($compress ? 'min' : 'raw')) . '.css';
       $save_path = osc_uploads_path() . 'minify/';
       $save_url = str_replace(osc_base_path(), osc_base_url(), $save_path);
 
@@ -140,19 +141,27 @@ class Styles {
                 if($compress) {
                   $minifier->add($path);
                 } else {
-                  $file = file_get_contents($path);
-                  $content .= $file;
+                  // relative url() would point from the merged file's folder, so make it relative to the source file
+                  $file = preg_replace_callback('/url\((["\']?)(?!data:|https?:|\/|#)([^"\')]+)\1\)/i', function($m) use ($url) {
+                    return 'url(' . dirname($url) . '/' . $m[2] . ')';
+                  }, file_get_contents($path));
+                  $content .= $file . PHP_EOL;
                 }
               }
             }
           }
         }
 
+        // write a temp file first, so a request never gets a half-written file
+        $tmp = $save_path . uniqid('tmp') . '.css';
+
         if($compress) {
-          $minifier->minify($save_path . $name);
+          $minifier->minify($tmp);
         } else {
-          file_put_contents($save_path . $name, $content);
+          file_put_contents($tmp, $content);
         }
+
+        rename($tmp, $save_path . $name);
       }
 
       foreach($this->styles as $id => $css) {
