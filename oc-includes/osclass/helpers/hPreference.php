@@ -2851,6 +2851,16 @@ function osc_mail_queue_time_budget() {
 }
 
 /**
+ * Gets seconds the second pass (emails of a queue type other than default) may spend sending in one cron run
+ *
+ * @return int
+ */
+function osc_mail_queue_other_time_budget() {
+  $value = (int)getPreference('mail_queue_other_time_budget');
+  return ($value > 0 ? min($value, 3600) : 15);
+}
+
+/**
  * Gets milliseconds the mail queue waits between two emails (0 = no pause)
  *
  * @return int

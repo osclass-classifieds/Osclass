@@ -126,6 +126,10 @@ if(is_array($cron)) {
       }
     }
 
+    // Second mail pass (other queue types) after the plugin jobs, with its own lock and time budget: it never holds back the first pass
+    $mail_queue_other = osc_mail_queue_run_other();
+    $messages[] = ' >>> ' . sprintf(__('Executed explicit function "%s"'), 'osc_mail_queue_run_other') . ' ' . json_encode($mail_queue_other);
+
     $messages[] = ' > ' . sprintf(__('Cron type "%s" finished at %s'), 'MINUTELY', date('Y-m-d H:i:s'));
   }
 }

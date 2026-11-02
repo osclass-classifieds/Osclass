@@ -618,7 +618,9 @@ function osc_doRequestQuick($url, $_data, $timeout = 2) {
  *   'priority' => 'INSTANT' (send now, logged), 'NORMAL' (next cron run) or 'BULK' (paced),
  *   'send_after' => unix time, 'expire' => unix time (cancel instead of sending late),
  *   'group' => fairness key for bulk mails (max 40 chars), 'ref' => plugin reference (max 64 chars),
- *   'private' => true to remove the body after sending (one-time codes)
+ *   'private' => true to remove the body after sending (one-time codes),
+ *   'queue_type' => processing path of the row (a-z, 0-9, _ and -, max 20 chars, default 'default'). Rows of another type are never
+ *                   sent inside the request or by the first pass of the worker, only by osc_mail_queue_run_other()
  * )
  *
  * @param array  $params
@@ -663,7 +665,9 @@ function osc_sendMail($params, $type = '') {
 
   $now = time();
   $send_after = (isset($queue['send_after']) && (int)$queue['send_after'] > $now ? (int)$queue['send_after'] : $now);
-  $instant = ($priority == 'INSTANT' && $send_after <= $now);
+  $queue_type = osc_substr(preg_replace('/[^a-z0-9_-]/', '', strtolower(isset($queue['queue_type']) && is_scalar($queue['queue_type']) ? (string)$queue['queue_type'] : '')), 0, 20);
+  $queue_type = ($queue_type != '' ? $queue_type : 'default');
+  $instant = ($priority == 'INSTANT' && $send_after <= $now && $queue_type == 'default');
   $to = (isset($params['to']) ? $params['to'] : '');
   $private_types = array('user_validation', 'user_forgot_password', 'new_email', 'alert_validation', 'item_validation', 'item_validation_non_register_user', 'new_admin');
   $json_flags = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE | JSON_PARTIAL_OUTPUT_ON_ERROR;
@@ -685,7 +689,8 @@ function osc_sendMail($params, $type = '') {
     'dt_send_after' => date('Y-m-d H:i:s', $send_after),
     'dt_expire' => (isset($queue['expire']) && (int)$queue['expire'] > 0 ? date('Y-m-d H:i:s', (int)$queue['expire']) : null),
     'dt_lock' => ($instant ? date('Y-m-d H:i:s', $now) : null),
-    's_lock' => ($instant ? bin2hex(random_bytes(16)) : null)
+    's_lock' => ($instant ? bin2hex(random_bytes(16)) : null),
+    's_queue_type' => $queue_type
   );
 
   // Not due before its attachment copies are stored (the cron could take it in between)

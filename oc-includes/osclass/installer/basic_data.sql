@@ -201,6 +201,7 @@ INSERT INTO /*TABLE_PREFIX*/t_preference VALUES
 ,('osclass', 'mail_queue_bulk_per_run', '30', 'INTEGER')
 ,('osclass', 'mail_queue_group_per_run', '15', 'INTEGER')
 ,('osclass', 'mail_queue_time_budget', '40', 'INTEGER')
+,('osclass', 'mail_queue_other_time_budget', '15', 'INTEGER')
 ,('osclass', 'mail_queue_pause', '100', 'INTEGER')
 ,('osclass', 'mail_queue_retry_delays', '3,10,60', 'STRING')
 ,('osclass', 'mail_queue_keep_days', '14', 'INTEGER')

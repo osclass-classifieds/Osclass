@@ -56,7 +56,8 @@ class MailQueue extends DAO {
       'dt_send_after',
       'dt_expire',
       'dt_lock',
-      'dt_done'
+      'dt_done',
+      's_queue_type'
     );
 
     $this->setFields($array_fields);
@@ -69,9 +70,9 @@ class MailQueue extends DAO {
   }
 
 
-  // Ids of due pending rows of one priority, oldest first. With $skip_groups only rows of other named groups.
+  // Ids of due pending rows of the default queue type and one priority, oldest first. With $skip_groups only rows of other named groups.
   public function findDue($priority, $limit, $skip_groups = null) {
-    $sql = sprintf("SELECT pk_i_id, s_group FROM %s WHERE e_status = 'PENDING' AND i_priority = %d AND dt_send_after <= '%s'", $this->getTableName(), (int)$priority, date('Y-m-d H:i:s'));
+    $sql = sprintf("SELECT pk_i_id, s_group FROM %s WHERE e_status = 'PENDING' AND s_queue_type = 'default' AND i_priority = %d AND dt_send_after <= '%s'", $this->getTableName(), (int)$priority, date('Y-m-d H:i:s'));
 
     if(is_array($skip_groups)) {
       $sql .= ' AND s_group IS NOT NULL';
@@ -82,6 +83,17 @@ class MailQueue extends DAO {
     }
 
     $result = $this->dao->query($sql . ' ORDER BY dt_send_after ASC LIMIT ' . max(1, (int)$limit));
+    if($result) {
+      return $result->result();
+    }
+
+    return array();
+  }
+
+
+  // Due pending rows of every other queue type (second pass), most urgent and oldest first
+  public function findDueOther($limit) {
+    $result = $this->dao->query(sprintf("SELECT * FROM %s WHERE e_status = 'PENDING' AND s_queue_type <> 'default' AND dt_send_after <= '%s' ORDER BY i_priority ASC, dt_send_after ASC LIMIT %d", $this->getTableName(), date('Y-m-d H:i:s'), max(1, (int)$limit)));
     if($result) {
       return $result->result();
     }
@@ -309,9 +321,9 @@ class MailQueue extends DAO {
   }
 
 
-  // One worker at a time per site (MySQL releases it when the connection ends, also after a crash)
-  public function lock() {
-    $result = $this->dao->query(sprintf("SELECT GET_LOCK('%s', 0) AS locked", $this->lockName()));
+  // One worker at a time per site (MySQL releases it when the connection ends, also after a crash). $part '' = first pass, 'other' = second pass
+  public function lock($part = '') {
+    $result = $this->dao->query(sprintf("SELECT GET_LOCK('%s', 0) AS locked", $this->lockName($part)));
     if($result) {
       $row = $result->row();
       return (isset($row['locked']) && (int)$row['locked'] === 1);
@@ -321,8 +333,8 @@ class MailQueue extends DAO {
   }
 
 
-  public function unlock() {
-    $this->dao->query(sprintf("SELECT RELEASE_LOCK('%s')", $this->lockName()));
+  public function unlock($part = '') {
+    $this->dao->query(sprintf("SELECT RELEASE_LOCK('%s')", $this->lockName($part)));
   }
 
 
@@ -364,8 +376,8 @@ class MailQueue extends DAO {
   }
 
 
-  private function lockName() {
-    return 'osc_mail_queue_' . md5(DB_NAME . '|' . DB_TABLE_PREFIX);
+  private function lockName($part = '') {
+    return 'osc_mail_queue_' . ($part != '' ? $part . '_' : '') . md5(DB_NAME . '|' . DB_TABLE_PREFIX);
   }
 }
 

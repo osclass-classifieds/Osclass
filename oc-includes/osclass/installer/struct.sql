@@ -678,9 +678,11 @@ CREATE TABLE /*TABLE_PREFIX*/t_mail_queue (
   dt_expire DATETIME NULL,
   dt_lock DATETIME NULL,
   dt_done DATETIME NULL,
+  s_queue_type VARCHAR(20) NOT NULL DEFAULT 'default',
 
   PRIMARY KEY (pk_i_id),
   INDEX idx_status_priority_send (e_status, i_priority, dt_send_after, s_group),
+  INDEX idx_status_queue_send (e_status, s_queue_type, i_priority, dt_send_after),
   INDEX idx_status_done (e_status, dt_done),
   INDEX idx_group_status (s_group, e_status),
   INDEX idx_to_email (s_to_email),

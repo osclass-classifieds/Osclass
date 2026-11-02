@@ -253,8 +253,9 @@ function osc_mail_queue_attachments($id, $params) {
 
 
 /**
- * Mail queue worker (minutely cron): one run at a time, recover crashed rows, claim due rows
+ * Mail queue worker, first pass (minutely cron): one run at a time, recover crashed rows, claim due rows of the default queue type
  * (instant and normal first, then bulk round-robin by group) and send them within the time budget.
+ * Rows of any other queue type (t_mail_queue.s_queue_type) are left to osc_mail_queue_run_other().
  *
  * @return array  sent, not_sent, released, busy
  */
@@ -393,6 +394,94 @@ function osc_mail_queue_run() {
 
 
 /**
+ * Mail queue worker, second pass: rows of every queue type other than 'default' (for example 'marketing'), with its own lock and
+ * time budget (Settings: mail_queue_other_time_budget), so a long or throttled second pass never holds back the first one.
+ * For each row the filter mail_queue_sender($sender, $row, $wait) may choose how it is sent: true (the start value) = no plugin cares (sent
+ * like any mail, with the pause between emails), false = nothing may be sent now (the pass stops, the rows stay pending for the next run),
+ * anything else = chosen, the plugin changes the transport for this one send (hook pre_send_mail) and may wait up to $wait seconds
+ * for a sender to become free. After the send the action mail_queue_sender_done($row, $sender, $sent) runs.
+ *
+ * @return array  sent, not_sent, released, busy, waiting
+ */
+function osc_mail_queue_run_other() {
+  $result = array('sent' => 0, 'not_sent' => 0, 'released' => 0, 'busy' => false, 'waiting' => false);
+  $mq = MailQueue::newInstance();
+
+  if(osc_mail_queue_paused() || (!osc_mail_queue_enabled() && !$mq->hasOpen())) {
+    return $result;
+  }
+
+  // Nothing due: no lock, no work
+  $per_run = osc_mail_queue_per_run();
+  $rows = $mq->findDueOther($per_run);
+  if(empty($rows)) {
+    return $result;
+  }
+
+  if(!$mq->lock('other')) {
+    $result['busy'] = true;
+    return $result;
+  }
+
+  $end = microtime(true) + osc_mail_queue_other_time_budget();
+  $max_time = (int)ini_get('max_execution_time');
+  if($max_time > 0) {
+    $end = min($end, (isset($_SERVER['REQUEST_TIME_FLOAT']) ? (float)$_SERVER['REQUEST_TIME_FLOAT'] : microtime(true)) + $max_time - 5);
+  }
+
+  $token = bin2hex(random_bytes(16));
+  $left = array();
+  $pause = osc_mail_queue_pause();
+
+  // A fatal error in a send: the row not finished goes back to the queue at once
+  register_shutdown_function(function() use (&$left, $token) {
+    if(!empty($left)) {
+      MailQueue::newInstance()->release($left, $token);
+    }
+  });
+
+  while(!empty($rows) && !$result['waiting'] && microtime(true) < $end) {
+    foreach($rows as $row) {
+      if(microtime(true) >= $end) {
+        break 2;
+      }
+
+      $sender = osc_apply_filter('mail_queue_sender', true, $row, max(0, $end - microtime(true)));
+      if($sender === false) {
+        $result['waiting'] = true;
+        break;
+      }
+
+      if($sender === true && $pause > 0 && $result['sent'] + $result['not_sent'] > 0) {
+        usleep($pause * 1000);
+      }
+
+      $claimed = $mq->claim(array($row['pk_i_id']), $token);
+      if(empty($claimed)) {
+        continue;
+      }
+
+      $left = array($row['pk_i_id']);
+      $sent = osc_mail_queue_send($claimed[0]);
+      $left = array();
+      osc_run_hook('mail_queue_sender_done', $claimed[0], $sender, $sent);
+
+      if($sent) {
+        $result['sent']++;
+      } else {
+        $result['not_sent']++;
+      }
+    }
+
+    $rows = ($result['waiting'] ? array() : $mq->findDueOther($per_run));
+  }
+
+  $mq->unlock('other');
+  return $result;
+}
+
+
+/**
  * Change the status of queue rows from oc-admin. Rows being sent are never changed.
  * PENDING = send again at the next cron run (attempts start again), SENT / FAILED / CANCELLED = finished.
  * Fires action mail_queue_status_changed($row, $old_status, $admin_id).
@@ -457,8 +546,13 @@ function osc_mail_queue_send_now($ids, $admin_id = 0) {
   $result = array('sent' => 0, 'not_sent' => 0, 'queued' => 0, 'skipped' => 0);
   $mq = MailQueue::newInstance();
   $pending = array();
+  $other = array();
 
   foreach($mq->findByIds($ids) as $row) {
+    if((string)$row['s_queue_type'] != 'default') {
+      $other[] = $row['pk_i_id'];
+    }
+
     if(!osc_mail_queue_can_send($row)) {
       $result['skipped']++;
     } else if($row['e_status'] == 'PENDING') {
@@ -475,6 +569,10 @@ function osc_mail_queue_send_now($ids, $admin_id = 0) {
       $result['skipped']++;
     }
   }
+
+  // Other queue types are sent by their own pass (their own sender), never from here
+  $queued_other = count(array_intersect($pending, $other));
+  $pending = array_values(array_diff($pending, $other));
 
   $end = microtime(true) + min(30, osc_mail_queue_time_budget());
   $max_time = (int)ini_get('max_execution_time');
@@ -508,7 +606,7 @@ function osc_mail_queue_send_now($ids, $admin_id = 0) {
   }
 
   // Claimed by the cron meanwhile: it sends them
-  $result['queued'] += count($pending) - count($rows);
+  $result['queued'] += count($pending) - count($rows) + $queued_other;
   return $result;
 }
 
