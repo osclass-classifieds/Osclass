@@ -1033,6 +1033,13 @@ if($current_version < 841) {
     $comm->query(sprintf('ALTER TABLE %st_log ADD INDEX idx_section_id_date (s_section, fk_i_id, dt_date);', DB_TABLE_PREFIX));
   }
 
+  // Reports: reporter name and email (guest access by key), conversation party of comments, statuses that say whose turn it is (runs once, see hReport.php)
+  osc_ensure_reports_tables();
+  if(strlen((string)osc_get_preference('report_secret')) < 32) {
+    osc_set_preference('report_secret', osc_genRandomPassword(48));
+  }
+  osc_ensure_report_rewrite_rules();
+
   $updated_version = 841;       // Version 8.4.1
 }
 

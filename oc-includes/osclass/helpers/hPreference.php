@@ -1721,6 +1721,7 @@ function osc_rewrite_report_rules_map() {
     $map['^' . $report_user . '/([0-9]+)/?$'] = 'index.php?page=report&action=user&id=$1';
   }
   if($report_view != '') {
+    $map['^' . $report_view . '/([0-9]+)/([a-f0-9]{32})/?$'] = 'index.php?page=report&action=view&id=$1&key=$2';
     $map['^' . $report_view . '/([0-9]+)/?$'] = 'index.php?page=report&action=view&id=$1';
   }
 

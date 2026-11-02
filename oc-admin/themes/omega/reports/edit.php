@@ -33,13 +33,13 @@ function addHelp() {
   echo '<p>' . __('Keep the report open while you investigate. Closing statuses (Resolved, Rejected, Cancelled) end the ticket. Reopen puts it back to In progress.') . '</p>';
   echo '<p><strong>' . __('Statuses') . '</strong></p>';
   echo '<ul>';
-  echo '<li><strong>' . osc_report_status_label('submitted') . '</strong>: ' . __('New report.') . '</li>';
+  echo '<li><strong>' . osc_report_status_label('waiting_admin') . '</strong>: ' . __('New report, or the customer replied. It is your turn.') . '</li>';
+  echo '<li><strong>' . osc_report_status_label('waiting_customer') . '</strong>: ' . __('You replied or asked for feedback. It is the customer\'s turn.') . '</li>';
   echo '<li><strong>' . osc_report_status_label('in_review') . '</strong>: ' . __('Under review.') . '</li>';
   echo '<li><strong>' . osc_report_status_label('on_hold') . '</strong>: ' . __('Paused') . '</li>';
-  echo '<li><strong>' . osc_report_status_label('awaiting_feedback') . '</strong>: ' . __('Ask the reported user for a reply on front.') . '</li>';
   echo '<li><strong>' . osc_report_status_label('resolved') . '</strong> / <strong>' . osc_report_status_label('rejected') . '</strong> / <strong>' . osc_report_status_label('cancelled') . '</strong>: ' . __('Close the report.') . '</li>';
   echo '</ul>';
-  echo '<p>' . __('Typical flow: Submitted to In progress to Resolved (or Rejected / Cancelled).') . '</p>';
+  echo '<p>' . __('Replies switch the status automatically between Waiting for admin and Waiting for customer. The reporter and the reported user each have their own conversation with you, also without an account (link with access key in their emails).') . '</p>';
 }
 
 osc_add_hook('help_box','addHelp');
@@ -87,7 +87,7 @@ if($report['b_open']) {
   $actions[] = '<a class="btn float-left" href="'.osc_admin_base_url(true).'?page=reports&amp;action=status&amp;id='.$report['pk_i_id'].'&amp;'.$csrf_token_url.'&amp;value=rejected">'.__('Reject').'</a>';
   $actions[] = '<a class="btn float-left" href="'.osc_admin_base_url(true).'?page=reports&amp;action=status&amp;id='.$report['pk_i_id'].'&amp;'.$csrf_token_url.'&amp;value=cancelled">'.__('Cancel').'</a>';
 
-  if($report['fk_i_user_id'] > 0 && osc_reports_feedback_enabled() && $report['s_status'] != 'awaiting_feedback') {
+  if($report['fk_i_user_id'] > 0 && osc_reports_feedback_enabled() && $report['s_status'] != 'waiting_customer') {
     $actions[] = '<a class="btn float-left" href="'.osc_admin_base_url(true).'?page=reports&amp;action=request_feedback&amp;id='.$report['pk_i_id'].'&amp;'.$csrf_token_url.'">'.__('Request feedback').'</a>';
   }
 } else {
@@ -120,8 +120,22 @@ if($report['fk_i_reporter_user_id'] > 0) {
 
 $actions = osc_apply_filter('report_edit_actions', $actions, $report);
 
-$reporter_name = ($reporter !== false ? (string)$reporter['s_name'] : __('Unknown'));
-$can_notify_reported = ((int)$report['fk_i_user_id'] > 0 || ($item !== false && !empty($item['s_contact_email'])));
+$reporter_contact = osc_report_party_contact($report, 'reporter');
+$reported_contact = osc_report_party_contact($report, 'reported');
+$reporter_name = ($reporter !== false ? (string)$reporter['s_name'] : ($reporter_contact['name'] != '' ? $reporter_contact['name'] . ($reporter_contact['email'] != '' ? ' <' . $reporter_contact['email'] . '>' : '') : __('Unknown')));
+$can_notify_reporter = ($reporter_contact['email'] != '');
+$can_notify_reported = ($reported_contact['email'] != '');
+$default_party = osc_report_default_party($report, $comments);
+$parties = array();
+if($reporter_contact['email'] != '' || $reporter_contact['user_id'] > 0) {
+  $parties['reporter'] = __('Report created by');
+}
+if($reported_contact['email'] != '' || $reported_contact['user_id'] > 0) {
+  $parties['reported'] = __('Reported user');
+}
+if(empty($parties)) {
+  $parties[$default_party] = ($default_party == 'reported' ? __('Reported user') : __('Report created by'));
+}
 ?>
 
 <?php osc_current_admin_theme_path('parts/header.php'); ?>
@@ -315,20 +329,21 @@ $can_notify_reported = ((int)$report['fk_i_user_id'] > 0 || ($item !== false && 
     <?php if(!empty($comments)) { ?>
       <?php foreach($comments as $comment) {
         $is_admin = ($comment['fk_i_admin_id'] > 0);
-        $is_creator = (!$is_admin && $comment['fk_i_user_id'] > 0 && (int)$comment['fk_i_user_id'] === (int)$report['fk_i_reporter_user_id']);
-        $is_reported = (!$is_admin && $comment['fk_i_user_id'] > 0 && (int)$comment['fk_i_user_id'] === (int)$report['fk_i_user_id']);
+        $comment_party = osc_report_comment_party($comment, $report);
+        $is_creator = (!$is_admin && $comment_party == 'reporter');
+        $is_reported = (!$is_admin && $comment_party == 'reported');
         $msg_class = ($is_admin ? 'report-message-admin' : ($is_reported ? 'report-message-user' : 'report-message-reporter'));
         $author = '-';
         $role = __('User');
 
         if($is_admin) {
           $author = ($comment['s_admin_name'] != '' ? $comment['s_admin_name'] : __('Admin'));
-          $role = __('Admin');
+          $role = __('Admin') . ' &rarr; ' . ($comment_party == 'reported' ? __('Reported user') : __('Report created by'));
         } else if($is_reported) {
-          $author = (string)$comment['s_user_name'];
+          $author = ((string)$comment['s_user_name'] != '' ? (string)$comment['s_user_name'] : $reported_contact['name']);
           $role = __('Reported user');
         } else if($is_creator) {
-          $author = (string)$comment['s_user_name'];
+          $author = ((string)$comment['s_user_name'] != '' ? (string)$comment['s_user_name'] : $reporter_contact['name']);
           $role = __('Report created by');
         } else if($comment['fk_i_user_id'] > 0) {
           $author = (string)$comment['s_user_name'];
@@ -370,7 +385,24 @@ $can_notify_reported = ((int)$report['fk_i_user_id'] > 0 || ($item !== false && 
         <div class="form-label"><?php _e('Add reply'); ?></div>
         <div class="form-controls">
           <textarea id="comment" name="comment" rows="4"></textarea>
-          <span class="help-inline"><?php _e('Visible to the reported user on front. The user who created the report has no front access.'); ?></span>
+          <span class="help-inline"><?php _e('Only the person you reply to sees the reply. The reporter and the reported user never see each other\'s conversation.'); ?></span>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-label"><?php _e('Reply to'); ?></div>
+        <div class="form-controls">
+          <select name="party" id="report-party">
+            <?php foreach($parties as $code => $label) { ?>
+              <option value="<?php echo $code; ?>" <?php if($code == $default_party) echo 'selected'; ?>><?php echo $label; ?></option>
+            <?php } ?>
+          </select>
+          <?php foreach(array('reporter', 'reported') as $code) { ?>
+            <?php $front_url = osc_report_access_url($report, $code); ?>
+            <?php if(isset($parties[$code]) && osc_report_access_key($report, $code) != '') { ?>
+              <span class="help-inline report-front-link" data-party="<?php echo $code; ?>"><?php _e('Link to the conversation for this person'); ?>: <a href="<?php echo osc_esc_html($front_url); ?>" target="_blank" rel="noopener"><?php echo osc_esc_html($front_url); ?></a></span>
+            <?php } ?>
+          <?php } ?>
         </div>
       </div>
 
@@ -382,7 +414,7 @@ $can_notify_reported = ((int)$report['fk_i_user_id'] > 0 || ($item !== false && 
               <option value="<?php echo osc_esc_html($code); ?>" <?php if($report['s_status'] == $code) echo 'selected'; ?>><?php echo $label; ?></option>
             <?php } ?>
           </select>
-          <span class="help-inline"><?php printf(__('The reported user can reply on front only when the status is %s'), osc_report_status_label('awaiting_feedback')); ?></span>
+          <span class="help-inline"><?php printf(__('Keep the status unchanged and it switches to %s after your reply.'), osc_report_status_label('waiting_customer')); ?></span>
         </div>
       </div>
 
@@ -391,13 +423,13 @@ $can_notify_reported = ((int)$report['fk_i_user_id'] > 0 || ($item !== false && 
         <div class="form-controls">
           <div class="form-label-checkbox">
             <label>
-              <input type="checkbox" name="notify_reporter" value="1" <?php if(!($report['fk_i_reporter_user_id'] > 0)) echo 'disabled="disabled"'; ?> />
+              <input type="checkbox" name="notify_reporter" value="1" <?php if(!$can_notify_reporter) { echo 'disabled="disabled"'; } else if($default_party == 'reporter') { echo 'checked="checked"'; } ?> />
               <?php _e('Notify report creator by email'); ?>
             </label>
           </div>
           <div class="form-label-checkbox">
             <label>
-              <input type="checkbox" name="notify_reported" value="1" <?php if(!$can_notify_reported) echo 'disabled="disabled"'; ?> />
+              <input type="checkbox" name="notify_reported" value="1" <?php if(!$can_notify_reported) { echo 'disabled="disabled"'; } else if($default_party == 'reported') { echo 'checked="checked"'; } ?> />
               <?php _e('Notify reported user by email'); ?>
             </label>
           </div>

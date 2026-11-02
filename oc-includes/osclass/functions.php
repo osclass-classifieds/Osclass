@@ -3269,7 +3269,7 @@ function osc_admin_toolbar_reports() {
     return;
   }
 
-  $total = Report::newInstance()->countByStatus('submitted');
+  $total = Report::newInstance()->countByStatus('waiting_admin');
   if($total > 0) {
     $title = '<i class="circle circle-red">' . $total . '</i>' . __('New reports');
 
@@ -3277,7 +3277,7 @@ function osc_admin_toolbar_reports() {
       array (
         'id' => 'reports' ,
         'title' => $title ,
-        'href' => osc_admin_base_url(true) . '?page=reports&status=submitted' ,
+        'href' => osc_admin_base_url(true) . '?page=reports&status=waiting_admin' ,
         'meta' => array ('class' => 'action-btn action-btn-black')
       )
     );

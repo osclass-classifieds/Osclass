@@ -29,7 +29,9 @@ class CWebReport extends BaseModel {
 
   //Business Layer...
   public function doModel() {
-    if(!osc_reports_enabled()) {
+    // Contact form conversations stay reachable when only contact messages are stored as reports
+    $conversation = in_array($this->action, array('view', 'comment_post', 'comments', 'status_post'));
+    if(!osc_reports_enabled() && !($conversation && osc_web_contact_create_report())) {
       osc_add_flash_warning_message(_m('Sorry, reports are disabled.'));
       $this->redirectTo($this->itemReportRedirectUrl());
     }
@@ -40,17 +42,14 @@ class CWebReport extends BaseModel {
     }
 
     if(!osc_is_web_user_logged_in()) {
-      // Admin session alone can open report view on front
-      if(osc_is_admin_user_logged_in() && ($this->action == 'view' || $this->action == 'comment_post')) {
+      // Conversation actions check access themselves (admin, reporter or reported user, logged in or with access key)
+      if($conversation) {
         // continue
       } else {
         $id = (int)Params::getParam('id');
         $redirect_url = '';
 
-        if($this->action == 'view' || $this->action == 'comment_post') {
-          osc_add_flash_warning_message(_m('You must be logged in to view this report.'));
-          $this->redirectTo(osc_base_url());
-        } else if($this->action == 'item' || ($this->action == 'report_post' && Params::getParam('type') == 'item')) {
+        if($this->action == 'item' || ($this->action == 'report_post' && Params::getParam('type') == 'item')) {
           osc_add_flash_warning_message(_m('You must be logged in to report a listing.'));
           $item = Item::newInstance()->findByPrimaryKey($id);
           if($item) {
@@ -286,15 +285,17 @@ class CWebReport extends BaseModel {
         break;
 
       case 'view':
-        $report = Report::newInstance()->findByPrimaryKey(Params::getParam('id'));
-        $userId = (int)osc_logged_user_id();
+        $report = $this->loadReportForViewer();
+        $viewer = osc_report_viewer($report);
 
-        if(!osc_report_user_can_view($report, $userId)) {
-          osc_add_flash_warning_message(_m('You can only view reports related to you.'));
-          $this->redirectTo(osc_base_url());
+        // Admin reading the conversation on front marks replies as seen; every visit stops reply emails while the person is here
+        if($viewer['role'] == 'admin') {
+          Report::newInstance()->markCommentsSeen($report['pk_i_id']);
         }
+        osc_report_mark_seen($report, $viewer['role']);
 
         $this->_exportVariableToView('report', $report);
+        $this->_exportVariableToView('report_viewer', $viewer);
         $this->_exportVariableToView('report_comments', osc_report_front_comments(Report::newInstance()->getComments($report['pk_i_id']), $report));
         $this->_exportVariableToView('report_mode', 'view');
 
@@ -302,37 +303,44 @@ class CWebReport extends BaseModel {
         $this->doView('report.php');
         break;
 
+      // New messages and status for live refresh (ajax): comments newer than "after" id that this viewer may see
+      case 'comments':
+        $report = $this->loadReportForViewer();
+        $viewer = osc_report_viewer($report);
+        if($viewer['role'] == 'admin') {
+          Report::newInstance()->markCommentsSeen($report['pk_i_id']);
+        }
+        osc_report_mark_seen($report, $viewer['role']);
+
+        $this->ajaxResponse($report, osc_report_front_comments(Report::newInstance()->getComments($report['pk_i_id'], (int)Params::getParam('after')), $report));
+        break;
+
       case 'comment_post':
         osc_csrf_check();
 
-        if(!osc_reports_feedback_enabled()) {
-          osc_add_flash_warning_message(_m('Sorry, replies to reports are disabled.'));
-          $this->redirectTo(osc_base_url());
-        }
-
-        $report = Report::newInstance()->findByPrimaryKey(Params::getParam('id'));
-        $userId = (int)osc_logged_user_id();
-
-        if(!osc_report_user_can_view($report, $userId)) {
-          osc_add_flash_warning_message(_m('You can only view reports related to you.'));
-          $this->redirectTo(osc_base_url());
-        }
+        $report = $this->loadReportForViewer();
+        $viewer = osc_report_viewer($report);
+        $is_ajax = (Params::getParam('ajax') != '');
 
         osc_run_hook('report_comment_post', $report);
 
-        if(!osc_report_user_can_comment($report, $userId)) {
-          if(is_array($report) && (int)$report['b_open'] === 0) {
-            osc_add_flash_warning_message(_m('This report has been closed, replies are not possible anymore.'));
-          } else {
-            osc_add_flash_warning_message(_m('You can reply only when feedback was requested on this report.'));
-          }
-          $this->redirectTo(osc_report_view_url($report['pk_i_id']));
+        $error = '';
+        if($viewer['role'] != 'admin' && !osc_reports_feedback_enabled()) {
+          $error = _m('Sorry, replies to reports are disabled.');
+        } else if(!osc_report_user_can_comment($report)) {
+          $error = ((int)$report['b_open'] === 0 ? _m('This report has been closed, replies are not possible anymore.') : _m('You cannot reply to this report.'));
         }
 
         $comment = trim(strip_tags((string)Params::getParam('comment')));
+        if($error == '' && ($comment == '' || osc_strlen($comment) < 2)) {
+          $error = _m('Please enter your reply.');
+        }
 
-        if($comment == '' || osc_strlen($comment) < 3) {
-          osc_add_flash_error_message(_m('Please enter your reply.'));
+        if($error != '') {
+          if($is_ajax) {
+            $this->ajaxResponse($report, array(), $error);
+          }
+          osc_add_flash_warning_message($error);
           $this->redirectTo(osc_report_view_url($report['pk_i_id']));
         }
 
@@ -343,29 +351,93 @@ class CWebReport extends BaseModel {
         osc_run_hook('before_add_report_comment', $report, $comment);
         $comment = osc_apply_filter('report_comment_insert_data', $comment, $report);
 
-        $commentId = Report::newInstance()->addComment($report['pk_i_id'], $comment, osc_logged_user_id());
+        // Admin writes to the party picked in the form (or the default one), reporter and reported user to their own conversation
+        if($viewer['role'] == 'admin') {
+          $party = Params::getParam('party');
+          $party = ($party == 'reporter' || $party == 'reported' ? $party : osc_report_default_party($report));
+          $commentId = Report::newInstance()->addComment($report['pk_i_id'], $comment, null, $viewer['admin_id'], $party);
+        } else {
+          $party = $viewer['role'];
+          $commentId = Report::newInstance()->addComment($report['pk_i_id'], $comment, $viewer['user_id'], null, $party);
+        }
 
         if(!$commentId) {
-          osc_add_flash_error_message(_m('There was a problem submitting your reply, please try again later.'));
+          $error = _m('There was a problem submitting your reply, please try again later.');
+          if($is_ajax) {
+            $this->ajaxResponse($report, array(), $error);
+          }
+          osc_add_flash_error_message($error);
           $this->redirectTo(osc_report_view_url($report['pk_i_id']));
         }
 
-        Report::newInstance()->updateStatus($report['pk_i_id'], 'in_review', 'user', osc_logged_user_id());
-        $report = Report::newInstance()->findByPrimaryKey($report['pk_i_id']);
-        osc_run_hook('report_status_change', $report, $report['s_status']);
+        // Whose turn it is: after customer reply the admin, after admin reply the customer (paused report keeps its status)
+        $after_status = ($viewer['role'] == 'admin' ? 'waiting_customer' : 'waiting_admin');
+        if((int)$report['b_open'] === 1 && $report['s_status'] != 'on_hold' && $report['s_status'] != $after_status) {
+          Report::newInstance()->updateStatus($report['pk_i_id'], $after_status, ($viewer['role'] == 'admin' ? 'admin' : 'user'), ($viewer['role'] == 'admin' ? $viewer['admin_id'] : $viewer['user_id']), false);
+          $report = Report::newInstance()->findByPrimaryKey($report['pk_i_id']);
+          osc_run_hook('report_status_change', $report, $report['s_status']);
+        }
 
         $commentRow = Report::newInstance()->findCommentByPrimaryKey($commentId);
+        osc_report_mark_seen(Report::newInstance()->findByPrimaryKey($report['pk_i_id']), $viewer['role']);
         osc_run_hook('add_report_comment', $report, $commentRow);
         osc_run_hook('after_add_report_comment', $report, $commentRow);
 
-        // Notify admin only - reporter must not receive conversation replies
+        // Customer reply goes to admins, admin reply to the party it was written to (smart: see osc_report_notify_allowed)
         if(osc_reports_notify_comments()) {
-          osc_run_hook('hook_email_report_new_comment', $report, $commentRow);
+          if($viewer['role'] == 'admin') {
+            $contact = osc_report_party_contact($report, $party);
+            osc_run_hook('hook_email_report_new_comment_user', $report, $commentRow, (int)$contact['user_id']);
+          } else {
+            osc_run_hook('hook_email_report_new_comment', $report, $commentRow);
+          }
+        }
+
+        if($is_ajax) {
+          $this->ajaxResponse($report, osc_report_front_comments(Report::newInstance()->getComments($report['pk_i_id'], (int)Params::getParam('after')), $report));
         }
 
         osc_add_flash_ok_message(_m('Your reply has been added.'));
         $redirect_url = osc_apply_filter('report_comment_post_redirect_url', osc_report_view_url($report['pk_i_id']), $report, $commentRow);
         $this->redirectTo($redirect_url);
+        break;
+
+      // Admin on front (logged in or with admin access key) changes status, e.g. resolves or reopens the report
+      case 'status_post':
+        osc_csrf_check();
+
+        $report = $this->loadReportForViewer();
+        $viewer = osc_report_viewer($report);
+        $status = osc_report_status_code(Params::getParam('status'));
+        $is_ajax = (Params::getParam('ajax') != '');
+
+        if($viewer['role'] != 'admin' || !in_array($status, array_keys(osc_report_statuses_enabled($report['s_status'])), true)) {
+          if($is_ajax) {
+            $this->ajaxResponse($report, array(), _m('You cannot change the status of this report.'));
+          }
+          osc_add_flash_warning_message(_m('You cannot change the status of this report.'));
+          $this->redirectTo(osc_report_view_url($report['pk_i_id']));
+        }
+
+        if($status != $report['s_status'] && Report::newInstance()->updateStatus($report['pk_i_id'], $status, 'admin', $viewer['admin_id'])) {
+          $report = Report::newInstance()->findByPrimaryKey($report['pk_i_id']);
+          if(osc_report_status_is_closed($status)) {
+            if(osc_reports_notify_reporter_resolved()) {
+              osc_run_hook('hook_email_report_reporter_resolved', $report);
+            }
+            if(osc_reports_notify_owner_resolved()) {
+              osc_run_hook('hook_email_report_owner_resolved', $report);
+            }
+          }
+          osc_run_hook('report_status_change', $report, $status);
+        }
+
+        if($is_ajax) {
+          $this->ajaxResponse($report, array());
+        }
+
+        osc_add_flash_ok_message(_m('The report status has been updated'));
+        $this->redirectTo(osc_report_view_url($report['pk_i_id']));
         break;
 
       case 'user':
@@ -425,6 +497,53 @@ class CWebReport extends BaseModel {
         $this->doView('report.php');
         break;
     }
+  }
+
+  // Load report for conversation actions, or leave when current visitor (admin, reporter, reported user, access key) has no access
+  private function loadReportForViewer() {
+    $report = Report::newInstance()->findByPrimaryKey((int)Params::getParam('id'));
+
+    if(!is_array($report) || !osc_report_user_can_view($report)) {
+      if(Params::getParam('ajax') != '' || $this->action == 'comments') {
+        header('Content-Type: application/json; charset=utf-8');
+        http_response_code(403);
+        echo json_encode(array('ok' => false, 'error' => _m('You can only view reports related to you.')));
+        exit;
+      }
+
+      if(!osc_is_web_user_logged_in() && !osc_is_admin_user_logged_in()) {
+        osc_add_flash_warning_message(_m('Log in, or open the report from the link in your email.'));
+        $this->redirectTo(osc_user_login_url());
+      }
+
+      osc_add_flash_warning_message(_m('You can only view reports related to you.'));
+      $this->redirectTo(osc_base_url());
+    }
+
+    return $report;
+  }
+
+  // Print conversation state as JSON (comments as plain data) and end the request
+  private function ajaxResponse($report, $comments, $error = '') {
+    $items = array();
+    foreach($comments as $comment) {
+      $items[] = osc_report_comment_data($comment, $report);
+    }
+
+    $out = array(
+      'ok' => ($error == ''),
+      'error' => $error,
+      'status' => osc_report_viewer_status($report),
+      'status_label' => osc_report_status_label(osc_report_viewer_status($report)),
+      'open' => ((int)$report['b_open'] === 1),
+      'can_comment' => osc_report_user_can_comment($report),
+      'comments' => $items
+    );
+
+    header('Content-Type: application/json; charset=utf-8');
+    header('Cache-Control: no-store');
+    echo json_encode(osc_apply_filter('report_ajax_response', $out, $report));
+    exit;
   }
 
   // Load listing for report, or redirect with flash if it is missing or not public

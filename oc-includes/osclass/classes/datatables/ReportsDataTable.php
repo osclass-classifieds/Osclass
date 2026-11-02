@@ -353,14 +353,14 @@ class ReportsDataTable extends DataTable {
       );
     }
 
-    if($report['s_status'] == 'submitted') {
+    if($report['s_status'] == 'waiting_admin') {
       return array(
         'class' => 'status-warning',
         'text' => osc_report_status_label($report['s_status'])
       );
     }
 
-    if($report['s_status'] == 'awaiting_feedback') {
+    if($report['s_status'] == 'waiting_customer') {
       return array(
         'class' => 'status-warning',
         'text' => osc_report_status_label($report['s_status'])

@@ -74,15 +74,15 @@ osc_add_hook('admin_header','customHead', 10);
 function addHelp() {
   echo '<p>' . __('Modify the options for reports users can submit on listings, users or other content.') . '</p>';
   echo '<p><strong>' . __('Report lifetime') . '</strong></p>';
-  echo '<p>' . __('A report is open from Submitted through In progress, On hold and Awaiting feedback. Setting Resolved, Rejected or Cancelled closes it. Closed reports can be reopened.') . '</p>';
-  echo '<p>' . __('Auto-close can close reports that stay in Awaiting feedback with no activity. Retention deletes old reports after the months you set (0 = keep forever). The daily report limit still applies even when multiple reports for the same listing or user are allowed.') . '</p>';
+  echo '<p>' . __('A report is open while it is Waiting for admin, Waiting for customer, In progress or On hold. Setting Resolved, Rejected or Cancelled closes it. Closed reports can be reopened.') . '</p>';
+  echo '<p>' . __('Auto-close can close reports that stay in Waiting for customer with no activity. Retention deletes old reports after the months you set (0 = keep forever). The daily report limit still applies even when multiple reports for the same listing or user are allowed.') . '</p>';
   echo '<p><strong>' . __('Statuses') . '</strong></p>';
   echo '<p>' . sprintf(
-    __('%s = new; %s = you are working on it; %s = paused; %s = reported user can reply on front; %s / %s / %s = closed.'),
-    osc_report_status_label('submitted'),
+    __('%s = your turn (new report or customer reply); %s = customer\'s turn; %s = you are working on it; %s = paused; %s / %s / %s = closed.'),
+    osc_report_status_label('waiting_admin'),
+    osc_report_status_label('waiting_customer'),
     osc_report_status_label('in_review'),
     osc_report_status_label('on_hold'),
-    osc_report_status_label('awaiting_feedback'),
     osc_report_status_label('resolved'),
     osc_report_status_label('rejected'),
     osc_report_status_label('cancelled')

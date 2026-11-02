@@ -21,16 +21,16 @@ function addHelp() {
   echo '<p>' . __('Manage reports submitted by users on listings, users or other content: review, reply, resolve, reject or delete them. Filter by status or user.') . '</p>';
   echo '<p>' . __('Website contact form messages can be stored as Contact form reports with no listing or user target.') . '</p>';
   echo '<p><strong>' . __('Report lifetime') . '</strong></p>';
-  echo '<p>' . __('A report stays open while status is Submitted, In progress, On hold or Awaiting feedback. Resolved, Rejected and Cancelled close the report. You can reopen a closed report (status goes back to In progress).') . '</p>';
+  echo '<p>' . __('A report stays open while status is Waiting for admin, Waiting for customer, In progress or On hold. Resolved, Rejected and Cancelled close the report. You can reopen a closed report (status goes back to In progress).') . '</p>';
   echo '<p><strong>' . __('Statuses') . '</strong></p>';
   echo '<ul>';
-  echo '<li><strong>' . osc_report_status_label('submitted') . '</strong>: ' . __('New report waiting for review.') . '</li>';
+  echo '<li><strong>' . osc_report_status_label('waiting_admin') . '</strong>: ' . __('New report, or the customer replied. It is your turn.') . '</li>';
+  echo '<li><strong>' . osc_report_status_label('waiting_customer') . '</strong>: ' . __('You replied or asked for feedback. It is the customer\'s turn.') . '</li>';
   echo '<li><strong>' . osc_report_status_label('in_review') . '</strong>: ' . __('You are reviewing or handling the report.') . '</li>';
   echo '<li><strong>' . osc_report_status_label('on_hold') . '</strong>: ' . __('Paused; no action expected right now.') . '</li>';
-  echo '<li><strong>' . osc_report_status_label('awaiting_feedback') . '</strong>: ' . __('Reported user can reply on the front report page (if feedback is enabled).') . '</li>';
   echo '<li><strong>' . osc_report_status_label('resolved') . '</strong> / <strong>' . osc_report_status_label('rejected') . '</strong> / <strong>' . osc_report_status_label('cancelled') . '</strong>: ' . __('Close the report.') . '</li>';
   echo '</ul>';
-  echo '<p>' . __('The user who created the report has no front access to it. Only the reported user (and admins) can open the front report page.') . '</p>';
+  echo '<p>' . __('The reporter and the reported user each see their own conversation with you on the front report page, logged in or through the link with access key from their emails.') . '</p>';
 }
 
 osc_add_hook('help_box','addHelp');

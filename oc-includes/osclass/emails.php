@@ -1567,7 +1567,7 @@ osc_add_hook('after_auto_upgrade', 'fn_email_auto_upgrade', 10);
 
 
 /**
- * Prepare placeholder words shared by all report emails
+ * Prepare placeholder words shared by all report emails (extra EVENT = admin_new|admin_reply|received|closed|owner_new|owner_closed|feedback|reply, for plugins)
  *
  * @param array $report
  * @param array $comment
@@ -1596,7 +1596,7 @@ function fn_email_report_words($report, $comment = null, $extra = array()) {
   $report_url = '';
   $report_link = '';
   if(empty($extra['HIDE_REPORT_URL'])) {
-    $report_url = osc_report_view_url($report['pk_i_id']);
+    $report_url = osc_report_view_url($report['pk_i_id'], (isset($extra['REPORT_KEY']) ? $extra['REPORT_KEY'] : ''));
     $report_link = '<a href="' . osc_esc_html($report_url) . '">' . osc_esc_html($report_url) . '</a>';
   }
 
@@ -1612,8 +1612,9 @@ function fn_email_report_words($report, $comment = null, $extra = array()) {
     } else if(!empty($extra['ANONYMIZE_USERS'])) {
       $comment_author = __('Participant');
     } else {
-      $commenter = User::newInstance()->findByPrimaryKey($comment['fk_i_user_id']);
-      $comment_author = ($commenter ? $commenter['s_name'] : '');
+      $commenter = ($comment['fk_i_user_id'] > 0 ? User::newInstance()->findByPrimaryKey($comment['fk_i_user_id']) : false);
+      $commenter_contact = osc_report_party_contact($report, osc_report_comment_party($comment, $report));
+      $comment_author = ($commenter ? $commenter['s_name'] : $commenter_contact['name']);
     }
     $comment_text = nl2br(osc_esc_html((string)$comment['s_comment']));
     if($comment_text != '') {
@@ -1649,7 +1650,7 @@ function fn_email_report_words($report, $comment = null, $extra = array()) {
     osc_esc_html(osc_report_reason_label($report['s_reason'])),
     osc_esc_html(osc_report_status_label($report['s_status'])),
     nl2br(osc_esc_html((string)$report['s_comment'])),
-    (!empty($extra['HIDE_REPORTER_NAME']) ? '' : ($reporter ? osc_esc_html($reporter['s_name']) : '')),
+    (!empty($extra['HIDE_REPORTER_NAME']) ? '' : ($reporter ? osc_esc_html($reporter['s_name']) : osc_esc_html((string)@$report['s_reporter_name']))),
     ($reported_user ? osc_esc_html($reported_user['s_name']) : ''),
     osc_esc_html($reported_title),
     $report_url,
@@ -1704,13 +1705,13 @@ function fn_email_report_send_admin($report, $extra = array(), $comment = null, 
   $content = fn_email_report_content('email_report_admin', $report);
   if(!$content) { return false; }
 
-  $words = fn_email_report_words($report, $comment, $extra);
-  $title = osc_apply_filter('email_report_admin_title', osc_mailBeauty($content['s_title'], $words), $report);
-  $body = osc_apply_filter('email_report_admin_description', osc_mailBeauty($content['s_text'], $words), $report);
-
   $admins = Admin::newInstance()->listAll();
   foreach($admins as $admin) {
     if(!empty($admin['s_email'])) {
+      $words = fn_email_report_words($report, $comment, array_merge($extra, array('REPORT_KEY' => osc_report_access_key($report, 'admin', $admin['s_email']))));
+      $title = osc_apply_filter('email_report_admin_title', osc_mailBeauty($content['s_title'], $words), $report);
+      $body = osc_apply_filter('email_report_admin_description', osc_mailBeauty($content['s_text'], $words), $report);
+
       $emailParams = array(
         'from' => _osc_from_email_aux(),
         'to' => $admin['s_email'],
@@ -1738,30 +1739,17 @@ function fn_email_report_send_admin($report, $extra = array(), $comment = null, 
  * @param string $mailType
  */
 function fn_email_report_send_user($internal_name, $report, $userId, $extra = array(), $comment = null, $mailType = 'report_user') {
-  $to = '';
-  $to_name = '';
-
-  if($userId > 0) {
-    $user = User::newInstance()->findByPrimaryKey($userId);
-    if($user && !empty($user['s_email'])) {
-      $to = $user['s_email'];
-      $to_name = $user['s_name'];
-    }
-  }
-
-  // Guest listing owner: notify via item contact email only when targeting the owner (no user id)
-  if($to == '' && !($userId > 0) && is_array($report) && $report['s_type'] == 'item' && $report['fk_i_item_id'] > 0) {
-    $item = Item::newInstance()->findByPrimaryKey($report['fk_i_item_id']);
-    if($item && !empty($item['s_contact_email'])) {
-      $to = $item['s_contact_email'];
-      $to_name = (!empty($item['s_contact_name']) ? $item['s_contact_name'] : $item['s_contact_email']);
-      $extra['HIDE_REPORT_URL'] = true;
-    }
-  }
+  // Party gets the email (extra PARTY, else by user id): reporter or reported user, guests by their email; link opens the report with their access key
+  $party = (isset($extra['PARTY']) ? $extra['PARTY'] : ((int)$userId > 0 && (int)$userId === (int)$report['fk_i_reporter_user_id'] ? 'reporter' : 'reported'));
+  $contact = osc_report_party_contact($report, $party);
+  $to = $contact['email'];
+  $to_name = ($contact['name'] != '' ? $contact['name'] : $contact['email']);
 
   if($to == '') {
     return false;
   }
+
+  $extra['REPORT_KEY'] = osc_report_access_key($report, $party, $to);
 
   $content = fn_email_report_content($internal_name, $report);
   if(!$content) { return false; }
@@ -1793,7 +1781,8 @@ function fn_email_report_send_user($internal_name, $report, $userId, $extra = ar
 function fn_email_report_admin($report) {
   fn_email_report_send_admin($report, array(
     'REPORT_EVENT' => sprintf(__('New report #%d has been submitted'), $report['pk_i_id']),
-    'REPORT_MESSAGE' => __('A new report has been submitted and is waiting for review.')
+    'REPORT_MESSAGE' => __('A new report has been submitted and is waiting for review.'),
+    'EVENT' => 'admin_new'
   ), null, 'report_admin');
 }
 
@@ -1809,7 +1798,8 @@ function fn_email_report_reporter_created($report) {
   fn_email_report_send_user('email_report_user', $report, $report['fk_i_reporter_user_id'], array(
     'REPORT_EVENT' => sprintf(__('Your report #%d has been received'), $report['pk_i_id']),
     'REPORT_MESSAGE' => __('Thank you for your report. Our team will review it.'),
-    'HIDE_REPORT_URL' => true
+    'EVENT' => 'received',
+    'PARTY' => 'reporter'
   ), null, 'report_reporter_created');
 }
 
@@ -1825,7 +1815,8 @@ function fn_email_report_reporter_resolved($report) {
   fn_email_report_send_user('email_report_user', $report, $report['fk_i_reporter_user_id'], array(
     'REPORT_EVENT' => sprintf(__('Your report #%d has been closed'), $report['pk_i_id']),
     'REPORT_MESSAGE' => __('Your report has been closed. Thank you for helping us keep the site safe.'),
-    'HIDE_REPORT_URL' => true
+    'EVENT' => 'closed',
+    'PARTY' => 'reporter'
   ), null, 'report_reporter_resolved');
 }
 
@@ -1841,8 +1832,10 @@ function fn_email_report_owner_created($report) {
   fn_email_report_send_user('email_report_user', $report, $report['fk_i_user_id'], array(
     'REPORT_EVENT' => sprintf(__('Report #%d has been submitted regarding your content'), $report['pk_i_id']),
     'REPORT_MESSAGE' => __('A report regarding your content has been submitted. Our team will review it. No action is required from you at this moment.'),
+    'EVENT' => 'owner_new',
     'HIDE_REPORTER_NAME' => true,
-    'ANONYMIZE_USERS' => true
+    'ANONYMIZE_USERS' => true,
+    'PARTY' => 'reported'
   ), null, 'report_owner_created');
 }
 
@@ -1858,8 +1851,10 @@ function fn_email_report_owner_resolved($report) {
   fn_email_report_send_user('email_report_user', $report, $report['fk_i_user_id'], array(
     'REPORT_EVENT' => sprintf(__('Report #%d regarding your content has been closed'), $report['pk_i_id']),
     'REPORT_MESSAGE' => __('The report regarding your content has been closed.'),
+    'EVENT' => 'owner_closed',
     'HIDE_REPORTER_NAME' => true,
-    'ANONYMIZE_USERS' => true
+    'ANONYMIZE_USERS' => true,
+    'PARTY' => 'reported'
   ), null, 'report_owner_resolved');
 }
 
@@ -1875,8 +1870,10 @@ function fn_email_report_feedback_request($report) {
   fn_email_report_send_user('email_report_user', $report, $report['fk_i_user_id'], array(
     'REPORT_EVENT' => sprintf(__('Your feedback is requested on report #%d'), $report['pk_i_id']),
     'REPORT_MESSAGE' => __('A report regarding your content is waiting for your feedback. If no feedback is provided, the report may be closed automatically.'),
+    'EVENT' => 'feedback',
     'HIDE_REPORTER_NAME' => true,
-    'ANONYMIZE_USERS' => true
+    'ANONYMIZE_USERS' => true,
+    'PARTY' => 'reported'
   ), null, 'report_feedback_request');
 }
 
@@ -1890,9 +1887,14 @@ osc_add_hook('hook_email_report_feedback_request', 'fn_email_report_feedback_req
  * @param array $comment
  */
 function fn_email_report_new_comment($report, $comment) {
+  if(!osc_report_notify_allowed($report, 'admin')) {
+    return false;
+  }
+
   fn_email_report_send_admin($report, array(
     'REPORT_EVENT' => sprintf(__('Report #%d has a new reply'), $report['pk_i_id']),
-    'REPORT_MESSAGE' => __('A new reply has been added to the report.')
+    'REPORT_MESSAGE' => __('A new reply has been added to the report.'),
+    'EVENT' => 'admin_reply'
   ), $comment, 'report_new_comment');
 }
 
@@ -1909,16 +1911,19 @@ osc_add_hook('hook_email_report_new_comment', 'fn_email_report_new_comment');
 function fn_email_report_new_comment_user($report, $comment, $userId) {
   $extra = array(
     'REPORT_EVENT' => sprintf(__('Report #%d has a new reply'), $report['pk_i_id']),
-    'REPORT_MESSAGE' => __('A new reply has been added to the report.')
+    'REPORT_MESSAGE' => __('A new reply has been added to the report.'),
+    'EVENT' => 'reply'
   );
 
-  // Reporter / guest owner cannot open FO conversation; registered reported user can
-  if((int)$userId <= 0 || (int)$userId === (int)$report['fk_i_reporter_user_id']) {
-    $extra['HIDE_REPORT_URL'] = true;
-  }
-  if((int)$userId <= 0 || (int)$userId === (int)$report['fk_i_user_id']) {
+  // Email goes to the conversation the comment belongs to; reported user never sees the reporter
+  $extra['PARTY'] = (is_array($comment) ? osc_report_comment_party($comment, $report) : ((int)$userId > 0 && (int)$userId === (int)$report['fk_i_reporter_user_id'] ? 'reporter' : 'reported'));
+  if($extra['PARTY'] == 'reported') {
     $extra['HIDE_REPORTER_NAME'] = true;
     $extra['ANONYMIZE_USERS'] = true;
+  }
+
+  if(!osc_report_notify_allowed($report, $extra['PARTY'])) {
+    return false;
   }
 
   fn_email_report_send_user('email_report_user', $report, $userId, $extra, $comment, 'report_new_comment_user');

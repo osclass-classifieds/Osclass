@@ -69,12 +69,20 @@ class Report extends DAO {
       's_reason',
       's_status',
       's_source',
+      's_reporter_name',
+      's_reporter_email',
       's_comment',
       's_admin_comment',
       's_file',
       'b_open',
       'dt_status_date',
       'dt_update_date',
+      'dt_seen_reporter',
+      'dt_seen_reported',
+      'dt_seen_admin',
+      'dt_notified_reporter',
+      'dt_notified_reported',
+      'dt_notified_admin',
       'dt_create_date'
     );
 
@@ -101,7 +109,7 @@ class Report extends DAO {
    * @return int|bool
    */
   public function createReport($data) {
-    $data['s_status'] = isset($data['s_status']) ? $data['s_status'] : 'submitted';
+    $data['s_status'] = isset($data['s_status']) ? osc_report_status_code($data['s_status']) : 'waiting_admin';
     $data['b_open'] = 1;
     $data['dt_status_date'] = date('Y-m-d H:i:s');
     $data['dt_create_date'] = date('Y-m-d H:i:s');
@@ -135,9 +143,11 @@ class Report extends DAO {
    * @param string $status
    * @param string $who
    * @param int $whoId
+   * @param bool $log false for the automatic turn switch after a reply (the reply itself is logged)
    * @return bool
    */
-  public function updateStatus($id, $status, $who = 'admin', $whoId = 0) {
+  public function updateStatus($id, $status, $who = 'admin', $whoId = 0, $log = true) {
+    $status = osc_report_status_code($status);
     $report = $this->findByPrimaryKey($id);
     if(!$report || !in_array($status, array_keys(osc_report_statuses()))) {
       return false;
@@ -163,7 +173,9 @@ class Report extends DAO {
       'dt_update_date' => date('Y-m-d H:i:s')
     ), array('pk_i_id' => $id));
 
-    Log::newInstance()->insertLog('report', 'status', $id, $report['s_status'] . ' > ' . $status, $who, $whoId);
+    if($log) {
+      Log::newInstance()->insertLog('report', 'status', $id, $report['s_status'] . ' > ' . $status, $who, $whoId);
+    }
 
     return true;
   }
@@ -177,18 +189,24 @@ class Report extends DAO {
    * @param string $comment
    * @param int $userId
    * @param int $adminId
+   * @param string $party conversation the comment belongs to (reporter|reported), derived when empty
    * @return int|bool
    */
-  public function addComment($reportId, $comment, $userId = null, $adminId = null) {
+  public function addComment($reportId, $comment, $userId = null, $adminId = null, $party = '') {
     $report = $this->findByPrimaryKey($reportId);
     if(!$report) {
       return false;
+    }
+
+    if($party != 'reporter' && $party != 'reported') {
+      $party = osc_report_comment_party(array('fk_i_user_id' => $userId, 'fk_i_admin_id' => $adminId), $report);
     }
 
     $status = $this->dao->insert($this->getCommentTableName(), array(
       'fk_i_report_id' => $reportId,
       'fk_i_user_id' => ($userId > 0 ? $userId : null),
       'fk_i_admin_id' => ($adminId > 0 ? $adminId : null),
+      's_party' => $party,
       's_comment' => $comment,
       'b_admin_seen' => ($adminId > 0 ? 1 : 0),
       'dt_date' => date('Y-m-d H:i:s')
@@ -221,15 +239,20 @@ class Report extends DAO {
    * @access public
    * @since 8.4.0
    * @param int $reportId
+   * @param int $afterId only comments newer than this id (live refresh)
    * @return array
    */
-  public function getComments($reportId) {
+  public function getComments($reportId, $afterId = 0) {
     $this->dao->select('c.*, u.s_name as s_user_name, a.s_name as s_admin_name');
     $this->dao->from($this->getCommentTableName() . ' c');
     $this->dao->join(DB_TABLE_PREFIX . 't_user u', 'u.pk_i_id = c.fk_i_user_id', 'LEFT');
     $this->dao->join(DB_TABLE_PREFIX . 't_admin a', 'a.pk_i_id = c.fk_i_admin_id', 'LEFT');
     $this->dao->where('c.fk_i_report_id', (int)$reportId);
+    if((int)$afterId > 0) {
+      $this->dao->where('c.pk_i_id >', (int)$afterId);
+    }
     $this->dao->orderBy('c.dt_date', 'ASC');
+    $this->dao->orderBy('c.pk_i_id', 'ASC');
 
     $result = $this->dao->get();
     if($result) {
@@ -348,7 +371,7 @@ class Report extends DAO {
   public function countByStatus($status) {
     $this->dao->select('COUNT(*) as i_total');
     $this->dao->from($this->getTableName());
-    $this->dao->where('s_status', $status);
+    $this->dao->where('s_status', osc_report_status_code($status));
 
     $result = $this->dao->get();
     if($result) {
@@ -447,7 +470,7 @@ class Report extends DAO {
   public function findAwaitingFeedbackOlderThan($days) {
     $this->dao->select();
     $this->dao->from($this->getTableName());
-    $this->dao->where('s_status', 'awaiting_feedback');
+    $this->dao->where('s_status', 'waiting_customer');
     $this->dao->where('dt_status_date <= \'' . date('Y-m-d H:i:s', time() - ((int)$days * 86400)) . '\'');
 
     $result = $this->dao->get();
@@ -572,7 +595,7 @@ class Report extends DAO {
       } else if($status == 'closed') {
         $this->dao->where('r.b_open', 0);
       } else {
-        $this->dao->where('r.s_status', $status);
+        $this->dao->where('r.s_status', osc_report_status_code($status));
       }
     }
 

@@ -146,19 +146,32 @@ function osc_report_reason_from_mark($as, $type = 'item') {
 }
 
 
-// Get list of report statuses (plugins can extend via filter)
+// Get list of report statuses (plugins can extend via filter). Waiting statuses tell whose turn it is
 function osc_report_statuses() {
   $statuses = array(
-    'submitted' => __('Submitted'),
+    'waiting_admin' => __('Waiting for admin'),
+    'waiting_customer' => __('Waiting for customer'),
     'in_review' => __('In progress'),
     'on_hold' => __('On hold'),
-    'awaiting_feedback' => __('Awaiting feedback'),
     'resolved' => __('Resolved'),
     'rejected' => __('Rejected'),
     'cancelled' => __('Cancelled')
   );
 
   return osc_apply_filter('osc_report_statuses', $statuses);
+}
+
+
+// Status codes used before 8.4.1 mapped to current ones (old links, settings and plugin calls)
+function osc_report_status_legacy_map() {
+  return array('submitted' => 'waiting_admin', 'awaiting_feedback' => 'waiting_customer');
+}
+
+
+// Get current status code for given (possibly legacy) code
+function osc_report_status_code($status) {
+  $map = osc_report_status_legacy_map();
+  return (isset($map[$status]) ? $map[$status] : (string)$status);
 }
 
 
@@ -189,11 +202,12 @@ function osc_report_status_is_closed($status) {
 
 // Get next status in report lifecycle
 function osc_report_status_next($status) {
+  $status = osc_report_status_code($status);
   $next = array(
-    'submitted' => 'in_review',
+    'waiting_admin' => 'in_review',
     'in_review' => 'resolved',
     'on_hold' => 'in_review',
-    'awaiting_feedback' => 'in_review'
+    'waiting_customer' => 'in_review'
   );
 
   $next = osc_apply_filter('osc_report_status_next', $next);
@@ -205,6 +219,7 @@ function osc_report_status_next($status) {
 // Get label of report status
 function osc_report_status_label($status) {
   $statuses = osc_report_statuses();
+  $status = (isset($statuses[$status]) ? $status : osc_report_status_code($status));
   return (isset($statuses[$status]) ? $statuses[$status] : $status);
 }
 
@@ -238,7 +253,7 @@ function osc_report_required_reasons() {
 
 // Statuses that cannot be disabled in settings
 function osc_report_required_statuses() {
-  return osc_apply_filter('osc_report_required_statuses', array('submitted', 'resolved'));
+  return osc_apply_filter('osc_report_required_statuses', array('waiting_admin', 'resolved'));
 }
 
 
@@ -308,6 +323,12 @@ function osc_report_reasons_for_type($type, $include = null) {
 }
 
 
+// Get reasons a website contact form can send in field "reason" (plugins map own reasons to type webcontact)
+function osc_report_contact_reasons() {
+  return osc_report_reasons_for_type('webcontact');
+}
+
+
 // Get enabled report status codes from preference (empty preference = all)
 function osc_reports_enabled_statuses_codes() {
   $all = array_keys(osc_report_statuses());
@@ -319,8 +340,8 @@ function osc_reports_enabled_statuses_codes() {
 
   $codes = array();
   foreach(explode(',', $raw) as $code) {
-    $code = trim((string)$code);
-    if($code !== '' && in_array($code, $all, true)) {
+    $code = osc_report_status_code(trim((string)$code));
+    if($code !== '' && in_array($code, $all, true) && !in_array($code, $codes, true)) {
       $codes[] = $code;
     }
   }
@@ -441,46 +462,302 @@ function osc_report_is_reported_user($report, $userId = null) {
 }
 
 
-// Front access: reported user, or admin logged in (any report)
+// Get secret used to sign report access keys (created on first use)
+function osc_report_secret() {
+  $secret = (string)osc_get_preference('report_secret');
+  if(strlen($secret) < 32) {
+    $secret = osc_genRandomPassword(48);
+    osc_set_preference('report_secret', $secret);
+    osc_reset_preferences();
+  }
+
+  return $secret;
+}
+
+
+// Get contact of report party (reporter = who created the report, reported = reported user or listing owner)
+// Returns array('user_id', 'email', 'name'); empty email when the party cannot be reached
+function osc_report_party_contact($report, $party) {
+  $out = array('user_id' => 0, 'email' => '', 'name' => '');
+  if(!is_array($report)) {
+    return $out;
+  }
+
+  if($party == 'reporter') {
+    $out['user_id'] = (int)$report['fk_i_reporter_user_id'];
+    $out['email'] = trim((string)@$report['s_reporter_email']);
+    $out['name'] = trim((string)@$report['s_reporter_name']);
+  } else if($party == 'reported') {
+    $out['user_id'] = (int)$report['fk_i_user_id'];
+    if($out['user_id'] <= 0 && (int)$report['fk_i_item_id'] > 0) {
+      $item = Item::newInstance()->findByPrimaryKey((int)$report['fk_i_item_id']);
+      if($item) {
+        $out['email'] = trim((string)@$item['s_contact_email']);
+        $out['name'] = trim((string)@$item['s_contact_name']);
+      }
+    }
+  }
+
+  if($out['user_id'] > 0 && ($out['email'] == '' || $out['name'] == '')) {
+    $user = User::newInstance()->findByPrimaryKey($out['user_id']);
+    if($user) {
+      $out['email'] = ($out['email'] != '' ? $out['email'] : (string)$user['s_email']);
+      $out['name'] = ($out['name'] != '' ? $out['name'] : (string)$user['s_name']);
+    }
+  }
+
+  return osc_apply_filter('report_party_contact', $out, $report, $party);
+}
+
+
+// Get access key of report front view for role (reporter|reported|admin): signed JSON of report id, role and email of the person
+// Admin key needs admin email; reporter and reported keys use the party email. Empty when there is no email
+function osc_report_access_key($report, $role, $email = '') {
+  if(!is_array($report)) {
+    $report = Report::newInstance()->findByPrimaryKey((int)$report);
+  }
+  if(!is_array($report) || !isset($report['pk_i_id']) || !in_array($role, array('reporter', 'reported', 'admin'), true)) {
+    return '';
+  }
+
+  if($email == '' && $role != 'admin') {
+    $contact = osc_report_party_contact($report, $role);
+    $email = $contact['email'];
+  }
+
+  $email = strtolower(trim((string)$email));
+  if($email == '') {
+    return '';
+  }
+
+  return substr(hash_hmac('sha256', json_encode(array('id' => (int)$report['pk_i_id'], 'role' => $role, 'email' => $email)), osc_report_secret()), 0, 32);
+}
+
+
+// Get front url of report for party or admin, with access key (opens without login)
+function osc_report_access_url($report, $role, $email = '') {
+  return osc_report_view_url((int)$report['pk_i_id'], osc_report_access_key($report, $role, $email));
+}
+
+
+// Who is looking at the report on front: array('role' => admin|reporter|reported|'', 'admin_id', 'user_id', 'key')
+// Order: access key from url, logged admin, logged user (reporter or reported user), access key remembered in session for this report
+function osc_report_viewer($report, $key = null) {
+  static $cache = array();
+  $out = array('role' => '', 'admin_id' => 0, 'user_id' => 0, 'key' => '');
+  if(!is_array($report) || !isset($report['pk_i_id'])) {
+    return $out;
+  }
+
+  $id = (int)$report['pk_i_id'];
+  $url_key = strtolower(trim((string)($key === null ? Params::getParam('key') : $key)));
+  $keys = Session::newInstance()->_get('report_keys');
+  $keys = (is_array($keys) ? $keys : array());
+  $cache_id = $id . '|' . $url_key . '|' . (int)osc_logged_user_id() . '|' . (int)osc_logged_admin_id();
+  if(isset($cache[$cache_id])) {
+    return $cache[$cache_id];
+  }
+
+  $sources = array('url' => $url_key, 'admin' => '', 'user' => '', 'session' => (isset($keys[$id]) ? strtolower((string)$keys[$id]) : ''));
+  foreach($sources as $source => $k) {
+    if($source == 'admin') {
+      if(osc_is_admin_user_logged_in()) {
+        $out = array('role' => 'admin', 'admin_id' => (int)osc_logged_admin_id(), 'user_id' => 0, 'key' => '');
+        break;
+      }
+      continue;
+    }
+
+    if($source == 'user') {
+      $email = strtolower(trim((string)osc_logged_user_email()));
+      if(osc_is_web_user_logged_in() && (osc_report_is_reporter($report) || ($email != '' && $email === strtolower(trim((string)@$report['s_reporter_email']))))) {
+        $out = array('role' => 'reporter', 'admin_id' => 0, 'user_id' => (int)osc_logged_user_id(), 'key' => '');
+        break;
+      } else if(osc_is_web_user_logged_in() && osc_report_is_reported_user($report)) {
+        $out = array('role' => 'reported', 'admin_id' => 0, 'user_id' => (int)osc_logged_user_id(), 'key' => '');
+        break;
+      }
+      continue;
+    }
+
+    if(!preg_match('/^[a-f0-9]{32}$/', $k)) {
+      continue;
+    }
+
+    foreach(array('reporter', 'reported') as $role) {
+      $contact = osc_report_party_contact($report, $role);
+      if($contact['email'] != '' && hash_equals(osc_report_access_key($report, $role, $contact['email']), $k)) {
+        $out = array('role' => $role, 'admin_id' => 0, 'user_id' => (int)$contact['user_id'], 'key' => $k);
+        break 2;
+      }
+    }
+
+    foreach(Admin::newInstance()->listAll() as $admin) {
+      if(!empty($admin['s_email']) && hash_equals(osc_report_access_key($report, 'admin', $admin['s_email']), $k)) {
+        $out = array('role' => 'admin', 'admin_id' => (int)$admin['pk_i_id'], 'user_id' => 0, 'key' => $k);
+        break 2;
+      }
+    }
+  }
+
+  // Remember valid key from url, so replies and refreshes work with plain report url. Admin acting through a key (no login) is logged once per session
+  if($out['key'] != '' && $out['key'] === $url_key) {
+    if($out['role'] == 'admin' && (!isset($keys[$id]) || $keys[$id] !== $url_key)) {
+      Log::newInstance()->insertLog('report', 'access_key', $id, 'admin key', 'admin', $out['admin_id']);
+    }
+    $keys[$id] = $url_key;
+    Session::newInstance()->_set('report_keys', array_slice($keys, -20, 20, true));
+  }
+
+  $out = osc_apply_filter('report_viewer', $out, $report);
+  $cache[$cache_id] = $out;
+
+  return $out;
+}
+
+
+// Remember that party (reporter|reported|admin) saw the conversation now; written at most once in 30 seconds
+function osc_report_mark_seen($report, $party) {
+  if(!is_array($report) || !in_array($party, array('reporter', 'reported', 'admin'), true)) {
+    return false;
+  }
+
+  if(!empty($report['dt_seen_' . $party]) && strtotime((string)$report['dt_seen_' . $party]) > time() - 30) {
+    return true;
+  }
+
+  return (bool)Report::newInstance()->update(array('dt_seen_' . $party => date('Y-m-d H:i:s')), array('pk_i_id' => (int)$report['pk_i_id']));
+}
+
+
+// Smart reply email to party (reporter|reported|admin): none while it is active in the chat (seen in last 90 seconds),
+// and only one until it opens the conversation again (no second email while the first one is unread). Marks party as notified when allowed
+function osc_report_notify_allowed($report, $party) {
+  $report = (is_array($report) ? Report::newInstance()->findByPrimaryKey((int)$report['pk_i_id']) : false);
+  if(!is_array($report) || !in_array($party, array('reporter', 'reported', 'admin'), true)) {
+    return false;
+  }
+
+  $seen = (!empty($report['dt_seen_' . $party]) ? strtotime((string)$report['dt_seen_' . $party]) : 0);
+  $notified = (!empty($report['dt_notified_' . $party]) ? strtotime((string)$report['dt_notified_' . $party]) : 0);
+  $allowed = ($seen < time() - 90 && ($notified == 0 || $notified < $seen));
+  $allowed = (bool)osc_apply_filter('report_notify_allowed', $allowed, $report, $party);
+
+  if($allowed) {
+    Report::newInstance()->update(array('dt_notified_' . $party => date('Y-m-d H:i:s')), array('pk_i_id' => (int)$report['pk_i_id']));
+  }
+
+  return $allowed;
+}
+
+
+// Get role of current front viewer of report (admin|reporter|reported|'')
+function osc_report_viewer_role($report = null) {
+  $v = osc_report_viewer(($report === null ? osc_report() : $report));
+  return $v['role'];
+}
+
+
+// Get conversation party of comment (reporter|reported); rows from before 8.4.1 have no party and follow the old rules
+function osc_report_comment_party($comment, $report) {
+  $party = (string)@$comment['s_party'];
+  if($party == 'reporter' || $party == 'reported') {
+    return $party;
+  }
+
+  if((int)@$comment['fk_i_user_id'] > 0) {
+    return ((int)$comment['fk_i_user_id'] === (int)$report['fk_i_reporter_user_id'] ? 'reporter' : 'reported');
+  }
+
+  return ((int)$report['fk_i_user_id'] > 0 && $report['s_type'] != 'webcontact' ? 'reported' : 'reporter');
+}
+
+
+// Get party the admin replies to by default: who wrote last, else reporter when reachable, else reported user
+function osc_report_default_party($report, $comments = null) {
+  $comments = (is_array($comments) ? $comments : Report::newInstance()->getComments($report['pk_i_id']));
+  foreach(array_reverse($comments) as $comment) {
+    if((int)$comment['fk_i_admin_id'] <= 0) {
+      return osc_report_comment_party($comment, $report);
+    }
+  }
+
+  $reporter = osc_report_party_contact($report, 'reporter');
+  return ($reporter['email'] != '' || $reporter['user_id'] > 0 ? 'reporter' : 'reported');
+}
+
+
+// Status as reporter or reported user reads it: both conversations share one status, so whose turn it is comes from the last message of their own conversation
+function osc_report_viewer_status($report) {
+  $status = (string)$report['s_status'];
+  $role = osc_report_viewer_role($report);
+  if(($role == 'reporter' || $role == 'reported') && ($status == 'waiting_admin' || $status == 'waiting_customer')) {
+    $last = null;
+    foreach(Report::newInstance()->getComments($report['pk_i_id']) as $comment) {
+      $last = (osc_report_comment_party($comment, $report) == $role ? $comment : $last);
+    }
+    $status = ($last !== null && (int)$last['fk_i_admin_id'] > 0 ? 'waiting_customer' : 'waiting_admin');
+  }
+
+  return osc_apply_filter('report_viewer_status', $status, $report, $role);
+}
+
+
+// Front access: admin, reporter or reported user (logged in or with access key)
 function osc_report_user_can_view($report, $userId = null) {
   if(!is_array($report)) {
     return false;
   }
-  $can = (osc_is_admin_user_logged_in() || osc_report_is_reported_user($report, $userId));
+
+  if($userId === null) {
+    $viewer = osc_report_viewer($report);
+    $can = ($viewer['role'] != '');
+  } else {
+    $can = (osc_is_admin_user_logged_in() || osc_report_is_reporter($report, $userId) || osc_report_is_reported_user($report, $userId));
+  }
+
   return (bool)osc_apply_filter('report_can_view', $can, $report, ($userId === null ? (int)osc_logged_user_id() : (int)$userId));
 }
 
 
-// Front reply: reported user only, when feedback was requested
+// Front reply: open report; admin always, reporter and reported user when replies are enabled
 function osc_report_user_can_comment($report, $userId = null) {
+  $role = '';
+  if(is_array($report)) {
+    if($userId === null) {
+      $viewer = osc_report_viewer($report);
+      $role = $viewer['role'];
+    } else if(osc_report_is_reporter($report, $userId)) {
+      $role = 'reporter';
+    } else if(osc_report_is_reported_user($report, $userId)) {
+      $role = 'reported';
+    }
+  }
+
   $can = (
-    osc_reports_feedback_enabled()
-    && is_array($report)
+    is_array($report)
     && (int)$report['b_open'] === 1
-    && $report['s_status'] == 'awaiting_feedback'
-    && osc_report_is_reported_user($report, $userId)
+    && ($role == 'admin' || (osc_reports_feedback_enabled() && ($role == 'reporter' || $role == 'reported')))
   );
+
   return (bool)osc_apply_filter('report_can_comment', $can, $report, ($userId === null ? (int)osc_logged_user_id() : (int)$userId));
 }
 
 
-// Filter conversation comments for front (hide reporter identity/messages; admins see all)
+// Filter conversation comments for front: admin sees both conversations, reporter and reported user only their own with admin
 function osc_report_front_comments($comments, $report) {
   if(!is_array($comments) || !is_array($report)) {
     return array();
   }
 
-  if(osc_is_admin_user_logged_in()) {
+  $role = osc_report_viewer_role($report);
+  if($role == 'admin') {
     return osc_apply_filter('report_front_comments', $comments, $comments, $report);
   }
 
   $out = array();
   foreach($comments as $comment) {
-    if((int)@$comment['fk_i_admin_id'] > 0) {
-      $out[] = $comment;
-      continue;
-    }
-    if((int)@$comment['fk_i_user_id'] > 0 && (int)$comment['fk_i_user_id'] === (int)$report['fk_i_user_id']) {
+    if($role != '' && osc_report_comment_party($comment, $report) == $role) {
       $out[] = $comment;
     }
   }
@@ -489,25 +766,44 @@ function osc_report_front_comments($comments, $report) {
 }
 
 
-// Public author label for front conversation (reporter hidden except for admin)
+// Public author label for front conversation (reporter identity is shown to admin only)
 function osc_report_front_author_label($comment, $report) {
+  $role = osc_report_viewer_role($report);
+  $party = osc_report_comment_party($comment, $report);
+
   if((int)@$comment['fk_i_admin_id'] > 0) {
-    $label = __('Admin');
-  } else if(osc_is_admin_user_logged_in()) {
-    if(osc_report_is_reported_user($report, @$comment['fk_i_user_id'])) {
-      $label = __('Reported user');
-    } else if(osc_report_is_reporter($report, @$comment['fk_i_user_id'])) {
-      $label = __('Report created by');
-    } else {
-      $label = __('Participant');
-    }
-  } else if(osc_report_is_reported_user($report, @$comment['fk_i_user_id'])) {
+    $label = ($role == 'admin' && trim((string)@$comment['s_admin_name']) != '' ? (string)$comment['s_admin_name'] : __('Admin'));
+  } else if($role == $party) {
     $label = __('You');
+  } else if($role == 'admin') {
+    $label = ($party == 'reported' ? __('Reported user') : __('Report created by'));
   } else {
     $label = __('Participant');
   }
 
   return osc_apply_filter('report_front_author_label', $label, $comment, $report);
+}
+
+
+// Get comment as plain data for front templates and ajax (text is not escaped)
+function osc_report_comment_data($comment, $report) {
+  $role = osc_report_viewer_role($report);
+  $party = osc_report_comment_party($comment, $report);
+  $is_admin = ((int)@$comment['fk_i_admin_id'] > 0);
+  $time = strtotime((string)$comment['dt_date']);
+
+  $data = array(
+    'id' => (int)$comment['pk_i_id'],
+    'party' => $party,
+    'admin' => $is_admin,
+    'mine' => ($is_admin ? $role == 'admin' : $role == $party),
+    'author' => osc_report_front_author_label($comment, $report),
+    'text' => (string)$comment['s_comment'],
+    'date' => (string)$comment['dt_date'],
+    'date_label' => osc_format_date($comment['dt_date']) . ' ' . date(osc_time_format(), $time)
+  );
+
+  return osc_apply_filter('report_comment_data', $data, $comment, $report);
 }
 
 
@@ -603,7 +899,7 @@ function osc_reports_tables_ready($force = false) {
 // Create reports tables when missing (upgrade recovery, no foreign keys for compatibility)
 function osc_ensure_reports_tables() {
   if(osc_reports_tables_ready()) {
-    return true;
+    return osc_ensure_reports_columns();
   }
 
   $conn = DBConnectionClass::newInstance()->getOsclassDb();
@@ -618,14 +914,22 @@ function osc_ensure_reports_tables() {
   fk_c_locale_code CHAR(5) NULL,
   s_type VARCHAR(20) NOT NULL DEFAULT 'item',
   s_reason VARCHAR(30) NULL,
-  s_status VARCHAR(30) NOT NULL DEFAULT 'submitted',
+  s_status VARCHAR(30) NOT NULL DEFAULT 'waiting_admin',
   s_source VARCHAR(30) NOT NULL DEFAULT 'osclass',
+  s_reporter_name VARCHAR(100) NULL,
+  s_reporter_email VARCHAR(100) NULL,
   s_comment VARCHAR(2000) NULL,
   s_admin_comment VARCHAR(2000) NULL,
   s_file VARCHAR(80) NULL,
   b_open TINYINT(1) NOT NULL DEFAULT 1,
   dt_status_date DATETIME NULL,
   dt_update_date DATETIME NULL,
+  dt_seen_reporter DATETIME NULL,
+  dt_seen_reported DATETIME NULL,
+  dt_seen_admin DATETIME NULL,
+  dt_notified_reporter DATETIME NULL,
+  dt_notified_reported DATETIME NULL,
+  dt_notified_admin DATETIME NULL,
   dt_create_date DATETIME NOT NULL,
   PRIMARY KEY (pk_i_id),
   INDEX idx_s_status (s_status),
@@ -641,6 +945,7 @@ function osc_ensure_reports_tables() {
   fk_i_report_id INT(10) UNSIGNED NOT NULL,
   fk_i_user_id INT(10) UNSIGNED NULL,
   fk_i_admin_id INT(10) UNSIGNED NULL,
+  s_party VARCHAR(10) NULL,
   s_comment VARCHAR(2000) NOT NULL,
   b_admin_seen TINYINT(1) NOT NULL DEFAULT 0,
   dt_date DATETIME NOT NULL,
@@ -650,7 +955,72 @@ function osc_ensure_reports_tables() {
   INDEX idx_b_admin_seen (b_admin_seen)
 ) ENGINE=InnoDB DEFAULT CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_unicode_ci'", DB_TABLE_PREFIX));
 
-  return osc_reports_tables_ready(true);
+  if(osc_reports_tables_ready(true)) {
+    osc_set_preference('reports_schema', 8412, 'osclass', 'INTEGER');
+    osc_reset_preferences();
+    return true;
+  }
+
+  return false;
+}
+
+
+// Report data of 8.4.1, once (upgrade or first use): reporter name and email, conversation party of comments, statuses that say whose turn it is,
+// last visit and last reply email per party (pref reports_schema 8412)
+function osc_ensure_reports_columns() {
+  if((int)osc_get_preference('reports_schema') >= 8412) {
+    return true;
+  }
+
+  $conn = DBConnectionClass::newInstance()->getOsclassDb();
+  $comm = new DBCommandClass($conn);
+  $add = array(
+    't_report' => array('s_reporter_name' => 'VARCHAR(100) NULL AFTER s_source', 's_reporter_email' => 'VARCHAR(100) NULL AFTER s_reporter_name', 'dt_seen_reporter' => 'DATETIME NULL AFTER dt_update_date', 'dt_seen_reported' => 'DATETIME NULL AFTER dt_seen_reporter', 'dt_seen_admin' => 'DATETIME NULL AFTER dt_seen_reported', 'dt_notified_reporter' => 'DATETIME NULL AFTER dt_seen_admin', 'dt_notified_reported' => 'DATETIME NULL AFTER dt_notified_reporter', 'dt_notified_admin' => 'DATETIME NULL AFTER dt_notified_reported'),
+    't_report_comment' => array('s_party' => 'VARCHAR(10) NULL AFTER fk_i_admin_id')
+  );
+
+  foreach($add as $table => $columns) {
+    foreach($columns as $column => $definition) {
+      $result = $comm->query(sprintf("SHOW COLUMNS FROM %s%s LIKE '%s'", DB_TABLE_PREFIX, $table, $column));
+      if($result !== false && $result->numRows() == 0) {
+        $comm->query(sprintf('ALTER TABLE %s%s ADD %s %s', DB_TABLE_PREFIX, $table, $column, $definition));
+      }
+    }
+  }
+
+  $result = $comm->query(sprintf("SHOW COLUMNS FROM %st_report LIKE 'dt_notified_admin'", DB_TABLE_PREFIX));
+  if($result === false || $result->numRows() == 0) {
+    return false;
+  }
+
+  $comm->query(sprintf("ALTER TABLE %st_report ALTER s_status SET DEFAULT 'waiting_admin'", DB_TABLE_PREFIX));
+  $comm->query(sprintf("UPDATE %st_report SET s_status = 'waiting_admin' WHERE s_status = 'submitted'", DB_TABLE_PREFIX));
+  $comm->query(sprintf("UPDATE %st_report SET s_status = 'waiting_customer' WHERE s_status = 'awaiting_feedback'", DB_TABLE_PREFIX));
+
+  $enabled_statuses = trim((string)osc_get_preference('reports_enabled_statuses'));
+  if($enabled_statuses != '') {
+    osc_set_preference('reports_enabled_statuses', str_replace(array('awaiting_feedback', 'submitted'), array('waiting_customer', 'waiting_admin'), $enabled_statuses));
+  }
+
+  // Party of older comments: user comment by reporter or reported user, admin comment to reported user except contact messages
+  $comm->query(sprintf("UPDATE %st_report_comment c INNER JOIN %st_report r ON r.pk_i_id = c.fk_i_report_id SET c.s_party = IF(c.fk_i_user_id > 0, IF(c.fk_i_user_id = r.fk_i_reporter_user_id, 'reporter', 'reported'), IF(r.fk_i_user_id > 0 AND r.s_type <> 'webcontact', 'reported', 'reporter')) WHERE c.s_party IS NULL", DB_TABLE_PREFIX, DB_TABLE_PREFIX));
+
+  // Reporter name and email: account of registered reporter, From line of contact messages
+  $comm->query(sprintf("UPDATE %st_report r INNER JOIN %st_user u ON u.pk_i_id = r.fk_i_reporter_user_id SET r.s_reporter_name = LEFT(u.s_name, 100), r.s_reporter_email = LEFT(u.s_email, 100) WHERE r.s_reporter_email IS NULL", DB_TABLE_PREFIX, DB_TABLE_PREFIX));
+  $contact_reports = $comm->query(sprintf("SELECT pk_i_id, s_comment FROM %st_report WHERE s_type = 'webcontact' AND s_reporter_email IS NULL", DB_TABLE_PREFIX));
+  if($contact_reports !== false) {
+    foreach($contact_reports->result() as $row) {
+      $head = implode("\n", array_slice(preg_split('/\R/', (string)$row['s_comment']), 0, 2));
+      if(preg_match('/^[^:\n]+:\s*(.*?)\s*<([^<>\s]+@[^<>\s]+)>/m', $head, $m) && osc_validate_email($m[2])) {
+        $comm->query(sprintf("UPDATE %st_report SET s_reporter_name = '%s', s_reporter_email = '%s' WHERE pk_i_id = %d", DB_TABLE_PREFIX, $comm->escapeStr(osc_substr($m[1], 0, 100)), $comm->escapeStr(osc_substr($m[2], 0, 100)), (int)$row['pk_i_id']));
+      }
+    }
+  }
+
+  osc_ensure_report_rewrite_rules();
+  osc_set_preference('reports_schema', 8412, 'osclass', 'INTEGER');
+  osc_reset_preferences();
+  return true;
 }
 
 
@@ -788,15 +1158,16 @@ function osc_report_user_url($user_id = null, $reason = '') {
 }
 
 
-// Get url to view report conversation
-function osc_report_view_url($id) {
+// Get url to view report conversation (optional access key opens it without login, see osc_report_access_url)
+function osc_report_view_url($id, $key = '') {
+  $key = (preg_match('/^[a-f0-9]{32}$/', (string)$key) ? (string)$key : '');
   if(osc_rewrite_enabled()) {
-    $url = osc_base_url(false, true) . osc_get_preference('rewrite_report_view') . '/' . $id;
+    $url = osc_base_url(false, true) . osc_get_preference('rewrite_report_view') . '/' . (int)$id . ($key != '' ? '/' . $key : '');
   } else {
-    $url = osc_base_url(true) . '?page=report&action=view&id=' . $id;
+    $url = osc_base_url(true) . '?page=report&action=view&id=' . (int)$id . ($key != '' ? '&key=' . $key : '');
   }
 
-  return osc_apply_filter('osc_report_view_url', $url, $id);
+  return osc_apply_filter('osc_report_view_url', $url, $id, $key);
 }
 
 
@@ -942,6 +1313,22 @@ function osc_report_web_contact_created($set = null) {
 // Create a report, run the report hooks and send the notification emails
 // $after_create(int $reportId) runs right after the insert, before the hooks (attachments)
 function osc_report_create($data, $notify = true, $after_create = null) {
+  if((int)@$data['fk_i_reporter_user_id'] > 0 && (empty($data['s_reporter_email']) || empty($data['s_reporter_name']))) {
+    $reporter = User::newInstance()->findByPrimaryKey((int)$data['fk_i_reporter_user_id']);
+    if($reporter) {
+      $data['s_reporter_email'] = (!empty($data['s_reporter_email']) ? $data['s_reporter_email'] : $reporter['s_email']);
+      $data['s_reporter_name'] = (!empty($data['s_reporter_name']) ? $data['s_reporter_name'] : $reporter['s_name']);
+    }
+  }
+  foreach(array('s_reporter_email', 's_reporter_name') as $field) {
+    if(isset($data[$field])) {
+      $data[$field] = osc_substr(trim(strip_tags((string)$data[$field])), 0, 100);
+    }
+  }
+  if(isset($data['s_reporter_email']) && !osc_validate_email($data['s_reporter_email'])) {
+    $data['s_reporter_email'] = null;
+  }
+
   $reportId = Report::newInstance()->createReport($data);
   if(!$reportId) {
     return false;
@@ -1008,12 +1395,19 @@ function osc_report_create_from_web_contact($params) {
     $comment = osc_substr($comment, 0, 2000);
   }
 
+  $reason = trim((string)(isset($params['reason']) ? $params['reason'] : Params::getParam('reason')));
+  if($reason == '' || !isset(osc_report_contact_reasons()[$reason])) {
+    $reason = 'contact';
+  }
+
   $data = array(
     'fk_i_reporter_user_id' => (osc_is_web_user_logged_in() ? (int)osc_logged_user_id() : 0),
     'fk_c_locale_code' => osc_current_user_locale(),
     's_type' => 'webcontact',
-    's_reason' => 'contact',
+    's_reason' => $reason,
     's_source' => 'osclass',
+    's_reporter_name' => $name,
+    's_reporter_email' => $email,
     's_comment' => $comment
   );
 

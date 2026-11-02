@@ -94,7 +94,7 @@ class CAdminReports extends AdminSecBaseModel {
       case('status'):
         osc_csrf_check(false);
         $id = (int)Params::getParam('id');
-        $value = Params::getParam('value');
+        $value = osc_report_status_code(Params::getParam('value'));
 
         if(!$id) return false;
         if(!in_array($value, array_keys(osc_report_statuses()))) return false;
@@ -146,8 +146,9 @@ class CAdminReports extends AdminSecBaseModel {
 
         $comments = $this->reportManager->getComments($report['pk_i_id']);
 
-        // Mark replies as seen by admin
+        // Mark replies as seen by admin (also stops reply emails to admins until a new message after this visit)
         $this->reportManager->markCommentsSeen($report['pk_i_id']);
+        osc_report_mark_seen($report, 'admin');
 
         $this->_exportVariableToView('report', $report);
         $this->_exportVariableToView('item', $item);
@@ -189,8 +190,8 @@ class CAdminReports extends AdminSecBaseModel {
           osc_substr((string)$update['s_admin_comment'], 0, 250)
         );
 
-        if(Params::getParam('status') != $report['s_status']) {
-          $this->changeStatus($report['pk_i_id'], Params::getParam('status'));
+        if(osc_report_status_code(Params::getParam('status')) != $report['s_status']) {
+          $this->changeStatus($report['pk_i_id'], osc_report_status_code(Params::getParam('status')));
         }
 
         $report = $this->reportManager->findByPrimaryKey($report['pk_i_id']);
@@ -214,9 +215,18 @@ class CAdminReports extends AdminSecBaseModel {
         osc_run_hook('report_comment_post', $report);
 
         $comment = osc_substr(trim(strip_tags((string)Params::getParam('comment'))), 0, 2000);
-        $new_status = Params::getParam('status');
+        $party = Params::getParam('party');
+        $party = ($party == 'reporter' || $party == 'reported' ? $party : osc_report_default_party($report));
+        $new_status = osc_report_status_code(Params::getParam('status'));
         $notify_reporter = (Params::getParam('notify_reporter') != '');
         $notify_reported = (Params::getParam('notify_reported') != '');
+
+        // Status left unchanged on an open report: it is the customer's turn now (automatic switch, not logged on its own)
+        $auto_status = false;
+        if(($new_status == '' || $new_status == $report['s_status']) && (int)$report['b_open'] === 1 && $report['s_status'] != 'on_hold') {
+          $new_status = 'waiting_customer';
+          $auto_status = true;
+        }
         $status_changed = ($new_status != '' && $new_status != $report['s_status'] && in_array($new_status, array_keys(osc_report_statuses())));
 
         if($comment == '') {
@@ -227,7 +237,7 @@ class CAdminReports extends AdminSecBaseModel {
         osc_run_hook('before_add_report_comment', $report, $comment);
         $comment = osc_apply_filter('report_comment_insert_data', $comment, $report);
 
-        $commentId = $this->reportManager->addComment($report['pk_i_id'], $comment, null, osc_logged_admin_id());
+        $commentId = $this->reportManager->addComment($report['pk_i_id'], $comment, null, osc_logged_admin_id(), $party);
 
         if($commentId) {
           $commentRow = $this->reportManager->findCommentByPrimaryKey($commentId);
@@ -236,7 +246,7 @@ class CAdminReports extends AdminSecBaseModel {
 
           if($status_changed) {
             // Update status without preference-based emails; checkboxes control notifications below
-            $this->changeStatus($report['pk_i_id'], $new_status, array('reporter' => false, 'reported' => false));
+            $this->changeStatus($report['pk_i_id'], $new_status, array('reporter' => false, 'reported' => false), !$auto_status);
             $report = $this->reportManager->findByPrimaryKey($report['pk_i_id']);
           }
 
@@ -249,16 +259,13 @@ class CAdminReports extends AdminSecBaseModel {
               osc_run_hook('hook_email_report_owner_resolved', $report);
             }
           } else {
-            if($notify_reporter && $report['fk_i_reporter_user_id'] > 0) {
-              osc_run_hook('hook_email_report_new_comment_user', $report, $commentRow, $report['fk_i_reporter_user_id']);
+            // Reply email goes to the party it was written to (with link to its conversation)
+            if($party == 'reporter' && $notify_reporter) {
+              osc_run_hook('hook_email_report_new_comment_user', $report, $commentRow, (int)$report['fk_i_reporter_user_id']);
             }
 
-            if($notify_reported) {
-              if($status_changed && $new_status == 'awaiting_feedback' && osc_reports_feedback_enabled() && $report['fk_i_user_id'] > 0) {
-                osc_run_hook('hook_email_report_feedback_request', $report);
-              } else {
-                osc_run_hook('hook_email_report_new_comment_user', $report, $commentRow, (int)$report['fk_i_user_id']);
-              }
+            if($party == 'reported' && $notify_reported) {
+              osc_run_hook('hook_email_report_new_comment_user', $report, $commentRow, (int)$report['fk_i_user_id']);
             }
           }
 
@@ -340,7 +347,7 @@ class CAdminReports extends AdminSecBaseModel {
           $this->redirectTo(osc_admin_base_url(true) . "?page=reports");
         }
 
-        $this->changeStatus($report['pk_i_id'], 'awaiting_feedback');
+        $this->changeStatus($report['pk_i_id'], 'waiting_customer');
 
         osc_add_flash_ok_message(_m('Feedback has been requested from reported user'), 'admin');
         $this->redirectTo(osc_admin_base_url(true) . "?page=reports&action=edit&id=" . $report['pk_i_id']);
@@ -498,14 +505,14 @@ class CAdminReports extends AdminSecBaseModel {
 
   // Change report status and send related notifications
   // $notify = null uses preferences; array('reporter'=>bool,'reported'=>bool) overrides
-  function changeStatus($id, $status, $notify = null) {
+  function changeStatus($id, $status, $notify = null, $log = true) {
     $report = $this->reportManager->findByPrimaryKey($id);
 
     if(!$report || $report['s_status'] == $status) {
       return false;
     }
 
-    if(!$this->reportManager->updateStatus($id, $status, 'admin', osc_logged_admin_id())) {
+    if(!$this->reportManager->updateStatus($id, $status, 'admin', osc_logged_admin_id(), $log)) {
       return false;
     }
 
@@ -523,7 +530,7 @@ class CAdminReports extends AdminSecBaseModel {
       if($notify_reported) {
         osc_run_hook('hook_email_report_owner_resolved', $report);
       }
-    } else if($status == 'awaiting_feedback' && $report['fk_i_user_id'] > 0 && osc_reports_feedback_enabled()) {
+    } else if($status == 'waiting_customer' && Params::getParam('action') == 'request_feedback' && $report['fk_i_user_id'] > 0 && osc_reports_feedback_enabled()) {
       if($notify === null || $notify_reported) {
         osc_run_hook('hook_email_report_feedback_request', $report);
       }
