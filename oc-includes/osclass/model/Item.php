@@ -118,11 +118,12 @@ class Item extends DAO {
    * @since  unknown
    *
    * @param int $id Item id
+   * @param string $locale Preferred locale for s_title/s_description, empty = current user locale
    *
    * @return array|bool
    * @throws \Exception
    */
-  public function findByPrimaryKey($id) {
+  public function findByPrimaryKey($id, $locale = '') {
     if(!is_numeric($id) || $id == null || $id <= 0) {
       return array();
     }
@@ -146,7 +147,7 @@ class Item extends DAO {
     $item = $result->row();
 
     if(null !== $item) {
-      $item_extend = $this->extendDataSingle($item);
+      $item_extend = $this->extendDataSingle($item, $locale);
       return $item_extend;
     }
 
@@ -1449,12 +1450,13 @@ class Item extends DAO {
    * @since  unknown
    *
    * @param array $item
+   * @param string $locale Preferred locale, empty = current user locale
    *
    * @return array item array with description in available locales
    * @throws \Exception
    */
-  public function extendDataSingle($item) {
-    $prefLocale = osc_current_user_locale();
+  public function extendDataSingle($item, $locale = '') {
+    $prefLocale = ($locale != '' ? $locale : osc_current_user_locale());
 
     $this->dao->select();
     $this->dao->from(DB_TABLE_PREFIX.'t_item_description');
@@ -1493,20 +1495,30 @@ class Item extends DAO {
       $item['s_title'] = $item['locale'][$prefLocale]['s_title'];
       $item['s_description'] = $item['locale'][$prefLocale]['s_description'];
     } else {
-      $title = $aCategory['s_name'];
-
-      $loc = '';
-      if(isset($item['s_city'])) {
-        $loc = trim(implode(' ', array_filter(array($item['s_country'], $item['s_region'], $item['s_city']))));
+      // Fallback to existing translation: preferred locale, site language, any locale
+      $title = '';
+      $desc = '';
+      foreach(array_merge(array((string)$prefLocale, (string)osc_language()), array_keys($item['locale'])) as $lc) {
+        if($title == '' && !empty($item['locale'][$lc]['s_title'])) { $title = $item['locale'][$lc]['s_title']; }
+        if($desc == '' && !empty($item['locale'][$lc]['s_description'])) { $desc = $item['locale'][$lc]['s_description']; }
       }
 
-      if($loc != '') {
-        $title = sprintf(__('%s in %s'), $title, $loc);
+      // No translation at all, generate title from category and location
+      if($title == '') {
+        $title = $aCategory['s_name'];
+
+        $loc = '';
+        if(isset($item['s_city'])) {
+          $loc = trim(implode(' ', array_filter(array($item['s_country'], $item['s_region'], $item['s_city']))));
+        }
+
+        if($loc != '') {
+          $title = sprintf(__('%s in %s'), $title, $loc);
+        }
       }
 
       $item['s_title'] = $title;
-      $item['s_description'] = __('There\'s no description available in your language');
-      unset($data);
+      $item['s_description'] = ($desc != '' ? $desc : __('There\'s no description available in your language'));
     }
 
     return $item;

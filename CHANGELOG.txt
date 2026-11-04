@@ -49,6 +49,8 @@ Osclass 8.4.1
 - Back office: new language pills for fields that have a value per language. One language is shown at a time, all language switches on a page move together and the last choice is remembered. Plugins use osc_admin_locale_fields() or add class osc-ltabs and data-ltab to their own markup.
 - Users keep the language they registered in, and the welcome, account confirmation, forgot password and new email messages use it, like search alerts already did. Before, they used the language of the page where the action happened. Users created in the back office get the site default language.
 - Optimized CSS and JS (Settings > Optimization) refresh on the next page load after any change to a merged file, and when you switch minify on or off. Each new file is written in one step, so visitors never get a half-written file. Merged files that are not minified keep each file on its own line, so a file without a closing semicolon no longer breaks the rest. A renamed content folder no longer makes the merged file rebuild on every page.
+- Listing emails show the real listing title even when the listing has no text in the current language. Before, they showed a made-up title such as "Waiter in Slovakia". The title follows the email's language when the listing has that translation, and messages to the seller from the contact form now use the seller's language.
+- Plugins can load a listing in a chosen language with Item::findByPrimaryKey($id, $locale).
 
 
 Osclass 8.4.0

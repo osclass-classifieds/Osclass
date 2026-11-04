@@ -412,7 +412,7 @@ function fn_email_new_item_non_register_user($item) {
     $item['pk_i_id'],
     $item['s_contact_name'],
     $item['s_contact_email'],
-    $item['s_title'],
+    (!empty($item['locale'][(string)$locale]['s_title']) ? $item['locale'][(string)$locale]['s_title'] : $item['s_title']),
     osc_item_url(),
     $item_url,
     '<a href="' . $edit_url . '">' . $edit_url . '</a>',
@@ -731,7 +731,10 @@ function fn_email_item_inquiry($aItem) {
 
   $mPages = new Page();
   $aPage = $mPages->findByInternalName('email_item_inquiry');
-  $locale = osc_current_user_locale();
+
+  // Email goes to item owner, use owner's locale
+  $locale = osc_user_def_locale_code((int)@$item['fk_i_user_id'], (string)@$item['s_contact_email']);
+  $locale = ($locale <> '' ? $locale : osc_current_user_locale());
 
   if(isset($aPage['locale'][$locale]['s_title'])) {
     $content = $aPage['locale'][$locale];
@@ -755,7 +758,7 @@ function fn_email_item_inquiry($aItem) {
   );
 
   $words[] = array(
-    $item['s_contact_name'], $yourName, $yourEmail, $phoneNumber, $item['s_title'], $item_url, $item_link, $message
+    $item['s_contact_name'], $yourName, $yourEmail, $phoneNumber, (!empty($item['locale'][(string)$locale]['s_title']) ? $item['locale'][(string)$locale]['s_title'] : $item['s_title']), $item_url, $item_link, $message
   );
 
   $title = osc_apply_filter('email_item_inquiry_title_after', osc_mailBeauty(osc_apply_filter('email_title', osc_apply_filter('email_item_inquiry_title', $content['s_title'], $aItem)), $words), $aItem);
@@ -891,7 +894,7 @@ function fn_email_new_comment_admin($aItem) {
   );
 
   $words[] = array(
-    $authorName, $authorEmail, $title, $body, $item['s_title'], $itemId,
+    $authorName, $authorEmail, $title, $body, (!empty($item['locale'][(string)$locale]['s_title']) ? $item['locale'][(string)$locale]['s_title'] : $item['s_title']), $itemId,
     osc_item_url(), $itemURL
   );
 
@@ -985,7 +988,7 @@ function fn_email_item_validation($item) {
   );
   $words[] = array(
     $all, $item['s_description'], $item['s_country'],
-    osc_format_price($item['i_price']), $item['s_region'], $item['s_city'], $item['pk_i_id'], $item['s_contact_name'], $item['s_contact_email'], $item['s_title'], $item_url, $item_link,
+    osc_format_price($item['i_price']), $item['s_region'], $item['s_city'], $item['pk_i_id'], $item['s_contact_name'], $item['s_contact_email'], (!empty($item['locale'][(string)$locale]['s_title']) ? $item['locale'][(string)$locale]['s_title'] : $item['s_title']), $item_url, $item_link,
     '<a href="' . $validation_url . '" >' . $validation_url . '</a>', $validation_url
   );
 
@@ -1079,7 +1082,7 @@ function fn_email_admin_new_item($item) {
 
   $words[] = array(
     '<a href="' . $admin_edit_url . '" >' . $admin_edit_url . '</a>', $admin_edit_url, $all, $item['s_description'], $item['s_country'],
-    osc_format_price($item['i_price']), $item['s_region'], $item['s_city'], $item['pk_i_id'], $item['s_contact_name'], $item['s_contact_email'], $item['s_title'], $item_url, $item_link,
+    osc_format_price($item['i_price']), $item['s_region'], $item['s_city'], $item['pk_i_id'], $item['s_contact_name'], $item['s_contact_email'], (!empty($item['locale'][(string)$locale]['s_title']) ? $item['locale'][(string)$locale]['s_title'] : $item['s_title']), $item_url, $item_link,
     '<a href="' . $validation_url . '" >' . $validation_url . '</a>', $validation_url
   );
 
@@ -1179,7 +1182,7 @@ function fn_email_item_validation_non_register_user($item) {
 
   $words[] = array(
     $all, $item['s_description'], $item['s_country'],
-    osc_format_price($item['i_price']), $item['s_region'], $item['s_city'], $item['pk_i_id'], $item['s_contact_name'], $item['s_contact_email'], $item['s_title'], $item_url, $item_link,
+    osc_format_price($item['i_price']), $item['s_region'], $item['s_city'], $item['pk_i_id'], $item['s_contact_name'], $item['s_contact_email'], (!empty($item['locale'][(string)$locale]['s_title']) ? $item['locale'][(string)$locale]['s_title'] : $item['s_title']), $item_url, $item_link,
     '<a href="' . $validation_url . '" >' . $validation_url . '</a>', $validation_url,
     '<a href="' . $edit_url . '">' . $edit_url . '</a>', $edit_url,
     '<a href="' . $delete_url . '">' . $delete_url . '</a>', $delete_url
@@ -1375,7 +1378,7 @@ function fn_email_new_comment_user($aItem) {
     '{SELLER_EMAIL}'
   );
 
-  $words[] = array($authorName, $authorEmail, $title, $body, $item['s_title'], $itemId, osc_item_url(), $itemURL, $name, $email);
+  $words[] = array($authorName, $authorEmail, $title, $body, (!empty($item['locale'][(string)$locale]['s_title']) ? $item['locale'][(string)$locale]['s_title'] : $item['s_title']), $itemId, osc_item_url(), $itemURL, $name, $email);
 
   $title_email = osc_apply_filter('email_new_comment_user_title_after', osc_mailBeauty(osc_apply_filter('email_title', osc_apply_filter('email_new_comment_user_title', $content['s_title'], $aItem)), $words), $aItem);
   $body_email = osc_apply_filter('email_new_comment_user_description_after', osc_mailBeauty(osc_apply_filter('email_description', osc_apply_filter('email_new_comment_user_description', $content['s_text'], $aItem)), $words), $aItem);
@@ -1488,7 +1491,7 @@ function fn_email_warn_expiration($aItem) {
   );
 
   $words[] = array(
-    $aItem['s_contact_name'], $aItem['s_title'], $itemId, $aItem['dt_expiration'],
+    $aItem['s_contact_name'], (!empty($aItem['locale'][(string)$locale]['s_title']) ? $aItem['locale'][(string)$locale]['s_title'] : $aItem['s_title']), $itemId, $aItem['dt_expiration'],
     osc_item_url(), $itemURL, $aItem['s_contact_name'], $aItem['s_contact_email'], $aItem['s_contact_name'], $aItem['s_contact_email']
   );
 
@@ -1580,7 +1583,7 @@ function fn_email_report_words($report, $comment = null, $extra = array()) {
 
   $reported_title = '';
   if($report['s_type'] == 'item' && $report['fk_i_item_id'] > 0) {
-    $item = Item::newInstance()->findByPrimaryKey($report['fk_i_item_id']);
+    $item = Item::newInstance()->findByPrimaryKey($report['fk_i_item_id'], (string)@$report['fk_c_locale_code']);
     $reported_title = ($item ? $item['s_title'] : '');
     if(!$reported_user && $item && !empty($item['s_contact_name'])) {
       $reported_user = array('s_name' => $item['s_contact_name'], 's_email' => (string)@$item['s_contact_email']);
